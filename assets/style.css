@@ -2956,14 +2956,18 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   background-position: center center;
   background-repeat: no-repeat;
   filter: brightness(0.68) contrast(1.08) saturate(1.1);
+  opacity: 0;
   transform: scale(1.02);
-  transition: transform 8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease;
+  transition: opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1), transform 12s ease;
   z-index: 1;
+  pointer-events: none;
 }
 
-.hero-screen:hover .hero-bg {
+.hero-bg.active {
+  opacity: 1;
   transform: scale(1.04);
 }
+
 
 .hero-scrim {
   position: absolute;

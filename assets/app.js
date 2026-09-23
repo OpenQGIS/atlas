@@ -86,67 +86,158 @@
   }
 
   /* -------------------------------------------------------------
-     Hero Screen (随机全屏背景图 + Slogan + 滚动定位到下一屏)
+     Hero Screen (多级智能匹配 + 双层平滑轮播 + 边界对齐)
      ------------------------------------------------------------- */
+  let heroTimer = null;
+  let activeHeroLayerIndex = 0; // 0 for A, 1 for B
+  let lastHeroItemId = null;
+
+  function isHeroExcluded(item) {
+    if (!item) return true;
+    if (item.hero === false) return true;
+    if (Array.isArray(item.tags)) {
+      const lowerTags = item.tags.map(t => String(t).trim().toLowerCase());
+      if (lowerTags.includes('no') || lowerTags.includes('no_hero') || lowerTags.includes('hero:no') || lowerTags.includes('hero=no')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function getEligibleHeroPool() {
+    if (!galleryItems || galleryItems.length === 0) return [];
+
+    // 1. 过滤掉作者标记为排除的画卷 ("hero": false 或 tag 为 "no")
+    const allowedItems = galleryItems.filter(item => !isHeroExcluded(item));
+    if (allowedItems.length === 0) return galleryItems;
+
+    // 2. 检测显示器分辨率（考虑物理像素比 DPR）
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    const screenW = window.innerWidth * dpr;
+    const screenH = window.innerHeight * dpr;
+
+    // 3. 计算以 cover 充满当前屏幕时的拉伸倍率 Scale = max(Ws / Wi, Hs / Hi)
+    // Scale <= 1.05 表示原图像素足够，无损下采样；Scale > 1.05 表示需放大拉伸造成失真
+    const scored = allowedItems.map(item => {
+      const itemW = item.width || 1920;
+      const itemH = item.height || 1080;
+      const scale = Math.max(screenW / itemW, screenH / itemH);
+      return { item, scale };
+    });
+
+    // 优先返回像素充足、无损覆盖的作品池
+    const losslessPool = scored.filter(s => s.scale <= 1.05).map(s => s.item);
+    if (losslessPool.length > 0) {
+      return losslessPool;
+    }
+
+    // 极端高分屏降级兜底：挑选拉伸倍率最小（最合适）的作品
+    scored.sort((a, b) => a.scale - b.scale);
+    const bestScale = scored[0].scale;
+    return scored.filter(s => s.scale <= bestScale * 1.15).map(s => s.item);
+  }
+
   function initHero() {
     const heroScreen = document.getElementById('heroScreen');
-    const heroBg = document.getElementById('heroBg');
     const heroScrollBtn = document.getElementById('heroScrollBtn');
-    const heroArtworkTag = document.getElementById('heroArtworkTag');
-    const heroArtworkName = document.getElementById('heroArtworkName');
-
     if (!heroScreen || !galleryItems || galleryItems.length === 0) return;
 
-    function selectHeroArtwork() {
-      // 检测当前视口比例（是否横屏）
-      const viewportRatio = window.innerWidth / (window.innerHeight || 1);
-      const isLandscape = viewportRatio >= 1.0;
+    function renderNextHeroArtwork(forcedItem) {
+      const pool = getEligibleHeroPool();
+      if (pool.length === 0) return;
 
-      // 依设备/视口比例精准匹配：横屏优先挑选横版作品 (aspectRatio >= 1)，竖屏优先挑选竖版作品 (aspectRatio < 1)
-      let matchedItems = galleryItems.filter(item => {
-        const ratio = item.aspectRatio || (item.width && item.height ? item.width / item.height : 1);
-        return isLandscape ? (ratio >= 1.0) : (ratio < 1.0);
-      });
-
-      if (!matchedItems || matchedItems.length === 0) {
-        matchedItems = galleryItems;
+      let nextItem = forcedItem;
+      if (!nextItem) {
+        // 轮播时尽量不连续重复上一张
+        let candidates = pool.filter(it => it.id !== lastHeroItemId);
+        if (candidates.length === 0) candidates = pool;
+        nextItem = candidates[Math.floor(Math.random() * candidates.length)];
       }
 
-      // 在匹配方向的作品池中随机挑选一幅
-      const randomIndex = Math.floor(Math.random() * matchedItems.length);
-      currentHeroItem = matchedItems[randomIndex];
+      currentHeroItem = nextItem;
+      lastHeroItemId = nextItem.id;
 
-      if (currentHeroItem) {
-        // 1. 瞬间呈现轻量缩略图（~40KB，0ms 秒开无缝展示，杜绝黑屏等待）
-        if (heroBg && currentHeroItem.thumb) {
-          heroBg.style.backgroundImage = `url("${currentHeroItem.thumb}")`;
-        }
+      const layerA = document.getElementById('heroBgA') || document.getElementById('heroBg');
+      const layerB = document.getElementById('heroBgB');
 
-        // 2. 后台并行静默预载 2K 高清大图，就绪后丝滑替换为极致细节
-        const highResHeroUrl = `thumbs/hero/${currentHeroItem.id}.webp`;
+      const incoming = (activeHeroLayerIndex === 0 && layerB) ? layerB : layerA;
+      const outgoing = (incoming === layerB) ? layerA : layerB;
+
+      if (incoming) {
+        // 先设低清缩略图做 0ms 保险底图
+        incoming.style.backgroundImage = `url("${nextItem.thumb}")`;
+
+        // 异步预载 2K 原生视口渲染大图
+        const highResUrl = `thumbs/hero/${nextItem.id}.webp`;
         const testImg = new Image();
-        testImg.src = highResHeroUrl;
+        testImg.src = highResUrl;
         testImg.onload = () => {
-          if (heroBg) {
-            heroBg.style.backgroundImage = `url("${highResHeroUrl}")`;
-          }
+          incoming.style.backgroundImage = `url("${highResUrl}")`;
         };
 
-        // 显示背景画卷名称与作者
-        if (heroArtworkTag && heroArtworkName) {
-          const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(currentHeroItem) : currentHeroItem;
-          heroArtworkName.textContent = locItem.title;
-          heroArtworkTag.style.display = 'inline-flex';
+        // 双层平滑淡入淡出（0 闪烁）
+        incoming.classList.add('active');
+        if (outgoing) {
+          outgoing.classList.remove('active');
         }
+
+        activeHeroLayerIndex = (incoming === layerB) ? 1 : 0;
+      }
+
+      // 更新右下角作品标牌
+      const heroArtworkTag = document.getElementById('heroArtworkTag');
+      const heroArtworkName = document.getElementById('heroArtworkName');
+      if (heroArtworkTag && heroArtworkName) {
+        const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(nextItem) : nextItem;
+        heroArtworkName.textContent = locItem.title;
+        heroArtworkTag.style.display = 'inline-flex';
       }
     }
 
-    selectHeroArtwork();
+    // 首帧加载
+    renderNextHeroArtwork();
 
-    // 监听横竖屏物理方向切换（避免移动端滚动时因地址栏收折触发 resize 误切图）
+    // 开启自动平滑轮播定时器（每隔 8.5 秒切换下一幅合格作品）
+    function startHeroTimer() {
+      stopHeroTimer();
+      heroTimer = setInterval(() => {
+        // 仅在用户位于首屏区域且页面处于活跃前台时自动轮播
+        if (window.scrollY < 80 && !document.hidden) {
+          renderNextHeroArtwork();
+        }
+      }, 8500);
+    }
+
+    function stopHeroTimer() {
+      if (heroTimer) {
+        clearInterval(heroTimer);
+        heroTimer = null;
+      }
+    }
+
+    startHeroTimer();
+
+    // 页面不可见或向下滚动离开首屏时暂停轮播以节省能耗与性能
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopHeroTimer();
+      } else if (window.scrollY < 80) {
+        startHeroTimer();
+      }
+    });
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 120) {
+        stopHeroTimer();
+      } else {
+        if (!heroTimer) startHeroTimer();
+      }
+    }, { passive: true });
+
+    // 监听横竖屏切换（物理屏幕翻转时即刻计算最契合图幅）
     const mql = window.matchMedia('(orientation: landscape)');
     const handleOrientationChange = () => {
-      selectHeroArtwork();
+      renderNextHeroArtwork();
     };
     if (mql.addEventListener) {
       mql.addEventListener('change', handleOrientationChange);
@@ -381,7 +472,9 @@
     card.tabIndex = 0;
     card.style.setProperty('--aspect-ratio', item.aspectRatio);
 
-    const tagsHtml = (locItem.tags || []).map(t => '<span class="tag-pill">' + escapeHtml(t) + '</span>').join('');
+    const tagsHtml = (locItem.tags || [])
+      .filter(t => !['no', 'no_hero', 'hero:no', 'hero=no'].includes(String(t).trim().toLowerCase()))
+      .map(t => '<span class="tag-pill">' + escapeHtml(t) + '</span>').join('');
     const actionLabel = window.AtlasI18n ? window.AtlasI18n.t('actionZoom') : '深览';
 
     card.innerHTML = 

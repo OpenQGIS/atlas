@@ -1,22 +1,19 @@
 # 地图录 · AtlasLog
-### OpenQGIS 制图作品集 · 与 QMapFlow 共同探索 QGIS 的表达上限
+### OpenQGIS 制图作品集 · 探索 QGIS 的表达上限
 > **主口号**：一图一境，静观其详。  
 > **副标**：个人制图实践，亦是 QGIS 能力边界的记录。  
 > **在线直达**：[https://openqgis.github.io/atlas/](https://openqgis.github.io/atlas/)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Ecosystem: QMapFlow](https://img.shields.io/badge/Workflow-QMapFlow-80cc28.svg)](https://github.com/OpenQGIS/QMapFlow)
 [![Viewer: OpenSeadragon](https://img.shields.io/badge/Engine-OpenSeadragon%204K-orange.svg)](#system-architecture)
 
 ---
 
 ## 1. 成果集定位与扩展描述 (Overview & Vision)
 
-> **一句话定位**：OpenQGIS 制图作品集，与 QMapFlow 共同探索 QGIS 的表达上限。
+> **一句话定位**：OpenQGIS 制图作品集，探索 QGIS 的表达上限。
 
-这里汇集多年来用 QGIS 亲手制作的地图作品。每一幅既是独立完成的视觉表达，也是对 QGIS 制图能力边界的探索与验证。
-
-作品背后的完整工作流与方法沉淀，同步记录于 **[QMapFlow](https://github.com/OpenQGIS/QMapFlow)**。
+这里汇集多年来用 QGIS 亲手制作的地图作品。每一幅既是独立完成的视觉表达，也是对 QGIS 制图能力边界的探索与验证。采用 1:1 4K 物理像素无损深览。
 
 ### 收录传世卷目 (Featured Masterworks)
 1. **上海市中心城区空间肌理 (`shanghai`)**
@@ -41,13 +38,6 @@
 │              AtlasLog 前端展厅 (GitHub Pages)              │
 │       https://openqgis.github.io/atlas/ (同源秒开)         │
 │  UI / 缩略图 / 元数据 / 1:1 4K WebP 金字塔瓦片 (tiles/)    │
-└─────────────────────────────┬──────────────────────────────┘
-                              │
-                              │ 深度方法论联动
-                              ▼
-┌────────────────────────────────────────────────────────────┐
-│                    QMapFlow 工作流智库                     │
-│          制图背后的完整工作流、操作方法与参数沉淀           │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -60,7 +50,6 @@
 
 ## 3. 关联生态 (Related Ecosystem)
 
-- **[QMapFlow]**: 每一幅地图成果背后的完整制图工作流、数据清洗步骤与样式规范沉淀。
 - **[珍奇柜 · Cabinet](https://github.com/OpenQGIS/Cabinet)**: 全球卫星遥感与国家标准地图要素的公开共享精选库。
 - **[聚合总览 · Gallery](https://github.com/OpenQGIS/Gallery)**: OpenQGIS 成果聚合探索大厅。
 - **[底座工程 · atlas-core](https://github.com/OpenQGIS/atlas-core)**: 高清原图金字塔切片算法生产工具套件。

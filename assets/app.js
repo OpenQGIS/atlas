@@ -87,6 +87,7 @@
     const modalEl = document.getElementById('aboutModal');
     const openBtn = document.getElementById('btnOpenAbout');
     const closeBtn = document.getElementById('btnCloseAbout');
+    const closeFooterBtn = document.getElementById('btnCloseAboutFooter');
     const backdropEl = document.getElementById('aboutBackdrop');
     if (!modalEl) return;
 
@@ -111,6 +112,7 @@
 
     if (openBtn) openBtn.addEventListener('click', openAbout);
     if (closeBtn) closeBtn.addEventListener('click', closeAbout);
+    if (closeFooterBtn) closeFooterBtn.addEventListener('click', closeAbout);
     if (backdropEl) backdropEl.addEventListener('click', closeAbout);
 
     window.addEventListener('keydown', (e) => {

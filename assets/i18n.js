@@ -60,6 +60,7 @@
       heroBgArtwork: '背景展卷',
       badgeNew: 'NEW',
       badgeNewAria: '近3个月新作',
+      footerCopyright: '<p class="footer-desc">「一图一境 · 静观其详」 每一幅地图既是独立完成的空间形态与视觉表达，也是对地理信息开源制图上限的探索与验证。</p><p class="footer-copy">© 2026 OpenQGIS / AtlasLog. All Rights Reserved. 原创空间制图作品未经许可严禁盗用、商用翻印或二次打包传播。</p>',
       langSelectTitle: '切换语言 / Switch Language'
     },
     en: {
@@ -115,6 +116,7 @@
       heroBgArtwork: 'Featured Map',
       badgeNew: 'NEW',
       badgeNewAria: 'Recent Artwork',
+      footerCopyright: '<p class="footer-desc">"One Map, One Realm · Contemplate the Nuance" — Each map stands as an independent spatial form and visual expression, exploring the upper limits of open-source GIS cartography.</p><p class="footer-copy">© 2026 OpenQGIS / AtlasLog. All Rights Reserved. Unauthorized commercial reproduction, reprinting, or repackaged redistribution is strictly prohibited.</p>',
       langSelectTitle: 'Switch Language / 切换语言'
     }
   };

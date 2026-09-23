@@ -2926,4 +2926,31 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   color: var(--accent);
 }
 
+/* Language Toggle Button */
+.lang-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+  margin: 0;
+}
+
+.lang-toggle-btn:hover {
+  color: var(--accent);
+  border-color: var(--border-medium);
+  background: var(--bg-surface-elevated);
+}
+
 

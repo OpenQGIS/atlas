@@ -76,8 +76,38 @@
     bindViewModeEvents();
     bindViewerModalEvents();
     bindAboutModalEvents();
+    bindI18nEvents();
 
     applyFilter('all');
+  }
+
+  /* -------------------------------------------------------------
+     i18n & Language Switcher Binding
+     ------------------------------------------------------------- */
+  function bindI18nEvents() {
+    const langBtn = document.getElementById('btnToggleLang');
+    if (langBtn && window.AtlasI18n) {
+      langBtn.textContent = window.AtlasI18n.t('navLangToggle');
+      langBtn.title = window.AtlasI18n.t('navLangTitle');
+      langBtn.addEventListener('click', () => {
+        window.AtlasI18n.toggle();
+      });
+    }
+
+    if (window.AtlasI18n) {
+      window.AtlasI18n.updateDOM();
+    }
+
+    window.addEventListener('languageChanged', () => {
+      // Re-render gallery grid with localized data
+      renderGrid(currentFilteredItems);
+
+      // If viewer modal is open, re-render metadata panel
+      const modalEl = document.getElementById('viewerModal');
+      if (modalEl && modalEl.classList.contains('open') && currentFilteredItems[currentViewerIndex]) {
+        updateArtworkMetadata(currentFilteredItems[currentViewerIndex]);
+      }
+    });
   }
 
   /* -------------------------------------------------------------
@@ -156,8 +186,9 @@
     grid.innerHTML = '';
 
     if (items.length === 0) {
+      const emptyText = window.AtlasI18n ? window.AtlasI18n.t('emptyFilter') : '当前筛选条件下暂无收录成果';
       grid.innerHTML = '<div style="padding: 48px 24px; color: var(--text-muted); text-align: center; width: 100%;">' +
-        '当前筛选条件下暂无收录成果</div>';
+        emptyText + '</div>';
       return;
     }
 
@@ -167,27 +198,29 @@
   }
 
   function createCard(item, localIdx) {
+    const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
     const card = document.createElement('article');
     card.className = 'gallery-card';
     card.setAttribute('role', 'button');
     card.tabIndex = 0;
     card.style.setProperty('--aspect-ratio', item.aspectRatio);
 
-    const tagsHtml = (item.tags || []).map(t => '<span class="tag-pill">' + escapeHtml(t) + '</span>').join('');
+    const tagsHtml = (locItem.tags || []).map(t => '<span class="tag-pill">' + escapeHtml(t) + '</span>').join('');
+    const actionLabel = window.AtlasI18n ? window.AtlasI18n.t('actionZoom') : '深览';
 
     card.innerHTML = 
       '<div class="card-media">' +
-        '<img class="card-img" src="' + item.thumb + '" alt="' + escapeHtml(item.title) + '" loading="lazy" />' +
+        '<img class="card-img" src="' + item.thumb + '" alt="' + escapeHtml(locItem.title) + '" loading="lazy" />' +
         '<div class="card-scrim-mask">' +
           '<div class="card-scrim-content">' +
-            '<h3 class="card-title" title="' + escapeHtml(item.title) + '">' + escapeHtml(item.title) + '</h3>' +
+            '<h3 class="card-title" title="' + escapeHtml(locItem.title) + '">' + escapeHtml(locItem.title) + '</h3>' +
             '<div class="card-meta-row">' +
               '<div class="card-tags">' +
                 tagsHtml +
               '</div>' +
               '<div class="card-action-hint">' +
                 SVG_ZOOM +
-                ' <span>深览</span>' +
+                ' <span>' + actionLabel + '</span>' +
               '</div>' +
             '</div>' +
           '</div>' +
@@ -433,10 +466,9 @@
     showArtwork(currentFilteredItems[currentViewerIndex]);
   }
 
-  function showArtwork(item) {
-    const modalEl = document.getElementById('viewerModal');
-    if (!modalEl) return;
-
+  function updateArtworkMetadata(item) {
+    if (!item) return;
+    const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
     const vTitle = document.getElementById('viewerTitle');
     const vDims = document.getElementById('viewerDims');
     const mTitle = document.getElementById('mTitle');
@@ -445,38 +477,47 @@
     const mRes = document.getElementById('mResolution');
     const mRatio = document.getElementById('mRatio');
     const mDesc = document.getElementById('mDescription');
-    const mSwatches = document.getElementById('mPalette');
 
-    if (vTitle) vTitle.textContent = item.title;
+    if (vTitle) vTitle.textContent = locItem.title;
     if (vDims) vDims.textContent = item.width + ' × ' + item.height + ' px';
-    if (mTitle) mTitle.textContent = item.title;
-    if (mCat) mCat.textContent = item.categoryName + (item.subCategory ? ' · ' + item.subCategory : '');
-    if (mAuthor) mAuthor.textContent = item.author || '原创';
-    if (mRes) mRes.textContent = item.width + ' × ' + item.height + ' px';
+    if (mTitle) mTitle.textContent = locItem.title;
+    if (mCat) mCat.textContent = locItem.categoryName + (locItem.subCategory ? ' · ' + locItem.subCategory : '');
+    if (mAuthor) mAuthor.textContent = locItem.author || 'OpenQGIS';
+    if (mRes) mRes.textContent = locItem.physicalSize || (item.width + ' × ' + item.height + ' px');
     if (mRatio) mRatio.textContent = item.aspectRatio + ':1';
-    if (mDesc) mDesc.textContent = item.description || '精密切线与空间几何工造代表作。';
+    if (mDesc) mDesc.textContent = locItem.description || '';
+  }
+
+  function showArtwork(item) {
+    const modalEl = document.getElementById('viewerModal');
+    if (!modalEl) return;
+
+    updateArtworkMetadata(item);
+
+    const mSwatches = document.getElementById('mPalette');
+    const t = window.AtlasI18n ? window.AtlasI18n.t : (k => k);
 
     // Extract dominant palette
     if (mSwatches) {
-      mSwatches.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">提取中...</span>';
+      mSwatches.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">' + t('metaPaletteExtracting') + '</span>';
       extractDominantColors(item, 5, function (colors) {
         if (!modalEl.classList.contains('open')) return;
         mSwatches.innerHTML = '';
         if (!colors || colors.length === 0) {
-          mSwatches.innerHTML = '<span style="font-size:0.72rem;color:var(--text-muted);">暂无色彩数据</span>';
+          mSwatches.innerHTML = '<span style="font-size:0.72rem;color:var(--text-muted);">' + t('metaPaletteEmpty') + '</span>';
           return;
         }
         colors.forEach(function (hex) {
           const btn = document.createElement('button');
           btn.className = 'meta-swatch';
-          btn.title = '点击复制色彩 ' + hex;
+          btn.title = t('metaPaletteHint') + hex;
           btn.innerHTML = '<span class="meta-swatch-dot" style="background-color: ' + hex + ';"></span>' +
                           '<span class="meta-swatch-hex">' + hex + '</span>';
           btn.addEventListener('click', function () {
             copyToClipboard(hex);
             btn.classList.add('copied');
             const hexSpan = btn.querySelector('.meta-swatch-hex');
-            if (hexSpan) hexSpan.textContent = '已复制!';
+            if (hexSpan) hexSpan.textContent = t('metaPaletteCopied');
             setTimeout(function () {
               btn.classList.remove('copied');
               if (hexSpan) hexSpan.textContent = hex;

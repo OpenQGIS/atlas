@@ -6,6 +6,7 @@
   <title>地图录 OpenQGIS制图作品集</title>
   <link rel="stylesheet" href="assets/style.css">
   <script src="assets/config.js"></script>
+  <script src="assets/i18n.js"></script>
   <script src="data/themes.js"></script>
   <script src="data/manifest.js"></script>
   <script src="assets/theme.js"></script>
@@ -18,28 +19,31 @@
       <div class="brand">
         <span class="brand-badge"></span>
         <div class="brand-text">
-          <h1 class="brand-title">地图录 · AtlasLog</h1>
-          <span class="brand-subtitle">个人制图实践 · QGIS 能力边界的记录</span>
+          <h1 class="brand-title" data-i18n="brandTitle">地图录 · AtlasLog</h1>
+          <span class="brand-subtitle" data-i18n="brandSubtitle">个人制图实践 · QGIS 能力边界的记录</span>
         </div>
       </div>
 
       <div class="header-meta">
-        <button id="btnOpenAbout" class="stat-pill about-btn" title="查看《地图录》案名定位与说明">
+        <button id="btnOpenAbout" class="stat-pill about-btn" data-i18n-title="navAboutTitle" title="查看《地图录》案名定位与说明">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          <span>关于</span>
+          <span data-i18n="navAbout">关于</span>
         </button>
-        <a href="https://github.com/OpenQGIS/Cabinet" target="_blank" rel="noopener" class="stat-pill" title="《珍奇柜 · 空间制图藏录》共享精选库" style="text-decoration: none; cursor: pointer;">
+        <a href="https://github.com/OpenQGIS/Cabinet" target="_blank" rel="noopener" class="stat-pill" data-i18n-title="navCabinetTitle" title="《珍奇柜 · 空间制图藏录》共享精选库" style="text-decoration: none; cursor: pointer;">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-          <span>珍奇柜</span>
+          <span data-i18n="navCabinet">珍奇柜</span>
           <svg class="icon" style="width:12px; height:12px; margin-left:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
         </a>
-        <a href="https://github.com/OpenQGIS/Gallery" target="_blank" rel="noopener" class="stat-pill" title="《Gallery · 典藏画廊》聚合大厅" style="text-decoration: none; cursor: pointer;">
+        <a href="https://github.com/OpenQGIS/Gallery" target="_blank" rel="noopener" class="stat-pill" data-i18n-title="navGalleryTitle" title="《Gallery · 典藏画廊》聚合大厅" style="text-decoration: none; cursor: pointer;">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>聚合总览</span>
+          <span data-i18n="navGallery">聚合总览</span>
           <svg class="icon" style="width:12px; height:12px; margin-left:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
         </a>
         <div class="divider"></div>
-        <button class="icon-btn theme-toggle-btn" id="btnToggleTheme" title="切换主题模式" aria-label="切换主题模式">
+        <button class="icon-btn lang-toggle-btn" id="btnToggleLang" title="Switch Language / 切换语言" aria-label="切换语言">
+          EN
+        </button>
+        <button class="icon-btn theme-toggle-btn" id="btnToggleTheme" data-i18n-title="navThemeToggle" title="切换主题模式" aria-label="切换主题模式">
         </button>
       </div>
     </div>
@@ -49,10 +53,9 @@
   <section class="gallery-subbar">
     <div class="subbar-inner">
       <div class="filter-group" id="filterGroup">
-        <span class="filter-label">分类精选:</span>
-        <button class="filter-chip active" data-filter="all">全部作品 (5)</button>
-        <button class="filter-chip" data-filter="wide">横幅长卷</button>
-        <button class="filter-chip" data-filter="tall">条幅立轴</button>
+        <button class="filter-chip active" data-filter="all" data-i18n="filterAll">全部成果</button>
+        <button class="filter-chip" data-filter="wide" data-i18n="filterWide">横幅画卷</button>
+        <button class="filter-chip" data-filter="tall" data-i18n="filterTall">条屏竖幅</button>
       </div>
     </div>
   </section>
@@ -140,30 +143,29 @@
         <div class="drawer-resize-corner-hint"></div>
         <div class="drawer-header" id="drawerDragHandle">
           <div class="drawer-drag-grip" aria-hidden="true"><span></span><span></span><span></span></div>
-          <h3 class="drawer-title">成果卷宗档案</h3>
-          <button class="drawer-close-btn nav-btn" id="btnCloseDrawer" title="收起面板 (Tab / I)" aria-label="收起面板">
+          <h3 class="drawer-title" data-i18n="metaDrawerTitle">成果卷宗档案</h3>
+          <button class="drawer-close-btn nav-btn" id="btnCloseDrawer" data-i18n-title="actionClose" title="收起面板 (Tab / I)" aria-label="收起面板">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
         <div class="drawer-content">
           <div class="meta-section">
-            <h4 class="meta-section-title">基本信息</h4>
+            <h4 class="meta-section-title" data-i18n="metaDrawerTitle">基本信息</h4>
             <dl class="meta-list">
-              <div class="meta-row"><dt>卷名</dt><dd id="mTitle">-</dd></div>
-              <div class="meta-row"><dt>工造门类</dt><dd id="mCategory">-</dd></div>
-              <div class="meta-row"><dt>匠师</dt><dd id="mAuthor">原创</dd></div>
-              <div class="meta-row"><dt>原生解析度</dt><dd id="mResolution">-</dd></div>
-              <div class="meta-row"><dt>画幅构图</dt><dd id="mRatio">-</dd></div>
+              <div class="meta-row"><dt data-i18n="metaCategory">工造门类</dt><dd id="mCategory">-</dd></div>
+              <div class="meta-row"><dt data-i18n="metaAuthor">匠师</dt><dd id="mAuthor">OpenQGIS</dd></div>
+              <div class="meta-row"><dt data-i18n="metaPhysicalSize">原生尺寸</dt><dd id="mResolution">-</dd></div>
+              <div class="meta-row"><dt data-i18n="metaRatio">长宽比例</dt><dd id="mRatio">-</dd></div>
             </dl>
           </div>
 
           <div class="meta-section" id="metaThemeSection">
-            <h4 class="meta-section-title">主调色板萃取</h4>
+            <h4 class="meta-section-title" data-i18n="metaPaletteTitle">主调色板萃取</h4>
             <div class="palette-swatches" id="mPalette"></div>
           </div>
 
           <div class="meta-section">
-            <h4 class="meta-section-title">工造题记与说明</h4>
+            <h4 class="meta-section-title" data-i18n="metaNotesTitle">工造题记与说明</h4>
             <p class="meta-desc" id="mDescription">暂无说明</p>
           </div>
         </div>
@@ -173,7 +175,7 @@
 
   <footer class="site-footer" style="padding: 36px 28px; text-align: center; border-top: 1px solid var(--border-subtle); margin-top: 60px;">
     <div style="max-width: 800px; margin: 0 auto;">
-      <p style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.6;">
+      <p style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.6;" data-i18n="footerCopyright">
         《地图录 · AtlasLog · OpenQGIS 制图作品集》· Copyright © 2026 OpenQGIS / Atlas · 严禁二次未经授权翻印商用
       </p>
     </div>
@@ -185,26 +187,26 @@
     <div class="about-dialog">
       <div class="about-dialog-header">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; background: rgba(var(--accent-rgb), 0.12); padding: 3px 8px; border-radius: 2px;">一图一境 · 静观其详</span>
-          <span style="font-size: 0.76rem; color: var(--text-muted);">OpenQGIS 制图作品集</span>
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; background: rgba(var(--accent-rgb), 0.12); padding: 3px 8px; border-radius: 2px;" data-i18n="aboutTag">一图一境 · 静观其详</span>
+          <span style="font-size: 0.76rem; color: var(--text-muted);" data-i18n="aboutSubtag">OpenQGIS 制图作品集</span>
         </div>
-        <button id="btnCloseAbout" class="icon-btn" title="关闭 (Esc)" style="border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border-subtle); cursor: pointer; color: var(--text-secondary);">
+        <button id="btnCloseAbout" class="icon-btn" data-i18n-title="actionClose" title="关闭 (Esc)" style="border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border-subtle); cursor: pointer; color: var(--text-secondary);">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
       <div class="about-dialog-body">
-        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); letter-spacing: 0.04em; margin-bottom: 6px;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); letter-spacing: 0.04em; margin-bottom: 6px;" data-i18n="aboutTitle">
           《地图录》· AtlasLog
         </h2>
-        <p style="font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 14px;">
+        <p style="font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 14px;" data-i18n="aboutSubtitle">
           个人制图实践，亦是 QGIS 能力边界的记录。
         </p>
-        <p style="font-size: 0.86rem; line-height: 1.75; color: var(--text-secondary); margin-bottom: 20px;">
+        <p style="font-size: 0.86rem; line-height: 1.75; color: var(--text-secondary); margin-bottom: 20px;" data-i18n-html="aboutDesc">
           这里汇集多年来用 QGIS 亲手制作的地图作品。每一幅既是独立完成的视觉表达，也是对 QGIS 制图能力边界的探索与验证。<br/><br/>
           作品采用 1:1 4K 物理像素无损深览，探索 QGIS 制图表现力的极致细节与空间形态美学。
         </p>
         <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <button id="btnCloseAboutFooter" style="display: inline-flex; align-items: center; padding: 8px 18px; font-size: 0.82rem; font-weight: 500; color: var(--text-secondary); background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer;">
+          <button id="btnCloseAboutFooter" data-i18n="aboutClose" style="display: inline-flex; align-items: center; padding: 8px 18px; font-size: 0.82rem; font-weight: 500; color: var(--text-secondary); background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer;">
             关闭
           </button>
         </div>

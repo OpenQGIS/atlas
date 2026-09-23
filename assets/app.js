@@ -97,20 +97,59 @@
 
     if (!heroScreen || !galleryItems || galleryItems.length === 0) return;
 
-    // 随机选择一卷藏录作品作为开屏背景
-    const randomIndex = Math.floor(Math.random() * galleryItems.length);
-    currentHeroItem = galleryItems[randomIndex];
+    function selectHeroArtwork() {
+      // 检测当前视口比例（是否横屏）
+      const viewportRatio = window.innerWidth / (window.innerHeight || 1);
+      const isLandscape = viewportRatio >= 1.0;
 
-    if (heroBg && currentHeroItem && currentHeroItem.thumb) {
-      heroBg.style.backgroundImage = `url("${currentHeroItem.thumb}")`;
+      // 依设备/视口比例精准匹配：横屏优先挑选横版作品 (aspectRatio >= 1)，竖屏优先挑选竖版作品 (aspectRatio < 1)
+      let matchedItems = galleryItems.filter(item => {
+        const ratio = item.aspectRatio || (item.width && item.height ? item.width / item.height : 1);
+        return isLandscape ? (ratio >= 1.0) : (ratio < 1.0);
+      });
+
+      if (!matchedItems || matchedItems.length === 0) {
+        matchedItems = galleryItems;
+      }
+
+      // 在匹配方向的作品池中随机挑选一幅
+      const randomIndex = Math.floor(Math.random() * matchedItems.length);
+      currentHeroItem = matchedItems[randomIndex];
+
+      if (currentHeroItem) {
+        // 优先载入高清 1080P/2K 原生渲染视口图，兼备无损清晰度与加载容错
+        const highResHeroUrl = `thumbs/hero/${currentHeroItem.id}.webp`;
+        const testImg = new Image();
+        testImg.src = highResHeroUrl;
+        testImg.onload = () => {
+          if (heroBg) heroBg.style.backgroundImage = `url("${highResHeroUrl}")`;
+        };
+        testImg.onerror = () => {
+          if (heroBg && currentHeroItem.thumb) {
+            heroBg.style.backgroundImage = `url("${currentHeroItem.thumb}")`;
+          }
+        };
+
+        // 显示背景画卷名称与作者
+        if (heroArtworkTag && heroArtworkName) {
+          const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(currentHeroItem) : currentHeroItem;
+          heroArtworkName.textContent = locItem.title;
+          heroArtworkTag.style.display = 'inline-flex';
+        }
+      }
     }
 
-    // 显示背景画卷名称与作者
-    if (heroArtworkTag && heroArtworkName && currentHeroItem) {
-      const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(currentHeroItem) : currentHeroItem;
-      heroArtworkName.textContent = locItem.title;
-      heroArtworkTag.style.display = 'inline-flex';
-    }
+    selectHeroArtwork();
+
+    // 监听横竖屏切换（如移动端翻转、桌面端拉伸至竖屏浏览器窗口）
+    let lastOrientation = (window.innerWidth >= window.innerHeight) ? 'landscape' : 'portrait';
+    window.addEventListener('resize', () => {
+      const currentOrientation = (window.innerWidth >= window.innerHeight) ? 'landscape' : 'portrait';
+      if (currentOrientation !== lastOrientation) {
+        lastOrientation = currentOrientation;
+        selectHeroArtwork();
+      }
+    }, { passive: true });
 
     // 精准滚动定位至下一屏（即 siteHeader 与瀑布流大厅）
     function scrollToNextScreen() {

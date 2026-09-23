@@ -42,7 +42,7 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
   },
   {
     "id": "city_papercut_14pro",
-    "title": "成都剪纸-iPAD pro",
+    "title": "成都剪纸 · 14Pro",
     "filename": "城市剪纸-14PRO.png",
     "category": "original",
     "categoryName": "原创图片分享",

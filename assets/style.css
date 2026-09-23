@@ -1560,16 +1560,16 @@ body[data-page="portal"] {
   background: linear-gradient(to bottom, transparent, var(--border-medium) 10%, var(--border-medium) 90%, transparent);
 }
 
-/* Masonry Grid (Equal-Height Justified Flow · 无缝拼贴无间隙) */
+/* Masonry Grid (Equal-Height Justified Flow · 典藏画廊画框式) */
 .masonry-grid {
   --target-row-height: 320px;
   display: flex;
   flex-wrap: wrap;
-  gap: 0 !important;
+  gap: 16px;
 }
 .masonry-grid.comfort {
   --target-row-height: 420px;
-  gap: 0 !important;
+  gap: 16px;
 }
 .masonry-grid::after {
   content: "";
@@ -1577,40 +1577,40 @@ body[data-page="portal"] {
 }
 
 @media (min-width: 1920px) {
-  .masonry-grid { --target-row-height: 280px; gap: 0 !important; }
-  .masonry-grid.comfort { --target-row-height: 380px; gap: 0 !important; }
+  .masonry-grid { --target-row-height: 280px; gap: 16px; }
+  .masonry-grid.comfort { --target-row-height: 380px; gap: 16px; }
 }
 
 @media (min-width: 2560px) {
-  .masonry-grid { --target-row-height: 250px; gap: 0 !important; }
-  .masonry-grid.comfort { --target-row-height: 330px; gap: 0 !important; }
+  .masonry-grid { --target-row-height: 250px; gap: 16px; }
+  .masonry-grid.comfort { --target-row-height: 330px; gap: 16px; }
 }
 
 @media (max-width: 1200px) {
   .dual-gallery-layout {
-    gap: 18px;
+    gap: 16px;
   }
-  .masonry-grid { --target-row-height: 240px; gap: 0 !important; }
-  .masonry-grid.comfort { --target-row-height: 320px; gap: 0 !important; }
+  .masonry-grid { --target-row-height: 240px; gap: 14px; }
+  .masonry-grid.comfort { --target-row-height: 320px; gap: 14px; }
 }
 
 @media (max-width: 980px) {
   .dual-gallery-layout {
     grid-template-columns: 1fr;
-    gap: 36px;
+    gap: 28px;
   }
   .column-divider {
     display: none;
   }
-  .masonry-grid { --target-row-height: 260px; gap: 0 !important; }
-  .masonry-grid.comfort { --target-row-height: 340px; gap: 0 !important; }
+  .masonry-grid { --target-row-height: 260px; gap: 14px; }
+  .masonry-grid.comfort { --target-row-height: 340px; gap: 14px; }
 }
 
 @media (max-width: 540px) {
   .gallery-main { padding: 12px; }
   .column-header { padding: 10px 14px; }
   .column-subtitle { display: none; }
-  .masonry-grid { --target-row-height: 180px; gap: 0 !important; }
+  .masonry-grid { --target-row-height: 180px; gap: 10px; }
 }
 
 .gallery-card {
@@ -1619,22 +1619,23 @@ body[data-page="portal"] {
   flex-basis: calc(var(--target-row-height, 320px) * var(--aspect-ratio));
   max-width: 100%;
   background: var(--bg-surface);
-  border: 0 !important;
-  outline: none !important;
-  border-radius: 0 !important;
+  border: 1px solid var(--border-subtle);
+  outline: none;
+  border-radius: var(--radius-md, 8px);
   overflow: hidden;
   cursor: pointer;
   position: relative;
-  box-shadow: none !important;
-  transition: background-color 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
 }
 .gallery-card:hover,
-.gallery-card:focus,
+.gallery-card:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px);
+}
 .gallery-card:active {
-  border: 0 !important;
-  outline: none !important;
-  box-shadow: none !important;
-  transform: none;
+  transform: translateY(0);
 }
 .card-media {
   width: 100%;
@@ -1642,8 +1643,7 @@ body[data-page="portal"] {
   background: var(--card-media-bg);
   position: relative;
   overflow: hidden;
-  border: 0 !important;
-  border-radius: 0 !important;
+  border-radius: calc(var(--radius-md, 8px) - 1px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1654,7 +1654,7 @@ body[data-page="portal"] {
   height: 100%;
   display: block;
   object-fit: cover;
-  border-radius: 0 !important;
+  border-radius: calc(var(--radius-md, 8px) - 1px);
   transform: scale(1.0);
   transform-origin: center center;
   transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;

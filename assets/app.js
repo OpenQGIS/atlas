@@ -151,6 +151,24 @@
         setTimeout(() => { isSnapping = false; }, 850);
       }
     }, { passive: true });
+
+    // 移动端触屏向上滑动时平滑过渡至下一屏
+    let touchStartY = 0;
+    window.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      if (!touchStartY) return;
+      const touchEndY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : 0;
+      const diff = touchStartY - touchEndY;
+      if (window.scrollY < 40 && diff > 50) {
+        scrollToNextScreen();
+      }
+      touchStartY = 0;
+    }, { passive: true });
   }
 
   /* -------------------------------------------------------------

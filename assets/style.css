@@ -3245,5 +3245,60 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   border-radius: 2px;
 }
 
+/* =====================================================================
+   Mobile Responsive Adjustments for Hero & Header
+   ==================================================================== */
+@media (max-width: 768px) {
+  .hero-content {
+    padding: 0 16px;
+    margin-bottom: 24px;
+  }
+
+  .hero-title {
+    font-size: clamp(1.8rem, 7.5vw, 2.8rem);
+    letter-spacing: 0.06em;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(0.9rem, 3.6vw, 1.15rem);
+    letter-spacing: 0.04em;
+  }
+
+  .hero-desc {
+    font-size: 0.72rem;
+  }
+
+  /* 移动端将画卷标记移至右上角，腾出底部空间给滚动提示 */
+  .hero-artwork-tag {
+    top: 18px;
+    right: 14px;
+    bottom: auto;
+    padding: 4px 10px;
+    font-size: 0.68rem;
+  }
+
+  .hero-scroll-btn {
+    bottom: 18px;
+  }
+
+  .header-inner {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .brand-subtitle {
+    display: none;
+  }
+
+  .header-meta {
+    gap: 6px;
+  }
+
+  .stat-pill {
+    padding: 5px 8px;
+    font-size: 0.74rem;
+  }
+}
+
 
 

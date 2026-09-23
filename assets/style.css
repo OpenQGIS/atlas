@@ -71,6 +71,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
 }
 
 html, body {
@@ -103,6 +104,8 @@ html, body {
   position: sticky;
   top: 0;
   z-index: 40;
+  scroll-snap-align: start;
+  scroll-margin-top: 0;
   transition: var(--theme-transition);
 }
 .header-inner {
@@ -2926,31 +2929,321 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   color: var(--accent);
 }
 
-/* Language Toggle Button */
-.lang-toggle-btn {
-  display: inline-flex;
+/* =====================================================================
+   Fullscreen Hero Opening Screen (开屏全景与Slogan)
+   ==================================================================== */
+.hero-screen {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 560px;
+  overflow: hidden;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  font-family: var(--font-mono, monospace);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm, 6px);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  padding: 0;
-  margin: 0;
+  text-align: center;
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+  background-color: #0b0d10;
+  user-select: none;
 }
 
-.lang-toggle-btn:hover {
-  color: var(--accent);
-  border-color: var(--border-medium);
-  background: var(--bg-surface-elevated);
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  filter: brightness(0.68) contrast(1.08) saturate(1.1);
+  transform: scale(1.02);
+  transition: transform 8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease;
+  z-index: 1;
 }
+
+.hero-screen:hover .hero-bg {
+  transform: scale(1.04);
+}
+
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at center, rgba(11, 13, 16, 0.4) 0%, rgba(11, 13, 16, 0.88) 100%),
+    linear-gradient(to bottom, rgba(11, 13, 16, 0.5) 0%, transparent 35%, rgba(11, 13, 16, 0.8) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 960px;
+  padding: 0 28px;
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  background: rgba(128, 204, 40, 0.12);
+  border: 1px solid rgba(128, 204, 40, 0.35);
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  margin-bottom: 22px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.hero-title {
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+  text-shadow: 0 4px 28px rgba(0, 0, 0, 0.8), 0 1px 4px rgba(0, 0, 0, 0.9);
+  line-height: 1.25;
+  margin-bottom: 16px;
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 2.2vw, 1.4rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7);
+  margin-bottom: 16px;
+}
+
+.hero-desc {
+  font-family: var(--font-mono);
+  font-size: clamp(0.76rem, 1.3vw, 0.88rem);
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.08em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+/* Featured Artwork Credit Badge */
+.hero-artwork-tag {
+  position: absolute;
+  right: 28px;
+  bottom: 28px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(11, 13, 16, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: var(--font-mono);
+  pointer-events: none;
+}
+
+.hero-artwork-label {
+  opacity: 0.55;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.hero-artwork-name {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Scroll Down Prompt Button */
+.hero-scroll-btn {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.75);
+  transition: all var(--transition-normal);
+  padding: 10px;
+}
+
+.hero-scroll-btn:hover {
+  color: var(--accent);
+  transform: translateX(-50%) translateY(4px);
+}
+
+.hero-scroll-text {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.scroll-mouse-anim {
+  width: 20px;
+  height: 32px;
+  border: 2px solid currentColor;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  padding-top: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.scroll-mouse-dot {
+  width: 3px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 2px;
+  animation: heroMouseWheel 1.6s ease-in-out infinite;
+}
+
+@keyframes heroMouseWheel {
+  0% { transform: translateY(0); opacity: 1; }
+  60% { transform: translateY(10px); opacity: 0.1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.scroll-chevron {
+  width: 14px;
+  height: 14px;
+  animation: heroChevronBounce 1.6s ease-in-out infinite;
+}
+
+@keyframes heroChevronBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+/* =====================================================================
+   Language Dropdown (中/EN 切换与未来多语言下拉接口)
+   ==================================================================== */
+.lang-dropdown-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.lang-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.lang-dropdown-btn:hover,
+.lang-dropdown-btn[aria-expanded="true"] {
+  background: var(--bg-surface-elevated);
+  border-color: var(--border-medium);
+  color: var(--accent);
+}
+
+.lang-current-label {
+  letter-spacing: 0.04em;
+  min-width: 14px;
+  text-align: center;
+}
+
+.lang-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 140px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  padding: 5px;
+  display: none;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 120;
+  animation: langDropdownFade 0.16s ease-out;
+}
+
+.lang-dropdown-menu.open {
+  display: flex;
+}
+
+@keyframes langDropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lang-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background 0.15s, color 0.15s;
+}
+
+.lang-dropdown-item:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.lang-dropdown-item.active {
+  color: var(--accent);
+  font-weight: 600;
+  background: var(--accent-subtle);
+}
+
+.lang-item-badge {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  opacity: 0.75;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
 
 

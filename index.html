@@ -13,8 +13,41 @@
   <script src="vendor/openseadragon.min.js"></script>
 </head>
 <body data-page="atlas">
-  <!-- Header -->
-  <header class="site-header">
+  <!-- Fullscreen Opening Screen (开屏全景与Slogan) -->
+  <section class="hero-screen" id="heroScreen">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-scrim"></div>
+    
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        <span class="hero-badge-text">OPENQGIS · ATLASLOG</span>
+      </div>
+      <h1 class="hero-title" id="heroTitle" data-i18n="heroSlogan">一图一境 · 静观其详</h1>
+      <p class="hero-subtitle" id="heroSubtitle" data-i18n="heroSubslogan">地图录 · AtlasLog · OpenQGIS 制图作品集</p>
+      <div class="hero-desc" data-i18n="heroDesc">个人制图实践 · QGIS 能力边界的记录</div>
+    </div>
+
+    <!-- Active Artwork Label (展示当前随机背景画卷名称) -->
+    <div class="hero-artwork-tag" id="heroArtworkTag" style="display: none;">
+      <span class="hero-artwork-label" data-i18n="heroBgArtwork">背景展卷</span>
+      <span class="hero-artwork-name" id="heroArtworkName"></span>
+    </div>
+
+    <!-- Scroll Down Prompt Button (点击或鼠标滚动直达第二屏瀑布流) -->
+    <button class="hero-scroll-btn" id="heroScrollBtn" aria-label="向下探索" data-i18n-title="heroScroll">
+      <span class="hero-scroll-text" data-i18n="heroScroll">向下探索</span>
+      <div class="scroll-mouse-anim">
+        <div class="scroll-mouse-dot"></div>
+      </div>
+      <svg class="icon scroll-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </button>
+  </section>
+
+  <!-- Header (滚动到下一屏后展现) -->
+  <header class="site-header" id="siteHeader">
     <div class="header-inner">
       <div class="brand">
         <span class="brand-badge"></span>
@@ -40,9 +73,30 @@
           <svg class="icon" style="width:12px; height:12px; margin-left:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
         </a>
         <div class="divider"></div>
-        <button class="icon-btn lang-toggle-btn" id="btnToggleLang" title="Switch Language / 切换语言" aria-label="切换语言">
-          EN
-        </button>
+        <!-- Language Selector Dropdown (可扩展多语言下拉面板) -->
+        <div class="lang-dropdown-wrapper" id="langDropdownWrapper">
+          <button class="stat-pill lang-dropdown-btn" id="btnLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" title="切换语言 / Switch Language">
+            <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span class="lang-current-label" id="currentLangLabel">中</span>
+            <svg class="icon chevron-icon" style="width:10px; height:10px; margin-left:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="lang-dropdown-menu" id="langDropdownMenu" role="menu">
+            <button class="lang-dropdown-item active" data-lang="zh" role="menuitem">
+              <span class="lang-item-name">简体中文</span>
+              <span class="lang-item-badge">ZH</span>
+            </button>
+            <button class="lang-dropdown-item" data-lang="en" role="menuitem">
+              <span class="lang-item-name">English</span>
+              <span class="lang-item-badge">EN</span>
+            </button>
+          </div>
+        </div>
         <button class="icon-btn theme-toggle-btn" id="btnToggleTheme" data-i18n-title="navThemeToggle" title="切换主题模式" aria-label="切换主题模式">
         </button>
       </div>

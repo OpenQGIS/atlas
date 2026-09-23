@@ -52,8 +52,13 @@
       metaPaletteCopied: '已复制!',
       metaPaletteHint: '点击复制色彩 ',
       metaNotesTitle: '工造题记与说明',
-      footerCopyright: '《地图录 · AtlasLog · OpenQGIS 制图作品集》· Copyright © 2026 OpenQGIS / Atlas · 严禁二次未经授权翻印商用',
-      emptyFilter: '当前筛选条件下暂无收录成果'
+      emptyFilter: '当前筛选条件下暂无收录成果',
+      heroSlogan: '一图一境 · 静观其详',
+      heroSubslogan: '地图录 · AtlasLog · OpenQGIS 制图作品集',
+      heroDesc: '个人制图实践 · QGIS 能力边界的记录',
+      heroScroll: '向下探索',
+      heroBgArtwork: '背景展卷',
+      langSelectTitle: '切换语言 / Switch Language'
     },
     en: {
       siteTitle: 'AtlasLog · OpenQGIS Cartography Portfolio',
@@ -100,7 +105,13 @@
       metaPaletteHint: 'Click to copy color ',
       metaNotesTitle: 'Notes & Description',
       footerCopyright: '《AtlasLog · OpenQGIS Cartography Portfolio》· Copyright © 2026 OpenQGIS / Atlas · Unauthorized reproduction prohibited',
-      emptyFilter: 'No artworks found under current filter'
+      emptyFilter: 'No artworks found under current filter',
+      heroSlogan: 'One Map, One Realm · Contemplate the Nuance',
+      heroSubslogan: 'AtlasLog · OpenQGIS Cartography Portfolio',
+      heroDesc: 'Personal Cartography · Recording the Limits of QGIS',
+      heroScroll: 'Scroll to Explore',
+      heroBgArtwork: 'Featured Map',
+      langSelectTitle: 'Switch Language / 切换语言'
     }
   };
 
@@ -253,13 +264,25 @@
       if (title) el.title = title;
     });
 
-    // 5. Update Lang toggle button text
-    const langBtn = document.getElementById('btnToggleLang');
-    if (langBtn) {
-      langBtn.textContent = t('navLangToggle');
-      langBtn.title = t('navLangTitle');
+    // 5. Update Lang toggle / dropdown indicators
+    const currentLangLabel = document.getElementById('currentLangLabel');
+    if (currentLangLabel) {
+      currentLangLabel.textContent = currentLang === 'zh' ? '中' : 'EN';
     }
+    const langBtn = document.getElementById('btnLangDropdown') || document.getElementById('btnToggleLang');
+    if (langBtn) {
+      langBtn.title = t('langSelectTitle');
+    }
+    document.querySelectorAll('.lang-dropdown-item').forEach(item => {
+      const itemLang = item.getAttribute('data-lang');
+      item.classList.toggle('active', itemLang === currentLang);
+    });
   }
+
+  const SUPPORTED_LANGUAGES = [
+    { code: 'zh', name: '简体中文', short: '中' },
+    { code: 'en', name: 'English', short: 'EN' }
+  ];
 
   // Pre-set document.documentElement.lang before paint
   document.documentElement.lang = (currentLang === 'zh' ? 'zh-CN' : 'en');
@@ -272,6 +295,7 @@
     t: t,
     getItem: getLocalizedItem,
     updateDOM: updateDOMTranslations,
+    languages: SUPPORTED_LANGUAGES,
     STRINGS: UI_STRINGS
   };
 })();

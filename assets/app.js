@@ -68,6 +68,8 @@
     });
   }
 
+  let currentHeroItem = null;
+
   function initGallery() {
     const countEl = document.getElementById('pageItemCount');
     if (countEl) countEl.textContent = galleryItems.length;
@@ -76,24 +78,129 @@
     bindViewModeEvents();
     bindViewerModalEvents();
     bindAboutModalEvents();
+    bindLanguageDropdown();
     bindI18nEvents();
+    initHero();
 
     applyFilter('all');
+  }
+
+  /* -------------------------------------------------------------
+     Hero Screen (随机全屏背景图 + Slogan + 滚动定位到下一屏)
+     ------------------------------------------------------------- */
+  function initHero() {
+    const heroScreen = document.getElementById('heroScreen');
+    const heroBg = document.getElementById('heroBg');
+    const heroScrollBtn = document.getElementById('heroScrollBtn');
+    const heroArtworkTag = document.getElementById('heroArtworkTag');
+    const heroArtworkName = document.getElementById('heroArtworkName');
+
+    if (!heroScreen || !galleryItems || galleryItems.length === 0) return;
+
+    // 随机选择一卷藏录作品作为开屏背景
+    const randomIndex = Math.floor(Math.random() * galleryItems.length);
+    currentHeroItem = galleryItems[randomIndex];
+
+    if (heroBg && currentHeroItem && currentHeroItem.thumb) {
+      heroBg.style.backgroundImage = `url("${currentHeroItem.thumb}")`;
+    }
+
+    // 显示背景画卷名称与作者
+    if (heroArtworkTag && heroArtworkName && currentHeroItem) {
+      const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(currentHeroItem) : currentHeroItem;
+      heroArtworkName.textContent = locItem.title;
+      heroArtworkTag.style.display = 'inline-flex';
+    }
+
+    // 精准滚动定位至下一屏（即 siteHeader 与瀑布流大厅）
+    function scrollToNextScreen() {
+      const target = document.getElementById('siteHeader') || document.querySelector('.site-header');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+      }
+    }
+
+    if (heroScrollBtn) {
+      heroScrollBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        scrollToNextScreen();
+      });
+    }
+
+    // 鼠标在开屏区域向下滚动时，平滑精准定位到下一屏
+    let isSnapping = false;
+    window.addEventListener('wheel', (e) => {
+      if (isSnapping) return;
+      const hero = document.getElementById('heroScreen');
+      if (!hero) return;
+
+      const heroHeight = hero.offsetHeight || window.innerHeight;
+
+      // 处于开屏视图顶部且向下滚轮滑动时
+      if (window.scrollY < 40 && e.deltaY > 15) {
+        isSnapping = true;
+        scrollToNextScreen();
+        setTimeout(() => { isSnapping = false; }, 850);
+      }
+      // 处于次屏交界处且向上滚轮滑动时，回卷至开屏
+      else if (window.scrollY > 0 && window.scrollY < heroHeight * 0.7 && e.deltaY < -15) {
+        isSnapping = true;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => { isSnapping = false; }, 850);
+      }
+    }, { passive: true });
+  }
+
+  /* -------------------------------------------------------------
+     Language Dropdown (中/EN 切换与扩展多语言支持)
+     ------------------------------------------------------------- */
+  function bindLanguageDropdown() {
+    const wrapper = document.getElementById('langDropdownWrapper');
+    const btn = document.getElementById('btnLangDropdown');
+    const menu = document.getElementById('langDropdownMenu');
+    if (!wrapper || !btn || !menu) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = menu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // 语言选项点击事件
+    menu.querySelectorAll('.lang-dropdown-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetLang = item.getAttribute('data-lang');
+        if (targetLang && window.AtlasI18n) {
+          window.AtlasI18n.setLang(targetLang);
+        }
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // 点击外部区域或按 Esc 自动关闭下拉菜单
+    document.addEventListener('click', (e) => {
+      if (!wrapper.contains(e.target)) {
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.classList.contains('open')) {
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
   }
 
   /* -------------------------------------------------------------
      i18n & Language Switcher Binding
      ------------------------------------------------------------- */
   function bindI18nEvents() {
-    const langBtn = document.getElementById('btnToggleLang');
-    if (langBtn && window.AtlasI18n) {
-      langBtn.textContent = window.AtlasI18n.t('navLangToggle');
-      langBtn.title = window.AtlasI18n.t('navLangTitle');
-      langBtn.addEventListener('click', () => {
-        window.AtlasI18n.toggle();
-      });
-    }
-
     if (window.AtlasI18n) {
       window.AtlasI18n.updateDOM();
     }
@@ -101,6 +208,15 @@
     window.addEventListener('languageChanged', () => {
       // Re-render gallery grid with localized data
       renderGrid(currentFilteredItems);
+
+      // Update hero active artwork title
+      if (currentHeroItem) {
+        const heroArtworkName = document.getElementById('heroArtworkName');
+        if (heroArtworkName) {
+          const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(currentHeroItem) : currentHeroItem;
+          heroArtworkName.textContent = locItem.title;
+        }
+      }
 
       // If viewer modal is open, re-render metadata panel
       const modalEl = document.getElementById('viewerModal');

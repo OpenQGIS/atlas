@@ -117,16 +117,18 @@
       currentHeroItem = matchedItems[randomIndex];
 
       if (currentHeroItem) {
-        // 优先载入高清 1080P/2K 原生渲染视口图，兼备无损清晰度与加载容错
+        // 1. 瞬间呈现轻量缩略图（~40KB，0ms 秒开无缝展示，杜绝黑屏等待）
+        if (heroBg && currentHeroItem.thumb) {
+          heroBg.style.backgroundImage = `url("${currentHeroItem.thumb}")`;
+        }
+
+        // 2. 后台并行静默预载 2K 高清大图，就绪后丝滑替换为极致细节
         const highResHeroUrl = `thumbs/hero/${currentHeroItem.id}.webp`;
         const testImg = new Image();
         testImg.src = highResHeroUrl;
         testImg.onload = () => {
-          if (heroBg) heroBg.style.backgroundImage = `url("${highResHeroUrl}")`;
-        };
-        testImg.onerror = () => {
-          if (heroBg && currentHeroItem.thumb) {
-            heroBg.style.backgroundImage = `url("${currentHeroItem.thumb}")`;
+          if (heroBg) {
+            heroBg.style.backgroundImage = `url("${highResHeroUrl}")`;
           }
         };
 
@@ -141,15 +143,16 @@
 
     selectHeroArtwork();
 
-    // 监听横竖屏切换（如移动端翻转、桌面端拉伸至竖屏浏览器窗口）
-    let lastOrientation = (window.innerWidth >= window.innerHeight) ? 'landscape' : 'portrait';
-    window.addEventListener('resize', () => {
-      const currentOrientation = (window.innerWidth >= window.innerHeight) ? 'landscape' : 'portrait';
-      if (currentOrientation !== lastOrientation) {
-        lastOrientation = currentOrientation;
-        selectHeroArtwork();
-      }
-    }, { passive: true });
+    // 监听横竖屏物理方向切换（避免移动端滚动时因地址栏收折触发 resize 误切图）
+    const mql = window.matchMedia('(orientation: landscape)');
+    const handleOrientationChange = () => {
+      selectHeroArtwork();
+    };
+    if (mql.addEventListener) {
+      mql.addEventListener('change', handleOrientationChange);
+    } else if (mql.addListener) {
+      mql.addListener(handleOrientationChange);
+    }
 
     // 精准滚动定位至下一屏（即 siteHeader 与瀑布流大厅）
     function scrollToNextScreen() {

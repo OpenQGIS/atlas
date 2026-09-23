@@ -142,20 +142,61 @@
     const heroScrollBtn = document.getElementById('heroScrollBtn');
     if (!heroScreen || !galleryItems || galleryItems.length === 0) return;
 
-    function renderNextHeroArtwork(forcedItem) {
+    const HERO_DWELL_MS = 8000; // 画面完全就绪后的专属驻留欣赏时间：8 秒
+    let preloadedNextItem = null;
+    let preloadImageObj = null;
+
+    function updateArtworkTag(item) {
+      const heroArtworkTag = document.getElementById('heroArtworkTag');
+      const heroArtworkName = document.getElementById('heroArtworkName');
+      if (heroArtworkTag && heroArtworkName && item) {
+        const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
+        heroArtworkName.textContent = locItem.title;
+        heroArtworkTag.style.display = 'inline-flex';
+      }
+    }
+
+    // 后台静默预加载下一卷 2K 画卷，确保到期切换时 0ms 瞬间无缝呈现
+    function prepareAndPreloadNext() {
+      const pool = getEligibleHeroPool();
+      if (pool.length === 0) return null;
+
+      let candidates = pool.filter(it => it.id !== (currentHeroItem ? currentHeroItem.id : null));
+      if (candidates.length === 0) candidates = pool;
+
+      preloadedNextItem = candidates[Math.floor(Math.random() * candidates.length)];
+      if (preloadedNextItem) {
+        preloadImageObj = new Image();
+        preloadImageObj.src = `thumbs/hero/${preloadedNextItem.id}.webp`;
+      }
+      return preloadedNextItem;
+    }
+
+    // 安排下一次换图（必须在大图完全加载并展示完成后才开始倒计时 8 秒）
+    function scheduleNextTransition() {
+      stopHeroTimer();
+      heroTimer = setTimeout(() => {
+        if (window.scrollY < 80 && !document.hidden) {
+          displayHeroArtwork(preloadedNextItem);
+        }
+      }, HERO_DWELL_MS);
+    }
+
+    function stopHeroTimer() {
+      if (heroTimer) {
+        clearTimeout(heroTimer);
+        heroTimer = null;
+      }
+    }
+
+    function displayHeroArtwork(itemToDisplay) {
+      stopHeroTimer();
       const pool = getEligibleHeroPool();
       if (pool.length === 0) return;
 
-      let nextItem = forcedItem;
-      if (!nextItem) {
-        // 轮播时尽量不连续重复上一张
-        let candidates = pool.filter(it => it.id !== lastHeroItemId);
-        if (candidates.length === 0) candidates = pool;
-        nextItem = candidates[Math.floor(Math.random() * candidates.length)];
-      }
-
-      currentHeroItem = nextItem;
-      lastHeroItemId = nextItem.id;
+      const targetItem = itemToDisplay || pool[Math.floor(Math.random() * pool.length)];
+      currentHeroItem = targetItem;
+      lastHeroItemId = targetItem.id;
 
       const layerA = document.getElementById('heroBgA') || document.getElementById('heroBg');
       const layerB = document.getElementById('heroBgB');
@@ -163,66 +204,56 @@
       const incoming = (activeHeroLayerIndex === 0 && layerB) ? layerB : layerA;
       const outgoing = (incoming === layerB) ? layerA : layerB;
 
-      if (incoming) {
-        // 先设低清缩略图做 0ms 保险底图
-        incoming.style.backgroundImage = `url("${nextItem.thumb}")`;
+      if (!incoming) return;
 
-        // 异步预载 2K 原生视口渲染大图
-        const highResUrl = `thumbs/hero/${nextItem.id}.webp`;
-        const testImg = new Image();
-        testImg.src = highResUrl;
-        testImg.onload = () => {
-          incoming.style.backgroundImage = `url("${highResUrl}")`;
-        };
+      // 0ms 瞬间挂上低清缩略图作底图，绝无黑屏等待
+      incoming.style.backgroundImage = `url("${targetItem.thumb}")`;
 
-        // 双层平滑淡入淡出（0 闪烁）
+      const highResUrl = `thumbs/hero/${targetItem.id}.webp`;
+      const highResImg = new Image();
+      let hasCompleted = false;
+
+      const onImageReady = () => {
+        if (hasCompleted) return;
+        hasCompleted = true;
+
+        // 大图加载就绪：上屏锐化并触发 1.4s 电影级淡入淡出
+        incoming.style.backgroundImage = `url("${highResUrl}")`;
         incoming.classList.add('active');
         if (outgoing) {
           outgoing.classList.remove('active');
         }
 
         activeHeroLayerIndex = (incoming === layerB) ? 1 : 0;
-      }
+        updateArtworkTag(targetItem);
 
-      // 更新右下角作品标牌
-      const heroArtworkTag = document.getElementById('heroArtworkTag');
-      const heroArtworkName = document.getElementById('heroArtworkName');
-      if (heroArtworkTag && heroArtworkName) {
-        const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(nextItem) : nextItem;
-        heroArtworkName.textContent = locItem.title;
-        heroArtworkTag.style.display = 'inline-flex';
-      }
-    }
+        // 【关键逻辑】：大图完全加载呈现后，立即后台预加载下一张，并启动满额 8 秒停留倒计时
+        prepareAndPreloadNext();
+        scheduleNextTransition();
+      };
 
-    // 首帧加载
-    renderNextHeroArtwork();
+      highResImg.onload = onImageReady;
+      highResImg.onerror = () => {
+        // 容错降级：大图网络异常时，以缩略图继续展示并正常计时
+        onImageReady();
+      };
+      highResImg.src = highResUrl;
 
-    // 开启自动平滑轮播定时器（每隔 8.5 秒切换下一幅合格作品）
-    function startHeroTimer() {
-      stopHeroTimer();
-      heroTimer = setInterval(() => {
-        // 仅在用户位于首屏区域且页面处于活跃前台时自动轮播
-        if (window.scrollY < 80 && !document.hidden) {
-          renderNextHeroArtwork();
-        }
-      }, 8500);
-    }
-
-    function stopHeroTimer() {
-      if (heroTimer) {
-        clearInterval(heroTimer);
-        heroTimer = null;
+      // 命中浏览器内存/磁盘缓存时秒开
+      if (highResImg.complete) {
+        onImageReady();
       }
     }
 
-    startHeroTimer();
+    // 首帧加载展示
+    displayHeroArtwork();
 
-    // 页面不可见或向下滚动离开首屏时暂停轮播以节省能耗与性能
+    // 页面不可见或向下滚动离开首屏时暂停倒计时以节省设备能耗
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         stopHeroTimer();
       } else if (window.scrollY < 80) {
-        startHeroTimer();
+        scheduleNextTransition();
       }
     });
 
@@ -230,14 +261,14 @@
       if (window.scrollY > 120) {
         stopHeroTimer();
       } else {
-        if (!heroTimer) startHeroTimer();
+        if (!heroTimer) scheduleNextTransition();
       }
     }, { passive: true });
 
     // 监听横竖屏切换（物理屏幕翻转时即刻计算最契合图幅）
     const mql = window.matchMedia('(orientation: landscape)');
     const handleOrientationChange = () => {
-      renderNextHeroArtwork();
+      displayHeroArtwork();
     };
     if (mql.addEventListener) {
       mql.addEventListener('change', handleOrientationChange);

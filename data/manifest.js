@@ -201,5 +201,48 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
         }
       }
     }
+  },
+  {
+    "id": "pinglu_canal",
+    "title": "平陆运河",
+    "filename": "平陆运河.png",
+    "category": "original",
+    "categoryName": "原创图片分享",
+    "subCategory": "工程规划",
+    "description": "这是一张具有强烈科技感和暗黑风格的地理信息（GIS）可视化地图。背景以黑色为主，布满了橙黄色发光的等高线，勾勒出复杂的地形地貌（如山脉、沟壑）。画面中央横贯一条醒目的红色粗线为广西平陆运河。红线在中部有一段白色斑马纹标识指示的是运河的开挖段。",
+    "author": "OpenQGIS",
+    "date": "2026.09",
+    "year": "2026.9",
+    "physicalSize": "15.0cm x 20.0cm，全景长卷",
+    "tags": [
+      "数据可视化",
+      "地形图",
+      "暗黑系",
+      "发光线条",
+      "平陆运河"
+    ],
+    "width": 14881,
+    "height": 3307,
+    "aspectRatio": 4.4998,
+    "thumb": "thumbs/pinglu_canal.webp",
+    "tileUrl": "tiles/pinglu_canal_files/",
+    "maxLevel": 14,
+    "tileSize": 256,
+    "overlap": 0,
+    "format": "webp",
+    "dzi": {
+      "Image": {
+        "xmlns": "http://schemas.microsoft.com/deepzoom/2008",
+        "Url": "tiles/pinglu_canal_files/",
+        "Format": "webp",
+        "Overlap": "0",
+        "TileSize": "256",
+        "Size": {
+          "Width": 14881,
+          "Height": 3307
+        }
+      }
+    }
   }
 ];
+

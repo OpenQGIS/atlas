@@ -176,6 +176,17 @@
         physicalSize: '120.0cm x 30.0cm, Panorama Scroll',
         tags: ['Greenway Elevation', 'Section Profile', 'Huanglongxi', 'DEM', 'Riparian Ecology']
       }
+    },
+    pinglu_canal: {
+      en: {
+        title: 'Pinglu Canal · Cyberpunk Dark Fabric',
+        categoryName: 'Original Cartography',
+        subCategory: 'Engineering & Morphology',
+        description: 'A dark-mode cyberpunk GIS visualization of the Pinglu Canal project in Guangxi. Over a deep black terrain substrate, glowing amber and golden contour lines delineate the rugged mountain ridges and gorges. A prominent crimson corridor traces the primary canal navigation route, highlighted with zebra-striped patterning across the active excavation segments.',
+        author: 'OpenQGIS',
+        physicalSize: '15.0cm x 20.0cm, Panorama Scroll',
+        tags: ['Data Visualization', 'Topographic Contours', 'Dark Aesthetics', 'Glowing Vector', 'Pinglu Canal']
+      }
     }
   };
 

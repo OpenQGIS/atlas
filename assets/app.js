@@ -856,8 +856,13 @@
     if (mCat) mCat.textContent = locItem.categoryName + (locItem.subCategory ? ' · ' + locItem.subCategory : '');
     if (mAuthor) mAuthor.textContent = locItem.author || 'OpenQGIS';
     if (mRes) mRes.textContent = locItem.physicalSize || (item.width + ' × ' + item.height + ' px');
-    if (mRatio) mRatio.textContent = item.aspectRatio + ':1';
-    if (mDesc) mDesc.textContent = locItem.description || '';
+    if (mDesc) {
+      if (locItem.descriptionHtml) {
+        mDesc.innerHTML = locItem.descriptionHtml;
+      } else {
+        mDesc.textContent = locItem.description || '';
+      }
+    }
   }
 
   function showArtwork(item) {

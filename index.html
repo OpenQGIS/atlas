@@ -24,6 +24,10 @@
       </div>
 
       <div class="header-meta">
+        <button id="btnOpenAbout" class="stat-pill about-btn" title="查看《地图录》案名定位与工作流介绍">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>关于 · About</span>
+        </button>
         <a href="https://github.com/OpenQGIS/QMapFlow" target="_blank" rel="noopener" class="stat-pill" title="《QMapFlow》制图方法与完整工作流沉淀" style="text-decoration: none; cursor: pointer;">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
           <span>工作流 · QMapFlow</span>
@@ -58,31 +62,6 @@
       </div>
     </div>
   </header>
-
-  <!-- Opener Banner: 宣传体系（QMapFlow 深度融合版） -->
-  <section class="atlas-hero-banner cangfeng-hero-banner" style="max-width: 1600px; margin: 24px auto 0; padding: 28px 32px; background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
-    <div style="max-width: 860px;">
-      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-        <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; background: rgba(var(--accent-rgb), 0.12); padding: 3px 8px; border-radius: 2px;">一图一境 · 静观其详</span>
-        <span style="font-size: 0.78rem; color: var(--text-muted);">OpenQGIS 制图作品集 · 与 QMapFlow 共同探索 QGIS 的表达上限</span>
-      </div>
-      <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary); letter-spacing: 0.05em; margin-bottom: 8px;">《地图录》· AtlasLog · 个人制图实践，亦是 QGIS 能力边界的记录</h2>
-      <p style="font-size: 0.86rem; line-height: 1.7; color: var(--text-secondary); margin: 0;">
-        这里汇集多年来用 QGIS 亲手制作的地图作品。每一幅既是独立完成的视觉表达，也是对 QGIS 制图能力边界的探索与验证。<br/>
-        作品背后的完整工作流与方法沉淀，同步记录于 <strong>QMapFlow</strong>。采用 1:1 4K 物理像素无损深览。
-      </p>
-    </div>
-    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-      <a href="#galleryGrid" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; font-size: 0.82rem; font-weight: 600; color: var(--text-primary); background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); text-decoration: none;">
-        <span>浏览制图卷轴</span>
-        <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-      </a>
-      <a href="https://github.com/OpenQGIS/QMapFlow" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; font-size: 0.82rem; font-weight: 600; color: var(--accent); background: var(--accent-subtle); border: 1px solid rgba(var(--accent-rgb), 0.3); border-radius: var(--radius-sm); text-decoration: none;">
-        <span>探索 QMapFlow 工作流</span>
-        <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-      </a>
-    </div>
-  </section>
 
   <!-- Sub-bar & Subcategory Filter Chips -->
   <section class="gallery-subbar">
@@ -217,6 +196,40 @@
       </p>
     </div>
   </footer>
+
+  <!-- About Modal (关于地图录 弹窗体系) -->
+  <div id="aboutModal" class="about-modal" aria-hidden="true" style="display: none;">
+    <div class="about-backdrop" id="aboutBackdrop"></div>
+    <div class="about-dialog">
+      <div class="about-dialog-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; background: rgba(var(--accent-rgb), 0.12); padding: 3px 8px; border-radius: 2px;">一图一境 · 静观其详</span>
+          <span style="font-size: 0.76rem; color: var(--text-muted);">OpenQGIS 制图作品集</span>
+        </div>
+        <button id="btnCloseAbout" class="icon-btn" title="关闭 (Esc)" style="border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border-subtle); cursor: pointer; color: var(--text-secondary);">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="about-dialog-body">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); letter-spacing: 0.04em; margin-bottom: 6px;">
+          《地图录》· AtlasLog
+        </h2>
+        <p style="font-size: 0.88rem; font-weight: 600; color: var(--accent); margin-bottom: 14px;">
+          个人制图实践，亦是 QGIS 能力边界的记录。
+        </p>
+        <p style="font-size: 0.86rem; line-height: 1.75; color: var(--text-secondary); margin-bottom: 22px;">
+          这里汇集多年来用 QGIS 亲手制作的地图作品。每一幅既是独立完成的视觉表达，也是对 QGIS 制图能力边界的探索与验证。<br/><br/>
+          作品背后的完整工作流与方法沉淀，同步记录于 <strong>QMapFlow</strong>。采用 1:1 4K 物理像素无损深览。
+        </p>
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+          <a href="https://github.com/OpenQGIS/QMapFlow" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; font-size: 0.82rem; font-weight: 600; color: var(--accent); background: var(--accent-subtle); border: 1px solid rgba(var(--accent-rgb), 0.3); border-radius: var(--radius-sm); text-decoration: none;">
+            <span>探索 QMapFlow 工作流</span>
+            <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="assets/app.js"></script>
 </body>

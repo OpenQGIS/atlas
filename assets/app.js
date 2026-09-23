@@ -75,8 +75,49 @@
     bindFilterEvents();
     bindViewModeEvents();
     bindViewerModalEvents();
+    bindAboutModalEvents();
 
     applyFilter('all');
+  }
+
+  /* -------------------------------------------------------------
+     About Modal Event Binding
+     ------------------------------------------------------------- */
+  function bindAboutModalEvents() {
+    const modalEl = document.getElementById('aboutModal');
+    const openBtn = document.getElementById('btnOpenAbout');
+    const closeBtn = document.getElementById('btnCloseAbout');
+    const backdropEl = document.getElementById('aboutBackdrop');
+    if (!modalEl) return;
+
+    function openAbout() {
+      modalEl.style.display = 'flex';
+      void modalEl.offsetWidth; // force reflow for smooth transition
+      modalEl.classList.add('open');
+      modalEl.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAbout() {
+      modalEl.classList.remove('open');
+      modalEl.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      setTimeout(() => {
+        if (!modalEl.classList.contains('open')) {
+          modalEl.style.display = 'none';
+        }
+      }, 250);
+    }
+
+    if (openBtn) openBtn.addEventListener('click', openAbout);
+    if (closeBtn) closeBtn.addEventListener('click', closeAbout);
+    if (backdropEl) backdropEl.addEventListener('click', closeAbout);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalEl.classList.contains('open')) {
+        closeAbout();
+      }
+    });
   }
 
   /* -------------------------------------------------------------

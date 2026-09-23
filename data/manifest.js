@@ -170,7 +170,8 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
     "subCategory": "原创设计",
     "description": "将川西北高原东缘的四条路线（莲宝叶则、马尔康、若尔盖、红原）整合成一份直观的“路书”。采用了“中心地形总览+四周局部卫星图”的排版，并附上详细的高程剖面图和用于导航的二维码，希望能清晰展示从高山峡谷到高原湿地、海拔在2800至3900米之间的复杂地貌与起伏，为户外爱好者和科考人员提供详实的行程参考。",
     "author": "OpenQGIS",
-    "year": "2025.7",
+    "date": "2026.08",
+    "year": "2026.8",
     "physicalSize": "60.0cm x 30.0cm",
     "tags": [
       "地形地貌",

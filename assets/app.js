@@ -18,6 +18,7 @@
   const SVG_EXIT_FULLSCREEN = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>';
   const SVG_FULLSCREEN = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
   const SVG_ZOOM = '<svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>';
+  const SVG_SPARKLE = '<svg class="badge-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1L9.8 6.2L15 8L9.8 9.8L8 15L6.2 9.8L1 8L6.2 6.2L8 1Z"/></svg>';
 
   // Initialize
   async function init() {
@@ -495,6 +496,68 @@
     });
   }
 
+  /**
+   * 判断作品是否属于近 3 个月（约 93 天）发布的新作
+   * 兼容 item.date 与 item.year 字段，支持 2026.8, 2026-08, 2026.09.15 等格式，
+   * 亦兼容 tags: ["new"] 或 isNew: true 显式标记。
+   */
+  function isNewArtwork(item, maxDays = 93) {
+    if (!item) return false;
+    if (item.isNew === true) return true;
+    if (item.isNew === false) return false;
+
+    // 检查 tags 显式标记
+    if (Array.isArray(item.tags)) {
+      const lowerTags = item.tags.map(t => String(t).trim().toLowerCase());
+      if (lowerTags.includes('new') || lowerTags.includes('新作') || lowerTags.includes('最新')) {
+        return true;
+      }
+    }
+
+    const rawDate = item.date || item.publishDate || item.releaseDate || item.year;
+    if (!rawDate) return false;
+
+    const str = String(rawDate).trim();
+    let year = null;
+    let month = null;
+    let day = null;
+
+    // 匹配常规年月[日]格式，如：
+    // 2026-08-15, 2026.08.15, 2026/8/15, 2026年8月15日
+    // 2026-08, 2026.8, 2026.08, 2026/8, 2026年8月
+    const matchDate = str.match(/^(\d{4})[-/.年](\d{1,2})(?:[-/.月](\d{1,2}))?/);
+    if (matchDate) {
+      year = parseInt(matchDate[1], 10);
+      month = parseInt(matchDate[2], 10);
+      if (matchDate[3]) {
+        day = parseInt(matchDate[3], 10);
+      }
+    } else {
+      // 尝试标准 Date.parse
+      const timestamp = Date.parse(str);
+      if (!isNaN(timestamp)) {
+        const d = new Date(timestamp);
+        year = d.getFullYear();
+        month = d.getMonth() + 1;
+        day = d.getDate();
+      }
+    }
+
+    if (!year || !month || month < 1 || month > 12) {
+      return false;
+    }
+
+    const targetDay = day || 1;
+    const itemDate = new Date(year, month - 1, targetDay);
+    const now = new Date();
+
+    const diffTime = now.getTime() - itemDate.getTime();
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+    // 允许未来 14 天容错（防止发布预热或时区差），在过去 maxDays（默认 93 天，约 3 个月）内
+    return diffDays >= -14 && diffDays <= maxDays;
+  }
+
   function createCard(item, localIdx) {
     const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
     const card = document.createElement('article');
@@ -508,8 +571,17 @@
       .map(t => '<span class="tag-pill">' + escapeHtml(t) + '</span>').join('');
     const actionLabel = window.AtlasI18n ? window.AtlasI18n.t('actionZoom') : '深览';
 
+    const isNew = isNewArtwork(item);
+    const newBadgeAria = window.AtlasI18n ? (window.AtlasI18n.t('badgeNewAria') || '新作') : '新作';
+    const newBadgeHtml = isNew ?
+      '<span class="card-new-badge" aria-label="' + escapeHtml(newBadgeAria) + '">' +
+        SVG_SPARKLE +
+        '<span>NEW</span>' +
+      '</span>' : '';
+
     card.innerHTML = 
       '<div class="card-media">' +
+        newBadgeHtml +
         '<img class="card-img" src="' + item.thumb + '" alt="' + escapeHtml(locItem.title) + '" loading="lazy" />' +
         '<div class="card-scrim-mask">' +
           '<div class="card-scrim-content">' +

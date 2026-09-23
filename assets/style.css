@@ -1672,6 +1672,77 @@ body[data-page="portal"] {
   transform: scale(1.06);
 }
 
+/* NEW 胶囊徽标 (近 3 个月新作标识) */
+.card-new-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 6px;
+  border-radius: 9999px;
+  background: rgba(11, 13, 16, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(128, 204, 40, 0.45);
+  color: var(--accent, #80cc28);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 10px rgba(128, 204, 40, 0.2);
+  pointer-events: none;
+  user-select: none;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.gallery-card:hover .card-new-badge {
+  transform: translateY(-1px) scale(1.04);
+  border-color: rgba(128, 204, 40, 0.85);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 14px rgba(128, 204, 40, 0.35);
+}
+
+.card-new-badge .badge-icon {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  fill: currentColor;
+  filter: drop-shadow(0 0 2px rgba(128, 204, 40, 0.5));
+}
+
+:root[data-theme="light"] .card-new-badge {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(106, 168, 32, 0.48);
+  color: #4f8016;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 8px rgba(106, 168, 32, 0.18);
+}
+
+:root[data-theme="light"] .gallery-card:hover .card-new-badge {
+  border-color: rgba(106, 168, 32, 0.85);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 0 12px rgba(106, 168, 32, 0.28);
+}
+
+:root[data-theme="light"] .card-new-badge .badge-icon {
+  filter: drop-shadow(0 0 2px rgba(106, 168, 32, 0.4));
+}
+
+@media (max-width: 640px) {
+  .card-new-badge {
+    top: 8px;
+    right: 8px;
+    padding: 2.5px 7px 2.5px 5.5px;
+    font-size: 0.62rem;
+  }
+  .card-new-badge .badge-icon {
+    width: 9px;
+    height: 9px;
+  }
+}
+
+
 /* 首页无缝拼贴专属卡片：纯净最大化展示图片，无任何文字和阴影遮挡 */
 .portal-seamless-card {
   border-radius: 0 !important;

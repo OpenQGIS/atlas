@@ -58,6 +58,8 @@
       heroDesc: '个人制图实践 · QGIS 能力边界的记录',
       heroScroll: '向下探索',
       heroBgArtwork: '背景展卷',
+      badgeNew: 'NEW',
+      badgeNewAria: '近3个月新作',
       langSelectTitle: '切换语言 / Switch Language'
     },
     en: {
@@ -111,6 +113,8 @@
       heroDesc: 'Personal Cartography · Recording the Limits of QGIS',
       heroScroll: 'Scroll to Explore',
       heroBgArtwork: 'Featured Map',
+      badgeNew: 'NEW',
+      badgeNewAria: 'Recent Artwork',
       langSelectTitle: 'Switch Language / 切换语言'
     }
   };

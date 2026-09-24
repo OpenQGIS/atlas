@@ -593,6 +593,33 @@
     return diffDays >= -14 && diffDays <= maxDays;
   }
 
+  /**
+   * 格式化日期为仅显示年月 (YYYY.MM 或 YYYY)
+   * 兼容 2024.07, 2024.7, 2024-07-15, 2024/07/15, 2024年7月, 2024 等多种格式
+   */
+  function formatYearMonth(rawDate) {
+    if (!rawDate) return '';
+    const str = String(rawDate).trim();
+    const match = str.match(/^(\d{4})[-/.年](\d{1,2})/);
+    if (match) {
+      const year = match[1];
+      const month = String(parseInt(match[2], 10)).padStart(2, '0');
+      return year + '.' + month;
+    }
+    const matchYear = str.match(/^(\d{4})$/);
+    if (matchYear) {
+      return matchYear[1];
+    }
+    const timestamp = Date.parse(str);
+    if (!isNaN(timestamp)) {
+      const d = new Date(timestamp);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      return year + '.' + month;
+    }
+    return str;
+  }
+
   function createCard(item, localIdx) {
     const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
     const card = document.createElement('article');
@@ -1509,6 +1536,8 @@
     const mTitle = document.getElementById('mTitle');
     const mCat = document.getElementById('mCategory');
     const mAuthor = document.getElementById('mAuthor');
+    const mDate = document.getElementById('mDate');
+    const mDateRow = document.getElementById('mDateRow');
     const mRes = document.getElementById('mResolution');
     const mRatio = document.getElementById('mRatio');
     const mDesc = document.getElementById('mDescription');
@@ -1518,7 +1547,23 @@
     if (mTitle) mTitle.textContent = locItem.title;
     if (mCat) mCat.textContent = locItem.categoryName + (locItem.subCategory ? ' · ' + locItem.subCategory : '');
     if (mAuthor) mAuthor.textContent = locItem.author || 'OpenQGIS';
+
+    // 日期仅显示年月
+    const rawDate = locItem.date || locItem.year || item.date || item.year;
+    const formattedDate = formatYearMonth(rawDate);
+    if (mDate) mDate.textContent = formattedDate || '-';
+    if (mDateRow) mDateRow.style.display = formattedDate ? '' : 'none';
+
     if (mRes) mRes.textContent = locItem.physicalSize || (item.width + ' × ' + item.height + ' px');
+    if (mRatio) {
+      if (item.aspectRatio) {
+        mRatio.textContent = item.aspectRatio + ' : 1';
+      } else if (item.width && item.height) {
+        mRatio.textContent = (item.width / item.height).toFixed(2) + ' : 1';
+      } else {
+        mRatio.textContent = '-';
+      }
+    }
     if (mDesc) {
       if (locItem.descriptionHtml) {
         mDesc.innerHTML = locItem.descriptionHtml;

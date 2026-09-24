@@ -3351,11 +3351,6 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     max-width: calc(100vw - 190px);
   }
 
-  /* 手机端隐藏右侧冗余退出按钮，保留左侧主退出按钮 */
-  #btnCloseViewerRight {
-    display: none !important;
-  }
-
   .viewer-header-right {
     gap: 4px;
   }

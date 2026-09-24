@@ -1,6 +1,10 @@
 window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
   {
     "id": "shanghai",
+    "aliases": [
+      "上海市",
+      "shanghai-dark"
+    ],
     "title": "SHANGHAI-暗夜肌理",
     "filename": "上海市.png",
     "category": "original",
@@ -44,6 +48,10 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
   },
   {
     "id": "city_papercut_14pro",
+    "aliases": [
+      "城市剪纸-14PRO",
+      "chengdu_14pro"
+    ],
     "title": "成都剪纸 · 14Pro",
     "filename": "城市剪纸-14PRO.png",
     "category": "original",
@@ -86,6 +94,10 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
   },
   {
     "id": "chengdu_papercut_ipad",
+    "aliases": [
+      "成都剪纸-iPAD pro",
+      "chengdu_ipad"
+    ],
     "title": "成都剪纸-iPAD pro",
     "filename": "成都剪纸-iPAD pro.png",
     "category": "original",
@@ -128,6 +140,10 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
   },
   {
     "id": "jinjiang_greenway_section",
+    "aliases": [
+      "jinjiang",
+      "锦江绿道_黄龙溪"
+    ],
     "title": "锦江绿道_黄龙溪",
     "filename": "锦江绿道_黄龙溪.png",
     "category": "original",
@@ -171,6 +187,10 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
   },
   {
     "id": "layout_pattern_02",
+    "aliases": [
+      "aba_cycling",
+      "阿坝骑行线路"
+    ],
     "title": "阿坝骑行线路",
     "filename": "阿坝骑行线路.jpg",
     "category": "original",
@@ -213,6 +233,10 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
   },
   {
     "id": "pinglu_canal",
+    "aliases": [
+      "pinglu",
+      "平陆运河"
+    ],
     "title": "平陆运河",
     "filename": "平陆运河.png",
     "category": "original",

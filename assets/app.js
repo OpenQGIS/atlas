@@ -415,6 +415,7 @@
   function bindAboutModalEvents() {
     const modalEl = document.getElementById('aboutModal');
     const openBtn = document.getElementById('btnOpenAbout');
+    const footerOpenBtn = document.getElementById('btnFooterOpenAbout');
     const closeBtn = document.getElementById('btnCloseAbout');
     const closeFooterBtn = document.getElementById('btnCloseAboutFooter');
     const backdropEl = document.getElementById('aboutBackdrop');
@@ -440,6 +441,7 @@
     }
 
     if (openBtn) openBtn.addEventListener('click', openAbout);
+    if (footerOpenBtn) footerOpenBtn.addEventListener('click', openAbout);
     if (closeBtn) closeBtn.addEventListener('click', closeAbout);
     if (closeFooterBtn) closeFooterBtn.addEventListener('click', closeAbout);
     if (backdropEl) backdropEl.addEventListener('click', closeAbout);

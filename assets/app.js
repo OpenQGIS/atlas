@@ -1521,21 +1521,35 @@
     loadOpenSeadragon(item);
   }
 
+  function ensureNavigatorElement(item) {
+    const navBody = document.getElementById('navigatorBody');
+    let navEl = document.getElementById('viewerNavigator');
+    if (!navEl && navBody) {
+      navEl = document.createElement('div');
+      navEl.id = 'viewerNavigator';
+      navEl.className = 'viewer-navigator';
+      navBody.appendChild(navEl);
+    } else if (navEl) {
+      navEl.innerHTML = '';
+    }
+    if (navEl && item) {
+      updateNavigatorDimensions(item);
+    }
+    return navEl;
+  }
+
   function loadOpenSeadragon(item) {
     const stage = document.getElementById('osdStage');
     if (!stage) return;
     stage.innerHTML = '';
 
-    const navEl = document.getElementById('viewerNavigator');
-    if (navEl) {
-      navEl.innerHTML = '';
-      updateNavigatorDimensions(item);
-    }
-
     if (osdViewer) {
       try { osdViewer.destroy(); } catch (e) {}
       osdViewer = null;
     }
+
+    // 确保在 osdViewer 销毁后重建导航器 DOM 节点，杜绝 null (setting 'id')
+    const navEl = ensureNavigatorElement(item);
 
     const isDark = (document.documentElement.getAttribute('data-theme') !== 'light');
     const stageBg = isDark ? '#07080b' : '#e5e8ed';
@@ -1572,6 +1586,7 @@
         prefixUrl: '',
         showNavigationControl: false,
         showNavigator: true,
+        navigatorElement: navEl,
         navigatorId: 'viewerNavigator',
         navigatorAutoFade: false,
         navigatorRotate: true,
@@ -1661,6 +1676,26 @@
       });
     } catch (err) {
       console.error('OpenSeadragon init failed:', err);
+      // 若因 Navigator 相关 DOM 问题失败，尝试无 Navigator 纯深览模式自愈恢复
+      if (stage && !osdViewer) {
+        try {
+          osdViewer = OpenSeadragon({
+            element: stage,
+            prefixUrl: '',
+            showNavigationControl: false,
+            showNavigator: false,
+            tileSources: tileSource,
+            placeholderImage: item.thumb,
+            immediateRender: true,
+            crossOriginPolicy: false,
+            backgroundColor: 'transparent'
+          });
+          console.warn('OpenSeadragon: 已自动降级为无导航图深览模式');
+          return;
+        } catch (retryErr) {
+          console.error('OpenSeadragon retry without navigator also failed:', retryErr);
+        }
+      }
       if (stage) {
         stage.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ff5555;font-family:var(--font-mono);">' +
           '[Error] 瓦片初始化失败：' + (err.message || err) + '</div>';
@@ -1905,8 +1940,7 @@
     }
     const stage = document.getElementById('osdStage');
     if (stage) stage.innerHTML = '';
-    const navEl = document.getElementById('viewerNavigator');
-    if (navEl) navEl.innerHTML = '';
+    ensureNavigatorElement(null);
     const navPanel = document.getElementById('viewerNavigatorPanel');
     if (navPanel) navPanel.classList.remove('closed');
 

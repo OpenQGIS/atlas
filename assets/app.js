@@ -951,7 +951,12 @@
       }
     }
 
-    if (navCloseBtn) navCloseBtn.addEventListener('click', closeNavigatorPanel);
+    if (navCloseBtn) {
+      navCloseBtn.addEventListener('click', closeNavigatorPanel);
+      navCloseBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+      navCloseBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+      navCloseBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+    }
 
     document.addEventListener('fullscreenchange', () => {
       const isFs = !!document.fullscreenElement;
@@ -1120,6 +1125,14 @@
 
     navEl.style.width = targetW + 'px';
     navEl.style.height = targetH + 'px';
+
+    const navPanel = document.getElementById('viewerNavigatorPanel');
+    if (navPanel) {
+      navPanel.style.width = targetW + 'px';
+      navPanel.style.height = targetH + 'px';
+    }
+
+    updateNavigatorCloseButtonColor(item);
   }
 
   let activeAmbientLayer = 'A';
@@ -1135,6 +1148,90 @@
       g: (num >> 8) & 255,
       b: num & 255
     };
+  }
+
+  // 动态分析画作右上角局部图面底色，并为右上角关闭按钮赋予自适应数学反色与高对比度
+  function updateNavigatorCloseButtonColor(item) {
+    const btn = document.getElementById('btnCloseNavigator');
+    if (!btn) return;
+
+    function applyColors(bgR, bgG, bgB) {
+      // 基础明度 (Rec. 601 Luma 测定人眼感知亮度)
+      const lum = 0.299 * bgR + 0.587 * bgG + 0.114 * bgB;
+
+      // 计算数学反色 (Inverted RGB)
+      let invR = 255 - bgR;
+      let invG = 255 - bgG;
+      let invB = 255 - bgB;
+
+      // 视觉反差保底强化：若反色与底色亮度差距不足 110，做极性强化，保证在任何复杂地图图面上绝对清晰可辨
+      const invLum = 0.299 * invR + 0.587 * invG + 0.114 * invB;
+      if (Math.abs(invLum - lum) < 110) {
+        if (lum < 128) {
+          invR = Math.min(255, invR + 85);
+          invG = Math.min(255, invG + 85);
+          invB = Math.min(255, invB + 85);
+        } else {
+          invR = Math.max(0, invR - 85);
+          invG = Math.max(0, invG - 85);
+          invB = Math.max(0, invB - 85);
+        }
+      }
+
+      const iconColor = 'rgb(' + invR + ', ' + invG + ', ' + invB + ')';
+      // 微型底托采用半透毛玻璃质感，避免与地图复杂地物纹理混杂
+      const btnBg = lum < 128 ? 'rgba(10, 14, 20, 0.62)' : 'rgba(255, 255, 255, 0.72)';
+      const btnBorder = 'rgba(' + invR + ', ' + invG + ', ' + invB + ', 0.38)';
+
+      btn.style.setProperty('--nav-btn-color', iconColor);
+      btn.style.setProperty('--nav-btn-bg', btnBg);
+      btn.style.setProperty('--nav-btn-border', btnBorder);
+      btn.style.setProperty('--nav-btn-hover-bg', iconColor);
+      btn.style.setProperty('--nav-btn-hover-color', 'rgb(' + bgR + ', ' + bgG + ', ' + bgB + ')');
+    }
+
+    function fallback() {
+      if (item && item.colors && item.colors.length > 0) {
+        const rgb = hexToRgb(item.colors[0]);
+        applyColors(rgb.r, rgb.g, rgb.b);
+      } else {
+        applyColors(20, 24, 32);
+      }
+    }
+
+    const thumbUrl = item && (item.thumb || (item.dzi && item.dzi.Image ? item.thumb : null));
+    if (thumbUrl) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = 64;
+          canvas.height = 64;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          if (!ctx) { fallback(); return; }
+          ctx.drawImage(img, 0, 0, 64, 64);
+          // 采样右上角 (x: 50..60, y: 3..12) 对应关闭按钮落座图面位置
+          const p = ctx.getImageData(50, 3, 10, 9).data;
+          let sumR = 0, sumG = 0, sumB = 0, count = 0;
+          for (let i = 0; i < p.length; i += 4) {
+            sumR += p[i];
+            sumG += p[i + 1];
+            sumB += p[i + 2];
+            count++;
+          }
+          if (count > 0) {
+            applyColors(Math.round(sumR / count), Math.round(sumG / count), Math.round(sumB / count));
+            return;
+          }
+        } catch (e) {}
+        fallback();
+      };
+      img.onerror = fallback;
+      img.src = thumbUrl;
+    } else {
+      fallback();
+    }
   }
 
   function updateAmbientBackdrop(item) {

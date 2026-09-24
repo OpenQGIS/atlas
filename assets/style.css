@@ -2908,33 +2908,26 @@ body:has(.viewer-modal.open) {
 }
 
 /* =====================================================================
-   Overview Navigator Panel · 左下角全图导航窗口 (极简纯图框 + 右上角微型关闭按钮)
+   Overview Navigator Panel · 左下角全图导航窗口 (极简纯图框 + 图面反色微型关闭按钮)
    ==================================================================== */
 .viewer-navigator-panel {
   position: absolute;
   bottom: 24px;
   left: 24px;
   z-index: 24;
-  background: rgba(15, 18, 24, 0.78);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm, 6px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  display: flex;
+  background: transparent;
+  padding: 0;
+  border-radius: 4px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  display: inline-flex;
   flex-direction: column;
-  padding: 5px;
-  overflow: visible;
+  overflow: hidden;
   transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
   user-select: none;
 }
 
 :root[data-theme="light"] .viewer-navigator-panel {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(20px) saturate(200%);
-  -webkit-backdrop-filter: blur(20px) saturate(200%);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
 .viewer-navigator-panel.closed {
@@ -2946,47 +2939,39 @@ body:has(.viewer-modal.open) {
 
 .navigator-close-btn {
   position: absolute;
-  top: -7px;
-  right: -7px;
-  width: 20px;
-  height: 20px;
+  top: 5px;
+  right: 5px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: rgba(20, 24, 32, 0.94);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
+  background: var(--nav-btn-bg, rgba(12, 16, 22, 0.65));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--nav-btn-border, rgba(255, 255, 255, 0.35));
+  color: var(--nav-btn-color, #ffffff);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  z-index: 25;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
-  transition: all var(--transition-fast);
+  z-index: 35;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  transition: transform var(--transition-fast), background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  pointer-events: auto;
 }
 
 .navigator-close-btn:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover, #2d3748);
-  border-color: var(--accent);
+  background: var(--nav-btn-hover-bg, #ffffff);
+  color: var(--nav-btn-hover-color, #0a0d14);
+  border-color: var(--nav-btn-hover-bg, #ffffff);
   transform: scale(1.15);
-}
-
-:root[data-theme="light"] .navigator-close-btn {
-  background: rgba(255, 255, 255, 0.96);
-  color: var(--text-muted);
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
-:root[data-theme="light"] .navigator-close-btn:hover {
-  color: var(--text-primary);
-  border-color: var(--accent);
-  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
 .navigator-close-btn .icon {
-  width: 11px;
-  height: 11px;
+  width: 10px;
+  height: 10px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
 }
 
 .navigator-body {
@@ -2996,7 +2981,7 @@ body:has(.viewer-modal.open) {
   justify-content: center;
   padding: 0;
   overflow: hidden;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 /* OpenSeadragon Navigator inside panel */
@@ -3008,17 +2993,18 @@ body:has(.viewer-modal.open) {
   right: auto !important;
   bottom: auto !important;
   border: 1.5px solid var(--accent) !important;
-  border-radius: 2px !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
   background: #000000 !important;
   overflow: hidden !important;
   cursor: crosshair !important;
+  box-sizing: border-box !important;
 }
 
 :root[data-theme="light"] .viewer-navigator,
 :root[data-theme="light"] .navigator {
   border: 1.5px solid var(--accent) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: none !important;
   background: #ffffff !important;
 }
 

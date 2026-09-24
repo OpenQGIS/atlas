@@ -166,9 +166,8 @@
   <div class="viewer-modal" id="viewerModal" aria-hidden="true" role="dialog" aria-label="Deep Zoom 展品阅览">
     <div class="viewer-backdrop" id="viewerBackdrop"></div>
     <div class="viewer-container">
-      <!-- Top-Left Floating Artwork & Brand Badge · 地图左上角头像图标与图名+QMapFlow -->
+      <!-- Top-Left Floating Artwork & Brand Badge · 地图左上角图名与QMapFlow纯粹烙印 -->
       <div class="viewer-artwork-badge" id="viewerArtworkBadge">
-        <img class="viewer-artwork-avatar" src="assets/avatar.png" alt="OpenQGIS" />
         <div class="viewer-artwork-meta">
           <span class="viewer-artwork-title" id="viewerTitle">作品名称</span>
           <div class="viewer-artwork-qmapflow" id="viewerQmapFlow" title="QGIS 制图工作流精度"></div>
@@ -178,7 +177,7 @@
       <!-- Top-Right Floating Actions · 视口右上角全局操作胶囊 (语言下拉、主题切换、退出阅览) -->
       <div class="viewer-top-actions" id="viewerTopActions">
         <div class="lang-dropdown-wrapper viewer-lang-dropdown" id="viewerLangDropdownWrapper">
-          <button class="tool-btn lang-dropdown-btn" id="viewerBtnLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" title="切换语言 / Switch Language" aria-label="切换语言">
+          <button class="lang-dropdown-btn" id="viewerBtnLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" title="切换语言 / Switch Language" aria-label="切换语言">
             <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="2" y1="12" x2="22" y2="12"></line>
@@ -318,7 +317,7 @@
                   </svg>
                 </span>
                 <div class="share-item-text">
-                  <span class="share-item-title" data-i18n="shareOptPoster">分享竖版海报加二维码</span>
+                  <span class="share-item-title" data-i18n="shareOptPoster">海报分享</span>
                   <span class="share-item-desc" data-i18n="shareOptPosterDesc">生成 3:4 典藏海报与专属码</span>
                 </div>
               </button>

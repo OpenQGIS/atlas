@@ -56,7 +56,7 @@
       shareOptLinkDesc: '复制专属直链到剪贴板',
       shareOptQr: '分享二维码',
       shareOptQrDesc: '扫码即刻原图深览',
-      shareOptPoster: '分享竖版海报加二维码',
+      shareOptPoster: '海报分享',
       shareOptPosterDesc: '生成 3:4 典藏海报与专属码',
       shareQrTitle: '扫码深览画卷',
       shareQrSaveBtn: '保存二维码图片',

@@ -1043,7 +1043,7 @@
         e.preventDefault();
         e.stopPropagation();
         const item = getCurrentViewerItem();
-        if (item) shareDirectLink(item);
+        if (item) shareDirectLink(item, e);
       });
     }
 
@@ -2486,16 +2486,19 @@
   function toggleSharePopover(force) {
     const popover = document.getElementById('sharePopover');
     const shareBtn = document.getElementById('btnShareArtwork');
+    const modalEl = document.getElementById('viewerModal');
     if (!popover || !shareBtn) return;
     const shouldOpen = typeof force === 'boolean' ? force : !popover.classList.contains('open');
     if (shouldOpen) {
       popover.classList.add('open');
       popover.setAttribute('aria-hidden', 'false');
       shareBtn.setAttribute('aria-expanded', 'true');
+      modalEl?.classList.add('share-focus-active');
     } else {
       popover.classList.remove('open');
       popover.setAttribute('aria-hidden', 'true');
       shareBtn.setAttribute('aria-expanded', 'false');
+      modalEl?.classList.remove('share-focus-active');
     }
   }
 
@@ -2507,10 +2510,35 @@
     toggleSharePopover();
   }
 
-  function shareDirectLink(item) {
+  function showCursorTip(e, text) {
+    const msg = text || (window.AtlasI18n && window.AtlasI18n.getLang() === 'en' ? 'Link Copied ✓' : '网址已复制 ✓');
+    const tip = document.createElement('div');
+    tip.className = 'cursor-toast-pill';
+    tip.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span>' + escapeHtml(msg) + '</span>';
+    
+    const x = (e && typeof e.clientX === 'number') ? e.clientX : window.innerWidth / 2;
+    const y = (e && typeof e.clientY === 'number') ? e.clientY - 12 : window.innerHeight - 80;
+    
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+    document.body.appendChild(tip);
+    
+    setTimeout(() => {
+      tip.classList.add('fade-out');
+      setTimeout(() => {
+        if (tip.parentNode) tip.parentNode.removeChild(tip);
+      }, 250);
+    }, 900);
+  }
+
+  function shareDirectLink(item, e) {
     if (!item) return;
     const url = getShareUrlForItem(item);
     copyToClipboard(url);
+
+    if (e) {
+      showCursorTip(e);
+    }
 
     const linkBtn = document.getElementById('btnShareOptLink');
     if (linkBtn) {

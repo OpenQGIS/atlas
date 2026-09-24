@@ -23,6 +23,20 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
       "黑金美学",
       "空间形态"
     ],
+    "colors": [
+      "#12161D",
+      "#C69C3A",
+      "#4A535E",
+      "#E6C66D",
+      "#202934"
+    ],
+    "color": [
+      "#12161D",
+      "#C69C3A",
+      "#4A535E",
+      "#E6C66D",
+      "#202934"
+    ],
     "width": 1771,
     "height": 2362,
     "aspectRatio": 0.7498,
@@ -69,6 +83,20 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
       "天府新区",
       "锦江生态"
     ],
+    "colors": [
+      "#EAE4D9",
+      "#2E5077",
+      "#8E8276",
+      "#B75D69",
+      "#F9F7F2"
+    ],
+    "color": [
+      "#EAE4D9",
+      "#2E5077",
+      "#8E8276",
+      "#B75D69",
+      "#F9F7F2"
+    ],
     "width": 1170,
     "height": 2532,
     "aspectRatio": 0.4621,
@@ -114,6 +142,20 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
       "矢量制图",
       "成都",
       "极简地图"
+    ],
+    "colors": [
+      "#EFEBE2",
+      "#2A4365",
+      "#8C7A6B",
+      "#D69E2E",
+      "#1A202C"
+    ],
+    "color": [
+      "#EFEBE2",
+      "#2A4365",
+      "#8C7A6B",
+      "#D69E2E",
+      "#1A202C"
     ],
     "width": 2224,
     "height": 1668,
@@ -162,6 +204,20 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
       "成都",
       "矢量艺术"
     ],
+    "colors": [
+      "#E57388",
+      "#72B365",
+      "#244933",
+      "#F6F1EA",
+      "#5E9C52"
+    ],
+    "color": [
+      "#E57388",
+      "#72B365",
+      "#244933",
+      "#F6F1EA",
+      "#5E9C52"
+    ],
     "width": 1771,
     "height": 2362,
     "aspectRatio": 0.7498,
@@ -207,6 +263,20 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
       "空间形态",
       "骑行",
       "信息可视化"
+    ],
+    "colors": [
+      "#12141A",
+      "#80CC28",
+      "#F4F5F7",
+      "#4A5568",
+      "#2D3748"
+    ],
+    "color": [
+      "#12141A",
+      "#80CC28",
+      "#F4F5F7",
+      "#4A5568",
+      "#2D3748"
     ],
     "width": 7086,
     "height": 3543,
@@ -254,6 +324,20 @@ window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
       "暗黑系",
       "发光线条",
       "平陆运河"
+    ],
+    "colors": [
+      "#0B0E14",
+      "#E65100",
+      "#FF9800",
+      "#E53935",
+      "#455A64"
+    ],
+    "color": [
+      "#0B0E14",
+      "#E65100",
+      "#FF9800",
+      "#E53935",
+      "#455A64"
     ],
     "width": 14881,
     "height": 3307,

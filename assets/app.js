@@ -2353,12 +2353,32 @@
     city_papercut_14pro: ['#EAE4D9', '#2E5077', '#8E8276', '#B75D69', '#F9F7F2'],
     chengdu_papercut_ipad: ['#EFEBE2', '#2A4365', '#8C7A6B', '#D69E2E', '#1A202C'],
     layout_pattern_02: ['#12141A', '#80CC28', '#F4F5F7', '#4A5568', '#2D3748'],
-    jinjiang_greenway_section: ['#234E70', '#5B84B1', '#9FB1BC', '#DCE2E6', '#D4AF37']
+    jinjiang_greenway_section: ['#E57388', '#72B365', '#244933', '#F6F1EA', '#5E9C52'],
+    pinglu_canal: ['#0B0E14', '#E65100', '#FF9800', '#E53935', '#455A64']
   };
   const DEFAULT_PALETTE = ['#80CC28', '#13171E', '#9EA5B3', '#5E6676', '#F4F5F7'];
 
   function extractDominantColors(target, maxColors, callback) {
     maxColors = maxColors || 5;
+
+    // 优先采用创作者在 Markdown Frontmatter (color/colors) 中明确标定的色板（消除动态计算误差）
+    let explicitColors = null;
+    if (target && typeof target === 'object') {
+      explicitColors = target.colors || target.color;
+      if ((!explicitColors || explicitColors.length === 0) && target.id) {
+        const found = galleryItems.find(i => i.id === target.id);
+        if (found) explicitColors = found.colors || found.color;
+      }
+    } else if (typeof target === 'string') {
+      const found = galleryItems.find(i => i.id === target || i.thumb === target);
+      if (found) explicitColors = found.colors || found.color;
+    }
+
+    if (Array.isArray(explicitColors) && explicitColors.length > 0) {
+      callback(explicitColors.slice(0, maxColors));
+      return;
+    }
+
     const thumbUrl = (typeof target === 'string') ? target : (target && target.thumb);
     const itemId = (target && typeof target === 'object') ? target.id : '';
     const fallbackColors = (itemId && MASTER_PALETTES[itemId]) || DEFAULT_PALETTE;

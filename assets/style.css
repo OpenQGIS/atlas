@@ -2906,98 +2906,85 @@ body:has(.viewer-modal.open) {
 }
 
 /* =====================================================================
-   Overview Navigator Panel · 左下角全图导航窗口 (自适应全图比例 · 视口同步)
+   Overview Navigator Panel · 左下角全图导航窗口 (极简纯图框 + 右上角微型关闭按钮)
    ==================================================================== */
 .viewer-navigator-panel {
   position: absolute;
   bottom: 24px;
   left: 24px;
   z-index: 24;
-  background: rgba(15, 18, 24, 0.85);
+  background: rgba(15, 18, 24, 0.78);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-sm, 6px);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  padding: 5px;
+  overflow: visible;
+  transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
   user-select: none;
 }
 
 :root[data-theme="light"] .viewer-navigator-panel {
-  background: rgba(255, 255, 255, 0.90);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(20px) saturate(200%);
   -webkit-backdrop-filter: blur(20px) saturate(200%);
   border: 1px solid rgba(0, 0, 0, 0.12);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
-.navigator-header {
-  height: 28px;
-  padding: 0 10px 0 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  background: rgba(19, 23, 30, 0.45);
-  border-bottom: 1px solid var(--border-subtle);
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-.navigator-header:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-:root[data-theme="light"] .navigator-header {
-  background: rgba(255, 255, 255, 0.65);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-:root[data-theme="light"] .navigator-header:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-.navigator-header-left {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--text-secondary);
+.viewer-navigator-panel.closed {
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
+  transform: scale(0.92) translateY(6px);
 }
 
-.navigator-header-left .icon {
-  width: 12px;
-  height: 12px;
-  color: var(--accent);
-}
-
-.navigator-toggle-btn {
-  background: transparent;
-  border: none;
+.navigator-close-btn {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(20, 24, 32, 0.94);
+  border: 1px solid var(--border-subtle);
   color: var(--text-muted);
   cursor: pointer;
-  padding: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm);
+  padding: 0;
+  z-index: 25;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
   transition: all var(--transition-fast);
 }
 
-.navigator-toggle-btn:hover {
+.navigator-close-btn:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--bg-hover, #2d3748);
+  border-color: var(--accent);
+  transform: scale(1.15);
 }
 
-:root[data-theme="light"] .navigator-toggle-btn:hover {
-  background: rgba(0, 0, 0, 0.07);
+:root[data-theme="light"] .navigator-close-btn {
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--text-muted);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="light"] .navigator-close-btn:hover {
   color: var(--text-primary);
+  border-color: var(--accent);
+  background: #ffffff;
+}
+
+.navigator-close-btn .icon {
+  width: 11px;
+  height: 11px;
 }
 
 .navigator-body {
@@ -3005,26 +2992,9 @@ body:has(.viewer-modal.open) {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px;
-  background: rgba(0, 0, 0, 0.25);
+  padding: 0;
   overflow: hidden;
-}
-
-:root[data-theme="light"] .navigator-body {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-/* Collapsed state */
-.viewer-navigator-panel.collapsed .navigator-header {
-  border-bottom: none;
-}
-
-.viewer-navigator-panel.collapsed .navigator-body {
-  display: none !important;
-}
-
-.viewer-navigator-panel.collapsed .navigator-toggle-btn svg {
-  transform: rotate(-90deg);
+  border-radius: 2px;
 }
 
 /* OpenSeadragon Navigator inside panel */

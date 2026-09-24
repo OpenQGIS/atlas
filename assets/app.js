@@ -915,17 +915,21 @@
     }
 
     const navPanel = document.getElementById('viewerNavigatorPanel');
-    const navToggleBtn = document.getElementById('btnToggleNavigator');
-    const navHeader = document.getElementById('navigatorHeader');
+    const navCloseBtn = document.getElementById('btnCloseNavigator');
 
-    function toggleNavigatorPanel(e) {
+    function closeNavigatorPanel(e) {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
       if (!navPanel) return;
-      navPanel.classList.toggle('collapsed');
-      if (!navPanel.classList.contains('collapsed') && osdViewer && osdViewer.navigator) {
+      navPanel.classList.add('closed');
+    }
+
+    function openNavigatorPanel() {
+      if (!navPanel) return;
+      navPanel.classList.remove('closed');
+      if (osdViewer && osdViewer.navigator) {
         setTimeout(() => {
           if (osdViewer && osdViewer.navigator) {
             osdViewer.navigator.updateSize();
@@ -934,13 +938,20 @@
       }
     }
 
-    if (navToggleBtn) navToggleBtn.addEventListener('click', toggleNavigatorPanel);
-    if (navHeader) {
-      navHeader.addEventListener('click', (e) => {
-        if (e.target.closest('button')) return;
-        toggleNavigatorPanel(e);
-      });
+    function toggleNavigatorPanel(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (!navPanel) return;
+      if (navPanel.classList.contains('closed')) {
+        openNavigatorPanel();
+      } else {
+        closeNavigatorPanel();
+      }
     }
+
+    if (navCloseBtn) navCloseBtn.addEventListener('click', closeNavigatorPanel);
 
     document.addEventListener('fullscreenchange', () => {
       const isFs = !!document.fullscreenElement;
@@ -1673,6 +1684,8 @@
     if (stage) stage.innerHTML = '';
     const navEl = document.getElementById('viewerNavigator');
     if (navEl) navEl.innerHTML = '';
+    const navPanel = document.getElementById('viewerNavigatorPanel');
+    if (navPanel) navPanel.classList.remove('closed');
 
     const glowA = document.getElementById('ambientGlowA');
     const glowB = document.getElementById('ambientGlowB');

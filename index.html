@@ -208,23 +208,11 @@
 
         <div class="osd-stage" id="osdStage"></div>
 
-        <!-- Overview Navigator · 左下角全图导航窗口 -->
+        <!-- Overview Navigator · 左下角全图导航窗口 (纯图框极简设计 + 右上角微型关闭按钮) -->
         <div class="viewer-navigator-panel" id="viewerNavigatorPanel">
-          <div class="navigator-header" id="navigatorHeader">
-            <div class="navigator-header-left">
-              <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
-                <line x1="8" y1="2" x2="8" y2="18"></line>
-                <line x1="16" y1="6" x2="16" y2="22"></line>
-              </svg>
-              <span data-i18n="navOverviewTitle">全图导航</span>
-            </div>
-            <button class="navigator-toggle-btn" id="btnToggleNavigator" title="折叠/展开全图导航 (N)" aria-label="折叠/展开全图导航" data-i18n-title="navToggleHint">
-              <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-          </div>
+          <button class="navigator-close-btn" id="btnCloseNavigator" title="关闭全图导航 (N)" aria-label="关闭全图导航" data-i18n-title="navCloseHint">
+            <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
           <div class="navigator-body" id="navigatorBody">
             <div class="viewer-navigator" id="viewerNavigator"></div>
           </div>

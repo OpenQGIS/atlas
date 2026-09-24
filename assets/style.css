@@ -3929,26 +3929,49 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     display: none !important;
   }
 
-  /* 底部浮动工具栏移动端紧凑化 */
+  /* 底部浮动工具栏移动端紧凑化 (方案 A: 4大核心按键极简流，居中避让，防溢出) */
   .viewer-float-toolbar,
   .viewer-floating-toolbar {
-    bottom: 16px;
-    padding: 3px 6px;
-    gap: 2px;
-    max-width: calc(100vw - 24px);
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 3px 6px !important;
+    gap: 4px !important;
+    max-width: calc(100vw - 24px) !important;
+    box-sizing: border-box !important;
   }
 
-  .tool-btn {
-    width: 32px;
-    height: 32px;
+  .viewer-floating-toolbar .tool-btn {
+    width: 34px !important;
+    height: 34px !important;
+    flex-shrink: 0 !important;
   }
 
-  /* 移动端/触屏设备自然支持双指捏合缩放与手势旋转，隐藏放大、缩小、旋转与全屏次级按钮，保障底部工具栏轻盈不溢出 */
+  /* 移动端/触屏设备自然支持双指捏合与物理屏幕旋转，隐藏冗余项：放大、缩小、旋转、全屏与多余分割线 */
   #toolZoomIn,
   #toolZoomOut,
   #toolRotate,
-  #toolFullscreen {
+  #toolFullscreen,
+  .viewer-floating-toolbar .tool-divider {
     display: none !important;
+  }
+
+  /* 比例控制器胶囊在移动端尺寸对齐，文字清晰 */
+  .tool-zoom-badge {
+    font-size: 0.72rem !important;
+    padding: 2px 7px !important;
+    min-width: 52px !important;
+    height: 34px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 比例控制器弹出层在移动端左对齐展开，防止窄屏下右侧或左侧溢出屏幕 */
+  .zoom-popover {
+    width: 216px !important;
+    left: 0 !important;
+    transform: translateY(6px) !important;
+    transform-origin: bottom left !important;
+  }
+  .zoom-popover.open {
+    transform: translateY(0) !important;
   }
 
   /* 移动端右上角紧凑化，并限制左上角图名徽章最大宽度避免重叠 */
@@ -3977,12 +4000,6 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   .tool-btn .icon {
     width: 14px;
     height: 14px;
-  }
-
-  .tool-zoom-badge {
-    font-size: 0.70rem;
-    padding: 2px 5px;
-    min-width: 38px;
   }
 
   .tool-btn-text {
@@ -5789,10 +5806,6 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     height: 32px;
     padding: 0 8px;
     font-size: 0.72rem;
-  }
-  .zoom-popover {
-    width: 216px;
-    padding: 8px;
   }
 }
 

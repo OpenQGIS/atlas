@@ -81,11 +81,25 @@
     bindViewModeEvents();
     bindViewerModalEvents();
     bindAboutModalEvents();
+    bindPortalScrollEvents();
     bindLanguageDropdown();
     bindI18nEvents();
     initHero();
 
     applyFilter('all');
+  }
+
+  function bindPortalScrollEvents() {
+    const portalBtn = document.getElementById('btnScrollToPortal');
+    if (portalBtn) {
+      portalBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const footer = document.getElementById('portalFooter');
+        if (footer) {
+          footer.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
   }
 
   /* -------------------------------------------------------------

@@ -169,6 +169,32 @@
     }
   }
 
+  let isScrollingFast = false;
+  let scrollDebounceTimer = null;
+  if (typeof window !== 'undefined') {
+    window.addEventListener('scroll', () => {
+      isScrollingFast = true;
+      clearTimeout(scrollDebounceTimer);
+      scrollDebounceTimer = setTimeout(() => {
+        isScrollingFast = false;
+      }, 120);
+    }, { passive: true });
+  }
+
+  function scheduleComposition(cardEl, item) {
+    if (isScrollingFast) {
+      setTimeout(() => {
+        scheduleComposition(cardEl, item);
+      }, 120);
+      return;
+    }
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      window.requestIdleCallback(() => compositeCardTiles(cardEl, item), { timeout: 600 });
+    } else {
+      setTimeout(() => compositeCardTiles(cardEl, item), 60);
+    }
+  }
+
   // 全局共享 IntersectionObserver
   let observer = null;
   function initObserver() {
@@ -180,7 +206,7 @@
           observer.unobserve(cardEl);
           const item = cardEl._atlasItem;
           if (item) {
-            compositeCardTiles(cardEl, item);
+            scheduleComposition(cardEl, item);
           }
         }
       });
@@ -197,7 +223,7 @@
     if (observer) {
       observer.observe(cardEl);
     } else {
-      setTimeout(() => compositeCardTiles(cardEl, item), 120);
+      scheduleComposition(cardEl, item);
     }
   }
 

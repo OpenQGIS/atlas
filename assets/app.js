@@ -911,6 +911,34 @@
       });
     }
 
+    const navPanel = document.getElementById('viewerNavigatorPanel');
+    const navToggleBtn = document.getElementById('btnToggleNavigator');
+    const navHeader = document.getElementById('navigatorHeader');
+
+    function toggleNavigatorPanel(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (!navPanel) return;
+      navPanel.classList.toggle('collapsed');
+      if (!navPanel.classList.contains('collapsed') && osdViewer && osdViewer.navigator) {
+        setTimeout(() => {
+          if (osdViewer && osdViewer.navigator) {
+            osdViewer.navigator.updateSize();
+          }
+        }, 50);
+      }
+    }
+
+    if (navToggleBtn) navToggleBtn.addEventListener('click', toggleNavigatorPanel);
+    if (navHeader) {
+      navHeader.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        toggleNavigatorPanel(e);
+      });
+    }
+
     document.addEventListener('fullscreenchange', () => {
       const isFs = !!document.fullscreenElement;
       modalEl.classList.toggle('fullscreen-mode', isFs);
@@ -925,6 +953,16 @@
         setTimeout(() => {
           osdViewer.viewport.applyConstraints();
         }, 60);
+      }
+      if (osdViewer && osdViewer.navigator) {
+        setTimeout(() => {
+          if (currentFilteredItems[currentViewerIndex]) {
+            updateNavigatorDimensions(currentFilteredItems[currentViewerIndex]);
+          }
+          if (osdViewer && osdViewer.navigator) {
+            osdViewer.navigator.updateSize();
+          }
+        }, 80);
       }
     });
 
@@ -983,6 +1021,10 @@
         case 'I':
           if (toggleInfoBtn) toggleInfoBtn.click();
           break;
+        case 'n':
+        case 'N':
+          toggleNavigatorPanel();
+          break;
         case 'Tab':
           e.preventDefault();
           if (toggleInfoBtn) toggleInfoBtn.click();
@@ -1027,8 +1069,45 @@
       }
     });
 
+    window.addEventListener('resize', () => {
+      if (modalEl && modalEl.classList.contains('open') && currentFilteredItems[currentViewerIndex]) {
+        updateNavigatorDimensions(currentFilteredItems[currentViewerIndex]);
+        if (osdViewer && osdViewer.navigator) {
+          osdViewer.navigator.updateSize();
+        }
+      }
+    });
+
     // 初始化浮动面板拖拽与 resize
     if (drawerEl) initFloatingDrawer(drawerEl, updateEdgeNextOffset);
+  }
+
+  function updateNavigatorDimensions(item) {
+    const navEl = document.getElementById('viewerNavigator');
+    if (!navEl || !item) return;
+
+    const isMobile = window.innerWidth <= 768;
+    const maxW = isMobile ? 130 : 200;
+    const maxH = isMobile ? 90 : 130;
+
+    const imgW = item.width || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Width) || 2000;
+    const imgH = item.height || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Height) || 2000;
+    const aspect = imgW / imgH;
+
+    let targetW, targetH;
+    if (aspect >= maxW / maxH) {
+      targetW = maxW;
+      targetH = Math.round(maxW / aspect);
+    } else {
+      targetH = maxH;
+      targetW = Math.round(maxH * aspect);
+    }
+
+    targetW = Math.max(targetW, 44);
+    targetH = Math.max(targetH, 36);
+
+    navEl.style.width = targetW + 'px';
+    navEl.style.height = targetH + 'px';
   }
 
   function openViewerByItem(item) {
@@ -1143,6 +1222,12 @@
     if (!stage) return;
     stage.innerHTML = '';
 
+    const navEl = document.getElementById('viewerNavigator');
+    if (navEl) {
+      navEl.innerHTML = '';
+      updateNavigatorDimensions(item);
+    }
+
     if (osdViewer) {
       try { osdViewer.destroy(); } catch (e) {}
       osdViewer = null;
@@ -1182,7 +1267,10 @@
         element: stage,
         prefixUrl: '',
         showNavigationControl: false,
-        showNavigator: false,
+        showNavigator: true,
+        navigatorId: 'viewerNavigator',
+        navigatorAutoFade: false,
+        navigatorRotate: true,
         autoResize: true,
         animationTime: 0.45,
         blendTime: 0.15,
@@ -1443,6 +1531,8 @@
     }
     const stage = document.getElementById('osdStage');
     if (stage) stage.innerHTML = '';
+    const navEl = document.getElementById('viewerNavigator');
+    if (navEl) navEl.innerHTML = '';
 
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});

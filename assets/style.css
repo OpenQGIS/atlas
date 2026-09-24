@@ -2308,6 +2308,20 @@ body:has(.viewer-modal.open) {
   transform: scale(0.95);
 }
 
+.tool-btn.active {
+  background: var(--accent);
+  color: #07080b;
+}
+
+:root[data-theme="light"] .tool-btn.active {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.tool-btn.copied {
+  color: var(--accent);
+}
+
 .tool-zoom-badge {
   font-family: var(--font-mono);
   font-size: 0.76rem;
@@ -4688,6 +4702,32 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0) scale(1);
+}
+
+/* 位于底部浮动工具栏时向上弹出 */
+.viewer-floating-toolbar .share-popover {
+  top: auto;
+  bottom: calc(100% + 14px);
+  right: 50%;
+  transform: translateX(50%) translateY(8px) scale(0.96);
+  transform-origin: bottom center;
+  z-index: 100;
+}
+
+.viewer-floating-toolbar .share-popover.open {
+  transform: translateX(50%) translateY(0) scale(1);
+}
+
+@media (max-width: 600px) {
+  .viewer-floating-toolbar .share-popover {
+    right: 0;
+    left: auto;
+    transform: translateY(8px) scale(0.96);
+    transform-origin: bottom right;
+  }
+  .viewer-floating-toolbar .share-popover.open {
+    transform: translateY(0) scale(1);
+  }
 }
 
 :root[data-theme="light"] .share-popover {

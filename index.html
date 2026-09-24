@@ -271,9 +271,9 @@
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
-        <div class="drawer-content">
-          <div class="meta-section">
-            <h4 class="meta-section-title" data-i18n="metaDrawerTitle">基本信息</h4>
+        <div class="drawer-content" id="drawerContent">
+          <div class="meta-section" id="metaSectionInfo">
+            <h4 class="meta-section-title" data-i18n="metaNavInfo">基本信息</h4>
             <dl class="meta-list">
               <div class="meta-row"><dt data-i18n="metaCategory">工造门类</dt><dd id="mCategory">-</dd></div>
               <div class="meta-row"><dt data-i18n="metaAuthor">匠师</dt><dd id="mAuthor">OpenQGIS</dd></div>
@@ -295,11 +295,34 @@
             <div class="palette-swatches" id="mPalette"></div>
           </div>
 
-          <div class="meta-section">
+          <div class="meta-section" id="metaSectionDesc">
             <h4 class="meta-section-title" data-i18n="metaNotesTitle">工造题记与说明</h4>
             <div class="meta-desc" id="mDescription">暂无说明</div>
           </div>
         </div>
+
+        <!-- Anchor Navigation Spine · 右侧微型锚点导轨与流光进度条 -->
+        <nav class="drawer-anchor-spine" id="drawerAnchorSpine" aria-label="章节导航">
+          <div class="spine-track">
+            <div class="spine-progress-bar" id="spineProgressBar"></div>
+          </div>
+          <button class="spine-node active" data-target="metaSectionInfo" title="基本信息" aria-label="基本信息" data-i18n-title="metaNavInfo">
+            <span class="spine-dot"></span>
+            <span class="spine-tooltip" data-i18n="metaNavInfo">基本信息</span>
+          </button>
+          <button class="spine-node" data-target="metaShareSection" title="专属直链" aria-label="专属直链" data-i18n-title="metaNavShare">
+            <span class="spine-dot"></span>
+            <span class="spine-tooltip" data-i18n="metaNavShare">专属直链</span>
+          </button>
+          <button class="spine-node" data-target="metaThemeSection" title="艺术色板" aria-label="艺术色板" data-i18n-title="metaNavPalette">
+            <span class="spine-dot"></span>
+            <span class="spine-tooltip" data-i18n="metaNavPalette">艺术色板</span>
+          </button>
+          <button class="spine-node" data-target="metaSectionDesc" title="工造题记" aria-label="工造题记" data-i18n-title="metaNavNotes">
+            <span class="spine-dot"></span>
+            <span class="spine-tooltip" data-i18n="metaNavNotes">工造题记</span>
+          </button>
+        </nav>
       </aside>
     </div>
   </div>

@@ -829,6 +829,9 @@
         if (toggleInfoBtn) toggleInfoBtn.classList.add('active');
         if (modalEl) modalEl.classList.add('drawer-open');
         updateEdgeNextOffset();
+        if (typeof drawerEl._updateSpine === 'function') {
+          requestAnimationFrame(() => drawerEl._updateSpine());
+        }
       } else {
         drawerEl.classList.remove('open');
         if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
@@ -1215,6 +1218,13 @@
         mDesc.textContent = locItem.description || '';
       }
     }
+
+    const drawerEl = document.getElementById('viewerMetaDrawer') || document.getElementById('viewerDrawer');
+    if (drawerEl && typeof drawerEl._updateSpine === 'function') {
+      const content = drawerEl.querySelector('.drawer-content');
+      if (content) content.scrollTop = 0;
+      requestAnimationFrame(() => drawerEl._updateSpine());
+    }
   }
 
   function showArtwork(item) {
@@ -1562,6 +1572,76 @@
         e.stopPropagation();
       }, { passive: true });
     }
+
+    initDrawerAnchorSpine(el);
+  }
+
+  function initDrawerAnchorSpine(el) {
+    const spine = el.querySelector('#drawerAnchorSpine');
+    const content = el.querySelector('.drawer-content');
+    if (!spine || !content) return;
+
+    const progressBar = spine.querySelector('#spineProgressBar');
+    const nodes = spine.querySelectorAll('.spine-node');
+
+    function updateSpine() {
+      const scrollTop = content.scrollTop;
+      const scrollHeight = content.scrollHeight;
+      const clientHeight = content.clientHeight;
+      const maxScroll = scrollHeight - clientHeight;
+
+      if (progressBar) {
+        const percent = (maxScroll > 0) ? Math.min(100, Math.max(0, (scrollTop / maxScroll) * 100)) : 0;
+        progressBar.style.height = percent + '%';
+      }
+
+      let activeIndex = 0;
+      nodes.forEach((node, idx) => {
+        const targetId = node.getAttribute('data-target');
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          const topDiff = targetEl.offsetTop - content.offsetTop - scrollTop;
+          if (topDiff <= 36) {
+            activeIndex = idx;
+          }
+        }
+      });
+
+      if (maxScroll > 0 && scrollTop >= maxScroll - 20) {
+        activeIndex = nodes.length - 1;
+      }
+
+      nodes.forEach((node, idx) => {
+        if (idx === activeIndex) {
+          node.classList.add('active');
+        } else {
+          node.classList.remove('active');
+        }
+      });
+    }
+
+    content.addEventListener('scroll', function() {
+      requestAnimationFrame(updateSpine);
+    }, { passive: true });
+
+    nodes.forEach(function(node) {
+      node.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const targetId = node.getAttribute('data-target');
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          const targetOffset = targetEl.offsetTop - content.offsetTop;
+          content.scrollTo({
+            top: Math.max(0, targetOffset),
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+
+    el._updateSpine = updateSpine;
+    updateSpine();
   }
 
   function closeViewer(updateHistory = true) {

@@ -2496,7 +2496,7 @@ body:has(.viewer-modal.open) {
 }
 
 .drawer-content {
-  padding: 22px 18px 24px 20px;
+  padding: 20px 28px 24px 18px;
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1;
@@ -2508,33 +2508,146 @@ body:has(.viewer-modal.open) {
   z-index: 2;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(var(--accent-rgb), 0.45) transparent;
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE / Edge */
 }
 
 .drawer-content::-webkit-scrollbar {
-  width: 6px;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-.drawer-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
+.drawer-content::-webkit-scrollbar-button,
+.drawer-content::-webkit-scrollbar-track,
 .drawer-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.22);
-  border-radius: 4px;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-.drawer-content::-webkit-scrollbar-thumb:hover {
+/* =====================================================================
+   Anchor Navigation Spine · 右侧微型锚点导轨与磁吸流光进度线
+   ==================================================================== */
+.drawer-anchor-spine {
+  position: absolute;
+  right: 5px;
+  top: 56px;
+  bottom: 18px;
+  width: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.spine-track {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1.5px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+:root[data-theme="light"] .spine-track {
+  background: rgba(0, 0, 0, 0.10);
+}
+
+.spine-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+  transition: height 0.12s ease-out;
+}
+
+.spine-node {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 6px 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  z-index: 2;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spine-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bg-surface, #1e2430);
+  border: 1.5px solid var(--text-muted);
+  box-sizing: border-box;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root[data-theme="light"] .spine-dot {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.32);
+}
+
+.spine-node:hover .spine-dot {
+  transform: scale(1.35);
+  border-color: var(--accent);
   background: var(--accent);
 }
 
-:root[data-theme="light"] .drawer-content::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.18);
+.spine-node.active .spine-dot {
+  transform: scale(1.4);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
 }
 
-:root[data-theme="light"] .drawer-content::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+/* Tooltip floating to the left on hover */
+.spine-tooltip {
+  position: absolute;
+  right: calc(100% + 7px);
+  padding: 3px 8px;
+  font-size: 0.70rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border-radius: var(--radius-sm, 4px);
+  background: rgba(14, 18, 24, 0.94);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-sans);
+  font-weight: 500;
+}
+
+:root[data-theme="light"] .spine-tooltip {
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--text-primary);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.spine-node:hover .spine-tooltip {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .meta-item {

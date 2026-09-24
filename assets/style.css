@@ -3087,7 +3087,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   width: 100%;
   height: 100vh;
   height: 100dvh;
-  min-height: 560px;
+  min-height: 380px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -3133,6 +3133,8 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   position: relative;
   z-index: 10;
   max-width: 960px;
+  width: 100%;
+  box-sizing: border-box;
   padding: 0 28px;
   margin-bottom: 40px;
   display: flex;
@@ -3431,28 +3433,53 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
 /* =====================================================================
    Mobile Responsive Adjustments for Hero & Header
    ==================================================================== */
+/* =====================================================================
+   Mobile Responsive Adjustments for Hero & Header (<= 768px)
+   覆盖移动端竖版及横版（<= 768px），杜绝任何顶栏撑破、文字竖排与断字错位
+   ==================================================================== */
 @media (max-width: 768px) {
   .hero-content {
     padding: 0 16px;
     margin-bottom: 24px;
     max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .hero-title {
     font-size: clamp(1.4rem, 6.2vw, 2.4rem);
     letter-spacing: 0.05em;
     line-height: 1.3;
+    max-width: 100%;
+  }
+
+  .hero-title-chunk {
+    display: block;
+    white-space: nowrap;
+  }
+  .hero-title-sep {
+    display: none;
   }
 
   .hero-subtitle {
     font-size: clamp(0.78rem, 3.2vw, 1.05rem);
     letter-spacing: 0.03em;
     line-height: 1.45;
+    max-width: 100%;
+  }
+
+  .hero-sub-chunk {
+    display: block;
+    white-space: nowrap;
+  }
+  .hero-sub-sep {
+    display: none;
   }
 
   .hero-desc {
     font-size: 0.7rem;
     letter-spacing: 0.04em;
+    max-width: 100%;
   }
 
   /* 移动端将画卷标记移至右上角，腾出底部空间给滚动提示 */
@@ -3474,7 +3501,8 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     gap: 8px;
   }
 
-  .brand-subtitle {
+  .brand-subtitle,
+  .brand-title-sub {
     display: none;
   }
 
@@ -3487,39 +3515,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     font-size: 0.74rem;
   }
 
-  .subbar-inner {
-    padding: 8px 14px;
-  }
-
-  .filter-chip {
-    padding: 4px 10px;
-    font-size: 0.72rem;
-  }
-}
-
-/* 窄屏设备优化 (<= 560px，解决 516px 视口横向溢出与顶栏拥挤) */
-@media (max-width: 560px) {
-  .hero-title-chunk {
-    display: block;
-    white-space: nowrap;
-  }
-  .hero-title-sep {
-    display: none;
-  }
-
-  .hero-sub-chunk {
-    display: block;
-    white-space: nowrap;
-  }
-  .hero-sub-sep {
-    display: none;
-  }
-
-  .brand-title-sub {
-    display: none;
-  }
-
-  /* 隐藏珍奇柜与聚合总览的文字标签及外链小箭头，仅保留高精矢量图标 */
+  /* 移动端统一将珍奇柜与聚合总览转为紧凑图标胶囊，彻底杜绝顶栏超宽溢出 */
   .stat-pill .icon-external {
     display: none;
   }
@@ -3534,6 +3530,63 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     min-width: 32px;
     height: 32px;
     justify-content: center;
+  }
+
+  .subbar-inner {
+    padding: 8px 14px;
+  }
+
+  .filter-chip {
+    padding: 4px 10px;
+    font-size: 0.72rem;
+  }
+}
+
+/* 横版 / 短屏视口适配 (高度 <= 600px，如手机横屏 667x375, 800x400, 538x540 等) */
+@media (max-height: 600px) {
+  .hero-screen {
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+  }
+  .hero-content {
+    margin-bottom: 8px;
+    padding: 0 16px;
+  }
+  .hero-badge {
+    margin-bottom: 8px;
+    padding: 3px 10px;
+    font-size: 0.65rem;
+  }
+  .hero-title {
+    font-size: clamp(1.2rem, 4.8vh, 1.7rem);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .hero-subtitle {
+    font-size: clamp(0.7rem, 2.8vh, 0.88rem);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .hero-desc {
+    font-size: 0.66rem;
+    display: none; /* 短屏横向模式下隐藏次要描述，保证居中与按钮呼吸空间 */
+  }
+  .hero-scroll-btn {
+    bottom: 8px;
+    padding: 4px;
+    gap: 2px;
+  }
+  .hero-scroll-text {
+    font-size: 0.65rem;
+  }
+  .scroll-mouse-anim {
+    display: none; /* 短屏下隐藏鼠标滚轮图标，节省36px垂直空间 */
+  }
+  .hero-artwork-tag {
+    top: 10px;
+    right: 10px;
+    padding: 3px 8px;
+    font-size: 0.62rem;
   }
 }
 

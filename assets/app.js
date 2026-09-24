@@ -457,12 +457,14 @@
       void modalEl.offsetWidth; // force reflow for smooth transition
       modalEl.classList.add('open');
       modalEl.setAttribute('aria-hidden', 'false');
+      document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
     }
 
     function closeAbout() {
       modalEl.classList.remove('open');
       modalEl.setAttribute('aria-hidden', 'true');
+      document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
       setTimeout(() => {
         if (!modalEl.classList.contains('open')) {
@@ -914,9 +916,15 @@
       modalEl.classList.toggle('fullscreen-mode', isFs);
       if (toolFullscreen) {
         toolFullscreen.innerHTML = isFs ? SVG_EXIT_FULLSCREEN : SVG_FULLSCREEN;
+        toolFullscreen.title = isFs ? '退出全屏 (F / Esc)' : '全屏阅览 (F)';
       }
       if (isFs && drawerEl) {
         setDrawerOpen(false);
+      }
+      if (osdViewer && osdViewer.viewport) {
+        setTimeout(() => {
+          osdViewer.viewport.applyConstraints();
+        }, 60);
       }
     });
 
@@ -1120,6 +1128,9 @@
 
     modalEl.classList.add('open');
     modalEl.setAttribute('aria-hidden', 'false');
+    document.documentElement.classList.add('viewer-open');
+    document.body.classList.add('viewer-open');
+    document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
     updateBrowserUrl(item);
@@ -1395,6 +1406,14 @@
       if (!el.classList.contains('open')) return;
       applyRect(clamp(getRect()));
     });
+
+    // 阻止信息面板滚轮穿透冒泡，确保滚动条完全独占受控
+    const drawerContent = el.querySelector('.drawer-content');
+    if (drawerContent) {
+      drawerContent.addEventListener('wheel', function(e) {
+        e.stopPropagation();
+      }, { passive: true });
+    }
   }
 
   function closeViewer(updateHistory = true) {
@@ -1403,6 +1422,9 @@
     if (!modalEl) return;
     modalEl.classList.remove('open');
     modalEl.setAttribute('aria-hidden', 'true');
+    document.documentElement.classList.remove('viewer-open');
+    document.body.classList.remove('viewer-open');
+    document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
 
     const drawerEl = document.getElementById('viewerMetaDrawer') || document.getElementById('viewerDrawer');

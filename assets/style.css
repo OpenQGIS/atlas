@@ -2015,6 +2015,14 @@ body[data-page="portal"] {
 }
 
 /* Deep Zoom Modal */
+html.viewer-open,
+body.viewer-open,
+html:has(.viewer-modal.open),
+body:has(.viewer-modal.open) {
+  overflow: hidden !important;
+  height: 100% !important;
+}
+
 .viewer-modal {
   position: fixed;
   inset: 0;
@@ -2022,6 +2030,7 @@ body[data-page="portal"] {
   display: flex;
   opacity: 0;
   pointer-events: none;
+  overflow: hidden !important;
   transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .viewer-modal.open {
@@ -2038,8 +2047,11 @@ body[data-page="portal"] {
   position: relative;
   width: 100vw;
   height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden !important;
   z-index: 1;
 }
 .viewer-topbar,
@@ -2414,7 +2426,7 @@ body[data-page="portal"] {
 }
 
 .drawer-content {
-  padding: 22px 20px;
+  padding: 22px 18px 24px 20px;
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1;
@@ -2422,6 +2434,37 @@ body[data-page="portal"] {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: relative;
+  z-index: 2;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--accent-rgb), 0.45) transparent;
+}
+
+.drawer-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.drawer-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.drawer-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+}
+
+.drawer-content::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+:root[data-theme="light"] .drawer-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+:root[data-theme="light"] .drawer-content::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }
 
 .meta-item {
@@ -2710,43 +2753,49 @@ body[data-page="portal"] {
 }
 
 /* =====================================================================
-   Immersive Fullscreen Mode (沉浸式全屏看图 · 自动隐形工具栏)
+   Fullscreen Mode (全屏看图模式 · 严密贴合视口 · 稳定工具栏与清晰指标)
    ==================================================================== */
+.viewer-modal.fullscreen-mode {
+  width: 100vw !important;
+  height: 100vh !important;
+  cursor: default !important;
+}
+
+.viewer-modal.fullscreen-mode .viewer-container {
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
 .viewer-modal.fullscreen-mode .viewer-header {
-  transform: translateY(-100%) !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease !important;
+  flex-shrink: 0 !important;
+  height: 56px !important;
+  transform: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.viewer-modal.fullscreen-mode .viewer-body {
+  flex: 1 !important;
+  height: calc(100vh - 56px) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.viewer-modal.fullscreen-mode .osd-stage {
+  width: 100% !important;
+  height: 100% !important;
+  cursor: grab !important;
+}
+
+.viewer-modal.fullscreen-mode .osd-stage:active {
+  cursor: grabbing !important;
 }
 
 .viewer-modal.fullscreen-mode .viewer-floating-toolbar,
 .viewer-modal.fullscreen-mode .viewer-float-toolbar {
-  transform: translate(-50%, 140%) !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease !important;
-}
-
-/* Mousemove or active hover gently reveals controls */
-.viewer-modal.fullscreen-mode.controls-visible .viewer-header {
-  transform: translateY(0) !important;
+  transform: translateX(-50%) !important;
   opacity: 1 !important;
   pointer-events: auto !important;
-}
-
-.viewer-modal.fullscreen-mode.controls-visible .viewer-floating-toolbar,
-.viewer-modal.fullscreen-mode.controls-visible .viewer-float-toolbar {
-  transform: translate(-50%, 0) !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-} 
-
-/* When in fullscreen, cursor hides on idle */
-.viewer-modal.fullscreen-mode:not(.controls-visible) {
-  cursor: none !important;
-}
-.viewer-modal.fullscreen-mode:not(.controls-visible) .osd-stage {
-  cursor: none !important;
 }
 
 /* =====================================================================
@@ -2830,21 +2879,15 @@ body[data-page="portal"] {
   box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.25);
 }
 
-/* In Fullscreen Mode: hide when idle, reveal on mousemove */
+/* In Fullscreen Mode: edge nav remains accessible and reactive */
 .viewer-modal.fullscreen-mode .viewer-edge-nav {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: opacity 0.35s ease, transform 0.35s ease !important;
-}
-
-.viewer-modal.fullscreen-mode.controls-visible .viewer-edge-nav {
-  opacity: 0.65 !important;
+  opacity: 0.6 !important;
   pointer-events: auto !important;
 }
 
-.viewer-modal.fullscreen-mode.controls-visible .viewer-edge-nav:hover {
+.viewer-modal.fullscreen-mode .viewer-edge-nav:hover {
   opacity: 1 !important;
-  transform: translateY(-50%) scale(1.15) !important;
+  transform: translateY(-50%) scale(1.12) !important;
 }
 
 /* -------------------------------------------------------------
@@ -2927,21 +2970,21 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
    ==================================================================== */
 .drawer-resize-handle {
   position: absolute;
-  z-index: 10;
+  z-index: 5;
   box-sizing: border-box;
 }
 
 /* 四角 */
-.drawer-resize-handle.nw { top: -4px; left: -4px; width: 14px; height: 14px; cursor: nw-resize; }
-.drawer-resize-handle.ne { top: -4px; right: -4px; width: 14px; height: 14px; cursor: ne-resize; }
-.drawer-resize-handle.sw { bottom: -4px; left: -4px; width: 14px; height: 14px; cursor: sw-resize; }
-.drawer-resize-handle.se { bottom: -4px; right: -4px; width: 14px; height: 14px; cursor: se-resize; }
+.drawer-resize-handle.nw { top: -4px; left: -4px; width: 12px; height: 12px; cursor: nw-resize; }
+.drawer-resize-handle.ne { top: -4px; right: -6px; width: 12px; height: 12px; cursor: ne-resize; }
+.drawer-resize-handle.sw { bottom: -4px; left: -4px; width: 12px; height: 12px; cursor: sw-resize; }
+.drawer-resize-handle.se { bottom: -4px; right: -6px; width: 12px; height: 12px; cursor: se-resize; }
 
 /* 四边 */
 .drawer-resize-handle.n  { top: -4px; left: 14px; right: 14px; height: 8px; cursor: n-resize; }
 .drawer-resize-handle.s  { bottom: -4px; left: 14px; right: 14px; height: 8px; cursor: s-resize; }
 .drawer-resize-handle.w  { left: -4px; top: 14px; bottom: 14px; width: 8px; cursor: w-resize; }
-.drawer-resize-handle.e  { right: -4px; top: 14px; bottom: 14px; width: 8px; cursor: e-resize; }
+.drawer-resize-handle.e  { right: -6px; top: 14px; bottom: 14px; width: 6px; cursor: e-resize; }
 
 /* 右下角 resize 视觉斜纹提示 */
 .drawer-resize-corner-hint {

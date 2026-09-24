@@ -81,6 +81,7 @@
     bindViewerModalEvents();
     bindAboutModalEvents();
     bindPortalScrollEvents();
+    bindFooterAccordion();
     bindLanguageDropdown();
     bindI18nEvents();
     initHero();
@@ -99,6 +100,21 @@
         }
       });
     }
+  }
+
+  function bindFooterAccordion() {
+    const groups = document.querySelectorAll('.footer-nav-group');
+    groups.forEach(group => {
+      const header = group.querySelector('.footer-group-header');
+      if (!header) return;
+      header.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          e.preventDefault();
+          const isOpen = group.classList.toggle('open');
+          header.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+      });
+    });
   }
 
   /* -------------------------------------------------------------

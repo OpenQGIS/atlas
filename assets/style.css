@@ -3878,6 +3878,29 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   flex-direction: column;
 }
 
+.footer-group-header {
+  display: block;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  pointer-events: none;
+  cursor: default;
+}
+
+.footer-chevron {
+  display: none;
+}
+
+.footer-group-collapse {
+  display: block;
+  max-height: none;
+  opacity: 1;
+  overflow: visible;
+}
+
 .footer-group-title {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -4093,9 +4116,66 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     gap: 28px;
     margin-bottom: 24px;
   }
+  .footer-brand-desc {
+    display: none;
+  }
+  .footer-brand-actions {
+    margin-top: 8px;
+  }
   .footer-nav-columns {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 0;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .footer-nav-group {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .footer-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 4px;
+    cursor: pointer;
+    pointer-events: auto;
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .footer-group-title {
+    margin: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  .footer-chevron {
+    display: block;
+    width: 15px;
+    height: 15px;
+    color: var(--text-muted);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+  }
+  .footer-nav-group.open .footer-chevron {
+    transform: rotate(180deg);
+    color: var(--accent);
+  }
+  .footer-group-collapse {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, padding 0.35s ease;
+    padding: 0 4px;
+  }
+  .footer-nav-group.open .footer-group-collapse {
+    max-height: 520px;
+    opacity: 1;
+    padding-bottom: 14px;
+  }
+  .footer-link-hint {
+    display: none;
+  }
+  .footer-group-list {
+    gap: 10px;
   }
   .footer-wordmark-container {
     padding: 6px 0 12px;

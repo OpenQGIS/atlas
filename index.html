@@ -263,74 +263,89 @@
         <div class="footer-nav-columns">
           <!-- Col 1: 空间制图全系 -->
           <div class="footer-nav-group">
-            <h4 class="footer-group-title" data-i18n="footerCol1Title">空间制图全系</h4>
-            <ul class="footer-group-list">
-              <li>
-                <a href="#heroScreen" class="footer-nav-link active">
-                  <span class="footer-link-name" data-i18n="footerLinkAtlas">地图录 · AtlasLog</span>
-                  <span class="footer-link-badge" data-i18n="footerBadgeCurrent">本卷</span>
-                </a>
-                <p class="footer-link-hint" data-i18n="footerLinkAtlasHint">QGIS 独立制图成果与 1:1 4K 深览</p>
-              </li>
-              <li>
-                <a href="https://github.com/OpenQGIS/Cabinet" target="_blank" rel="noopener" class="footer-nav-link">
-                  <span class="footer-link-name" data-i18n="footerLinkCabinet">珍奇柜 · Cabinet</span>
-                  <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </a>
-                <p class="footer-link-hint" data-i18n="footerLinkCabinetHint">空间碎片藏录与开源资源精选库</p>
-              </li>
-              <li>
-                <a href="https://github.com/OpenQGIS/Gallery" target="_blank" rel="noopener" class="footer-nav-link">
-                  <span class="footer-link-name" data-i18n="footerLinkGallery">典藏总馆 · Gallery</span>
-                  <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </a>
-                <p class="footer-link-hint" data-i18n="footerLinkGalleryHint">空间地理成果与制图聚合大厅</p>
-              </li>
-            </ul>
+            <button class="footer-group-header" type="button" aria-expanded="false">
+              <span class="footer-group-title" data-i18n="footerCol1Title">空间制图全系</span>
+              <svg class="icon footer-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="footer-group-collapse">
+              <ul class="footer-group-list">
+                <li>
+                  <a href="#heroScreen" class="footer-nav-link active">
+                    <span class="footer-link-name" data-i18n="footerLinkAtlas">地图录 · AtlasLog</span>
+                    <span class="footer-link-badge" data-i18n="footerBadgeCurrent">本卷</span>
+                  </a>
+                  <p class="footer-link-hint" data-i18n="footerLinkAtlasHint">QGIS 独立制图成果与 1:1 4K 深览</p>
+                </li>
+                <li>
+                  <a href="https://github.com/OpenQGIS/Cabinet" target="_blank" rel="noopener" class="footer-nav-link">
+                    <span class="footer-link-name" data-i18n="footerLinkCabinet">珍奇柜 · Cabinet</span>
+                    <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                  </a>
+                  <p class="footer-link-hint" data-i18n="footerLinkCabinetHint">空间碎片藏录与开源资源精选库</p>
+                </li>
+                <li>
+                  <a href="https://github.com/OpenQGIS/Gallery" target="_blank" rel="noopener" class="footer-nav-link">
+                    <span class="footer-link-name" data-i18n="footerLinkGallery">典藏总馆 · Gallery</span>
+                    <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                  </a>
+                  <p class="footer-link-hint" data-i18n="footerLinkGalleryHint">空间地理成果与制图聚合大厅</p>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <!-- Col 2: 工造规范与特性 -->
           <div class="footer-nav-group">
-            <h4 class="footer-group-title" data-i18n="footerCol2Title">工造规范与特性</h4>
-            <ul class="footer-group-list static-list">
-              <li>
-                <span class="footer-static-item" data-i18n="footerFeature1">QGIS 极限矢量制图</span>
-                <p class="footer-link-hint" data-i18n="footerFeature1Hint">突破桌面 GIS 视觉表达边界</p>
-              </li>
-              <li>
-                <span class="footer-static-item" data-i18n="footerFeature2">OpenSeadragon 4K WebP 切片</span>
-                <p class="footer-link-hint" data-i18n="footerFeature2Hint">1:1 原生微米级深览引擎</p>
-              </li>
-              <li>
-                <span class="footer-static-item" data-i18n="footerFeature3">空间形态学与路网织体</span>
-                <p class="footer-link-hint" data-i18n="footerFeature3Hint">几何形态与地理环境深度解构</p>
-              </li>
-              <li>
-                <span class="footer-static-item" data-i18n="footerFeature4">自适应主调色板萃取</span>
-                <p class="footer-link-hint" data-i18n="footerFeature4Hint">动态吸色与作品专属色彩基因</p>
-              </li>
-            </ul>
+            <button class="footer-group-header" type="button" aria-expanded="false">
+              <span class="footer-group-title" data-i18n="footerCol2Title">工造规范与特性</span>
+              <svg class="icon footer-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="footer-group-collapse">
+              <ul class="footer-group-list static-list">
+                <li>
+                  <span class="footer-static-item" data-i18n="footerFeature1">QGIS 极限矢量制图</span>
+                  <p class="footer-link-hint" data-i18n="footerFeature1Hint">突破桌面 GIS 视觉表达边界</p>
+                </li>
+                <li>
+                  <span class="footer-static-item" data-i18n="footerFeature2">OpenSeadragon 4K WebP 切片</span>
+                  <p class="footer-link-hint" data-i18n="footerFeature2Hint">1:1 原生微米级深览引擎</p>
+                </li>
+                <li>
+                  <span class="footer-static-item" data-i18n="footerFeature3">空间形态学与路网织体</span>
+                  <p class="footer-link-hint" data-i18n="footerFeature3Hint">几何形态与地理环境深度解构</p>
+                </li>
+                <li>
+                  <span class="footer-static-item" data-i18n="footerFeature4">自适应主调色板萃取</span>
+                  <p class="footer-link-hint" data-i18n="footerFeature4Hint">动态吸色与作品专属色彩基因</p>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <!-- Col 3: 社区准则与许可 -->
           <div class="footer-nav-group">
-            <h4 class="footer-group-title" data-i18n="footerCol3Title">社区与版权准则</h4>
-            <ul class="footer-group-list">
-              <li>
-                <a href="https://github.com/OpenQGIS" target="_blank" rel="noopener" class="footer-nav-link">
-                  <span class="footer-link-name">GitHub · OpenQGIS</span>
-                  <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                </a>
-                <p class="footer-link-hint" data-i18n="footerLinkOrgHint">探索更多开源制图与空间算法项目</p>
-              </li>
-              <li>
-                <div class="footer-disclaimer-box">
-                  <p class="footer-disclaimer-text" data-i18n="footerCopyrightNotice">
-                    所有作品为原创空间制图实践，受国际版权及开源许可保护。未经许可严禁商用、翻印、洗稿或二次打包再分发。
-                  </p>
-                </div>
-              </li>
-            </ul>
+            <button class="footer-group-header" type="button" aria-expanded="false">
+              <span class="footer-group-title" data-i18n="footerCol3Title">社区与版权准则</span>
+              <svg class="icon footer-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="footer-group-collapse">
+              <ul class="footer-group-list">
+                <li>
+                  <a href="https://github.com/OpenQGIS" target="_blank" rel="noopener" class="footer-nav-link">
+                    <span class="footer-link-name">GitHub · OpenQGIS</span>
+                    <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                  </a>
+                  <p class="footer-link-hint" data-i18n="footerLinkOrgHint">探索更多开源制图与空间算法项目</p>
+                </li>
+                <li>
+                  <div class="footer-disclaimer-box">
+                    <p class="footer-disclaimer-text" data-i18n="footerCopyrightNotice">
+                      所有作品为原创空间制图实践，受国际版权及开源许可保护。未经许可严禁商用、翻印、洗稿或二次打包再分发。
+                    </p>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>

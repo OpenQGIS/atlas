@@ -32,6 +32,7 @@
     if (manifestData) {
       setupData(manifestData);
       initGallery();
+      checkUrlDeepLink();
       return;
     }
 
@@ -41,6 +42,7 @@
       const data = await res.json();
       setupData(data);
       initGallery();
+      checkUrlDeepLink();
     } catch (err) {
       console.error('Failed to load Atlas manifest:', err);
       const grid = document.getElementById('galleryGrid');
@@ -676,6 +678,12 @@
     if (edgePrevBtn) edgePrevBtn.addEventListener('click', () => navigateArtwork(-1));
     if (edgeNextBtn) edgeNextBtn.addEventListener('click', () => navigateArtwork(1));
 
+    const shareBtn = document.getElementById('btnShareArtwork');
+    if (shareBtn) shareBtn.addEventListener('click', shareCurrentArtwork);
+
+    const copyShareUrlBtn = document.getElementById('btnCopyShareUrl');
+    if (copyShareUrlBtn) copyShareUrlBtn.addEventListener('click', shareCurrentArtwork);
+
     if (toggleInfoBtn && drawerEl) {
       toggleInfoBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -817,6 +825,28 @@
             StealthWatermark.toggleReveal();
           }
           break;
+        case 's':
+        case 'S':
+          shareCurrentArtwork();
+          break;
+      }
+    });
+
+    window.addEventListener('popstate', () => {
+      const modalEl = document.getElementById('viewerModal');
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id') || urlParams.get('art');
+      if (id) {
+        const item = findArtworkByQuery(id);
+        if (item) {
+          if (!modalEl || !modalEl.classList.contains('open') || currentFilteredItems[currentViewerIndex]?.id !== item.id) {
+            openViewerByItem(item);
+          }
+        }
+      } else {
+        if (modalEl && modalEl.classList.contains('open')) {
+          closeViewer(false);
+        }
       }
     });
 
@@ -833,8 +863,17 @@
   }
 
   function openViewerByItem(item) {
-    const idx = currentFilteredItems.findIndex(i => i.id === item.id);
-    currentViewerIndex = (idx !== -1) ? idx : 0;
+    if (!item) return;
+    let idx = currentFilteredItems.findIndex(i => i.id === item.id);
+    if (idx === -1) {
+      applyFilter('all');
+      idx = currentFilteredItems.findIndex(i => i.id === item.id);
+      if (idx === -1) {
+        currentFilteredItems.unshift(item);
+        idx = 0;
+      }
+    }
+    currentViewerIndex = idx;
     showArtwork(item);
   }
 
@@ -911,9 +950,18 @@
       });
     }
 
+    const mShareUrl = document.getElementById('metaShareUrl');
+    const shareUrl = getShareUrlForItem(item);
+    if (mShareUrl) {
+      mShareUrl.textContent = shareUrl;
+      mShareUrl.title = shareUrl;
+    }
+
     modalEl.classList.add('open');
     modalEl.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+
+    updateBrowserUrl(item);
 
     loadOpenSeadragon(item);
   }
@@ -1207,7 +1255,7 @@
     });
   }
 
-  function closeViewer() {
+  function closeViewer(updateHistory = true) {
     StealthWatermark.destroy();
     const modalEl = document.getElementById('viewerModal');
     if (!modalEl) return;
@@ -1226,7 +1274,152 @@
     }
     const stage = document.getElementById('osdStage');
     if (stage) stage.innerHTML = '';
+
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+
+    if (updateHistory) {
+      clearBrowserUrl();
+    }
   }
+
+  /* -------------------------------------------------------------
+     Single Artwork Direct Share & Deep Linking
+     ------------------------------------------------------------- */
+  function getShareUrlForItem(item) {
+    if (!item) return window.location.href;
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('art');
+      url.searchParams.set('id', item.id);
+      url.hash = '';
+      return url.toString();
+    } catch (e) {
+      return window.location.origin + window.location.pathname + '?id=' + encodeURIComponent(item.id);
+    }
+  }
+
+  function shareCurrentArtwork() {
+    if (currentViewerIndex < 0 || !currentFilteredItems[currentViewerIndex]) return;
+    const item = currentFilteredItems[currentViewerIndex];
+    const url = getShareUrlForItem(item);
+    copyToClipboard(url);
+
+    const shareBtn = document.getElementById('btnShareArtwork');
+    if (shareBtn) {
+      shareBtn.classList.add('copied');
+      setTimeout(() => shareBtn.classList.remove('copied'), 1500);
+    }
+
+    const copyBtn = document.getElementById('btnCopyShareUrl');
+    const t = window.AtlasI18n ? window.AtlasI18n.t : (k => k);
+    if (copyBtn) {
+      copyBtn.textContent = t('actionShareCopied');
+      copyBtn.classList.add('copied');
+      setTimeout(() => {
+        copyBtn.textContent = t('actionCopy');
+        copyBtn.classList.remove('copied');
+      }, 1500);
+    }
+
+    const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
+    const title = (locItem && locItem.title) || item.title;
+    const successMsg = window.AtlasI18n && window.AtlasI18n.getCurrentLang() === 'en'
+      ? `Copied direct link for "${title}"`
+      : `已复制画卷《${title}》专属直链`;
+    showToast(successMsg);
+  }
+
+  function updateBrowserUrl(item) {
+    if (!item) return;
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('id') !== item.id) {
+        url.searchParams.delete('art');
+        url.searchParams.set('id', item.id);
+        window.history.replaceState({ artworkId: item.id }, '', url.toString());
+      }
+    } catch (e) {}
+  }
+
+  function clearBrowserUrl() {
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('id') || url.searchParams.has('art') || window.location.hash) {
+        url.searchParams.delete('id');
+        url.searchParams.delete('art');
+        url.hash = '';
+        window.history.replaceState(null, '', url.toString());
+      }
+    } catch (e) {}
+  }
+
+  function findArtworkByQuery(query) {
+    if (!query) return null;
+    let q = '';
+    try {
+      q = decodeURIComponent(String(query)).trim().toLowerCase();
+    } catch (e) {
+      q = String(query).trim().toLowerCase();
+    }
+    if (!q) return null;
+
+    return galleryItems.find(item => {
+      if (item.id && item.id.toLowerCase() === q) return true;
+      if (Array.isArray(item.aliases) && item.aliases.some(a => String(a).trim().toLowerCase() === q)) return true;
+      if (item.title && item.title.trim().toLowerCase() === q) return true;
+      if (item.filename) {
+        const fn = item.filename.trim().toLowerCase();
+        if (fn === q) return true;
+        if (fn.replace(/\.[^.]+$/, '') === q) return true;
+      }
+      return false;
+    });
+  }
+
+  function checkUrlDeepLink() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      let target = urlParams.get('id') || urlParams.get('art');
+      if (!target && window.location.hash) {
+        const hash = window.location.hash.replace(/^#\/?/, '');
+        if (hash.startsWith('id=')) target = hash.replace('id=', '');
+        else if (hash.startsWith('art=')) target = hash.replace('art=', '');
+        else target = hash;
+      }
+      if (target) {
+        const match = findArtworkByQuery(target);
+        if (match) {
+          setTimeout(() => {
+            openViewerByItem(match);
+          }, 120);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('Error checking URL deep link:', e);
+    }
+    return false;
+  }
+
+  let toastTimer = null;
+  function showToast(message, duration = 2200) {
+    let toast = document.getElementById('galleryToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'galleryToast';
+      toast.className = 'gallery-toast';
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML = '<span class="toast-indicator"></span><span class="toast-text">' + escapeHtml(message) + '</span>';
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, duration);
+  }
+
 
   /* -------------------------------------------------------------
      Stealth Digital Watermark & Anti-Theft Security Engine
@@ -1554,8 +1747,26 @@
 
   function copyToClipboard(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).catch(() => {});
+      navigator.clipboard.writeText(text).catch(() => {
+        fallbackCopyText(text);
+      });
+    } else {
+      fallbackCopyText(text);
     }
+  }
+
+  function fallbackCopyText(text) {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    } catch (e) {}
   }
 
   function escapeHtml(str) {

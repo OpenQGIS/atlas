@@ -135,10 +135,13 @@
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
           <div class="divider"></div>
-          <button class="nav-btn info-btn" id="btnToggleInfo" title="作品档案与色板 (I)">
+          <button class="nav-btn info-btn" id="btnToggleInfo" title="作品档案与色板 (I)" data-i18n-title="actionToggleInfo">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
           </button>
-          <button class="nav-btn" id="btnCloseViewerRight" title="退出阅览 (Esc)">
+          <button class="nav-btn" id="btnShareArtwork" title="分享画卷链接 (S)" aria-label="分享画卷链接" data-i18n-title="actionShare">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+          </button>
+          <button class="nav-btn" id="btnCloseViewerRight" title="退出阅览 (Esc)" data-i18n-title="actionClose">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
@@ -205,6 +208,14 @@
               <div class="meta-row"><dt data-i18n="metaPhysicalSize">原生尺寸</dt><dd id="mResolution">-</dd></div>
               <div class="meta-row"><dt data-i18n="metaRatio">长宽比例</dt><dd id="mRatio">-</dd></div>
             </dl>
+          </div>
+
+          <div class="meta-section" id="metaShareSection">
+            <h4 class="meta-section-title" data-i18n="metaShareTitle">画卷直链分享</h4>
+            <div class="meta-share-row">
+              <span class="meta-share-url font-mono" id="metaShareUrl">-</span>
+              <button class="meta-copy-btn" id="btnCopyShareUrl" data-i18n-title="actionCopyShare" title="复制画卷专属直链" data-i18n="actionCopy">复制</button>
+            </div>
           </div>
 
           <div class="meta-section" id="metaThemeSection">

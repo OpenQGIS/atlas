@@ -1061,11 +1061,9 @@
       }
     });
 
-    window.addEventListener('themeChanged', (e) => {
-      if (osdViewer) {
-        const isDark = (e.detail.theme === 'dark');
-        const stage = document.getElementById('osdStage');
-        if (stage) stage.style.backgroundColor = isDark ? '#07080b' : '#e5e8ed';
+    window.addEventListener('themeChanged', () => {
+      if (modalEl && modalEl.classList.contains('open') && currentFilteredItems[currentViewerIndex]) {
+        updateAmbientBackdrop(currentFilteredItems[currentViewerIndex]);
       }
     });
 
@@ -1108,6 +1106,67 @@
 
     navEl.style.width = targetW + 'px';
     navEl.style.height = targetH + 'px';
+  }
+
+  let activeAmbientLayer = 'A';
+
+  function hexToRgb(hex) {
+    if (!hex) return { r: 128, g: 128, b: 128 };
+    hex = hex.replace(/^#/, '');
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    const num = parseInt(hex, 16);
+    if (isNaN(num)) return { r: 128, g: 128, b: 128 };
+    return {
+      r: (num >> 16) & 255,
+      g: (num >> 8) & 255,
+      b: num & 255
+    };
+  }
+
+  function updateAmbientBackdrop(item) {
+    if (!item) return;
+    const layerA = document.getElementById('ambientGlowA');
+    const layerB = document.getElementById('ambientGlowB');
+    const meshLayer = document.getElementById('ambientMeshLayer');
+    if (!layerA || !layerB) return;
+
+    // Cross-fade between layers A and B for silky smooth transitions
+    const nextLayer = (activeAmbientLayer === 'A') ? layerB : layerA;
+    const prevLayer = (activeAmbientLayer === 'A') ? layerA : layerB;
+    activeAmbientLayer = (activeAmbientLayer === 'A') ? 'B' : 'A';
+
+    if (item.thumb) {
+      nextLayer.style.backgroundImage = 'url("' + item.thumb + '")';
+      nextLayer.classList.add('active');
+      prevLayer.classList.remove('active');
+    }
+
+    // Dynamic Gaussian mesh gradient based on dominant colors
+    extractDominantColors(item, 5, function (colors) {
+      if (!meshLayer) return;
+      if (!colors || colors.length === 0) {
+        colors = ['#80CC28', '#13171E', '#9EA5B3', '#5E6676'];
+      }
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const alphas = isLight ? [0.42, 0.36, 0.38, 0.30, 0.26] : [0.55, 0.48, 0.50, 0.38, 0.32];
+
+      const c = colors.map((hex, i) => {
+        const rgb = hexToRgb(hex);
+        const a = alphas[i] || 0.30;
+        return 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + a + ')';
+      });
+
+      const bgGradient = [
+        'radial-gradient(ellipse 70% 60% at 20% 25%, ' + c[0] + ' 0%, transparent 72%)',
+        'radial-gradient(ellipse 65% 55% at 80% 25%, ' + (c[1] || c[0]) + ' 0%, transparent 70%)',
+        'radial-gradient(ellipse 75% 65% at 50% 80%, ' + (c[2] || c[0]) + ' 0%, transparent 75%)',
+        'radial-gradient(ellipse 60% 50% at 85% 75%, ' + (c[3] || c[1] || c[0]) + ' 0%, transparent 68%)',
+        'radial-gradient(ellipse 55% 50% at 15% 75%, ' + (c[4] || c[2] || c[0]) + ' 0%, transparent 65%)'
+      ].join(', ');
+
+      meshLayer.style.background = bgGradient;
+      meshLayer.classList.add('active');
+    });
   }
 
   function openViewerByItem(item) {
@@ -1162,6 +1221,7 @@
     const modalEl = document.getElementById('viewerModal');
     if (!modalEl) return;
 
+    updateAmbientBackdrop(item);
     updateArtworkMetadata(item);
 
     const mSwatches = document.getElementById('mPalette');
@@ -1283,10 +1343,10 @@
         tileSources: tileSource,
         placeholderImage: item.thumb,
         immediateRender: true,
-        placeholderFillStyle: stageBg,
+        placeholderFillStyle: 'transparent',
         crossOriginPolicy: false,
         ajaxWithCredentials: false,
-        backgroundColor: stageBg
+        backgroundColor: 'transparent'
       });
 
       StealthWatermark.init(stage, item);
@@ -1533,6 +1593,22 @@
     if (stage) stage.innerHTML = '';
     const navEl = document.getElementById('viewerNavigator');
     if (navEl) navEl.innerHTML = '';
+
+    const glowA = document.getElementById('ambientGlowA');
+    const glowB = document.getElementById('ambientGlowB');
+    const meshLayer = document.getElementById('ambientMeshLayer');
+    if (glowA) {
+      glowA.classList.remove('active');
+      glowA.style.backgroundImage = 'none';
+    }
+    if (glowB) {
+      glowB.classList.remove('active');
+      glowB.style.backgroundImage = 'none';
+    }
+    if (meshLayer) {
+      meshLayer.classList.remove('active');
+      meshLayer.style.background = 'none';
+    }
 
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});

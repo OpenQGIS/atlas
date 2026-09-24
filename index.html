@@ -198,6 +198,14 @@
       </button>
 
       <div class="viewer-body">
+        <!-- Ambient Blurred Backdrop · 视口画板高斯模糊渐变色背板 -->
+        <div class="viewer-ambient-backdrop" id="viewerAmbientBackdrop" aria-hidden="true">
+          <div class="ambient-glow-layer ambient-layer-a" id="ambientGlowA"></div>
+          <div class="ambient-glow-layer ambient-layer-b" id="ambientGlowB"></div>
+          <div class="ambient-mesh-layer" id="ambientMeshLayer"></div>
+          <div class="ambient-scrim"></div>
+        </div>
+
         <div class="osd-stage" id="osdStage"></div>
 
         <!-- Overview Navigator · 左下角全图导航窗口 -->

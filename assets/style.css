@@ -3123,7 +3123,7 @@ body:has(.viewer-modal.open) {
 /* 方案 A: 信息面板展开时，下一张按钮平滑向左避让推开，保持完全可见且绝不重叠 */
 .viewer-modal.drawer-open .viewer-edge-nav.edge-next,
 .viewer-container:has(.viewer-meta-drawer.open) .viewer-edge-nav.edge-next {
-  right: var(--drawer-offset, 356px);
+  right: var(--drawer-offset, 364px);
 }
 
 .viewer-edge-nav:hover {

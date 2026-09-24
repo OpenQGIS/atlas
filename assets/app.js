@@ -812,10 +812,24 @@
         modalEl.style.removeProperty('--drawer-offset');
         return;
       }
-      const rect = drawerEl.getBoundingClientRect();
-      const distFromRight = window.innerWidth - rect.right;
-      if (distFromRight < 80 && rect.left < window.innerWidth - 60) {
-        const neededRight = (window.innerWidth - rect.left) + 16;
+      const container = modalEl.querySelector('.viewer-container') || modalEl;
+      const cW = container.offsetWidth || window.innerWidth;
+
+      // 提取未经 CSS transform（如 scale(0.94) 展开动效）干扰的真实布局宽度与左边缘绝对定位
+      let dLeft, dWidth;
+      if (drawerEl.style.left && drawerEl.style.left !== 'auto') {
+        dLeft = parseFloat(drawerEl.style.left);
+        dWidth = parseFloat(drawerEl.style.width) || drawerEl.offsetWidth || 320;
+      } else {
+        dWidth = parseFloat(drawerEl.style.width) || drawerEl.offsetWidth || 320;
+        const dRight = parseFloat(drawerEl.style.right) || 20;
+        dLeft = cW - dRight - dWidth;
+      }
+
+      const distFromRight = cW - (dLeft + dWidth);
+      // 只要抽屉停靠在屏幕右侧区域（与右侧下一张按钮产生水平干涉），即主动向左推开留出 24px 充裕呼吸间隔
+      if (distFromRight < 120 && dLeft < cW - 40) {
+        const neededRight = (cW - dLeft) + 24;
         modalEl.style.setProperty('--drawer-offset', `${Math.max(20, Math.round(neededRight))}px`);
       } else {
         modalEl.style.setProperty('--drawer-offset', '20px');
@@ -829,6 +843,7 @@
         if (toggleInfoBtn) toggleInfoBtn.classList.add('active');
         if (modalEl) modalEl.classList.add('drawer-open');
         updateEdgeNextOffset();
+        setTimeout(updateEdgeNextOffset, 300);
         if (typeof drawerEl._updateSpine === 'function') {
           requestAnimationFrame(() => drawerEl._updateSpine());
         }
@@ -837,6 +852,7 @@
         if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
         if (modalEl) modalEl.classList.remove('drawer-open');
         updateEdgeNextOffset();
+        setTimeout(updateEdgeNextOffset, 300);
       }
     }
 
@@ -1089,6 +1105,7 @@
     window.addEventListener('resize', () => {
       if (modalEl && modalEl.classList.contains('open') && currentFilteredItems[currentViewerIndex]) {
         updateNavigatorDimensions(currentFilteredItems[currentViewerIndex]);
+        updateEdgeNextOffset();
         if (osdViewer && osdViewer.navigator) {
           osdViewer.navigator.updateSize();
         }

@@ -1343,12 +1343,21 @@
     navEl.style.height = targetH + 'px';
 
     const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
+    navEl.style.setProperty('--nav-bg', dominantColor);
     navEl.style.setProperty('background-color', dominantColor, 'important');
     navEl.style.setProperty('background', dominantColor, 'important');
-    // 同步更新 canvas 背景，消除白边
+    // 同步更新 navigator 内所有层级容器与 canvas 背景，消除白边
     const navCanvas = navEl.querySelector('canvas');
     if (navCanvas) {
       navCanvas.style.setProperty('background-color', dominantColor, 'important');
+    }
+    const navContainer = navEl.querySelector('.openseadragon-container');
+    if (navContainer) {
+      navContainer.style.setProperty('background-color', dominantColor, 'important');
+    }
+    const navOsdCanvas = navEl.querySelector('.openseadragon-canvas');
+    if (navOsdCanvas) {
+      navOsdCanvas.style.setProperty('background-color', dominantColor, 'important');
     }
 
     const navPanel = document.getElementById('viewerNavigatorPanel');
@@ -1812,6 +1821,8 @@
     };
 
     try {
+      const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
+
       osdViewer = OpenSeadragon({
         element: stage,
         prefixUrl: '',
@@ -1821,6 +1832,7 @@
         navigatorId: 'viewerNavigator',
         navigatorAutoFade: false,
         navigatorRotate: true,
+        navigatorBackground: dominantColor,
         autoResize: true,
         animationTime: 0.45,
         blendTime: 0.15,
@@ -1833,7 +1845,7 @@
         tileSources: tileSource,
         placeholderImage: item.thumb,
         immediateRender: true,
-        placeholderFillStyle: 'transparent',
+        placeholderFillStyle: dominantColor,
         crossOriginPolicy: false,
         ajaxWithCredentials: false,
         backgroundColor: 'transparent'
@@ -1845,16 +1857,23 @@
         StealthWatermark.burnIn(osdViewer);
       });
 
-      // 鹰眼导航器白边根治：OSD 初始化后强制覆盖背景色与画布填充
-      // OSD navigator canvas letterbox 区域默认为白色，用画作主色覆盖
+      // 鹰眼导航器白边根治：OSD 初始化后强制覆盖背景色、容器层级与精确重排画布
       function fixNavigatorBackground() {
         const navEl = document.getElementById('viewerNavigator');
         if (!navEl) return;
         const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
-        // 强制 navEl 自身背景 = 画作主色（覆盖 OSD inline style）
+        navEl.style.setProperty('--nav-bg', dominantColor);
         navEl.style.setProperty('background-color', dominantColor, 'important');
         navEl.style.setProperty('background', dominantColor, 'important');
-        // 强制 canvas 填满 navEl（消除水平方向空白边）
+        
+        const container = navEl.querySelector('.openseadragon-container');
+        if (container) {
+          container.style.setProperty('background-color', dominantColor, 'important');
+        }
+        const osdCanvas = navEl.querySelector('.openseadragon-canvas');
+        if (osdCanvas) {
+          osdCanvas.style.setProperty('background-color', dominantColor, 'important');
+        }
         const canvas = navEl.querySelector('canvas');
         if (canvas) {
           canvas.style.setProperty('display', 'block', 'important');
@@ -1862,10 +1881,14 @@
           canvas.style.setProperty('height', '100%', 'important');
           canvas.style.setProperty('background-color', dominantColor, 'important');
         }
+        if (osdViewer && osdViewer.navigator) {
+          osdViewer.navigator.updateSize();
+        }
       }
       osdViewer.addHandler('open', function () {
         setTimeout(fixNavigatorBackground, 0);
-        setTimeout(fixNavigatorBackground, 100);
+        setTimeout(fixNavigatorBackground, 80);
+        setTimeout(fixNavigatorBackground, 250);
       });
 
       const badge = document.getElementById('toolZoomBadge');

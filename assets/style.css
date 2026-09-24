@@ -72,6 +72,7 @@
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+  scrollbar-gutter: stable;
   width: 100%;
 }
 
@@ -1668,7 +1669,7 @@ body[data-page="portal"] {
 .gallery-card {
   height: var(--target-row-height, 320px);
   flex-grow: calc(var(--aspect-ratio) * 100);
-  flex-basis: calc(var(--target-row-height, 320px) * var(--aspect-ratio));
+  flex-basis: min(calc(var(--target-row-height, 320px) * var(--aspect-ratio)), 100%);
   min-width: 0;
   max-width: 100%;
   background: var(--bg-surface);
@@ -3199,24 +3200,31 @@ body:has(.viewer-modal.open) {
   border: 1.5px solid var(--accent) !important;
   border-radius: 4px !important;
   box-shadow: none !important;
-  background: #07080b !important;
+  background: var(--nav-bg, #07080b) !important;
   overflow: hidden !important;
   cursor: crosshair !important;
-  box-sizing: border-box !important;
+  box-sizing: content-box !important;
 }
 
 :root[data-theme="light"] .viewer-navigator,
 :root[data-theme="light"] .navigator {
   border: 1.5px solid var(--accent) !important;
   box-shadow: none !important;
-  background: #07080b !important;
+  background: var(--nav-bg, #07080b) !important;
+}
+
+.viewer-navigator .openseadragon-container,
+.viewer-navigator .openseadragon-canvas,
+.navigator .openseadragon-container,
+.navigator .openseadragon-canvas {
+  background: var(--nav-bg, #07080b) !important;
 }
 
 .navigator canvas {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
-  background: transparent !important;
+  background: var(--nav-bg, #07080b) !important;
 }
 
 .displayregion {

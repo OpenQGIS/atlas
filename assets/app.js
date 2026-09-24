@@ -1139,6 +1139,7 @@
 
   function updateAmbientBackdrop(item) {
     if (!item) return;
+    const backdropEl = document.getElementById('viewerAmbientBackdrop');
     const layerA = document.getElementById('ambientGlowA');
     const layerB = document.getElementById('ambientGlowB');
     const meshLayer = document.getElementById('ambientMeshLayer');
@@ -1161,12 +1162,26 @@
       if (!colors || colors.length === 0) {
         colors = ['#80CC28', '#13171E', '#9EA5B3', '#5E6676'];
       }
-      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      const alphas = isLight ? [0.42, 0.36, 0.38, 0.30, 0.26] : [0.55, 0.48, 0.50, 0.38, 0.32];
+
+      // 计算画作基础调性 (基于主色调或标定色盘的首色明度)
+      const baseRgb = hexToRgb(colors[0]);
+      const baseLum = 0.299 * baseRgb.r + 0.587 * baseRgb.g + 0.114 * baseRgb.b;
+      const isDarkArtwork = baseLum < 128;
+
+      if (backdropEl) {
+        backdropEl.classList.toggle('artwork-dark', isDarkArtwork);
+        backdropEl.classList.toggle('artwork-light', !isDarkArtwork);
+        backdropEl.style.backgroundColor = isDarkArtwork ? (colors[0] || '#07080b') : '#f2efe9';
+      }
+
+      // 无论系统主题处于白天还是夜晚，背景均与画作本体深浅气质保持高度融合
+      const alphas = isDarkArtwork
+        ? [0.72, 0.62, 0.55, 0.45, 0.38]
+        : [0.52, 0.44, 0.42, 0.32, 0.26];
 
       const c = colors.map((hex, i) => {
         const rgb = hexToRgb(hex);
-        const a = alphas[i] || 0.30;
+        const a = alphas[i] || 0.35;
         return 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + a + ')';
       });
 

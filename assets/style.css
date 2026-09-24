@@ -2161,7 +2161,7 @@ body:has(.viewer-modal.open) {
 }
 
 /* =====================================================================
-   Immersive Ambient Backdrop · 视口画板高斯模糊渐变背景
+   Immersive Ambient Backdrop · 视口画板高斯模糊渐变背景 (自适应画作本体调性)
    ==================================================================== */
 .viewer-ambient-backdrop {
   position: absolute;
@@ -2169,8 +2169,8 @@ body:has(.viewer-modal.open) {
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
-  background-color: var(--stage-bg);
-  transition: background-color var(--transition-normal);
+  background-color: #07080b;
+  transition: background-color 0.85s ease;
 }
 
 .ambient-glow-layer {
@@ -2181,7 +2181,7 @@ body:has(.viewer-modal.open) {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  filter: blur(80px) saturate(160%) brightness(0.72);
+  filter: blur(80px) saturate(180%) brightness(0.85);
   opacity: 0;
   transform: scale(1.08);
   transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s ease-out;
@@ -2189,16 +2189,17 @@ body:has(.viewer-modal.open) {
 }
 
 .ambient-glow-layer.active {
-  opacity: 0.55;
+  opacity: 0.70;
   transform: scale(1);
 }
 
-:root[data-theme="light"] .ambient-glow-layer {
-  filter: blur(80px) saturate(160%) brightness(1.06);
+/* 浅色底画作 (如宣纸米色) 适配微调 */
+.viewer-ambient-backdrop.artwork-light .ambient-glow-layer {
+  filter: blur(80px) saturate(150%) brightness(1.02);
 }
 
-:root[data-theme="light"] .ambient-glow-layer.active {
-  opacity: 0.42;
+.viewer-ambient-backdrop.artwork-light .ambient-glow-layer.active {
+  opacity: 0.52;
 }
 
 .ambient-mesh-layer {
@@ -2210,23 +2211,24 @@ body:has(.viewer-modal.open) {
 }
 
 .ambient-mesh-layer.active {
-  opacity: 0.85;
+  opacity: 0.90;
 }
 
-:root[data-theme="light"] .ambient-mesh-layer.active {
-  opacity: 0.65;
+.viewer-ambient-backdrop.artwork-light .ambient-mesh-layer.active {
+  opacity: 0.70;
 }
 
 /* Subtle ambient scrim for depth and toolbar contrast */
 .ambient-scrim {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(7, 8, 11, 0.15) 30%, rgba(7, 8, 11, 0.65) 100%);
+  background: radial-gradient(circle at 50% 50%, rgba(7, 8, 11, 0.10) 30%, rgba(7, 8, 11, 0.65) 100%);
   pointer-events: none;
+  transition: background 0.6s ease;
 }
 
-:root[data-theme="light"] .ambient-scrim {
-  background: radial-gradient(circle at 50% 50%, rgba(248, 249, 251, 0.15) 30%, rgba(229, 232, 237, 0.65) 100%);
+.viewer-ambient-backdrop.artwork-light .ambient-scrim {
+  background: radial-gradient(circle at 50% 50%, rgba(250, 248, 244, 0.08) 30%, rgba(220, 215, 205, 0.50) 100%);
 }
 
 .osd-stage {

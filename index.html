@@ -117,10 +117,13 @@
   <div class="viewer-modal" id="viewerModal" aria-hidden="true" role="dialog" aria-label="Deep Zoom 展品阅览">
     <div class="viewer-backdrop" id="viewerBackdrop"></div>
     <div class="viewer-container">
-      <!-- Top-Left Floating Artwork & Brand Badge · 地图左上角头像图标与图名 -->
+      <!-- Top-Left Floating Artwork & Brand Badge · 地图左上角头像图标与图名+QMapFlow -->
       <div class="viewer-artwork-badge" id="viewerArtworkBadge">
         <img class="viewer-artwork-avatar" src="assets/avatar.png" alt="OpenQGIS" />
-        <span class="viewer-artwork-title" id="viewerTitle">作品名称</span>
+        <div class="viewer-artwork-meta">
+          <span class="viewer-artwork-title" id="viewerTitle">作品名称</span>
+          <div class="viewer-artwork-qmapflow" id="viewerQmapFlow" title="QGIS 制图工作流精度"></div>
+        </div>
       </div>
 
       <!-- Left / Right Edge Navigation Paddles -->

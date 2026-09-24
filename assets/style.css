@@ -3398,6 +3398,12 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     height: 32px;
   }
 
+  /* 移动端/触屏设备自然支持双指捏合缩放与双击放大，隐藏工具栏放大(+)与缩小(-)冗余按钮，释放屏幕空间 */
+  #toolZoomIn,
+  #toolZoomOut {
+    display: none !important;
+  }
+
   .tool-btn .icon {
     width: 14px;
     height: 14px;

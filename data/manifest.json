@@ -16,6 +16,9 @@
     "date": "2024",
     "year": "2024",
     "physicalSize": "15.0cm x 20.0cm，海报比例",
+    "workflow": {
+      "QGIS": "100%"
+    },
     "tags": [
       "城市肌理",
       "矢量制图",
@@ -71,17 +74,20 @@
     "category": "original",
     "categoryName": "原创图片分享",
     "subCategory": "城市肌理",
-    "description": "运用空间形态学方法提炼成都从北至南的城市密度与肌理演变。 长卷构图：以米色为底，通过极简的矢量线条勾勒出错综复杂的环形与放射状路网。 生态水轴：突出锦江蜿蜒穿城而过的蓝色生态脉络，并展现南部天府新区兴隆湖等大型蓝绿空间的分布。 中轴演进：作品以长卷形式表现了成都平原沿南北中轴线持续向南拓展的宏观空间生长态势。",
-    "descriptionHtml": "<h3 class=\"meta-desc-h3\">工造题记与设计意图</h3><p class=\"meta-desc-p\">运用空间形态学方法提炼成都从北至南的城市密度与肌理演变。</p><h4 class=\"meta-desc-h4\">空间生长态势</h4><ul class=\"meta-desc-list\"><li><strong>长卷构图</strong>：以米色为底，通过极简的矢量线条勾勒出错综复杂的环形与放射状路网。</li><li><strong>生态水轴</strong>：突出锦江蜿蜒穿城而过的蓝色生态脉络，并展现南部天府新区兴隆湖等大型蓝绿空间的分布。</li><li><strong>中轴演进</strong>：作品以长卷形式表现了成都平原沿南北中轴线持续向南拓展的宏观空间生长态势。</li></ul>",
+    "description": "运用空间形态学方法提炼成都南北向城市中轴建筑密度与肌理演变。 底色基底：以温润纸本色调为底，极简矢量线条勾勒环线与放射状路网。 生态脉络：凸显锦江穿城与天府新区湖泊水系的纵向展卷格局。",
+    "descriptionHtml": "<h3 class=\"meta-desc-h3\">工造题记与设计意图</h3><p class=\"meta-desc-p\">运用空间形态学方法提炼成都南北向城市中轴建筑密度与肌理演变。</p><h4 class=\"meta-desc-h4\">视觉语言与生态特征</h4><ul class=\"meta-desc-list\"><li><strong>底色基底</strong>：以温润纸本色调为底，极简矢量线条勾勒环线与放射状路网。</li><li><strong>生态脉络</strong>：凸显锦江穿城与天府新区湖泊水系的纵向展卷格局。</li></ul>",
     "author": "OpenQGIS",
-    "date": "2025.06",
-    "year": "2025.6",
+    "date": "2024.08",
+    "year": "2024.8",
     "physicalSize": "9.9 x 21.4cm",
+    "workflow": {
+      "QGIS": "100%"
+    },
     "tags": [
       "城市肌理",
-      "成都中轴线",
-      "天府新区",
-      "锦江生态"
+      "矢量制图",
+      "成都",
+      "极简地图"
     ],
     "colors": [
       "#EAE4D9",
@@ -137,6 +143,9 @@
     "date": "2024.07",
     "year": "2024.7",
     "physicalSize": "18.8 x 14.1cm，10.5寸",
+    "workflow": {
+      "QGIS": "100%"
+    },
     "tags": [
       "城市肌理",
       "矢量制图",
@@ -190,19 +199,21 @@
     "filename": "锦江绿道_黄龙溪.png",
     "category": "original",
     "categoryName": "原创图片分享",
-    "subCategory": "原创设计",
-    "description": "采用极简矢量线条与粉绿撞色的视觉语言解构并重塑了成都锦江绿道华阳街道至黄龙溪镇的城乡路网肌理与轨迹走向。 生态脉络：结合坡度剖面与打卡节点，清晰展示天府平原生态绿道与城市空间的有机融合。 形态解构：以粉绿撞色提炼沿江水陆交织的宏观空间格局。",
-    "descriptionHtml": "<h3 class=\"meta-desc-h3\">工造题记与设计意图</h3><p class=\"meta-desc-p\">采用极简矢量线条与粉绿撞色的视觉语言解构并重塑了成都锦江绿道华阳街道至黄龙溪镇的城乡路网肌理与轨迹走向。</p><h4 class=\"meta-desc-h4\">空间与生态表达</h4><ul class=\"meta-desc-list\"><li><strong>生态脉络</strong>：结合坡度剖面与打卡节点，清晰展示天府平原生态绿道与城市空间的有机融合。</li><li><strong>形态解构</strong>：以粉绿撞色提炼沿江水陆交织的宏观空间格局。</li></ul>",
+    "subCategory": "原创",
+    "description": "采用高精度 DEM 与空间剖面算法，绘制锦江绿道流经黄龙溪古镇段的生态剖面长卷。 生态走廊：依托高程数据真实还原锦江河谷断面的起伏变化。 水陆交织：生动展现河床高程渐变。",
+    "descriptionHtml": "<h3 class=\"meta-desc-h3\">工造题记与设计意图</h3><p class=\"meta-desc-p\">采用高精度 DEM 与空间剖面算法，绘制锦江绿道流经黄龙溪古镇段的生态剖面长卷。</p><h4 class=\"meta-desc-h4\">空间形态与生态断面</h4><ul class=\"meta-desc-list\"><li><strong>生态走廊</strong>：依托高程数据真实还原锦江河谷断面的起伏变化。</li><li><strong>水陆交织</strong>：生动展现河床高程渐变。</li></ul>",
     "author": "OpenQGIS",
     "date": "2024.07",
     "year": "2024.7",
-    "physicalSize": "15.0cm x 20.0cm",
+    "physicalSize": "120.0cm x 30.0cm，条屏全景",
+    "workflow": {
+      "QGIS": "100%"
+    },
     "tags": [
-      "绿道",
-      "路线图",
-      "城市肌理",
-      "成都",
-      "矢量艺术"
+      "剖面图",
+      "空间形态",
+      "锦江绿道",
+      "黄龙溪"
     ],
     "colors": [
       "#E57388",
@@ -244,25 +255,29 @@
   {
     "id": "layout_pattern_02",
     "aliases": [
-      "aba_cycling",
+      "排版范式_02",
+      "layout02",
       "阿坝骑行线路"
     ],
-    "title": "阿坝骑行线路",
-    "filename": "阿坝骑行线路.jpg",
+    "title": "排版范式_02",
+    "filename": "排版范式_02.png",
     "category": "original",
     "categoryName": "原创图片分享",
-    "subCategory": "原创设计",
-    "description": "将川西北高原东缘的四条路线（莲宝叶则、马尔康、若尔盖、红原）整合成一份直观的“路书”。 布局范式：采用“中心地形总览 + 四周局部卫星图”的版面结构。 高程与剖面：附上详细的高程剖面图和用于导航的二维码。 地貌特征：清晰展示从高山峡谷到高原湿地、海拔在 2800 至 3900 米之间的复杂地貌与起伏，为户外爱好者和科考人员提供详实的行程参考。",
-    "descriptionHtml": "<h3 class=\"meta-desc-h3\">工造题记与设计意图</h3><p class=\"meta-desc-p\">将川西北高原东缘的四条路线（莲宝叶则、马尔康、若尔盖、红原）整合成一份直观的“路书”。</p><h4 class=\"meta-desc-h4\">版面与视觉排版</h4><ul class=\"meta-desc-list\"><li><strong>布局范式</strong>：采用“中心地形总览 + 四周局部卫星图”的版面结构。</li><li><strong>高程与剖面</strong>：附上详细的高程剖面图和用于导航的二维码。</li><li><strong>地貌特征</strong>：清晰展示从高山峡谷到高原湿地、海拔在 2800 至 3900 米之间的复杂地貌与起伏，为户外爱好者和科考人员提供详实的行程参考。</li></ul>",
+    "subCategory": "制图范式",
+    "description": "基于空间句法与现代网格构成理论的制图排版研究。 动态秩序：运用严谨的模数网格系统，探索地图主视窗、鹰眼附图、图例与留白之间的动态秩序。 信息层级：建立清晰的视觉层级与极简制图美学。",
+    "descriptionHtml": "<h3 class=\"meta-desc-h3\">工造题记与设计意图</h3><p class=\"meta-desc-p\">基于空间句法与现代网格构成理论的制图排版研究。</p><h4 class=\"meta-desc-h4\">视觉语言与网格系统</h4><ul class=\"meta-desc-list\"><li><strong>动态秩序</strong>：运用严谨的模数网格系统，探索地图主视窗、鹰眼附图、图例与留白之间的动态秩序。</li><li><strong>信息层级</strong>：建立清晰的视觉层级与极简制图美学。</li></ul>",
     "author": "OpenQGIS",
-    "date": "2026.08",
-    "year": "2026.8",
-    "physicalSize": "60.0cm x 30.0cm",
+    "date": "2024",
+    "year": "2024",
+    "physicalSize": "21.0cm x 29.7cm，A4标幅",
+    "workflow": {
+      "QGIS": "100%"
+    },
     "tags": [
-      "地形地貌",
-      "空间形态",
-      "骑行",
-      "信息可视化"
+      "版式设计",
+      "空间范式",
+      "网格系统",
+      "极简制图"
     ],
     "colors": [
       "#12141A",
@@ -304,26 +319,28 @@
   {
     "id": "pinglu_canal",
     "aliases": [
-      "pinglu",
-      "平陆运河"
+      "平陆运河",
+      "pinglu"
     ],
     "title": "平陆运河",
     "filename": "平陆运河.png",
     "category": "original",
     "categoryName": "原创图片分享",
-    "subCategory": "工程规划",
-    "description": "这是一张具有强烈科技感和暗黑风格的地理信息（GIS）可视化地图。 地形基底：背景以深黑色为主，布满橙黄色发光等高线，立体刻画出山脉与沟壑起伏交错的地貌骨架。 运河航道：画面中央横贯一条醒目的红色粗线，标识广西平陆运河全线走廊。 工程开挖：红线中部的黑白斑马纹标识指示的是运河越岭核心人工开挖段。",
-    "descriptionHtml": "<h3 class=\"meta-desc-h3\">工造题记与设计意图</h3><p class=\"meta-desc-p\">这是一张具有强烈科技感和暗黑风格的地理信息（GIS）可视化地图。</p><h4 class=\"meta-desc-h4\">视觉语言与空间形态</h4><ul class=\"meta-desc-list\"><li><strong>地形基底</strong>：背景以深黑色为主，布满橙黄色发光等高线，立体刻画出山脉与沟壑起伏交错的地貌骨架。</li><li><strong>运河航道</strong>：画面中央横贯一条醒目的红色粗线，标识广西平陆运河全线走廊。</li><li><strong>工程开挖</strong>：红线中部的黑白斑马纹标识指示的是运河越岭核心人工开挖段。</li></ul>",
+    "subCategory": "工程肌理",
+    "description": "以暗夜极简风格解构平陆运河工程地形与水系脉络。 地形基底：深色背景下以炽热橙红线条突出运河主航道与开挖断面。 江海通达：展现西部陆海新通道江海联运骨干工程的宏伟空间骨架。",
+    "descriptionHtml": "<h3 class=\"meta-desc-h3\">工造题记与设计意图</h3><p class=\"meta-desc-p\">以暗夜极简风格解构平陆运河工程地形与水系脉络。</p><h4 class=\"meta-desc-h4\">视觉语言与工程脉络</h4><ul class=\"meta-desc-list\"><li><strong>地形基底</strong>：深色背景下以炽热橙红线条突出运河主航道与开挖断面。</li><li><strong>江海通达</strong>：展现西部陆海新通道江海联运骨干工程的宏伟空间骨架。</li></ul>",
     "author": "OpenQGIS",
-    "date": "2026.09",
-    "year": "2026.9",
-    "physicalSize": "15.0cm x 20.0cm，全景长卷",
+    "date": "2024",
+    "year": "2024",
+    "physicalSize": "15.0cm x 20.0cm，海报比例",
+    "workflow": {
+      "QGIS": "100%"
+    },
     "tags": [
-      "数据可视化",
-      "地形图",
-      "暗黑系",
-      "发光线条",
-      "平陆运河"
+      "空间形态",
+      "赛博暗色",
+      "平陆运河",
+      "矢量制图"
     ],
     "colors": [
       "#0B0E14",

@@ -1465,17 +1465,26 @@
     const modalEl = document.getElementById('viewerModal');
     if (!modalEl) return;
 
+    modalEl.classList.add('open');
+    modalEl.setAttribute('aria-hidden', 'false');
+    document.documentElement.classList.add('viewer-open');
+    document.body.classList.add('viewer-open');
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
     updateAmbientBackdrop(item);
     updateArtworkMetadata(item);
 
     const mSwatches = document.getElementById('mPalette');
     const t = window.AtlasI18n ? window.AtlasI18n.t : (k => k);
+    const activeItem = item;
 
     // Extract dominant palette
     if (mSwatches) {
       mSwatches.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">' + t('metaPaletteExtracting') + '</span>';
       extractDominantColors(item, 5, function (colors) {
         if (!modalEl.classList.contains('open')) return;
+        if (currentViewerIndex >= 0 && galleryItems[currentViewerIndex] && galleryItems[currentViewerIndex].id !== activeItem.id) return;
         mSwatches.innerHTML = '';
         if (!colors || colors.length === 0) {
           mSwatches.innerHTML = '<span style="font-size:0.72rem;color:var(--text-muted);">' + t('metaPaletteEmpty') + '</span>';
@@ -1508,13 +1517,6 @@
       mShareUrl.textContent = shareUrl;
       mShareUrl.title = shareUrl;
     }
-
-    modalEl.classList.add('open');
-    modalEl.setAttribute('aria-hidden', 'false');
-    document.documentElement.classList.add('viewer-open');
-    document.body.classList.add('viewer-open');
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
 
     updateBrowserUrl(item);
 
@@ -2319,14 +2321,18 @@
     }
 
     // 主调色板圆角色块
-    if (Array.isArray(item.palette) && item.palette.length > 0) {
+    const posterPalette = (Array.isArray(item.palette) && item.palette.length > 0) ? item.palette :
+                          (Array.isArray(item.colors) && item.colors.length > 0) ? item.colors :
+                          (Array.isArray(item.color) && item.color.length > 0) ? item.color :
+                          (MASTER_PALETTES[item.id] || []);
+    if (Array.isArray(posterPalette) && posterPalette.length > 0) {
       const swY = metaY + 175;
       ctx.font = '600 14px "JetBrains Mono", Consolas, monospace';
       ctx.fillStyle = textSecondary;
       ctx.fillText('COLOR PALETTE', 64, swY);
 
       const swW = 46, swH = 20, swGap = 8;
-      item.palette.slice(0, 6).forEach((col, idx) => {
+      posterPalette.slice(0, 6).forEach((col, idx) => {
         ctx.fillStyle = col;
         roundRect(ctx, 64 + idx * (swW + swGap), swY + 8, swW, swH, 4);
         ctx.fill();

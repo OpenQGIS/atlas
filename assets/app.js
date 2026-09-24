@@ -999,6 +999,19 @@
           }
         }, 80);
       }
+      if (!isFs && headerEl) {
+        headerEl.classList.remove('peek');
+      }
+    });
+
+    const headerEl = modalEl.querySelector('.viewer-header');
+    modalEl.addEventListener('mousemove', (e) => {
+      if (!modalEl.classList.contains('fullscreen-mode') || !headerEl) return;
+      if (e.clientY < 28) {
+        headerEl.classList.add('peek');
+      } else if (e.clientY > 72) {
+        headerEl.classList.remove('peek');
+      }
     });
 
     window.addEventListener('keydown', (e) => {

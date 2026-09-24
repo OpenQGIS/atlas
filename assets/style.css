@@ -1625,10 +1625,6 @@ body[data-page="portal"] {
   --target-row-height: 420px;
   gap: 16px;
 }
-.masonry-grid::after {
-  content: "";
-  flex-grow: 999;
-}
 
 @media (min-width: 1920px) {
   .masonry-grid { --target-row-height: 280px; gap: 16px; }

@@ -11,6 +11,7 @@
   <script src="data/manifest.js"></script>
   <script src="assets/theme.js"></script>
   <script src="vendor/openseadragon.min.js"></script>
+  <script src="assets/qrcode.min.js"></script>
   <script src="assets/tile-compositor.js"></script>
 </head>
 <body data-page="atlas">
@@ -140,9 +141,48 @@
               <path d="M13 17C13 17.5523 12.5523 18 12 18C11.4477 18 11 17.5523 11 17C11 16.4477 11.4477 16 12 16C12.5523 16 13 16.4477 13 17Z" fill="currentColor" stroke="none"/>
             </svg>
           </button>
-          <button class="nav-btn" id="btnShareArtwork" title="分享画卷链接 (S)" aria-label="分享画卷链接" data-i18n-title="actionShare">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-          </button>
+          <div class="share-dropdown-wrapper" id="shareDropdownWrapper">
+            <button class="nav-btn" id="btnShareArtwork" title="分享画卷 (S)" aria-label="分享画卷" data-i18n-title="actionShare" aria-haspopup="true" aria-expanded="false">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            </button>
+            <div class="share-popover" id="sharePopover" role="menu" aria-hidden="true">
+              <button class="share-popover-item" id="btnShareOptLink" role="menuitem">
+                <span class="share-item-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="butt" stroke-linejoin="round">
+                    <path d="M8.4812 18.1454L8.1883 18.4383C7.5084 19.1181 6.5864 19.5 5.625 19.5C4.6636 19.5 3.7416 19.1181 3.0617 18.4383C2.3819 17.7584 2 16.8364 2 15.875C2 14.9136 2.3819 13.9916 3.0617 13.3117L8.1867 8.1867C8.8666 7.5069 9.7886 7.125 10.75 7.125C11.7114 7.125 12.6334 7.5069 13.3133 8.1867C13.9931 8.8666 14.375 9.7886 14.375 10.75C14.375 11.7114 13.9931 12.6334 13.3133 13.3133L13.0204 13.6062M15.5188 5.8546L15.8117 5.5617C16.4916 4.8819 17.4136 4.5 18.375 4.5C19.3364 4.5 20.2584 4.8819 20.9383 5.5617C21.6181 6.2416 22 7.1636 22 8.125C22 9.0864 21.6181 10.0084 20.9383 10.6883L15.8133 15.8133C15.1334 16.4931 14.2114 16.875 13.25 16.875C12.2886 16.875 11.3666 16.4931 10.6867 15.8133C10.0069 15.1334 9.625 14.2114 9.625 13.25C9.625 12.2886 10.0069 11.3666 10.6867 10.6867L10.9796 10.3938" fill="none"/>
+                  </svg>
+                </span>
+                <div class="share-item-text">
+                  <span class="share-item-title" data-i18n="shareOptLink">分享网址</span>
+                  <span class="share-item-desc" data-i18n="shareOptLinkDesc">复制专属直链到剪贴板</span>
+                </div>
+              </button>
+              <button class="share-popover-item" id="btnShareOptQr" role="menuitem">
+                <span class="share-item-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="butt" stroke-linejoin="round">
+                    <path d="M3 3L8 3L8 8L3 8L3 3ZM16 3L21 3L21 8L16 8L16 3ZM16 16L21 16L21 21L16 21L16 16ZM12 6L12 12L18 12M12 22L12 16L6 16M9 12L2 12M3 15L3 22" fill="none"/>
+                    <path d="M20 11L22 11L22 13L20 13L20 11ZM6 20L8 20L8 22L6 22L6 20ZM11 2L13 2L13 4L11 4L11 2Z" fill="currentColor" stroke="none"/>
+                  </svg>
+                </span>
+                <div class="share-item-text">
+                  <span class="share-item-title" data-i18n="shareOptQr">分享二维码</span>
+                  <span class="share-item-desc" data-i18n="shareOptQrDesc">扫码即刻原图深览</span>
+                </div>
+              </button>
+              <button class="share-popover-item" id="btnShareOptPoster" role="menuitem">
+                <span class="share-item-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="butt" stroke-linejoin="round">
+                    <path d="M3 3L21 3L21 21L3 21L3 3ZM3 18L9 12L13 16L17 13L21 17"/>
+                    <path d="M9.5 7.5C9.5 8.3284 8.8284 9 8 9C7.1716 9 6.5 8.3284 6.5 7.5C6.5 6.6716 7.1716 6 8 6C8.8284 6 9.5 6.6716 9.5 7.5Z" fill="currentColor" stroke="none"/>
+                  </svg>
+                </span>
+                <div class="share-item-text">
+                  <span class="share-item-title" data-i18n="shareOptPoster">分享竖版海报加二维码</span>
+                  <span class="share-item-desc" data-i18n="shareOptPosterDesc">生成 3:4 典藏海报与专属码</span>
+                </div>
+              </button>
+            </div>
+          </div>
           <button class="nav-btn" id="btnCloseViewerRight" title="退出阅览 (Esc)" data-i18n-title="actionClose">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
@@ -397,6 +437,54 @@
             关闭
           </button>
         </div>
+      </div>
+    </div>
+  <!-- Share QR Code Modal · 二维码深览弹窗 -->
+  <div class="share-submodal" id="shareQrModal" aria-hidden="true" role="dialog" aria-label="分享画卷二维码">
+    <div class="share-submodal-backdrop" id="shareQrBackdrop"></div>
+    <div class="share-submodal-dialog">
+      <div class="share-submodal-header">
+        <h3 class="share-submodal-title" data-i18n="shareQrTitle">扫码深览画卷</h3>
+        <button class="share-submodal-close icon-btn" id="btnCloseShareQr" aria-label="关闭" data-i18n-title="actionClose">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="share-submodal-body">
+        <div class="share-qr-card">
+          <div class="share-qr-box" id="shareQrContainer"></div>
+          <h4 class="share-qr-artwork-title" id="shareQrArtworkTitle">-</h4>
+          <p class="share-qr-artwork-sub">地图录 · 1:1 4K Deep Zoom 深览</p>
+        </div>
+      </div>
+      <div class="share-submodal-footer">
+        <button class="share-submodal-btn secondary" id="btnShareQrCopyLink" data-i18n="shareOptLink">复制网址</button>
+        <button class="share-submodal-btn primary" id="btnShareQrDownload" data-i18n="shareQrSaveBtn">保存二维码图片</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Poster Modal · 3:4 竖版展卷典藏海报弹窗 -->
+  <div class="share-submodal" id="sharePosterModal" aria-hidden="true" role="dialog" aria-label="分享竖版海报">
+    <div class="share-submodal-backdrop" id="sharePosterBackdrop"></div>
+    <div class="share-submodal-dialog poster-dialog">
+      <div class="share-submodal-header">
+        <h3 class="share-submodal-title" data-i18n="sharePosterTitle">3:4 展卷典藏海报</h3>
+        <button class="share-submodal-close icon-btn" id="btnCloseSharePoster" aria-label="关闭" data-i18n-title="actionClose">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="share-submodal-body poster-body">
+        <div class="poster-preview-stage" id="posterPreviewStage">
+          <div class="poster-loading" id="posterLoading">
+            <div class="poster-spinner"></div>
+            <span data-i18n="sharePosterGenerating">正在生成高清典藏海报...</span>
+          </div>
+          <img class="poster-preview-img" id="posterPreviewImg" alt="典藏海报预览" style="display: none;" />
+        </div>
+      </div>
+      <div class="share-submodal-footer">
+        <button class="share-submodal-btn secondary" id="btnClosePosterBottom" data-i18n="aboutClose">关闭</button>
+        <button class="share-submodal-btn primary" id="btnDownloadPoster" data-i18n="sharePosterDownloadBtn">下载高清海报 (PNG)</button>
       </div>
     </div>
   </div>

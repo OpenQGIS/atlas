@@ -708,10 +708,101 @@
     if (edgeNextBtn) edgeNextBtn.addEventListener('click', () => navigateArtwork(1));
 
     const shareBtn = document.getElementById('btnShareArtwork');
-    if (shareBtn) shareBtn.addEventListener('click', shareCurrentArtwork);
+    if (shareBtn) {
+      shareBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSharePopover();
+      });
+    }
 
     const copyShareUrlBtn = document.getElementById('btnCopyShareUrl');
-    if (copyShareUrlBtn) copyShareUrlBtn.addEventListener('click', shareCurrentArtwork);
+    if (copyShareUrlBtn) {
+      copyShareUrlBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
+          shareDirectLink(currentFilteredItems[currentViewerIndex]);
+        }
+      });
+    }
+
+    const btnShareOptLink = document.getElementById('btnShareOptLink');
+    if (btnShareOptLink) {
+      btnShareOptLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
+          shareDirectLink(currentFilteredItems[currentViewerIndex]);
+        }
+      });
+    }
+
+    const btnShareOptQr = document.getElementById('btnShareOptQr');
+    if (btnShareOptQr) {
+      btnShareOptQr.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
+          openShareQrModal(currentFilteredItems[currentViewerIndex]);
+        }
+      });
+    }
+
+    const btnShareOptPoster = document.getElementById('btnShareOptPoster');
+    if (btnShareOptPoster) {
+      btnShareOptPoster.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
+          openSharePosterModal(currentFilteredItems[currentViewerIndex]);
+        }
+      });
+    }
+
+    // 二维码弹窗事件
+    const btnCloseShareQr = document.getElementById('btnCloseShareQr');
+    const shareQrBackdrop = document.getElementById('shareQrBackdrop');
+    if (btnCloseShareQr) btnCloseShareQr.addEventListener('click', closeShareQrModal);
+    if (shareQrBackdrop) shareQrBackdrop.addEventListener('click', closeShareQrModal);
+
+    const btnShareQrCopyLink = document.getElementById('btnShareQrCopyLink');
+    if (btnShareQrCopyLink) {
+      btnShareQrCopyLink.addEventListener('click', () => {
+        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
+          shareDirectLink(currentFilteredItems[currentViewerIndex]);
+        }
+      });
+    }
+
+    const btnShareQrDownload = document.getElementById('btnShareQrDownload');
+    if (btnShareQrDownload) {
+      btnShareQrDownload.addEventListener('click', () => {
+        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
+          downloadQrCodeImage(currentFilteredItems[currentViewerIndex]);
+        }
+      });
+    }
+
+    // 竖版海报弹窗事件
+    const btnCloseSharePoster = document.getElementById('btnCloseSharePoster');
+    const btnClosePosterBottom = document.getElementById('btnClosePosterBottom');
+    const sharePosterBackdrop = document.getElementById('sharePosterBackdrop');
+    if (btnCloseSharePoster) btnCloseSharePoster.addEventListener('click', closeSharePosterModal);
+    if (btnClosePosterBottom) btnClosePosterBottom.addEventListener('click', closeSharePosterModal);
+    if (sharePosterBackdrop) sharePosterBackdrop.addEventListener('click', closeSharePosterModal);
+
+    const btnDownloadPoster = document.getElementById('btnDownloadPoster');
+    if (btnDownloadPoster) {
+      btnDownloadPoster.addEventListener('click', downloadPosterImage);
+    }
+
+    // 点击外部空白收起分享锚点弹窗
+    document.addEventListener('click', (e) => {
+      const wrapper = document.getElementById('shareDropdownWrapper');
+      if (wrapper && !wrapper.contains(e.target)) {
+        closeSharePopover();
+      }
+    });
 
     function updateEdgeNextOffset() {
       if (!modalEl || !drawerEl) return;
@@ -834,7 +925,16 @@
 
       switch (e.key) {
         case 'Escape':
-          if (document.fullscreenElement) {
+          const posterModal = document.getElementById('sharePosterModal');
+          const qrModal = document.getElementById('shareQrModal');
+          const popover = document.getElementById('sharePopover');
+          if (posterModal && posterModal.classList.contains('open')) {
+            closeSharePosterModal();
+          } else if (qrModal && qrModal.classList.contains('open')) {
+            closeShareQrModal();
+          } else if (popover && popover.classList.contains('open')) {
+            closeSharePopover();
+          } else if (document.fullscreenElement) {
             document.exitFullscreen().catch(() => {});
           } else if (drawerEl && drawerEl.classList.contains('open')) {
             setDrawerOpen(false);
@@ -1311,6 +1411,9 @@
     if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
     modalEl.classList.remove('drawer-open');
     modalEl.style.removeProperty('--drawer-offset');
+    closeSharePopover();
+    closeShareQrModal();
+    closeSharePosterModal();
 
     if (osdViewer) {
       try { osdViewer.destroy(); } catch (e) {}
@@ -1344,11 +1447,46 @@
     }
   }
 
+  function toggleSharePopover(force) {
+    const popover = document.getElementById('sharePopover');
+    const shareBtn = document.getElementById('btnShareArtwork');
+    if (!popover || !shareBtn) return;
+    const shouldOpen = typeof force === 'boolean' ? force : !popover.classList.contains('open');
+    if (shouldOpen) {
+      popover.classList.add('open');
+      popover.setAttribute('aria-hidden', 'false');
+      shareBtn.setAttribute('aria-expanded', 'true');
+    } else {
+      popover.classList.remove('open');
+      popover.setAttribute('aria-hidden', 'true');
+      shareBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function closeSharePopover() {
+    toggleSharePopover(false);
+  }
+
   function shareCurrentArtwork() {
-    if (currentViewerIndex < 0 || !currentFilteredItems[currentViewerIndex]) return;
-    const item = currentFilteredItems[currentViewerIndex];
+    toggleSharePopover();
+  }
+
+  function shareDirectLink(item) {
+    if (!item) return;
     const url = getShareUrlForItem(item);
     copyToClipboard(url);
+
+    const linkBtn = document.getElementById('btnShareOptLink');
+    if (linkBtn) {
+      const titleEl = linkBtn.querySelector('.share-item-title');
+      const origText = titleEl ? titleEl.textContent : '';
+      if (titleEl) titleEl.textContent = (window.AtlasI18n && window.AtlasI18n.getCurrentLang() === 'en') ? 'Copied Link ✓' : '已复制网址 ✓';
+      linkBtn.classList.add('copied');
+      setTimeout(() => {
+        if (titleEl) titleEl.textContent = origText;
+        linkBtn.classList.remove('copied');
+      }, 1500);
+    }
 
     const shareBtn = document.getElementById('btnShareArtwork');
     if (shareBtn) {
@@ -1373,6 +1511,366 @@
       ? `Copied direct link for "${title}"`
       : `已复制画卷《${title}》专属直链`;
     showToast(successMsg);
+
+    setTimeout(() => {
+      closeSharePopover();
+    }, 1200);
+  }
+
+  // ── 二维码专属深览弹窗 ──
+  function openShareQrModal(item) {
+    closeSharePopover();
+    if (!item) return;
+    const modal = document.getElementById('shareQrModal');
+    const container = document.getElementById('shareQrContainer');
+    const titleEl = document.getElementById('shareQrArtworkTitle');
+    if (!modal || !container) return;
+
+    const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
+    if (titleEl) titleEl.textContent = (locItem && locItem.title) || item.title;
+
+    const url = getShareUrlForItem(item);
+    if (window.qrcode) {
+      try {
+        const qr = qrcode(0, 'M');
+        qr.addData(url);
+        qr.make();
+        container.innerHTML = qr.createSvgTag({ cellSize: 6, margin: 4, scalable: true });
+      } catch (err) {
+        console.error('QR code generation error:', err);
+      }
+    }
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeShareQrModal() {
+    const modal = document.getElementById('shareQrModal');
+    if (modal) {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function downloadQrCodeImage(item) {
+    if (!item) return;
+    const url = getShareUrlForItem(item);
+    if (!window.qrcode) return;
+    try {
+      const qr = qrcode(0, 'M');
+      qr.addData(url);
+      qr.make();
+      const count = qr.getModuleCount();
+      const cellSize = 10;
+      const margin = 30;
+      const size = count * cellSize + margin * 2;
+      const cvs = document.createElement('canvas');
+      cvs.width = size;
+      cvs.height = size;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#000000';
+      for (let r = 0; r < count; r++) {
+        for (let c = 0; c < count; c++) {
+          if (qr.isDark(r, c)) {
+            ctx.fillRect(margin + c * cellSize, margin + r * cellSize, cellSize, cellSize);
+          }
+        }
+      }
+      const a = document.createElement('a');
+      a.download = `${item.title || 'atlas'}_qrcode.png`;
+      a.href = cvs.toDataURL('image/png');
+      a.click();
+    } catch (e) {
+      console.error('Download QR failed:', e);
+    }
+  }
+
+  // ── 3:4 竖版展卷典藏海报生成引擎 ──
+  let currentPosterBlob = null;
+  let currentPosterItem = null;
+
+  async function openSharePosterModal(item) {
+    closeSharePopover();
+    if (!item) return;
+    currentPosterItem = item;
+    const modal = document.getElementById('sharePosterModal');
+    const loading = document.getElementById('posterLoading');
+    const imgEl = document.getElementById('posterPreviewImg');
+    if (!modal) return;
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    if (loading) {
+      loading.style.display = 'flex';
+      loading.innerHTML = '<div class="poster-spinner"></div><span>正在生成高清典藏海报...</span>';
+    }
+    if (imgEl) {
+      imgEl.style.display = 'none';
+      imgEl.src = '';
+    }
+
+    try {
+      const canvas = await generateArtworkPoster(item);
+      if (canvas && imgEl) {
+        canvas.toBlob((blob) => {
+          currentPosterBlob = blob;
+          if (blob) {
+            const blobUrl = URL.createObjectURL(blob);
+            imgEl.src = blobUrl;
+            imgEl.style.display = 'block';
+            if (loading) loading.style.display = 'none';
+          }
+        }, 'image/png', 0.95);
+      }
+    } catch (err) {
+      console.error('Poster generation failed:', err);
+      if (loading) {
+        loading.innerHTML = '<span style="color:#ff5555;font-size:0.85rem;">[海报生成失败，请重试]</span>';
+      }
+    }
+  }
+
+  function closeSharePosterModal() {
+    const modal = document.getElementById('sharePosterModal');
+    if (modal) {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function downloadPosterImage() {
+    if (!currentPosterBlob || !currentPosterItem) return;
+    const a = document.createElement('a');
+    a.download = `${currentPosterItem.title || 'atlas'}_3x4海报.png`;
+    a.href = URL.createObjectURL(currentPosterBlob);
+    a.click();
+  }
+
+  async function generateArtworkPoster(item) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 1440;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const bgPrimary = isLight ? '#f6f7fa' : '#0a0d14';
+    const bgCard = isLight ? '#ffffff' : '#141824';
+    const textPrimary = isLight ? '#0f141c' : '#f0f3f8';
+    const textSecondary = isLight ? '#596780' : '#8fa0ba';
+    const accent = '#d4a373';
+    const borderColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
+
+    // 1. 背景底色
+    ctx.fillStyle = bgPrimary;
+    ctx.fillRect(0, 0, 1080, 1440);
+
+    // 雅致内双线边框
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(36, 36, 1080 - 72, 1440 - 72);
+
+    // 2. 顶部页眉
+    ctx.font = '700 20px "JetBrains Mono", Consolas, monospace';
+    ctx.fillStyle = accent;
+    ctx.fillText('OPENQGIS · ATLASLOG', 64, 86);
+
+    ctx.font = '500 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.fillStyle = textSecondary;
+    ctx.fillText('「一图一境 · 静观其详」', 64, 118);
+
+    const rightMeta = '2026 EDITION';
+    ctx.font = '600 18px "JetBrains Mono", Consolas, monospace';
+    const rmWidth = ctx.measureText(rightMeta).width;
+    ctx.fillText(rightMeta, 1080 - 64 - rmWidth, 102);
+
+    // 分隔线
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(64, 140);
+    ctx.lineTo(1080 - 64, 140);
+    ctx.stroke();
+
+    // 3. 画卷主展台
+    const imgX = 64, imgY = 165, imgW = 952, imgH = 730;
+    ctx.fillStyle = bgCard;
+    roundRect(ctx, imgX, imgY, imgW, imgH, 16);
+    ctx.fill();
+    ctx.strokeStyle = borderColor;
+    ctx.stroke();
+
+    const imgSrc = item.thumb || item.heroImage || (item.dzi && item.dzi.Image && item.dzi.Image.Url) || '';
+    if (imgSrc) {
+      try {
+        const img = await loadImageAsync(imgSrc);
+        ctx.save();
+        roundRect(ctx, imgX, imgY, imgW, imgH, 16);
+        ctx.clip();
+
+        const imgAspect = img.naturalWidth / img.naturalHeight;
+        const boxAspect = imgW / imgH;
+        let dw, dh, dx, dy;
+        if (imgAspect > boxAspect) {
+          dw = imgW;
+          dh = imgW / imgAspect;
+          dx = imgX;
+          dy = imgY + (imgH - dh) / 2;
+        } else {
+          dh = imgH;
+          dw = imgH * imgAspect;
+          dx = imgX + (imgW - dw) / 2;
+          dy = imgY;
+        }
+        ctx.drawImage(img, dx, dy, dw, dh);
+        ctx.restore();
+      } catch (e) {
+        console.warn('Poster artwork image load failed:', e);
+      }
+    }
+
+    // 4. 作品档案与题记区
+    const metaY = 935;
+    ctx.font = '700 38px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.fillStyle = textPrimary;
+    const titleText = item.title || '空间地图成果';
+    ctx.fillText(titleText, 64, metaY + 40);
+
+    ctx.font = '500 20px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.fillStyle = textSecondary;
+    const categoryText = (item.category || '空间制图') + '   |   匠师：OpenQGIS';
+    ctx.fillText(categoryText, 64, metaY + 78);
+
+    if (item.description) {
+      ctx.font = '400 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = textSecondary;
+      wrapText(ctx, item.description, 64, metaY + 116, 620, 26, 2);
+    }
+
+    // 主调色板圆角色块
+    if (Array.isArray(item.palette) && item.palette.length > 0) {
+      const swY = metaY + 175;
+      ctx.font = '600 14px "JetBrains Mono", Consolas, monospace';
+      ctx.fillStyle = textSecondary;
+      ctx.fillText('COLOR PALETTE', 64, swY);
+
+      const swW = 46, swH = 20, swGap = 8;
+      item.palette.slice(0, 6).forEach((col, idx) => {
+        ctx.fillStyle = col;
+        roundRect(ctx, 64 + idx * (swW + swGap), swY + 8, swW, swH, 4);
+        ctx.fill();
+        ctx.strokeStyle = borderColor;
+        ctx.stroke();
+      });
+    }
+
+    // 5. 右下角专属二维码
+    const qrSize = 136;
+    const qrX = 1080 - 64 - qrSize;
+    const qrY = 1185;
+
+    // 白底圆角卡片
+    ctx.fillStyle = '#ffffff';
+    roundRect(ctx, qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 14);
+    ctx.fill();
+
+    // 绘制二维码矩阵
+    if (window.qrcode) {
+      try {
+        const url = getShareUrlForItem(item);
+        const qr = qrcode(0, 'M');
+        qr.addData(url);
+        qr.make();
+        const modCount = qr.getModuleCount();
+        const cellSize = qrSize / modCount;
+        ctx.fillStyle = '#000000';
+        for (let r = 0; r < modCount; r++) {
+          for (let c = 0; c < modCount; c++) {
+            if (qr.isDark(r, c)) {
+              ctx.fillRect(qrX + c * cellSize, qrY + r * cellSize, cellSize + 0.5, cellSize + 0.5);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Poster QR render error:', e);
+      }
+    }
+
+    ctx.font = '600 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.fillStyle = textPrimary;
+    ctx.fillText('扫码 1:1 4K 原图深览', qrX - 220, qrY + 48);
+
+    ctx.font = '400 15px "JetBrains Mono", Consolas, monospace';
+    ctx.fillStyle = textSecondary;
+    ctx.fillText('openqgis.github.io/atlas', qrX - 220, qrY + 76);
+
+    // 6. 底部版权与 Slogan
+    ctx.strokeStyle = borderColor;
+    ctx.beginPath();
+    ctx.moveTo(64, 1365);
+    ctx.lineTo(1080 - 64, 1365);
+    ctx.stroke();
+
+    ctx.font = '400 16px "JetBrains Mono", Consolas, monospace';
+    ctx.fillStyle = textSecondary;
+    ctx.fillText('© 2026 OpenQGIS / AtlasLog · 个人空间工造与视觉成果典藏', 64, 1395);
+
+    return canvas;
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    if (typeof ctx.roundRect === 'function') {
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, r);
+      return;
+    }
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctx.lineTo(x + r, y + h);
+    ctx.arcTo(x, y + h, x, y + h - r, r);
+    ctx.lineTo(x, y + r);
+    ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+    if (!text) return;
+    let line = '';
+    let lineCount = 0;
+    for (let i = 0; i < text.length; i++) {
+      const testLine = line + text[i];
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && i > 0) {
+        lineCount++;
+        if (lineCount >= maxLines) {
+          ctx.fillText(line + '...', x, y);
+          return;
+        }
+        ctx.fillText(line, x, y);
+        line = text[i];
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    if (line) ctx.fillText(line, x, y);
+  }
+
+  function loadImageAsync(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Image failed to load: ' + src));
+      img.src = src;
+    });
   }
 
   function updateBrowserUrl(item) {

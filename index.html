@@ -4,15 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20260924_v2">
+  <link rel="stylesheet" href="assets/style.css?v=20260924_v3">
   <script src="assets/config.js"></script>
-  <script src="assets/i18n.js?v=20260924_v2"></script>
+  <script src="assets/i18n.js?v=20260924_v3"></script>
   <script src="data/themes.js"></script>
   <script src="data/manifest.js"></script>
   <script src="assets/theme.js"></script>
   <script src="vendor/openseadragon.min.js"></script>
   <script src="assets/qrcode.min.js"></script>
-  <script src="assets/tile-compositor.js?v=20260924_v2"></script>
+  <script src="assets/tile-compositor.js?v=20260924_v3"></script>
 </head>
 <body data-page="atlas">
   <!-- Fullscreen Opening Screen (开屏全景与Slogan) -->
@@ -21,11 +21,52 @@
     <div class="hero-bg hero-bg-b" id="heroBgB"></div>
     <div class="hero-scrim"></div>
     
-    <div class="hero-content">
+    <!-- Top-Left Floating Brand Badge (首屏左上角品牌胶囊) -->
+    <div class="hero-top-brand" id="heroTopBrand">
       <div class="hero-badge">
         <span class="hero-badge-dot"></span>
         <span class="hero-badge-text">OPENQGIS · ATLASLOG</span>
       </div>
+    </div>
+
+    <!-- Top-Right Floating Controls (首屏右上角多语言下拉与深浅主题切换) -->
+    <div class="hero-top-actions" id="heroTopActions">
+      <div class="lang-dropdown-wrapper hero-lang-dropdown" id="heroLangDropdownWrapper">
+        <button class="stat-pill lang-dropdown-btn" id="btnHeroLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" title="切换语言 / Switch Language">
+          <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+          <span class="lang-current-label" id="currentHeroLangLabel">中</span>
+          <svg class="icon chevron-icon" style="width:10px; height:10px; margin-left:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div class="lang-dropdown-menu" id="heroLangDropdownMenu" role="menu">
+          <button class="lang-dropdown-item active" data-lang="zh" role="menuitem">
+            <span class="lang-item-name">简体中文</span>
+            <span class="lang-item-badge">ZH</span>
+          </button>
+          <button class="lang-dropdown-item" data-lang="en" role="menuitem">
+            <span class="lang-item-name">English</span>
+            <span class="lang-item-badge">EN</span>
+          </button>
+          <button class="lang-dropdown-item" data-lang="ja" role="menuitem">
+            <span class="lang-item-name">日本語</span>
+            <span class="lang-item-badge">JA</span>
+          </button>
+          <button class="lang-dropdown-item" data-lang="ko" role="menuitem">
+            <span class="lang-item-name">한국어</span>
+            <span class="lang-item-badge">KO</span>
+          </button>
+        </div>
+      </div>
+      <button class="icon-btn theme-toggle-btn hero-theme-btn" id="btnHeroToggleTheme" data-i18n-title="navThemeToggle" title="切换主题模式" aria-label="切换主题模式">
+      </button>
+    </div>
+
+    <div class="hero-content">
       <h1 class="hero-title" id="heroTitle" data-i18n-html="heroSlogan"><span class="hero-title-chunk">一图一境</span><span class="hero-title-sep"> · </span><span class="hero-title-chunk">静观其详</span></h1>
       <p class="hero-subtitle" id="heroSubtitle" data-i18n-html="heroSubslogan"><span class="hero-sub-chunk">地图录</span><span class="hero-sub-sep"> · </span><span class="hero-sub-chunk">OpenQGIS 制图作品集</span></p>
       <div class="hero-desc" data-i18n="heroDesc">个人制图实践 · QGIS 能力边界的记录</div>
@@ -206,16 +247,25 @@
         </div>
 
         <div class="viewer-floating-toolbar">
-          <span class="tool-zoom-badge" id="toolZoomBadge" title="当前缩放倍率">100%</span>
-          <button class="tool-btn tool-btn-text" id="toolActualSize" title="1:1 原生像素 (快捷键 1)">1:1</button>
-          <div class="tool-divider"></div>
-          <button class="tool-btn" id="toolZoomIn" title="放大 (+)">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-          </button>
-          <button class="tool-btn" id="toolZoomOut" title="缩小 (-)">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-          </button>
-          <button class="tool-btn" id="toolReset" title="自适应居中 (0)">
+          <!-- 动态比例控制器 (类似 Photoshop 比例控制器：支持直接输入数值 + 预设档位拉取) -->
+          <div class="zoom-dropdown-wrapper" id="zoomDropdownWrapper">
+            <button class="tool-zoom-badge" id="toolZoomBadge" aria-haspopup="true" aria-expanded="false" title="缩放比例与预设档位 (快捷键: 0适应, 1物理原寸)">
+              <span class="zoom-val" id="toolZoomVal">100%</span>
+              <svg class="icon chevron-icon" style="width:10px; height:10px; margin-left:3px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="zoom-popover" id="zoomPopover" role="menu" aria-hidden="true">
+              <div class="zoom-popover-header">
+                <span class="zoom-input-prefix" data-i18n="zoomInputPrefix">比例</span>
+                <input type="number" class="zoom-input-box" id="zoomInputBox" min="1" max="1000" step="1" value="100" />
+                <span class="zoom-input-suffix">%</span>
+                <button class="zoom-input-apply" id="btnApplyZoomInput" data-i18n="zoomInputApply">确定</button>
+              </div>
+              <div class="zoom-presets-list" id="zoomPresetsList">
+                <!-- 动态根据当前作品的物理尺寸生成预设档位 -->
+              </div>
+            </div>
+          </div>
+          <button class="tool-btn" id="toolReset" title="整图展卷全貌 (0)" data-i18n-title="toolFitScreen">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
           </button>
           <button class="tool-btn" id="toolRotate" title="顺时针旋转 (R)">
@@ -568,6 +618,6 @@
         </div>
       </div>
     </div>
-  <script src="assets/app.js?v=20260924_v2"></script>
+  <script src="assets/app.js?v=20260924_v3"></script>
 </body>
 </html>

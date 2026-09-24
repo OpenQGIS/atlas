@@ -92,7 +92,8 @@
   function updateUI() {
     const buttons = [
       document.getElementById('btnToggleTheme'),
-      document.getElementById('toolToggleTheme')
+      document.getElementById('toolToggleTheme'),
+      document.getElementById('btnHeroToggleTheme')
     ].filter(Boolean);
 
     buttons.forEach(btn => {
@@ -111,7 +112,7 @@
   // Bind toggle buttons after DOM ready
   document.addEventListener('DOMContentLoaded', () => {
     updateUI();
-    ['btnToggleTheme', 'toolToggleTheme'].forEach(id => {
+    ['btnToggleTheme', 'toolToggleTheme', 'btnHeroToggleTheme'].forEach(id => {
       const btn = document.getElementById(id);
       if (btn) {
         btn.addEventListener('click', toggleTheme);

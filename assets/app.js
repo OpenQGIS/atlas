@@ -14,6 +14,174 @@
   let osdViewer = null;
   let currentFilter = 'all';
   let preViewerScrollY = 0;
+  let currentHistoryLevel = 0; // 0: hero, 1: gallery, 2: viewer
+
+  // 物理尺寸引擎基准 (300 DPI 印刷制图在 96 CSS DPI 显示器上的 100% 物理真实尺寸系数)
+  const PHYSICAL_100_RATIO = 96 / 300; // 0.32
+
+  function getBase100PhysicalZoom(viewer) {
+    if (!viewer || !viewer.viewport) return 1;
+    return viewer.viewport.imageToViewportZoom(1) * PHYSICAL_100_RATIO;
+  }
+
+  function getPhysicalPercentFromZoom(viewer, zoom) {
+    const base100 = getBase100PhysicalZoom(viewer);
+    if (!base100 || base100 <= 0) return 100;
+    return Math.round((zoom / base100) * 100);
+  }
+
+  function getZoomFromPhysicalPercent(viewer, percent) {
+    const base100 = getBase100PhysicalZoom(viewer);
+    return base100 * (Math.max(1, Math.min(percent, 2500)) / 100);
+  }
+
+  function bindZoomControllerEvents() {
+    const wrapper = document.getElementById('zoomDropdownWrapper');
+    const badgeBtn = document.getElementById('toolZoomBadge');
+    const popover = document.getElementById('zoomPopover');
+    const inputBox = document.getElementById('zoomInputBox');
+    const applyBtn = document.getElementById('btnApplyZoomInput');
+    if (!wrapper || !badgeBtn || !popover || !inputBox) return;
+
+    function closeZoomPopover() {
+      popover.classList.remove('open');
+      badgeBtn.setAttribute('aria-expanded', 'false');
+      popover.setAttribute('aria-hidden', 'true');
+    }
+
+    function openZoomPopover() {
+      popover.classList.add('open');
+      badgeBtn.setAttribute('aria-expanded', 'true');
+      popover.setAttribute('aria-hidden', 'false');
+      inputBox.focus();
+      inputBox.select();
+    }
+
+    badgeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (popover.classList.contains('open')) {
+        closeZoomPopover();
+      } else {
+        openZoomPopover();
+      }
+    });
+
+    function applyInputZoom() {
+      const val = parseInt(inputBox.value, 10);
+      if (Number.isFinite(val) && val > 0 && osdViewer && osdViewer.viewport) {
+        const targetZoom = getZoomFromPhysicalPercent(osdViewer, val);
+        osdViewer.viewport.zoomTo(targetZoom);
+        osdViewer.viewport.applyConstraints();
+      }
+      closeZoomPopover();
+    }
+
+    if (applyBtn) {
+      applyBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        applyInputZoom();
+      });
+    }
+
+    inputBox.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyInputZoom();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeZoomPopover();
+      }
+    });
+
+    popover.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!wrapper.contains(e.target)) {
+        closeZoomPopover();
+      }
+    });
+  }
+
+  function updateZoomUI() {
+    if (!osdViewer || !osdViewer.viewport) return;
+    const currentZoom = osdViewer.viewport.getZoom();
+    const currentPercent = getPhysicalPercentFromZoom(osdViewer, currentZoom);
+
+    const zoomValEl = document.getElementById('toolZoomVal');
+    if (zoomValEl) zoomValEl.textContent = currentPercent + '%';
+
+    const inputBox = document.getElementById('zoomInputBox');
+    if (inputBox && document.activeElement !== inputBox) {
+      inputBox.value = currentPercent;
+    }
+
+    const presetItems = document.querySelectorAll('.zoom-preset-item');
+    presetItems.forEach(item => {
+      const p = parseInt(item.getAttribute('data-percent'), 10);
+      item.classList.toggle('active', Math.abs(p - currentPercent) <= 2);
+    });
+  }
+
+  function renderDynamicZoomPresets(item) {
+    const presetsList = document.getElementById('zoomPresetsList');
+    if (!presetsList || !osdViewer || !osdViewer.viewport) return;
+
+    const base100 = getBase100PhysicalZoom(osdViewer);
+    const homeZoom = osdViewer.viewport.getHomeZoom();
+    const fitPercent = Math.max(1, Math.round((homeZoom / base100) * 100));
+    const pixelNativePercent = Math.round((1 / PHYSICAL_100_RATIO) * 100); // 313%
+
+    const t = window.AtlasI18n ? window.AtlasI18n.t : (k => k);
+
+    const rawPresets = [
+      { label: t('zoomFitOption') || '自适应全貌', percent: fitPercent, isFit: true },
+      { label: t('zoomPhysical50') || '50% 物理尺寸', percent: 50 },
+      { label: t('zoomPhysical100') || '100% 物理原寸 (真实幅面)', percent: 100 },
+      { label: t('zoomPhysical200') || '200% 精细刻画', percent: 200 },
+      { label: t('zoomPixel1to1') || '1:1 像素点对点 (超精细)', percent: pixelNativePercent },
+      { label: t('zoomUltraDetail') || '400% 超微细节', percent: 400 }
+    ];
+
+    const presets = [];
+    const seen = new Set();
+    rawPresets.sort((a, b) => a.percent - b.percent).forEach(p => {
+      if (seen.has(p.percent)) return;
+      seen.add(p.percent);
+      presets.push(p);
+    });
+
+    presetsList.innerHTML = '';
+    presets.forEach(p => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'zoom-preset-item';
+      btn.setAttribute('data-percent', p.percent);
+      btn.innerHTML = `<span class="zoom-preset-label">${p.label}</span><span class="zoom-preset-val">${p.percent}%</span>`;
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (p.isFit) {
+          osdViewer.viewport.goHome();
+        } else {
+          const targetZoom = getZoomFromPhysicalPercent(osdViewer, p.percent);
+          osdViewer.viewport.zoomTo(targetZoom);
+          osdViewer.viewport.applyConstraints();
+        }
+        const popover = document.getElementById('zoomPopover');
+        const badgeBtn = document.getElementById('toolZoomBadge');
+        if (popover) popover.classList.remove('open');
+        if (badgeBtn) badgeBtn.setAttribute('aria-expanded', 'false');
+      });
+      presetsList.appendChild(btn);
+    });
+
+    updateZoomUI();
+  }
+
 
   const SVG_EXIT_FULLSCREEN = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>';
   const SVG_FULLSCREEN = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
@@ -311,10 +479,28 @@
     });
 
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 120) {
+      const scrollY = window.scrollY || window.pageYOffset;
+      if (scrollY > 120) {
         stopHeroTimer();
       } else {
         if (!heroTimer) scheduleNextTransition();
+      }
+
+      // 同步 Level 0 / Level 1 历史状态
+      const modalEl = document.getElementById('viewerModal');
+      if (!modalEl || !modalEl.classList.contains('open')) {
+        const heroThreshold = Math.max(260, window.innerHeight * 0.45);
+        if (scrollY >= heroThreshold && currentHistoryLevel === 0) {
+          currentHistoryLevel = 1;
+          const url = new URL(window.location.href);
+          url.hash = 'gallery';
+          window.history.pushState({ level: 1, view: 'gallery' }, '', url.toString());
+        } else if (scrollY < 60 && currentHistoryLevel === 1) {
+          currentHistoryLevel = 0;
+          const url = new URL(window.location.href);
+          url.hash = '';
+          window.history.replaceState({ level: 0, view: 'hero' }, '', url.pathname + url.search);
+        }
       }
     }, { passive: true });
 
@@ -336,6 +522,12 @@
         target.scrollIntoView({ behavior: 'smooth' });
       } else {
         window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+      }
+      if (currentHistoryLevel === 0) {
+        currentHistoryLevel = 1;
+        const url = new URL(window.location.href);
+        url.hash = 'gallery';
+        window.history.pushState({ level: 1, view: 'gallery' }, '', url.toString());
       }
     }
 
@@ -393,6 +585,7 @@
      ------------------------------------------------------------- */
   function bindLanguageDropdown() {
     const dropdownConfigs = [
+      { wrapperId: 'heroLangDropdownWrapper', btnId: 'btnHeroLangDropdown', menuId: 'heroLangDropdownMenu' },
       { wrapperId: 'langDropdownWrapper', btnId: 'btnLangDropdown', menuId: 'langDropdownMenu' },
       { wrapperId: 'viewerLangDropdownWrapper', btnId: 'viewerBtnLangDropdown', menuId: 'viewerLangMenu' }
     ];
@@ -716,11 +909,11 @@
       img.onload = () => img.classList.add('loaded');
     }
 
-    card.addEventListener('click', () => openViewerByItem(item));
+    card.addEventListener('click', () => openViewerByItem(item, true));
     card.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        openViewerByItem(item);
+        openViewerByItem(item, true);
       }
     });
 
@@ -769,16 +962,21 @@
     const drawerEl = document.getElementById('viewerMetaDrawer') || document.getElementById('viewerDrawer');
     const drawerCloseBtn = document.getElementById('btnCloseDrawer') || document.getElementById('btnDrawerClose');
 
-    const toolZoomIn = document.getElementById('toolZoomIn');
-    const toolZoomOut = document.getElementById('toolZoomOut');
     const toolReset = document.getElementById('toolReset');
     const toolRotate = document.getElementById('toolRotate');
     const toolFullscreen = document.getElementById('toolFullscreen');
-    const toolActualSize = document.getElementById('toolActualSize');
 
-    if (backdropEl) backdropEl.addEventListener('click', closeViewer);
-    if (closeBtn) closeBtn.addEventListener('click', closeViewer);
-    if (closeRightBtn) closeRightBtn.addEventListener('click', closeViewer);
+    function requestCloseViewer() {
+      if (currentHistoryLevel === 2 && window.history.length > 1) {
+        window.history.back();
+      } else {
+        closeViewer(true);
+      }
+    }
+
+    if (backdropEl) backdropEl.addEventListener('click', requestCloseViewer);
+    if (closeBtn) closeBtn.addEventListener('click', requestCloseViewer);
+    if (closeRightBtn) closeRightBtn.addEventListener('click', requestCloseViewer);
     if (prevBtn) prevBtn.addEventListener('click', () => navigateArtwork(-1));
     if (nextBtn) nextBtn.addEventListener('click', () => navigateArtwork(1));
     if (edgePrevBtn) edgePrevBtn.addEventListener('click', () => navigateArtwork(-1));
@@ -983,33 +1181,8 @@
       });
     }
 
-    if (toolActualSize) {
-      toolActualSize.addEventListener('click', () => {
-        if (osdViewer && osdViewer.viewport) {
-          const targetZoom = osdViewer.viewport.imageToViewportZoom(1);
-          osdViewer.viewport.zoomTo(targetZoom);
-          osdViewer.viewport.applyConstraints();
-        }
-      });
-    }
-
-    if (toolZoomIn) {
-      toolZoomIn.addEventListener('click', () => {
-        if (osdViewer) {
-          osdViewer.viewport.zoomBy(1.35);
-          osdViewer.viewport.applyConstraints();
-        }
-      });
-    }
-
-    if (toolZoomOut) {
-      toolZoomOut.addEventListener('click', () => {
-        if (osdViewer) {
-          osdViewer.viewport.zoomBy(1 / 1.35);
-          osdViewer.viewport.applyConstraints();
-        }
-      });
-    }
+    // 初始化比例控制器浮层与输入交互
+    bindZoomControllerEvents();
 
     if (toolReset) {
       toolReset.addEventListener('click', () => {
@@ -1129,7 +1302,12 @@
           const qrModal = document.getElementById('shareQrModal');
           const popover = document.getElementById('sharePopover');
           const vLangMenu = document.getElementById('viewerLangMenu');
-          if (posterModal && posterModal.classList.contains('open')) {
+          const zoomPopover = document.getElementById('zoomPopover');
+          if (zoomPopover && zoomPopover.classList.contains('open')) {
+            zoomPopover.classList.remove('open');
+            const badgeBtn = document.getElementById('toolZoomBadge');
+            if (badgeBtn) badgeBtn.setAttribute('aria-expanded', 'false');
+          } else if (posterModal && posterModal.classList.contains('open')) {
             closeSharePosterModal();
           } else if (qrModal && qrModal.classList.contains('open')) {
             closeShareQrModal();
@@ -1144,7 +1322,7 @@
           } else if (drawerEl && drawerEl.classList.contains('open')) {
             setDrawerOpen(false);
           } else {
-            closeViewer();
+            requestCloseViewer();
           }
           break;
         case 'ArrowLeft':
@@ -1154,15 +1332,25 @@
           navigateArtwork(1);
           break;
         case '1':
-          if (toolActualSize) toolActualSize.click();
+          if (osdViewer && osdViewer.viewport) {
+            const targetZoom = getZoomFromPhysicalPercent(osdViewer, 100);
+            osdViewer.viewport.zoomTo(targetZoom);
+            osdViewer.viewport.applyConstraints();
+          }
           break;
         case '+':
         case '=':
-          if (toolZoomIn) toolZoomIn.click();
+          if (osdViewer && osdViewer.viewport) {
+            osdViewer.viewport.zoomBy(1.3);
+            osdViewer.viewport.applyConstraints();
+          }
           break;
         case '-':
         case '_':
-          if (toolZoomOut) toolZoomOut.click();
+          if (osdViewer && osdViewer.viewport) {
+            osdViewer.viewport.zoomBy(1 / 1.3);
+            osdViewer.viewport.applyConstraints();
+          }
           break;
         case '0':
         case 'Home':
@@ -1202,20 +1390,31 @@
       }
     });
 
-    window.addEventListener('popstate', () => {
+    window.addEventListener('popstate', (e) => {
       const modalEl = document.getElementById('viewerModal');
       const urlParams = new URLSearchParams(window.location.search);
       const id = urlParams.get('id') || urlParams.get('art');
+      const state = e.state || {};
+
       if (id) {
         const item = findArtworkByQuery(id);
         if (item) {
           if (!modalEl || !modalEl.classList.contains('open') || currentFilteredItems[currentViewerIndex]?.id !== item.id) {
-            openViewerByItem(item);
+            openViewerByItem(item, false);
           }
         }
+        currentHistoryLevel = 2;
       } else {
         if (modalEl && modalEl.classList.contains('open')) {
           closeViewer(false);
+        }
+
+        // 判断是否退回到了首屏 Level 0
+        if (state.level === 0 || (!window.location.hash && !state.level)) {
+          currentHistoryLevel = 0;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          currentHistoryLevel = 1;
         }
       }
     });
@@ -1599,8 +1798,9 @@
     });
   }
 
-  function openViewerByItem(item) {
+  function openViewerByItem(item, isNewOpen = false) {
     if (!item) return;
+    preViewerScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
     let idx = currentFilteredItems.findIndex(i => i.id === item.id);
     if (idx === -1) {
       applyFilter('all');
@@ -1611,13 +1811,13 @@
       }
     }
     currentViewerIndex = idx;
-    showArtwork(item);
+    showArtwork(item, isNewOpen);
   }
 
   function navigateArtwork(direction) {
     if (currentFilteredItems.length === 0) return;
     currentViewerIndex = (currentViewerIndex + direction + currentFilteredItems.length) % currentFilteredItems.length;
-    showArtwork(currentFilteredItems[currentViewerIndex]);
+    showArtwork(currentFilteredItems[currentViewerIndex], false);
   }
 
   function updateArtworkMetadata(item) {
@@ -1695,7 +1895,7 @@
     }
   }
 
-  function showArtwork(item) {
+  function showArtwork(item, isNewOpen = false) {
     const modalEl = document.getElementById('viewerModal');
     if (!modalEl) return;
 
@@ -1756,7 +1956,7 @@
       mShareUrl.title = shareUrl;
     }
 
-    updateBrowserUrl(item);
+    updateBrowserUrl(item, isNewOpen);
 
     loadOpenSeadragon(item);
   }
@@ -1889,15 +2089,13 @@
         setTimeout(fixNavigatorBackground, 0);
         setTimeout(fixNavigatorBackground, 80);
         setTimeout(fixNavigatorBackground, 250);
+        setTimeout(() => {
+          renderDynamicZoomPresets(item);
+        }, 80);
       });
 
-      const badge = document.getElementById('toolZoomBadge');
       osdViewer.addHandler('zoom', function () {
-        if (!badge || !osdViewer || !osdViewer.viewport) return;
-        const currentZoom = osdViewer.viewport.getZoom();
-        const baseZoom = osdViewer.viewport.getHomeZoom();
-        const ratio = baseZoom > 0 ? (currentZoom / baseZoom) : 1;
-        badge.textContent = Math.round(ratio * 100) + '%';
+        updateZoomUI();
       });
 
       let tileFailCount = 0;
@@ -2201,6 +2399,11 @@
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
 
+    // 关键步骤 1：解除锁定后第一时间立即将滚动位置锁死在 preViewerScrollY，防止浏览器重绘置零
+    if (typeof preViewerScrollY === 'number' && preViewerScrollY >= 0) {
+      window.scrollTo({ top: preViewerScrollY, behavior: 'instant' });
+    }
+
     const drawerEl = document.getElementById('viewerMetaDrawer') || document.getElementById('viewerDrawer');
     if (drawerEl) drawerEl.classList.remove('open');
     const toggleInfoBtn = document.getElementById('btnToggleInfo');
@@ -2211,6 +2414,11 @@
     closeShareQrModal();
     closeSharePosterModal();
     if (window.closeAtlasLangDropdowns) window.closeAtlasLangDropdowns();
+
+    const zoomPopover = document.getElementById('zoomPopover');
+    const zoomBadge = document.getElementById('toolZoomBadge');
+    if (zoomPopover) zoomPopover.classList.remove('open');
+    if (zoomBadge) zoomBadge.setAttribute('aria-expanded', 'false');
 
     if (osdViewer) {
       try { osdViewer.destroy(); } catch (e) {}
@@ -2246,7 +2454,7 @@
       clearBrowserUrl();
     }
 
-    // 精确还原至进入深览前的视口滚动位置，优先精准对准当前作品卡片
+    // 关键步骤 2：下一帧平滑/居中对齐目标卡片
     const currentItem = (currentFilteredItems && currentFilteredItems[currentViewerIndex]) || null;
     const targetCard = currentItem ? (document.getElementById('artCard_' + currentItem.id) || document.querySelector('.gallery-card[data-id="' + currentItem.id + '"]')) : null;
 
@@ -2254,7 +2462,7 @@
       if (targetCard) {
         targetCard.scrollIntoView({ block: 'center', behavior: 'auto' });
       } else if (typeof preViewerScrollY === 'number' && preViewerScrollY >= 0) {
-        window.scrollTo({ top: preViewerScrollY, behavior: 'auto' });
+        window.scrollTo({ top: preViewerScrollY, behavior: 'instant' });
       }
     });
   }
@@ -2747,14 +2955,20 @@
     });
   }
 
-  function updateBrowserUrl(item) {
+  function updateBrowserUrl(item, isNewOpen = false) {
     if (!item) return;
     try {
       const url = new URL(window.location.href);
       if (url.searchParams.get('id') !== item.id) {
         url.searchParams.delete('art');
         url.searchParams.set('id', item.id);
-        window.history.replaceState({ artworkId: item.id }, '', url.toString());
+        url.hash = '';
+        if (isNewOpen) {
+          window.history.pushState({ level: 2, view: 'viewer', artworkId: item.id }, '', url.toString());
+        } else {
+          window.history.replaceState({ level: 2, view: 'viewer', artworkId: item.id }, '', url.toString());
+        }
+        currentHistoryLevel = 2;
       }
     } catch (e) {}
   }
@@ -2765,8 +2979,9 @@
       if (url.searchParams.has('id') || url.searchParams.has('art') || window.location.hash) {
         url.searchParams.delete('id');
         url.searchParams.delete('art');
-        url.hash = '';
-        window.history.replaceState(null, '', url.toString());
+        url.hash = 'gallery';
+        window.history.replaceState({ level: 1, view: 'gallery' }, '', url.toString());
+        currentHistoryLevel = 1;
       }
     } catch (e) {}
   }
@@ -2807,8 +3022,15 @@
       if (target) {
         const match = findArtworkByQuery(target);
         if (match) {
+          try {
+            const galleryUrl = new URL(window.location.href);
+            galleryUrl.searchParams.delete('id');
+            galleryUrl.searchParams.delete('art');
+            galleryUrl.hash = 'gallery';
+            window.history.replaceState({ level: 1, view: 'gallery' }, '', galleryUrl.toString());
+          } catch (e) {}
           setTimeout(() => {
-            openViewerByItem(match);
+            openViewerByItem(match, true);
           }, 120);
           return true;
         }

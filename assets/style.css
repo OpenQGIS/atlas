@@ -2311,12 +2311,6 @@ body[data-page="portal"] {
   opacity: 0.9;
 }
 
-/* 鼠标在地图上缩放时，不透明度降低至 30%，透视底层地图纹理 */
-.viewer-drawer.open.map-zooming,
-.viewer-meta-drawer.open.map-zooming {
-  opacity: 0.3 !important;
-}
-
 /* 拖拽/resize 时禁用过渡并保持适度清晰 */
 .viewer-drawer.dragging,
 .viewer-meta-drawer.dragging {

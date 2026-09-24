@@ -13,7 +13,6 @@
   let currentViewerIndex = -1;
   let osdViewer = null;
   let currentFilter = 'all';
-  let triggerMapZooming = null;
 
   const SVG_EXIT_FULLSCREEN = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>';
   const SVG_FULLSCREEN = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
@@ -1051,7 +1050,6 @@
 
       const badge = document.getElementById('toolZoomBadge');
       osdViewer.addHandler('zoom', function () {
-        if (typeof triggerMapZooming === 'function') triggerMapZooming();
         if (!badge || !osdViewer || !osdViewer.viewport) return;
         const currentZoom = osdViewer.viewport.getZoom();
         const baseZoom = osdViewer.viewport.getHomeZoom();
@@ -1243,25 +1241,6 @@
       h.addEventListener('touchstart', onResizeStart, { passive: false });
     });
 
-    // ── 悬浮窗动态不透明度联动机制 ──
-    // 鼠标在悬浮窗悬停由 CSS :hover 保持 80%，在地图上缩放时激活 map-zooming 降至 30%
-    let zoomOpacityTimer = null;
-    triggerMapZooming = function () {
-      if (!el.classList.contains('open')) return;
-      el.classList.add('map-zooming');
-      if (zoomOpacityTimer) clearTimeout(zoomOpacityTimer);
-      zoomOpacityTimer = setTimeout(function () {
-        el.classList.remove('map-zooming');
-      }, 650);
-    };
-
-    const stageEl = document.getElementById('osdStage');
-    if (stageEl) {
-      stageEl.addEventListener('wheel', function () {
-        triggerMapZooming();
-      }, { passive: true });
-    }
-
     // 视口变化时防溢出
     window.addEventListener('resize', function() {
       if (!el.classList.contains('open')) return;
@@ -1278,7 +1257,7 @@
     document.body.style.overflow = '';
 
     const drawerEl = document.getElementById('viewerMetaDrawer') || document.getElementById('viewerDrawer');
-    if (drawerEl) drawerEl.classList.remove('open', 'map-zooming');
+    if (drawerEl) drawerEl.classList.remove('open');
     const toggleInfoBtn = document.getElementById('btnToggleInfo');
     if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
 

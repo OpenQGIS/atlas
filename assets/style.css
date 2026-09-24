@@ -2054,6 +2054,102 @@ body:has(.viewer-modal.open) {
   overflow: hidden !important;
   z-index: 1;
 }
+
+/* -------------------------------------------------------------
+   Top-Left Floating Artwork & Brand Badge (地图左上角头像图标与图名)
+   ------------------------------------------------------------- */
+.viewer-artwork-badge {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px 6px 8px;
+  background: rgba(15, 18, 24, 0.68);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.28),
+    0 1px 3px rgba(0, 0, 0, 0.16);
+  user-select: none;
+  pointer-events: auto;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  max-width: calc(100vw - 40px);
+}
+
+.viewer-artwork-badge:hover {
+  background: rgba(22, 27, 36, 0.88);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.38),
+    0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.viewer-artwork-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  display: block;
+}
+
+.viewer-artwork-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+  line-height: 1.2;
+}
+
+:root[data-theme="light"] .viewer-artwork-badge {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+:root[data-theme="light"] .viewer-artwork-badge:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+:root[data-theme="light"] .viewer-artwork-title {
+  color: #0f172a;
+}
+
+@media (max-width: 768px) {
+  .viewer-artwork-badge {
+    top: 14px;
+    left: 14px;
+    padding: 5px 12px 5px 6px;
+    gap: 8px;
+    max-width: calc(100vw - 28px);
+  }
+  .viewer-artwork-avatar {
+    width: 24px;
+    height: 24px;
+  }
+  .viewer-artwork-title {
+    font-size: 0.84rem;
+    max-width: 200px;
+  }
+}
+
 .viewer-topbar,
 .viewer-header {
   height: 56px;

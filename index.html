@@ -117,24 +117,11 @@
   <div class="viewer-modal" id="viewerModal" aria-hidden="true" role="dialog" aria-label="Deep Zoom 展品阅览">
     <div class="viewer-backdrop" id="viewerBackdrop"></div>
     <div class="viewer-container">
-      <header class="viewer-header">
-        <div class="viewer-header-left">
-          <h2 class="viewer-title" id="viewerTitle">作品名称</h2>
-        </div>
-
-        <div class="viewer-header-right">
-          <button class="nav-btn" id="btnPrevArtwork" title="上一卷 (←)">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          </button>
-          <button class="nav-btn" id="btnNextArtwork" title="下一卷 (→)">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-          </button>
-          <div class="divider"></div>
-          <button class="nav-btn" id="btnCloseViewerRight" title="退出阅览 (Esc)" data-i18n-title="actionClose">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-        </div>
-      </header>
+      <!-- Top-Left Floating Artwork & Brand Badge · 地图左上角头像图标与图名 -->
+      <div class="viewer-artwork-badge" id="viewerArtworkBadge">
+        <img class="viewer-artwork-avatar" src="assets/avatar.png" alt="OpenQGIS" />
+        <span class="viewer-artwork-title" id="viewerTitle">作品名称</span>
+      </div>
 
       <!-- Left / Right Edge Navigation Paddles -->
       <button class="viewer-edge-nav edge-prev" id="btnEdgePrev" title="上一卷 (←)" aria-label="上一卷">
@@ -234,6 +221,10 @@
               </button>
             </div>
           </div>
+          <div class="tool-divider"></div>
+          <button class="tool-btn" id="btnCloseViewer" title="退出阅览 (Esc)" aria-label="退出阅览" data-i18n-title="actionClose">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
       </div>
 

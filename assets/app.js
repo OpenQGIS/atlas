@@ -713,12 +713,47 @@
     const copyShareUrlBtn = document.getElementById('btnCopyShareUrl');
     if (copyShareUrlBtn) copyShareUrlBtn.addEventListener('click', shareCurrentArtwork);
 
+    function updateEdgeNextOffset() {
+      if (!modalEl || !drawerEl) return;
+      if (!drawerEl.classList.contains('open')) {
+        modalEl.style.removeProperty('--drawer-offset');
+        return;
+      }
+      const rect = drawerEl.getBoundingClientRect();
+      const distFromRight = window.innerWidth - rect.right;
+      if (distFromRight < 80 && rect.left < window.innerWidth - 60) {
+        const neededRight = (window.innerWidth - rect.left) + 16;
+        modalEl.style.setProperty('--drawer-offset', `${Math.max(20, Math.round(neededRight))}px`);
+      } else {
+        modalEl.style.setProperty('--drawer-offset', '20px');
+      }
+    }
+
+    function setDrawerOpen(isOpen) {
+      if (!drawerEl) return;
+      if (isOpen) {
+        drawerEl.classList.add('open');
+        if (toggleInfoBtn) toggleInfoBtn.classList.add('active');
+        if (modalEl) modalEl.classList.add('drawer-open');
+        updateEdgeNextOffset();
+      } else {
+        drawerEl.classList.remove('open');
+        if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
+        if (modalEl) modalEl.classList.remove('drawer-open');
+        updateEdgeNextOffset();
+      }
+    }
+
+    function toggleDrawer() {
+      if (!drawerEl) return;
+      setDrawerOpen(!drawerEl.classList.contains('open'));
+    }
+
     if (toggleInfoBtn && drawerEl) {
       toggleInfoBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const isOpen = drawerEl.classList.toggle('open');
-        toggleInfoBtn.classList.toggle('active', isOpen);
+        toggleDrawer();
       });
     }
 
@@ -726,8 +761,7 @@
       drawerCloseBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        drawerEl.classList.remove('open');
-        if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
+        setDrawerOpen(false);
       });
     }
 
@@ -791,8 +825,7 @@
         toolFullscreen.innerHTML = isFs ? SVG_EXIT_FULLSCREEN : SVG_FULLSCREEN;
       }
       if (isFs && drawerEl) {
-        drawerEl.classList.remove('open');
-        if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
+        setDrawerOpen(false);
       }
     });
 
@@ -804,8 +837,7 @@
           if (document.fullscreenElement) {
             document.exitFullscreen().catch(() => {});
           } else if (drawerEl && drawerEl.classList.contains('open')) {
-            drawerEl.classList.remove('open');
-            if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
+            setDrawerOpen(false);
           } else {
             closeViewer();
           }
@@ -888,7 +920,7 @@
     });
 
     // 初始化浮动面板拖拽与 resize
-    if (drawerEl) initFloatingDrawer(drawerEl);
+    if (drawerEl) initFloatingDrawer(drawerEl, updateEdgeNextOffset);
   }
 
   function openViewerByItem(item) {
@@ -1136,7 +1168,7 @@
   /* -------------------------------------------------------------
      浮动信息面板 · 拖拽移动 & 8向 Resize 引擎
      ------------------------------------------------------------- */
-  function initFloatingDrawer(el) {
+  function initFloatingDrawer(el, onRectChange) {
     if (el._floatInited) return;
     el._floatInited = true;
 
@@ -1169,6 +1201,7 @@
       el.style.height = r.height + 'px';
       el.style.right  = 'auto';
       el.style.bottom = 'auto';
+      if (typeof onRectChange === 'function') onRectChange();
     }
 
     // ── 拖拽：标题栏 ──
@@ -1276,6 +1309,8 @@
     if (drawerEl) drawerEl.classList.remove('open');
     const toggleInfoBtn = document.getElementById('btnToggleInfo');
     if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
+    modalEl.classList.remove('drawer-open');
+    modalEl.style.removeProperty('--drawer-offset');
 
     if (osdViewer) {
       try { osdViewer.destroy(); } catch (e) {}

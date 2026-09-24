@@ -2064,23 +2064,23 @@ body:has(.viewer-modal.open) {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 16px 8px 10px;
-  background: rgba(15, 18, 24, 0.72);
+  padding: 7px 16px 7px 8px;
+  background: rgba(15, 18, 24, 0.82);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
+  border-radius: 13px;
   box-shadow: 
     0 8px 24px rgba(0, 0, 0, 0.35),
     0 2px 6px rgba(0, 0, 0, 0.2);
   user-select: none;
   pointer-events: auto;
   transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-  max-width: calc(100vw - 40px);
+  max-width: calc(100vw - 165px);
 }
 
 .viewer-artwork-badge:hover {
-  background: rgba(22, 27, 36, 0.90);
+  background: rgba(22, 27, 36, 0.92);
   border-color: rgba(255, 255, 255, 0.25);
   transform: translateY(-1px);
   box-shadow: 
@@ -2088,16 +2088,20 @@ body:has(.viewer-modal.open) {
     0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
+/* 左侧头像：占用 2 行高的圆角矩形 */
 .viewer-artwork-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   object-fit: cover;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   display: block;
 }
 
+/* 右侧双行元数据容器 */
 .viewer-artwork-meta {
   display: flex;
   flex-direction: column;
@@ -2106,34 +2110,44 @@ body:has(.viewer-modal.open) {
   min-width: 0;
 }
 
+/* 第一行：地图名标注 */
 .viewer-artwork-title {
-  font-size: 0.95rem;
+  font-size: 0.90rem;
   font-weight: 600;
   color: #f8fafc;
   letter-spacing: 0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 320px;
+  max-width: 280px;
   line-height: 1.25;
 }
 
+/* 第二行：QMapFlow SVG 精度徽标 */
 .viewer-artwork-qmapflow {
   display: flex;
   align-items: center;
-  height: 15px;
+  height: 16px;
   line-height: 1;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.viewer-artwork-qmapflow:hover {
+  opacity: 0.92;
+  transform: translateY(-0.5px);
 }
 
 .viewer-artwork-qmapflow svg,
 .viewer-qmapflow-img {
-  height: 15px;
+  height: 16px;
   width: auto;
   display: block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 :root[data-theme="light"] .viewer-artwork-badge {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(0, 0, 0, 0.12);
   box-shadow: 
     0 8px 24px rgba(0, 0, 0, 0.10),
@@ -2145,6 +2159,11 @@ body:has(.viewer-modal.open) {
   border-color: rgba(0, 0, 0, 0.2);
 }
 
+:root[data-theme="light"] .viewer-artwork-avatar {
+  border-color: rgba(0, 0, 0, 0.10);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10);
+}
+
 :root[data-theme="light"] .viewer-artwork-title {
   color: #0f172a;
 }
@@ -2153,26 +2172,26 @@ body:has(.viewer-modal.open) {
   .viewer-artwork-badge {
     top: 14px;
     left: 14px;
-    padding: 6px 12px 6px 8px;
+    padding: 5px 12px 5px 7px;
     gap: 10px;
-    border-radius: 10px;
-    max-width: calc(100vw - 28px);
+    border-radius: 11px;
+    max-width: calc(100vw - 160px);
   }
   .viewer-artwork-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
   }
   .viewer-artwork-title {
-    font-size: 0.86rem;
-    max-width: 180px;
+    font-size: 0.84rem;
+    max-width: 170px;
   }
   .viewer-artwork-qmapflow {
-    height: 13px;
+    height: 14px;
   }
   .viewer-artwork-qmapflow svg,
   .viewer-qmapflow-img {
-    height: 13px;
+    height: 14px;
   }
 }
 
@@ -3183,7 +3202,7 @@ body:has(.viewer-modal.open) {
   background: #07080b !important;
   overflow: hidden !important;
   cursor: crosshair !important;
-  box-sizing: content-box !important;
+  box-sizing: border-box !important;
 }
 
 :root[data-theme="light"] .viewer-navigator,
@@ -3509,6 +3528,156 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   transform-origin: right center;
 }
 
+
+/* =====================================================================
+   Top-Right Floating Actions · 视口右上角全局操作胶囊 (语言下拉弹窗、主题切换、退出阅览)
+   ==================================================================== */
+.viewer-top-actions {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(14, 18, 24, 0.82);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  box-shadow: 
+    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.28),
+    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.24),
+    0px 10px 10px -3.75px rgba(0, 0, 0, 0.20),
+    0px 16px 32px -4px rgba(0, 0, 0, 0.50);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  pointer-events: auto;
+}
+
+.viewer-top-actions:hover {
+  background: rgba(20, 25, 34, 0.92);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+:root[data-theme="light"] .viewer-top-actions {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.08),
+    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.06),
+    0px 10px 10px -3.75px rgba(0, 0, 0, 0.05),
+    0px 16px 32px -4px rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="light"] .viewer-top-actions:hover {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(0, 0, 0, 0.16);
+}
+
+.viewer-top-actions .tool-btn {
+  width: 36px;
+  height: 36px;
+}
+
+.viewer-top-actions .tool-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 2px;
+}
+
+:root[data-theme="light"] .viewer-top-actions .tool-divider {
+  background: rgba(0, 0, 0, 0.10);
+}
+
+.viewer-top-actions .close-btn:hover,
+#btnCloseViewer:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+:root[data-theme="light"] .viewer-top-actions .close-btn:hover,
+:root[data-theme="light"] #btnCloseViewer:hover {
+  background: rgba(220, 38, 38, 0.10) !important;
+  color: #dc2626 !important;
+  border-color: rgba(220, 38, 38, 0.25) !important;
+}
+
+/* 详图窗口语言切换下拉菜单 */
+.viewer-lang-dropdown {
+  position: relative;
+  display: inline-flex;
+}
+
+.viewer-lang-dropdown .lang-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  height: 36px;
+  border-radius: 9999px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.viewer-lang-dropdown .lang-dropdown-btn:hover,
+.viewer-lang-dropdown .lang-dropdown-btn[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.10);
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .viewer-lang-dropdown .lang-dropdown-btn:hover,
+:root[data-theme="light"] .viewer-lang-dropdown .lang-dropdown-btn[aria-expanded="true"] {
+  background: rgba(0, 0, 0, 0.06);
+  color: #0f141c;
+}
+
+.viewer-lang-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 145px;
+  background: rgba(18, 22, 30, 0.95);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 100;
+  animation: langDropdownFade 0.16s ease-out;
+}
+
+.viewer-lang-menu.open {
+  display: flex;
+}
+
+:root[data-theme="light"] .viewer-lang-menu {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(0, 0, 0, 0.09);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.viewer-modal.fullscreen-mode .viewer-top-actions {
+  opacity: 0.85;
+  transition: opacity 0.25s ease;
+}
+.viewer-modal.fullscreen-mode .viewer-top-actions:hover {
+  opacity: 1;
+}
+
 /* =====================================================================
    Mobile Responsive Optimizations (针对手机移动端视口与手势优化)
    ==================================================================== */
@@ -3569,10 +3738,35 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     height: 32px;
   }
 
-  /* 移动端/触屏设备自然支持双指捏合缩放与双击放大，隐藏工具栏放大(+)与缩小(-)冗余按钮，释放屏幕空间 */
+  /* 移动端/触屏设备自然支持双指捏合缩放与手势旋转，隐藏放大、缩小、旋转与全屏次级按钮，保障底部工具栏轻盈不溢出 */
   #toolZoomIn,
-  #toolZoomOut {
+  #toolZoomOut,
+  #toolRotate,
+  #toolFullscreen {
     display: none !important;
+  }
+
+  /* 移动端右上角紧凑化，并限制左上角图名徽章最大宽度避免重叠 */
+  .viewer-top-actions {
+    top: 14px;
+    right: 14px;
+    padding: 3px 6px;
+    gap: 2px;
+  }
+
+  .viewer-top-actions .tool-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .viewer-top-actions .viewer-lang-dropdown .lang-dropdown-btn {
+    height: 32px;
+    padding: 0 6px;
+    font-size: 0.72rem;
+  }
+
+  .viewer-artwork-badge {
+    max-width: calc(100vw - 160px) !important;
   }
 
   .tool-btn .icon {
@@ -4267,6 +4461,38 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   .masonry-grid {
     --target-row-height: 140px;
     gap: 8px;
+  }
+
+  /* 详图查看窗口极窄屏适配 */
+  .viewer-top-actions {
+    top: 10px;
+    right: 10px;
+    padding: 2px 4px;
+    gap: 1px;
+  }
+  .viewer-top-actions .tool-btn {
+    width: 28px;
+    height: 28px;
+  }
+  .viewer-top-actions .viewer-lang-dropdown .lang-dropdown-btn {
+    height: 28px;
+    padding: 0 4px;
+    font-size: 0.68rem;
+  }
+  .viewer-artwork-badge {
+    top: 10px !important;
+    left: 10px !important;
+    max-width: calc(100vw - 125px) !important;
+    padding: 4px 8px 4px 6px !important;
+    gap: 6px !important;
+  }
+  .viewer-artwork-avatar {
+    width: 24px !important;
+    height: 24px !important;
+  }
+  .viewer-artwork-title {
+    font-size: 0.78rem !important;
+    max-width: 110px !important;
   }
 }
 

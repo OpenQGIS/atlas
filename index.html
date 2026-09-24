@@ -87,6 +87,14 @@
               <span class="lang-item-name">English</span>
               <span class="lang-item-badge">EN</span>
             </button>
+            <button class="lang-dropdown-item" data-lang="ja" role="menuitem">
+              <span class="lang-item-name">日本語</span>
+              <span class="lang-item-badge">JA</span>
+            </button>
+            <button class="lang-dropdown-item" data-lang="ko" role="menuitem">
+              <span class="lang-item-name">한국어</span>
+              <span class="lang-item-badge">KO</span>
+            </button>
           </div>
         </div>
         <button class="icon-btn theme-toggle-btn" id="btnToggleTheme" data-i18n-title="navThemeToggle" title="切换主题模式" aria-label="切换主题模式">
@@ -124,6 +132,48 @@
           <span class="viewer-artwork-title" id="viewerTitle">作品名称</span>
           <div class="viewer-artwork-qmapflow" id="viewerQmapFlow" title="QGIS 制图工作流精度"></div>
         </div>
+      </div>
+
+      <!-- Top-Right Floating Actions · 视口右上角全局操作胶囊 (语言下拉、主题切换、退出阅览) -->
+      <div class="viewer-top-actions" id="viewerTopActions">
+        <div class="lang-dropdown-wrapper viewer-lang-dropdown" id="viewerLangDropdownWrapper">
+          <button class="tool-btn lang-dropdown-btn" id="viewerBtnLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" title="切换语言 / Switch Language" aria-label="切换语言">
+            <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span class="lang-current-label" id="viewerCurrentLangLabel">中</span>
+            <svg class="icon chevron-icon" style="width:10px; height:10px; margin-left:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="lang-dropdown-menu viewer-lang-menu" id="viewerLangMenu" role="menu" aria-hidden="true">
+            <button class="lang-dropdown-item active" data-lang="zh" role="menuitem">
+              <span class="lang-item-name">简体中文</span>
+              <span class="lang-item-badge">ZH</span>
+            </button>
+            <button class="lang-dropdown-item" data-lang="en" role="menuitem">
+              <span class="lang-item-name">English</span>
+              <span class="lang-item-badge">EN</span>
+            </button>
+            <button class="lang-dropdown-item" data-lang="ja" role="menuitem">
+              <span class="lang-item-name">日本語</span>
+              <span class="lang-item-badge">JA</span>
+            </button>
+            <button class="lang-dropdown-item" data-lang="ko" role="menuitem">
+              <span class="lang-item-name">한국어</span>
+              <span class="lang-item-badge">KO</span>
+            </button>
+          </div>
+        </div>
+        <button class="tool-btn theme-toggle-btn" id="toolToggleTheme" title="切换主题模式" data-i18n-title="navThemeToggle" aria-label="切换主题模式">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <div class="tool-divider"></div>
+        <button class="tool-btn close-btn" id="btnCloseViewer" title="退出阅览 (Esc)" aria-label="退出阅览" data-i18n-title="actionClose">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
 
       <!-- Left / Right Edge Navigation Paddles -->
@@ -224,20 +274,6 @@
               </button>
             </div>
           </div>
-          <button class="tool-btn" id="toolToggleLang" title="切换语言 / Switch Language" data-i18n-title="langSelectTitle" aria-label="切换语言">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="2" y1="12" x2="22" y2="12"></line>
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-            </svg>
-          </button>
-          <button class="tool-btn theme-toggle-btn" id="toolToggleTheme" title="切换主题模式" data-i18n-title="navThemeToggle" aria-label="切换主题模式">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          </button>
-          <div class="tool-divider"></div>
-          <button class="tool-btn" id="btnCloseViewer" title="退出阅览 (Esc)" aria-label="退出阅览" data-i18n-title="actionClose">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
         </div>
       </div>
 

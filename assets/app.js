@@ -392,44 +392,69 @@
      Language Dropdown (中/EN 切换与扩展多语言支持)
      ------------------------------------------------------------- */
   function bindLanguageDropdown() {
-    const wrapper = document.getElementById('langDropdownWrapper');
-    const btn = document.getElementById('btnLangDropdown');
-    const menu = document.getElementById('langDropdownMenu');
-    if (!wrapper || !btn || !menu) return;
+    const dropdownConfigs = [
+      { wrapperId: 'langDropdownWrapper', btnId: 'btnLangDropdown', menuId: 'langDropdownMenu' },
+      { wrapperId: 'viewerLangDropdownWrapper', btnId: 'viewerBtnLangDropdown', menuId: 'viewerLangMenu' }
+    ];
 
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isOpen = menu.classList.toggle('open');
-      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    });
+    function closeAllLangDropdowns(exceptMenuId) {
+      dropdownConfigs.forEach(({ btnId, menuId }) => {
+        if (exceptMenuId && menuId === exceptMenuId) return;
+        const menu = document.getElementById(menuId);
+        const btn = document.getElementById(btnId);
+        if (menu) menu.classList.remove('open');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      });
+    }
 
-    // 语言选项点击事件
-    menu.querySelectorAll('.lang-dropdown-item').forEach(item => {
-      item.addEventListener('click', (e) => {
+    dropdownConfigs.forEach(({ wrapperId, btnId, menuId }) => {
+      const wrapper = document.getElementById(wrapperId);
+      const btn = document.getElementById(btnId);
+      const menu = document.getElementById(menuId);
+      if (!wrapper || !btn || !menu) return;
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
-        const targetLang = item.getAttribute('data-lang');
-        if (targetLang && window.AtlasI18n) {
-          window.AtlasI18n.setLang(targetLang);
-        }
-        menu.classList.remove('open');
-        btn.setAttribute('aria-expanded', 'false');
+        closeAllLangDropdowns(menuId);
+        const isOpen = menu.classList.toggle('open');
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+
+      menu.querySelectorAll('.lang-dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const targetLang = item.getAttribute('data-lang');
+          if (targetLang && window.AtlasI18n) {
+            window.AtlasI18n.setLang(targetLang);
+          }
+          closeAllLangDropdowns();
+        });
       });
     });
 
-    // 点击外部区域或按 Esc 自动关闭下拉菜单
+    // 点击外部区域自动关闭下拉菜单
     document.addEventListener('click', (e) => {
-      if (!wrapper.contains(e.target)) {
-        menu.classList.remove('open');
-        btn.setAttribute('aria-expanded', 'false');
+      dropdownConfigs.forEach(({ wrapperId, btnId, menuId }) => {
+        const wrapper = document.getElementById(wrapperId);
+        const menu = document.getElementById(menuId);
+        const btn = document.getElementById(btnId);
+        if (wrapper && menu && !wrapper.contains(e.target)) {
+          menu.classList.remove('open');
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    // 按 Esc 自动关闭下拉菜单
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAllLangDropdowns();
       }
     });
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && menu.classList.contains('open')) {
-        menu.classList.remove('open');
-        btn.setAttribute('aria-expanded', 'false');
-      }
-    });
+    window.closeAtlasLangDropdowns = closeAllLangDropdowns;
   }
 
   /* -------------------------------------------------------------
@@ -1103,12 +1128,17 @@
           const posterModal = document.getElementById('sharePosterModal');
           const qrModal = document.getElementById('shareQrModal');
           const popover = document.getElementById('sharePopover');
+          const vLangMenu = document.getElementById('viewerLangMenu');
           if (posterModal && posterModal.classList.contains('open')) {
             closeSharePosterModal();
           } else if (qrModal && qrModal.classList.contains('open')) {
             closeShareQrModal();
           } else if (popover && popover.classList.contains('open')) {
             closeSharePopover();
+          } else if (vLangMenu && vLangMenu.classList.contains('open')) {
+            vLangMenu.classList.remove('open');
+            const vLangBtn = document.getElementById('viewerBtnLangDropdown');
+            if (vLangBtn) vLangBtn.setAttribute('aria-expanded', 'false');
           } else if (document.fullscreenElement) {
             document.exitFullscreen().catch(() => {});
           } else if (drawerEl && drawerEl.classList.contains('open')) {
@@ -1314,6 +1344,12 @@
 
     const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
     navEl.style.setProperty('background-color', dominantColor, 'important');
+    navEl.style.setProperty('background', dominantColor, 'important');
+    // 同步更新 canvas 背景，消除白边
+    const navCanvas = navEl.querySelector('canvas');
+    if (navCanvas) {
+      navCanvas.style.setProperty('background-color', dominantColor, 'important');
+    }
 
     const navPanel = document.getElementById('viewerNavigatorPanel');
     if (navPanel) {
@@ -1597,6 +1633,21 @@
         precision = String(item.workflow.QGIS).replace(/%/g, '').trim();
       }
       qmfEl.innerHTML = getQMapFlowSvg(precision);
+      const qmfTitle = window.AtlasI18n && window.AtlasI18n.getLang() === 'en'
+        ? `QMapFlow: QGIS Cartography Workflow ${precision}%`
+        : (window.AtlasI18n && window.AtlasI18n.getLang() === 'ja'
+          ? `QMapFlow: QGIS 独立作図比率 ${precision}%`
+          : (window.AtlasI18n && window.AtlasI18n.getLang() === 'ko'
+            ? `QMapFlow: QGIS 단독 지도 제작 비중 ${precision}%`
+            : `QMapFlow: QGIS 独立制图内容占比 ${precision}%`));
+      qmfEl.title = qmfTitle;
+      if (!qmfEl.dataset.qmfBound) {
+        qmfEl.dataset.qmfBound = 'true';
+        qmfEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          window.open('https://github.com/OpenQGIS/QMapFlow', '_blank', 'noopener,noreferrer');
+        });
+      }
     }
     if (vDims) vDims.textContent = item.width + ' × ' + item.height + ' px';
     if (mTitle) mTitle.textContent = locItem.title;
@@ -1792,6 +1843,29 @@
 
       osdViewer.addHandler('update-viewport', function () {
         StealthWatermark.burnIn(osdViewer);
+      });
+
+      // 鹰眼导航器白边根治：OSD 初始化后强制覆盖背景色与画布填充
+      // OSD navigator canvas letterbox 区域默认为白色，用画作主色覆盖
+      function fixNavigatorBackground() {
+        const navEl = document.getElementById('viewerNavigator');
+        if (!navEl) return;
+        const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
+        // 强制 navEl 自身背景 = 画作主色（覆盖 OSD inline style）
+        navEl.style.setProperty('background-color', dominantColor, 'important');
+        navEl.style.setProperty('background', dominantColor, 'important');
+        // 强制 canvas 填满 navEl（消除水平方向空白边）
+        const canvas = navEl.querySelector('canvas');
+        if (canvas) {
+          canvas.style.setProperty('display', 'block', 'important');
+          canvas.style.setProperty('width', '100%', 'important');
+          canvas.style.setProperty('height', '100%', 'important');
+          canvas.style.setProperty('background-color', dominantColor, 'important');
+        }
+      }
+      osdViewer.addHandler('open', function () {
+        setTimeout(fixNavigatorBackground, 0);
+        setTimeout(fixNavigatorBackground, 100);
       });
 
       const badge = document.getElementById('toolZoomBadge');
@@ -2113,6 +2187,7 @@
     closeSharePopover();
     closeShareQrModal();
     closeSharePosterModal();
+    if (window.closeAtlasLangDropdowns) window.closeAtlasLangDropdowns();
 
     if (osdViewer) {
       try { osdViewer.destroy(); } catch (e) {}

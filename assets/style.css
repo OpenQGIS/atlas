@@ -2292,15 +2292,15 @@ body[data-page="portal"] {
 
 .viewer-drawer.open,
 .viewer-meta-drawer.open {
-  opacity: 0.65;
+  opacity: 0.8;
   pointer-events: auto;
   transform: scale(1) translateY(0);
 }
 
-/* 鼠标在悬浮窗悬停，不透明度设置为 80% */
+/* 鼠标在悬浮窗悬停，不透明度设置为 90% */
 .viewer-drawer.open:hover,
 .viewer-meta-drawer.open:hover {
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 /* 鼠标在地图上缩放时，不透明度降低至 30%，透视底层地图纹理 */

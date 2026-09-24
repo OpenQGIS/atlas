@@ -79,7 +79,7 @@
       metaNavNotes: '工造题记',
       emptyFilter: '当前筛选条件下暂无收录成果',
       heroSlogan: '<span class="hero-title-chunk">一图一境</span><span class="hero-title-sep"> · </span><span class="hero-title-chunk">静观其详</span>',
-      heroSubslogan: '<span class="hero-sub-chunk">地图录 · AtlasLog</span><span class="hero-sub-sep"> · </span><span class="hero-sub-chunk">OpenQGIS 制图作品集</span>',
+      heroSubslogan: '<span class="hero-sub-chunk">地图录</span><span class="hero-sub-sep"> · </span><span class="hero-sub-chunk">OpenQGIS 制图作品集</span>',
       heroDesc: '个人制图实践 · QGIS 能力边界的记录',
       heroScroll: '向下探索',
       heroBgArtwork: '背景展卷',

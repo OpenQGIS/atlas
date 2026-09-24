@@ -1234,6 +1234,63 @@
     }
   }
 
+  // 空间多区域色彩提取：采样画作左侧、中心、右侧纵向切片的代表色，构建真实的空间色彩流向
+  function extractSpatialColors(thumbUrl, callback) {
+    if (!thumbUrl) {
+      callback(null);
+      return;
+    }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 32;
+        canvas.height = 18;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) { callback(null); return; }
+        ctx.drawImage(img, 0, 0, 32, 18);
+        const imgData = ctx.getImageData(0, 0, 32, 18).data;
+
+        // 采样左侧切片 (cols 0..7), 中央切片 (cols 12..19), 右侧切片 (cols 24..31)
+        let lR = 0, lG = 0, lB = 0, lC = 0;
+        let cR = 0, cG = 0, cB = 0, cC = 0;
+        let rR = 0, rG = 0, rB = 0, rC = 0;
+
+        for (let y = 0; y < 18; y++) {
+          for (let x = 0; x < 32; x++) {
+            const idx = (y * 32 + x) * 4;
+            const r = imgData[idx];
+            const g = imgData[idx + 1];
+            const b = imgData[idx + 2];
+            const a = imgData[idx + 3];
+            if (a < 64) continue;
+
+            if (x <= 7) {
+              lR += r; lG += g; lB += b; lC++;
+            } else if (x >= 12 && x <= 19) {
+              cR += r; cG += g; cB += b; cC++;
+            } else if (x >= 24) {
+              rR += r; rG += g; rB += b; rC++;
+            }
+          }
+        }
+
+        if (lC > 0 && rC > 0) {
+          callback({
+            left: { r: Math.round(lR / lC), g: Math.round(lG / lC), b: Math.round(lB / lC) },
+            center: { r: Math.round(cR / (cC || 1)), g: Math.round(cG / (cC || 1)), b: Math.round(cB / (cC || 1)) },
+            right: { r: Math.round(rR / rC), g: Math.round(rG / rC), b: Math.round(rB / rC) }
+          });
+          return;
+        }
+      } catch (e) {}
+      callback(null);
+    };
+    img.onerror = () => callback(null);
+    img.src = thumbUrl;
+  }
+
   function updateAmbientBackdrop(item) {
     if (!item) return;
     const backdropEl = document.getElementById('viewerAmbientBackdrop');
@@ -1253,45 +1310,58 @@
       prevLayer.classList.remove('active');
     }
 
-    // Dynamic Gaussian mesh gradient based on dominant colors
-    extractDominantColors(item, 5, function (colors) {
-      if (!meshLayer) return;
-      if (!colors || colors.length === 0) {
-        colors = ['#80CC28', '#13171E', '#9EA5B3', '#5E6676'];
-      }
+    // 动态提取画作左、中、右真实空间渐变色 (Spatial Gradient)
+    extractSpatialColors(item.thumb, function (spatial) {
+      extractDominantColors(item, 5, function (colors) {
+        if (!colors || colors.length === 0) {
+          colors = ['#12161D', '#C69C3A', '#4A535E', '#E6C66D', '#202934'];
+        }
 
-      // 计算画作基础调性 (基于主色调或标定色盘的首色明度)
-      const baseRgb = hexToRgb(colors[0]);
-      const baseLum = 0.299 * baseRgb.r + 0.587 * baseRgb.g + 0.114 * baseRgb.b;
-      const isDarkArtwork = baseLum < 128;
+        let leftRgb, centerRgb, rightRgb;
+        if (spatial) {
+          leftRgb = spatial.left;
+          centerRgb = spatial.center;
+          rightRgb = spatial.right;
+        } else {
+          leftRgb = hexToRgb(colors[0]);
+          rightRgb = hexToRgb(colors[2] || colors[0]);
+          centerRgb = hexToRgb(colors[4] || colors[1] || colors[0]);
+        }
 
-      if (backdropEl) {
-        backdropEl.classList.toggle('artwork-dark', isDarkArtwork);
-        backdropEl.classList.toggle('artwork-light', !isDarkArtwork);
-        backdropEl.style.backgroundColor = isDarkArtwork ? (colors[0] || '#07080b') : '#f2efe9';
-      }
+        // 计算画作整体调性
+        const avgLum = 0.299 * ((leftRgb.r + rightRgb.r) / 2) +
+                       0.587 * ((leftRgb.g + rightRgb.g) / 2) +
+                       0.114 * ((leftRgb.b + rightRgb.b) / 2);
+        const isDarkArtwork = avgLum < 135;
 
-      // 无论系统主题处于白天还是夜晚，背景均与画作本体深浅气质保持高度融合
-      const alphas = isDarkArtwork
-        ? [0.72, 0.62, 0.55, 0.45, 0.38]
-        : [0.52, 0.44, 0.42, 0.32, 0.26];
+        if (backdropEl) {
+          backdropEl.classList.toggle('artwork-dark', isDarkArtwork);
+          backdropEl.classList.toggle('artwork-light', !isDarkArtwork);
 
-      const c = colors.map((hex, i) => {
-        const rgb = hexToRgb(hex);
-        const a = alphas[i] || 0.35;
-        return 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + a + ')';
+          // 核心：视口底板应用精准左右渐变（左侧匹配左部底色，右侧匹配右部底色）
+          const leftCss = 'rgb(' + leftRgb.r + ', ' + leftRgb.g + ', ' + leftRgb.b + ')';
+          const centerCss = 'rgb(' + centerRgb.r + ', ' + centerRgb.g + ', ' + centerRgb.b + ')';
+          const rightCss = 'rgb(' + rightRgb.r + ', ' + rightRgb.g + ', ' + rightRgb.b + ')';
+
+          backdropEl.style.background = 'linear-gradient(90deg, ' + leftCss + ' 0%, ' + centerCss + ' 50%, ' + rightCss + ' 100%)';
+        }
+
+        if (meshLayer) {
+          // 空间流向网格梯度：在左右两侧各自形成柔和的径向光晕，进一步强化左右明暗/色彩过渡层次
+          const lAura = 'rgba(' + leftRgb.r + ', ' + leftRgb.g + ', ' + leftRgb.b + ', 0.85)';
+          const rAura = 'rgba(' + rightRgb.r + ', ' + rightRgb.g + ', ' + rightRgb.b + ', 0.85)';
+          const cAura = 'rgba(' + centerRgb.r + ', ' + centerRgb.g + ', ' + centerRgb.b + ', 0.65)';
+
+          const meshGradient = [
+            'radial-gradient(ellipse 75% 85% at 15% 50%, ' + lAura + ' 0%, transparent 75%)',
+            'radial-gradient(ellipse 75% 85% at 85% 50%, ' + rAura + ' 0%, transparent 75%)',
+            'radial-gradient(ellipse 60% 60% at 50% 50%, ' + cAura + ' 0%, transparent 70%)'
+          ].join(', ');
+
+          meshLayer.style.background = meshGradient;
+          meshLayer.classList.add('active');
+        }
       });
-
-      const bgGradient = [
-        'radial-gradient(ellipse 70% 60% at 20% 25%, ' + c[0] + ' 0%, transparent 72%)',
-        'radial-gradient(ellipse 65% 55% at 80% 25%, ' + (c[1] || c[0]) + ' 0%, transparent 70%)',
-        'radial-gradient(ellipse 75% 65% at 50% 80%, ' + (c[2] || c[0]) + ' 0%, transparent 75%)',
-        'radial-gradient(ellipse 60% 50% at 85% 75%, ' + (c[3] || c[1] || c[0]) + ' 0%, transparent 68%)',
-        'radial-gradient(ellipse 55% 50% at 15% 75%, ' + (c[4] || c[2] || c[0]) + ' 0%, transparent 65%)'
-      ].join(', ');
-
-      meshLayer.style.background = bgGradient;
-      meshLayer.classList.add('active');
     });
   }
 

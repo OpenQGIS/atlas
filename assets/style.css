@@ -2162,7 +2162,7 @@ body:has(.viewer-modal.open) {
 
 /* =====================================================================
    Immersive Ambient Backdrop · 视口画板高斯模糊渐变背景 (自适应画作本体调性)
-   ==================================================================== */
+    ==================================================================== */
 .viewer-ambient-backdrop {
   position: absolute;
   inset: 0;
@@ -2170,65 +2170,65 @@ body:has(.viewer-modal.open) {
   pointer-events: none;
   z-index: 0;
   background-color: #07080b;
-  transition: background-color 0.85s ease;
+  transition: background 0.85s ease, background-color 0.85s ease;
 }
 
 .ambient-glow-layer {
   position: absolute;
-  inset: -15%;
-  width: 130%;
-  height: 130%;
-  background-size: cover;
+  inset: -12%;
+  width: 124%;
+  height: 124%;
+  background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  filter: blur(80px) saturate(180%) brightness(0.85);
+  filter: blur(85px) saturate(140%) brightness(0.95);
   opacity: 0;
-  transform: scale(1.08);
+  transform: scale(1.05);
   transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s ease-out;
   will-change: opacity, transform;
 }
 
 .ambient-glow-layer.active {
-  opacity: 0.70;
+  opacity: 0.88;
   transform: scale(1);
 }
 
 /* 浅色底画作 (如宣纸米色) 适配微调 */
 .viewer-ambient-backdrop.artwork-light .ambient-glow-layer {
-  filter: blur(80px) saturate(150%) brightness(1.02);
+  filter: blur(85px) saturate(120%) brightness(1.0);
 }
 
 .viewer-ambient-backdrop.artwork-light .ambient-glow-layer.active {
-  opacity: 0.52;
+  opacity: 0.82;
 }
 
 .ambient-mesh-layer {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 0.85s ease;
+  transition: opacity 0.85s ease, background 0.85s ease;
   pointer-events: none;
 }
 
 .ambient-mesh-layer.active {
-  opacity: 0.90;
+  opacity: 0.65;
 }
 
 .viewer-ambient-backdrop.artwork-light .ambient-mesh-layer.active {
-  opacity: 0.70;
+  opacity: 0.60;
 }
 
 /* Subtle ambient scrim for depth and toolbar contrast */
 .ambient-scrim {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(7, 8, 11, 0.10) 30%, rgba(7, 8, 11, 0.65) 100%);
+  background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.05) 35%, rgba(0, 0, 0, 0.45) 100%);
   pointer-events: none;
   transition: background 0.6s ease;
 }
 
 .viewer-ambient-backdrop.artwork-light .ambient-scrim {
-  background: radial-gradient(circle at 50% 50%, rgba(250, 248, 244, 0.08) 30%, rgba(220, 215, 205, 0.50) 100%);
+  background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.02) 40%, rgba(0, 0, 0, 0.18) 100%);
 }
 
 .osd-stage {

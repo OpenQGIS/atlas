@@ -728,14 +728,29 @@
       });
     }
 
+    function getCurrentViewerItem() {
+      if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
+        return currentFilteredItems[currentViewerIndex];
+      }
+      if (currentViewerIndex >= 0 && galleryItems[currentViewerIndex]) {
+        return galleryItems[currentViewerIndex];
+      }
+      const urlParams = new URLSearchParams(window.location.search);
+      const artId = urlParams.get('id') || urlParams.get('art');
+      if (artId) {
+        const found = galleryItems.find(i => i.id === artId);
+        if (found) return found;
+      }
+      return galleryItems[0] || null;
+    }
+
     const btnShareOptLink = document.getElementById('btnShareOptLink');
     if (btnShareOptLink) {
       btnShareOptLink.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
-          shareDirectLink(currentFilteredItems[currentViewerIndex]);
-        }
+        const item = getCurrentViewerItem();
+        if (item) shareDirectLink(item);
       });
     }
 
@@ -744,9 +759,8 @@
       btnShareOptQr.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
-          openShareQrModal(currentFilteredItems[currentViewerIndex]);
-        }
+        const item = getCurrentViewerItem();
+        if (item) openShareQrModal(item);
       });
     }
 
@@ -755,9 +769,8 @@
       btnShareOptPoster.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
-          openSharePosterModal(currentFilteredItems[currentViewerIndex]);
-        }
+        const item = getCurrentViewerItem();
+        if (item) openSharePosterModal(item);
       });
     }
 
@@ -770,18 +783,16 @@
     const btnShareQrCopyLink = document.getElementById('btnShareQrCopyLink');
     if (btnShareQrCopyLink) {
       btnShareQrCopyLink.addEventListener('click', () => {
-        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
-          shareDirectLink(currentFilteredItems[currentViewerIndex]);
-        }
+        const item = getCurrentViewerItem();
+        if (item) shareDirectLink(item);
       });
     }
 
     const btnShareQrDownload = document.getElementById('btnShareQrDownload');
     if (btnShareQrDownload) {
       btnShareQrDownload.addEventListener('click', () => {
-        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
-          downloadQrCodeImage(currentFilteredItems[currentViewerIndex]);
-        }
+        const item = getCurrentViewerItem();
+        if (item) downloadQrCodeImage(item);
       });
     }
 
@@ -2083,6 +2094,7 @@
 
   // ── 3:4 竖版展卷典藏海报生成引擎 ──
   let currentPosterBlob = null;
+  let currentPosterDataUrl = null;
   let currentPosterItem = null;
 
   async function openSharePosterModal(item) {
@@ -2108,15 +2120,38 @@
     try {
       const canvas = await generateArtworkPoster(item);
       if (canvas && imgEl) {
-        canvas.toBlob((blob) => {
-          currentPosterBlob = blob;
-          if (blob) {
-            const blobUrl = URL.createObjectURL(blob);
-            imgEl.src = blobUrl;
+        const fallbackDataUrl = () => {
+          try {
+            const dataUrl = canvas.toDataURL('image/png');
+            currentPosterDataUrl = dataUrl;
+            currentPosterBlob = null;
+            imgEl.src = dataUrl;
             imgEl.style.display = 'block';
             if (loading) loading.style.display = 'none';
+          } catch (err2) {
+            console.error('Poster export fallback failed:', err2);
+            if (loading) {
+              loading.innerHTML = '<span style="color:#ff5555;font-size:0.85rem;">[海报生成失败，请重试]</span>';
+            }
           }
-        }, 'image/png', 0.95);
+        };
+
+        try {
+          canvas.toBlob((blob) => {
+            if (blob) {
+              currentPosterBlob = blob;
+              currentPosterDataUrl = null;
+              const blobUrl = URL.createObjectURL(blob);
+              imgEl.src = blobUrl;
+              imgEl.style.display = 'block';
+              if (loading) loading.style.display = 'none';
+            } else {
+              fallbackDataUrl();
+            }
+          }, 'image/png', 0.95);
+        } catch (e) {
+          fallbackDataUrl();
+        }
       }
     } catch (err) {
       console.error('Poster generation failed:', err);
@@ -2135,10 +2170,16 @@
   }
 
   function downloadPosterImage() {
-    if (!currentPosterBlob || !currentPosterItem) return;
+    if (!currentPosterItem) return;
     const a = document.createElement('a');
-    a.download = `${currentPosterItem.title || 'atlas'}_3x4海报.png`;
-    a.href = URL.createObjectURL(currentPosterBlob);
+    a.download = `${currentPosterItem.title || 'atlas'}_3x4典藏海报.png`;
+    if (currentPosterBlob) {
+      a.href = URL.createObjectURL(currentPosterBlob);
+    } else if (currentPosterDataUrl) {
+      a.href = currentPosterDataUrl;
+    } else {
+      return;
+    }
     a.click();
   }
 
@@ -2359,9 +2400,21 @@
   function loadImageAsync(src) {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous';
+      const isExternal = /^https?:\/\//i.test(src) && (!window.location.origin || !src.startsWith(window.location.origin));
+      if (isExternal) {
+        img.crossOrigin = 'anonymous';
+      }
       img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error('Image failed to load: ' + src));
+      img.onerror = () => {
+        if (img.crossOrigin) {
+          const retryImg = new Image();
+          retryImg.onload = () => resolve(retryImg);
+          retryImg.onerror = () => reject(new Error('Image failed to load: ' + src));
+          retryImg.src = src;
+        } else {
+          reject(new Error('Image failed to load: ' + src));
+        }
+      };
       img.src = src;
     });
   }
@@ -2441,11 +2494,14 @@
   let toastTimer = null;
   function showToast(message, duration = 2200) {
     let toast = document.getElementById('galleryToast');
+    const targetParent = document.fullscreenElement || document.getElementById('viewerModal') || document.body;
     if (!toast) {
       toast = document.createElement('div');
       toast.id = 'galleryToast';
       toast.className = 'gallery-toast';
-      document.body.appendChild(toast);
+      targetParent.appendChild(toast);
+    } else if (toast.parentElement !== targetParent) {
+      targetParent.appendChild(toast);
     }
     toast.innerHTML = '<span class="toast-indicator"></span><span class="toast-text">' + escapeHtml(message) + '</span>';
     toast.classList.add('show');

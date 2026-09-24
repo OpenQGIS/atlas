@@ -311,6 +311,56 @@
           </button>
         </nav>
       </aside>
+
+      <!-- Share QR Code Modal · 二维码深览弹窗 (位于 viewerModal 内部以完美支持视口全屏) -->
+      <div class="share-submodal" id="shareQrModal" aria-hidden="true" role="dialog" aria-label="分享画卷二维码">
+        <div class="share-submodal-backdrop" id="shareQrBackdrop"></div>
+        <div class="share-submodal-dialog">
+          <div class="share-submodal-header">
+            <h3 class="share-submodal-title" data-i18n="shareQrTitle">扫码深览画卷</h3>
+            <button class="share-submodal-close icon-btn" id="btnCloseShareQr" aria-label="关闭" data-i18n-title="actionClose">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+          <div class="share-submodal-body">
+            <div class="share-qr-card">
+              <div class="share-qr-box" id="shareQrContainer"></div>
+              <h4 class="share-qr-artwork-title" id="shareQrArtworkTitle">-</h4>
+              <p class="share-qr-artwork-sub">地图录 · 1:1 4K Deep Zoom 深览</p>
+            </div>
+          </div>
+          <div class="share-submodal-footer">
+            <button class="share-submodal-btn secondary" id="btnShareQrCopyLink" data-i18n="shareOptLink">复制网址</button>
+            <button class="share-submodal-btn primary" id="btnShareQrDownload" data-i18n="shareQrSaveBtn">保存二维码图片</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Share Poster Modal · 3:4 竖版展卷典藏海报弹窗 (位于 viewerModal 内部以完美支持视口全屏) -->
+      <div class="share-submodal" id="sharePosterModal" aria-hidden="true" role="dialog" aria-label="分享竖版海报">
+        <div class="share-submodal-backdrop" id="sharePosterBackdrop"></div>
+        <div class="share-submodal-dialog poster-dialog">
+          <div class="share-submodal-header">
+            <h3 class="share-submodal-title" data-i18n="sharePosterTitle">3:4 展卷典藏海报</h3>
+            <button class="share-submodal-close icon-btn" id="btnCloseSharePoster" aria-label="关闭" data-i18n-title="actionClose">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+          <div class="share-submodal-body poster-body">
+            <div class="poster-preview-stage" id="posterPreviewStage">
+              <div class="poster-loading" id="posterLoading">
+                <div class="poster-spinner"></div>
+                <span data-i18n="sharePosterGenerating">正在生成高清典藏海报...</span>
+              </div>
+              <img class="poster-preview-img" id="posterPreviewImg" alt="典藏海报预览" style="display: none;" />
+            </div>
+          </div>
+          <div class="share-submodal-footer">
+            <button class="share-submodal-btn secondary" id="btnClosePosterBottom" data-i18n="aboutClose">关闭</button>
+            <button class="share-submodal-btn primary" id="btnDownloadPoster" data-i18n="sharePosterDownloadBtn">下载高清海报 (PNG)</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -479,56 +529,6 @@
         </div>
       </div>
     </div>
-  <!-- Share QR Code Modal · 二维码深览弹窗 -->
-  <div class="share-submodal" id="shareQrModal" aria-hidden="true" role="dialog" aria-label="分享画卷二维码">
-    <div class="share-submodal-backdrop" id="shareQrBackdrop"></div>
-    <div class="share-submodal-dialog">
-      <div class="share-submodal-header">
-        <h3 class="share-submodal-title" data-i18n="shareQrTitle">扫码深览画卷</h3>
-        <button class="share-submodal-close icon-btn" id="btnCloseShareQr" aria-label="关闭" data-i18n-title="actionClose">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-      <div class="share-submodal-body">
-        <div class="share-qr-card">
-          <div class="share-qr-box" id="shareQrContainer"></div>
-          <h4 class="share-qr-artwork-title" id="shareQrArtworkTitle">-</h4>
-          <p class="share-qr-artwork-sub">地图录 · 1:1 4K Deep Zoom 深览</p>
-        </div>
-      </div>
-      <div class="share-submodal-footer">
-        <button class="share-submodal-btn secondary" id="btnShareQrCopyLink" data-i18n="shareOptLink">复制网址</button>
-        <button class="share-submodal-btn primary" id="btnShareQrDownload" data-i18n="shareQrSaveBtn">保存二维码图片</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Share Poster Modal · 3:4 竖版展卷典藏海报弹窗 -->
-  <div class="share-submodal" id="sharePosterModal" aria-hidden="true" role="dialog" aria-label="分享竖版海报">
-    <div class="share-submodal-backdrop" id="sharePosterBackdrop"></div>
-    <div class="share-submodal-dialog poster-dialog">
-      <div class="share-submodal-header">
-        <h3 class="share-submodal-title" data-i18n="sharePosterTitle">3:4 展卷典藏海报</h3>
-        <button class="share-submodal-close icon-btn" id="btnCloseSharePoster" aria-label="关闭" data-i18n-title="actionClose">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-      <div class="share-submodal-body poster-body">
-        <div class="poster-preview-stage" id="posterPreviewStage">
-          <div class="poster-loading" id="posterLoading">
-            <div class="poster-spinner"></div>
-            <span data-i18n="sharePosterGenerating">正在生成高清典藏海报...</span>
-          </div>
-          <img class="poster-preview-img" id="posterPreviewImg" alt="典藏海报预览" style="display: none;" />
-        </div>
-      </div>
-      <div class="share-submodal-footer">
-        <button class="share-submodal-btn secondary" id="btnClosePosterBottom" data-i18n="aboutClose">关闭</button>
-        <button class="share-submodal-btn primary" id="btnDownloadPoster" data-i18n="sharePosterDownloadBtn">下载高清海报 (PNG)</button>
-      </div>
-    </div>
-  </div>
-
   <script src="assets/app.js"></script>
 </body>
 </html>

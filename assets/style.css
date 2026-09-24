@@ -1620,6 +1620,8 @@ body[data-page="portal"] {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+  width: 100%;
+  align-content: flex-start;
 }
 .masonry-grid.comfort {
   --target-row-height: 420px;
@@ -1667,6 +1669,7 @@ body[data-page="portal"] {
   height: var(--target-row-height, 320px);
   flex-grow: calc(var(--aspect-ratio) * 100);
   flex-basis: calc(var(--target-row-height, 320px) * var(--aspect-ratio));
+  min-width: 0;
   max-width: 100%;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);

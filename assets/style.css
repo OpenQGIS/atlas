@@ -1726,6 +1726,33 @@ body[data-page="portal"] {
   transform: scale(1.06);
 }
 
+/* Micro-Tile Canvas (高分屏 2K/4K 瓦片点对点高精图层) */
+.card-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: calc(var(--radius-md, 8px) - 1px);
+  transform: scale(1.0);
+  transform-origin: center center;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease;
+  will-change: transform;
+  backface-visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.card-canvas.loaded {
+  opacity: 1;
+}
+
+.gallery-card:hover .card-canvas {
+  transform: scale(1.06);
+}
+
 /* NEW 胶囊徽标 (近 3 个月新作标识) */
 .card-new-badge {
   position: absolute;

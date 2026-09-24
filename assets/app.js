@@ -616,6 +616,10 @@
       }
     });
 
+    if (window.MicroTileCompositor) {
+      window.MicroTileCompositor.observe(card, item);
+    }
+
     return card;
   }
 

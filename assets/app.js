@@ -531,10 +531,16 @@
       }
     }, { passive: true });
 
-    // 监听横竖屏切换（物理屏幕翻转时即刻计算最契合图幅）
+    // 监听横竖屏切换（物理屏幕翻转时经平滑防抖后计算最契合图幅，防止旋转中途闪烁）
     const mql = window.matchMedia('(orientation: landscape)');
+    let orientTimer = null;
     const handleOrientationChange = () => {
-      displayHeroArtwork();
+      if (orientTimer) clearTimeout(orientTimer);
+      orientTimer = setTimeout(() => {
+        requestAnimationFrame(() => {
+          displayHeroArtwork();
+        });
+      }, 120);
     };
     if (mql.addEventListener) {
       mql.addEventListener('change', handleOrientationChange);
@@ -2443,9 +2449,9 @@
         updateZoomUI();
       });
 
-      // 移动端在移动或捏合画布时，自动关闭过高的信息抽屉，提升浏览沉浸感
+      // 移动端在移动、捏合或轻触画布时，自动收起信息抽屉，平滑复原底栏
       function autoCloseDrawerOnMobileCanvasMove() {
-        if (window.innerWidth <= 768) {
+        if (window.innerWidth <= 768 || window.innerHeight <= 500) {
           const drawerEl = document.getElementById('viewerMetaDrawer') || document.getElementById('viewerDrawer');
           if (drawerEl && drawerEl.classList.contains('open')) {
             const toggleInfoBtn = document.getElementById('btnToggleInfo');
@@ -2457,6 +2463,11 @@
         }
       }
 
+      osdViewer.addHandler('canvas-click', (e) => {
+        if (e && e.quick) {
+          autoCloseDrawerOnMobileCanvasMove();
+        }
+      });
       osdViewer.addHandler('canvas-drag', () => {
         autoCloseDrawerOnMobileCanvasMove();
         resetTopActionsIdleTimer();

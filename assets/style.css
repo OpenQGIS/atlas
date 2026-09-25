@@ -4226,9 +4226,9 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
 }
 
 /* =====================================================================
-   Mobile Responsive Optimizations (针对手机移动端视口与手势优化)
+   Mobile Responsive Optimizations (针对手机移动端视口与手势优化，含横屏与竖屏)
    ==================================================================== */
-@media (max-width: 768px) {
+@media (max-width: 768px), (orientation: landscape) and (max-height: 500px) {
   .viewer-container {
     height: 100vh;
     height: 100dvh;
@@ -4403,6 +4403,43 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   .drawer-resize-handle,
   .drawer-resize-corner-hint {
     display: none !important;
+  }
+
+  /* 移动端信息面板展开时，底部悬浮工具栏平滑下沉隐退，彻底杜绝遮挡与透底 */
+  .viewer-modal.drawer-open .viewer-floating-toolbar,
+  .viewer-modal.drawer-open .viewer-float-toolbar,
+  .viewer-modal:has(.viewer-drawer.open) .viewer-floating-toolbar,
+  .viewer-modal:has(.viewer-drawer.open) .viewer-float-toolbar {
+    transform: translateX(-50%) translateY(80px) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease !important;
+  }
+
+  .viewer-modal.drawer-open .viewer-navigator-panel,
+  .viewer-modal:has(.viewer-drawer.open) .viewer-navigator-panel {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: scale(0.92) translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease !important;
+  }
+
+  /* 手机横屏模式下，抽屉居中且高度自适应为 68vh，上方留白 32vh 可视地图并可轻触收起 */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .viewer-drawer,
+    .viewer-meta-drawer {
+      max-height: 68vh !important;
+      width: min(620px, 92vw) !important;
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%) translateY(100%) !important;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+    }
+    .viewer-drawer.open,
+    .viewer-meta-drawer.open {
+      transform: translateX(-50%) translateY(0) !important;
+    }
   }
 }
 
@@ -4930,10 +4967,11 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   }
 
   .hero-title {
-    font-size: clamp(1.4rem, 6.2vw, 2.4rem);
+    font-size: clamp(1.35rem, 5.2vw, 2.0rem);
     letter-spacing: 0.05em;
     line-height: 1.3;
     max-width: 100%;
+    transition: font-size 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .hero-title-chunk {
@@ -4945,10 +4983,11 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   }
 
   .hero-subtitle {
-    font-size: clamp(0.78rem, 3.2vw, 1.05rem);
+    font-size: clamp(0.76rem, 3.0vw, 0.98rem);
     letter-spacing: 0.03em;
     line-height: 1.45;
     max-width: 100%;
+    transition: font-size 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .hero-sub-chunk {
@@ -5027,14 +5066,16 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     font-size: 0.65rem;
   }
   .hero-title {
-    font-size: clamp(1.2rem, 4.8vh, 1.7rem);
+    font-size: clamp(1.3rem, 5.2vh, 1.8rem);
     margin-bottom: 6px;
     line-height: 1.2;
+    transition: font-size 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .hero-subtitle {
-    font-size: clamp(0.7rem, 2.8vh, 0.88rem);
+    font-size: clamp(0.74rem, 3.0vh, 0.92rem);
     margin-bottom: 6px;
     line-height: 1.3;
+    transition: font-size 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .hero-desc {
     font-size: 0.66rem;

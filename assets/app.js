@@ -1924,6 +1924,9 @@
     img.src = thumbUrl;
   }
 
+  // 方案 B：微型 Canvas 降采样 + GPU 硬件高斯弥散环境光 (Apple Music / Spotify 级流光底板)
+  const ambientCanvasCache = new Map();
+
   function updateAmbientBackdrop(item) {
     if (!item) return;
     const backdropEl = document.getElementById('viewerAmbientBackdrop');
@@ -1937,65 +1940,87 @@
     const prevLayer = (activeAmbientLayer === 'A') ? layerA : layerB;
     activeAmbientLayer = (activeAmbientLayer === 'A') ? 'B' : 'A';
 
-    if (item.thumb) {
-      nextLayer.style.backgroundImage = 'url("' + item.thumb + '")';
-      nextLayer.classList.add('active');
-      prevLayer.classList.remove('active');
-    }
+    // 辅助函数：将已解码图像通过 24x24 离屏 Canvas 双线性低频采样，消除压缩色偏与高频噪点并生成弥散底图
+    function applyAmbientData(source) {
+      try {
+        let dataUrl = ambientCanvasCache.get(item.id);
+        let avgLum = 100;
 
-    // 动态提取画作左、中、右真实空间渐变色 (Spatial Gradient)
-    extractSpatialColors(item.thumb, function (spatial) {
-      extractDominantColors(item, 5, function (colors) {
-        if (!colors || colors.length === 0) {
-          colors = ['#12161D', '#C69C3A', '#4A535E', '#E6C66D', '#202934'];
+        if (!dataUrl) {
+          const canvas = document.createElement('canvas');
+          canvas.width = 24;
+          canvas.height = 24;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          if (!ctx) return false;
+
+          // 核心：浏览器双线性插值把全图平滑收缩到 24x24，物理滤除 JPEG/WebP 块噪点和振铃杂色
+          ctx.drawImage(source, 0, 0, 24, 24);
+
+          // 采样明暗调性（加权亮度）
+          const p = ctx.getImageData(0, 0, 24, 24).data;
+          let sumLum = 0, count = 0;
+          for (let i = 0; i < p.length; i += 16) {
+            sumLum += 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2];
+            count++;
+          }
+          avgLum = sumLum / (count || 1);
+
+          dataUrl = canvas.toDataURL('image/webp', 0.85);
+          if (!dataUrl || dataUrl.length < 50) {
+            dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          }
+          if (dataUrl) {
+            ambientCanvasCache.set(item.id, dataUrl);
+          }
         }
 
-        let leftRgb, centerRgb, rightRgb;
-        if (spatial) {
-          leftRgb = spatial.left;
-          centerRgb = spatial.center;
-          rightRgb = spatial.right;
-        } else {
-          leftRgb = hexToRgb(colors[0]);
-          rightRgb = hexToRgb(colors[2] || colors[0]);
-          centerRgb = hexToRgb(colors[4] || colors[1] || colors[0]);
+        if (dataUrl) {
+          nextLayer.style.backgroundImage = 'url("' + dataUrl + '")';
+          nextLayer.classList.add('active');
+          prevLayer.classList.remove('active');
         }
 
-        // 计算画作整体调性
-        const avgLum = 0.299 * ((leftRgb.r + rightRgb.r) / 2) +
-                       0.587 * ((leftRgb.g + rightRgb.g) / 2) +
-                       0.114 * ((leftRgb.b + rightRgb.b) / 2);
         const isDarkArtwork = avgLum < 135;
-
         if (backdropEl) {
           backdropEl.classList.toggle('artwork-dark', isDarkArtwork);
           backdropEl.classList.toggle('artwork-light', !isDarkArtwork);
-
-          // 核心：视口底板应用精准左右渐变（左侧匹配左部底色，右侧匹配右部底色）
-          const leftCss = 'rgb(' + leftRgb.r + ', ' + leftRgb.g + ', ' + leftRgb.b + ')';
-          const centerCss = 'rgb(' + centerRgb.r + ', ' + centerRgb.g + ', ' + centerRgb.b + ')';
-          const rightCss = 'rgb(' + rightRgb.r + ', ' + rightRgb.g + ', ' + rightRgb.b + ')';
-
-          backdropEl.style.background = 'linear-gradient(90deg, ' + leftCss + ' 0%, ' + centerCss + ' 50%, ' + rightCss + ' 100%)';
         }
-
         if (meshLayer) {
-          // 空间流向网格梯度：在左右两侧各自形成柔和的径向光晕，进一步强化左右明暗/色彩过渡层次
-          const lAura = 'rgba(' + leftRgb.r + ', ' + leftRgb.g + ', ' + leftRgb.b + ', 0.85)';
-          const rAura = 'rgba(' + rightRgb.r + ', ' + rightRgb.g + ', ' + rightRgb.b + ', 0.85)';
-          const cAura = 'rgba(' + centerRgb.r + ', ' + centerRgb.g + ', ' + centerRgb.b + ', 0.65)';
-
-          const meshGradient = [
-            'radial-gradient(ellipse 75% 85% at 15% 50%, ' + lAura + ' 0%, transparent 75%)',
-            'radial-gradient(ellipse 75% 85% at 85% 50%, ' + rAura + ' 0%, transparent 75%)',
-            'radial-gradient(ellipse 60% 60% at 50% 50%, ' + cAura + ' 0%, transparent 70%)'
-          ].join(', ');
-
-          meshLayer.style.background = meshGradient;
-          meshLayer.classList.add('active');
+          meshLayer.classList.remove('active');
+          meshLayer.style.background = 'none';
         }
-      });
-    });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // 1. 优先：同步获取主页画廊卡片中已完成解码的 <img> 节点 (0ms 瞬时无白屏呈现)
+    const renderedCardImg = document.querySelector('.gallery-card[data-id="' + item.id + '"] img.gallery-card-thumb');
+    if (renderedCardImg && renderedCardImg.complete && renderedCardImg.naturalWidth > 0) {
+      if (applyAmbientData(renderedCardImg)) return;
+    }
+
+    // 2. 检查缓存
+    if (ambientCanvasCache.has(item.id)) {
+      if (applyAmbientData(null)) return;
+    }
+
+    // 3. 次选：异步加载缩略图
+    if (item.thumb) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        applyAmbientData(img);
+      };
+      img.onerror = () => {
+        const fallbackColor = (item.colors && item.colors[0]) || '#12161D';
+        nextLayer.style.backgroundImage = 'radial-gradient(circle at 50% 50%, ' + fallbackColor + ' 0%, #07080b 100%)';
+        nextLayer.classList.add('active');
+        prevLayer.classList.remove('active');
+      };
+      img.src = item.thumb;
+    }
   }
 
   function openViewerByItem(item, isNewOpen = false) {

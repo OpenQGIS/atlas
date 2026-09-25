@@ -24,23 +24,23 @@ if ($status) {
     }
     git add .
     git commit -m "$Message"
-    Write-Host "[✓] 本地提交完成。" -ForegroundColor Green
+    Write-Host "(OK) 本地提交完成。" -ForegroundColor Green
     Write-Host ""
 } else {
-    Write-Host "[✓] 工作区干净，准备推送远程分支..." -ForegroundColor Green
+    Write-Host "(OK) 工作区干净，准备推送远程分支..." -ForegroundColor Green
     Write-Host ""
 }
 
 # 2. 推送主干 main 分支
 Write-Host "[1/2] 正在推送到源码主干 (origin/main)..." -ForegroundColor Yellow
 git push origin main
-Write-Host "[✓] main 分支推送成功！" -ForegroundColor Green
+Write-Host "(OK) main 分支推送成功！" -ForegroundColor Green
 Write-Host ""
 
 # 3. 一键同步推送到 website 分支以触发 GitHub Pages 构建
 Write-Host "[2/2] 正在同步推送到生产发布分支 (origin/website)..." -ForegroundColor Yellow
 git push origin main:website
-Write-Host "[✓] website 分支同步成功！" -ForegroundColor Green
+Write-Host "(OK) website 分支同步成功！" -ForegroundColor Green
 Write-Host ""
 
 Write-Host "===================================================" -ForegroundColor Cyan

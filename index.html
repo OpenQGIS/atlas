@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20260925_v12">
+  <link rel="stylesheet" href="assets/style.css?v=20260925_v14">
   <script src="assets/config.js"></script>
-  <script src="assets/i18n.js?v=20260925_v12"></script>
+  <script src="assets/i18n.js?v=20260925_v13"></script>
   <script src="data/themes.js"></script>
   <script src="data/manifest.js"></script>
-  <script src="assets/theme.js?v=20260925_v12"></script>
+  <script src="assets/theme.js?v=20260925_v13"></script>
   <script src="vendor/openseadragon.min.js"></script>
   <script src="assets/qrcode.min.js"></script>
   <script src="assets/tile-compositor.js?v=20260925_v10"></script>
@@ -248,6 +248,11 @@
         </div>
 
         <div class="viewer-floating-toolbar">
+          <button class="tool-btn nav-artwork-btn prev-artwork-btn" id="btnPrevArtwork" title="上一卷 (←)" aria-label="上一卷" data-i18n-title="actionPrev">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
           <!-- 动态比例控制器 (底栏输入+显示二合一 · 展开窗口仅精简展示纯档位) -->
           <div class="zoom-dropdown-wrapper" id="zoomDropdownWrapper">
             <div class="tool-zoom-pill" id="toolZoomPill" title="缩放比例与预设档位 (回车应用，点击展开档位)">
@@ -331,6 +336,11 @@
               </button>
             </div>
           </div>
+          <button class="tool-btn nav-artwork-btn next-artwork-btn" id="btnNextArtwork" title="下一卷 (→)" aria-label="下一卷" data-i18n-title="actionNext">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
 
           <!-- High-End Glassmorphic Floating Tooltip · 工具栏微胶囊悬浮气泡提示 -->
           <div class="dock-tooltip" id="dockTooltip" aria-hidden="true">
@@ -665,6 +675,6 @@
         </div>
       </div>
     </div>
-  <script src="assets/app.js?v=20260925_v12"></script>
+  <script src="assets/app.js?v=20260925_v13"></script>
 </body>
 </html>

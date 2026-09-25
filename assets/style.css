@@ -2592,6 +2592,11 @@ body:has(.about-modal.open) {
               color 0.2s ease;
 }
 
+/* 底栏嵌入式上/下一卷切换按钮：桌面端默认隐藏（已有侧边大翻页把手），移动端开启 */
+.viewer-floating-toolbar .nav-artwork-btn {
+  display: none;
+}
+
 .viewer-floating-toolbar .tool-btn:hover,
 .viewer-float-toolbar .tool-btn:hover {
   background: transparent !important;
@@ -4264,6 +4269,11 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     display: none !important;
   }
 
+  /* 移动端底部工具栏两端开启上一卷/下一卷翻页微按键 */
+  .viewer-floating-toolbar .nav-artwork-btn {
+    display: inline-flex !important;
+  }
+
   /* 比例控制器胶囊在移动端尺寸对齐，文字清晰，并禁用点击弹出软键盘 */
   .tool-zoom-pill {
     height: 34px !important;
@@ -5751,14 +5761,14 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: 260px;
+  width: 220px;
   background: rgba(18, 22, 30, 0.95);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  padding: 6px;
+  padding: 5px;
   z-index: 90;
   opacity: 0;
   pointer-events: none;
@@ -5768,7 +5778,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
               transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   user-select: none;
 }
 
@@ -5798,7 +5808,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     right: auto !important;
     transform: translateX(-50%) translateY(8px) scale(0.96) !important;
     transform-origin: bottom center !important;
-    width: min(280px, calc(100vw - 32px)) !important;
+    width: min(218px, calc(100vw - 32px)) !important;
   }
   .viewer-floating-toolbar .share-popover.open {
     transform: translateX(-50%) translateY(0) scale(1) !important;
@@ -5814,8 +5824,8 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
 .share-popover-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 9px 12px;
+  gap: 10px;
+  padding: 8px 10px;
   border-radius: 9px;
   border: none;
   background: transparent;
@@ -5880,6 +5890,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   color: var(--text-muted);
   line-height: 1.25;
   margin-top: 2px;
+  white-space: nowrap;
 }
 
 .share-popover-item.copied .share-item-title {

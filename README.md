@@ -28,8 +28,6 @@
 - **[聚合总览 · Gallery](https://github.com/OpenQGIS/Gallery)**: OpenQGIS 成果聚合探索大厅。
 - **[底座工程 · atlas-core](https://github.com/OpenQGIS/atlas-core)**: 高清原图金字塔切片算法生产工具套件。
 
----
-
 ## 3. 本地极速浏览
 
 在 Windows 环境下，直接双击运行：
@@ -41,3 +39,19 @@
 python -m http.server 8080
 ```
 浏览器访问 `http://localhost:8080` 即可开始沉浸式深览。
+
+---
+
+## 4. 开发与部署规范 (Deployment & Branches)
+
+本项目采用**双分支协同机制**：
+- **`main`**：源码主干；
+- **`website`**：GitHub Pages 生产部署源分支。
+
+**一键双分支同步发布**：
+```bash
+# Windows 双击运行 deploy.bat，或在终端执行：
+.\deploy.ps1
+```
+详细分支定义与维护规范参见 **[DEPLOY.md](DEPLOY.md)**。
+

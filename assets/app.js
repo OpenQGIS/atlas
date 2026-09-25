@@ -1727,13 +1727,9 @@
     if (aspect >= maxW / maxH) {
       targetW = maxW;
       targetH = Math.max(Math.round(maxW / aspect), 24);
-      targetW = Math.round(targetH * aspect);
-      if (targetW > maxW) targetW = maxW;
     } else {
       targetH = maxH;
       targetW = Math.max(Math.round(maxH * aspect), 28);
-      targetH = Math.round(targetW / aspect);
-      if (targetH > maxH) targetH = maxH;
     }
 
     const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
@@ -2283,7 +2279,7 @@
         StealthWatermark.burnIn(osdViewer);
       });
 
-      // 鹰眼导航器视野范围框边界自适应约束：防止宽屏 Letterbox 时视野框被切到图框外导致完全不可见
+      // 鹰眼导航器视野范围框边界自适应约束：消除 OSD 边框扣减偏差，并在全览总图时精准满格贴边
       function clampNavigatorDisplayRegion() {
         if (!osdViewer || !osdViewer.navigator) return;
         const nav = osdViewer.navigator;
@@ -2298,6 +2294,12 @@
         let w = parseFloat(dr.style.width) || 0;
         let h = parseFloat(dr.style.height) || 0;
 
+        // OSD 在 content-box 假设下计算时预先扣减了 totalBorderWidths (3px)。
+        // 本项目中 .displayregion 为 border-box，需补回该 3px 边框扣减，避免底部/右侧缩水 3px 空隙：
+        const borderCompensation = (nav.totalBorderWidths && nav.totalBorderWidths.x) || 3;
+        w += borderCompensation;
+        h += borderCompensation;
+
         let r = l + w;
         let b = t + h;
 
@@ -2305,6 +2307,12 @@
         let clampedT = Math.max(0, Math.min(navH, t));
         let clampedR = Math.max(0, Math.min(navW, r));
         let clampedB = Math.max(0, Math.min(navH, b));
+
+        // 全览贴边吸附：在视口贴近整图四界时（容差 <= 2.5px），无缝贴紧图框边缘，消弭亚像素浮点折损
+        if (clampedL <= 2.5) clampedL = 0;
+        if (clampedT <= 2.5) clampedT = 0;
+        if (navW - clampedR <= 2.5) clampedR = navW;
+        if (navH - clampedB <= 2.5) clampedB = navH;
 
         let clampedW = Math.max(0, clampedR - clampedL);
         let clampedH = Math.max(0, clampedB - clampedT);

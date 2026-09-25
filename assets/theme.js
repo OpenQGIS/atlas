@@ -109,16 +109,27 @@
     });
   }
 
-  // Bind toggle buttons after DOM ready
-  document.addEventListener('DOMContentLoaded', () => {
+  function initThemeButtons() {
     updateUI();
     ['btnToggleTheme', 'toolToggleTheme', 'btnHeroToggleTheme'].forEach(id => {
       const btn = document.getElementById(id);
-      if (btn) {
-        btn.addEventListener('click', toggleTheme);
+      if (btn && !btn.dataset.themeBound) {
+        btn.dataset.themeBound = 'true';
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleTheme();
+        });
       }
     });
-  });
+  }
+
+  // Bind toggle buttons after DOM ready or immediately if already ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initThemeButtons);
+  } else {
+    initThemeButtons();
+  }
 
   // Watch system color scheme changes if not explicitly overridden
   if (window.matchMedia) {
@@ -137,6 +148,8 @@
     get current() { return currentTheme; },
     setTheme,
     toggleTheme,
+    updateUI,
+    initThemeButtons,
     loadTokens
   };
 })();

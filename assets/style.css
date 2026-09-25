@@ -2464,20 +2464,20 @@ body:has(.about-modal.open) {
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(14, 18, 24, 0.95);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(14, 18, 24, 0.60);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   padding: 6px 8px;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   gap: 4px;
   box-shadow: 
-    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.28),
-    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.25),
-    0px 10px 10px -3.75px rgba(0, 0, 0, 0.2),
-    0px 20px 35px -5px rgba(0, 0, 0, 0.55);
+    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.20),
+    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.18),
+    0px 10px 10px -3.75px rgba(0, 0, 0, 0.14),
+    0px 16px 32px -5px rgba(0, 0, 0, 0.35);
   z-index: 20;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
               background 0.3s ease,
@@ -2499,17 +2499,17 @@ body:has(.about-modal.open) {
 .viewer-floating-toolbar:hover {
   transform: translateX(-50%);
   box-shadow: 
-    0px 0.8px 1px -1px rgba(0, 0, 0, 0.32),
-    0px 3px 4px -2px rgba(0, 0, 0, 0.28),
-    0px 14px 18px -4px rgba(0, 0, 0, 0.24),
-    0px 26px 48px -6px rgba(0, 0, 0, 0.65);
+    0px 0.8px 1px -1px rgba(0, 0, 0, 0.25),
+    0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+    0px 14px 18px -4px rgba(0, 0, 0, 0.18),
+    0px 22px 42px -6px rgba(0, 0, 0, 0.45);
 }
 
 :root[data-theme="light"] .viewer-float-toolbar,
 :root[data-theme="light"] .viewer-floating-toolbar {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.60);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 
     0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.08),
@@ -3109,7 +3109,7 @@ body:has(.about-modal.open) {
   top: 80px;
   right: 20px;
   width: 320px;
-  height: auto;
+  height: min(490px, calc(100vh - 180px));
   min-width: 240px;
   min-height: 200px;
   max-width: calc(100vw - 40px);
@@ -4533,20 +4533,37 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease !important;
   }
 
-  /* 手机横屏模式下，抽屉居中且高度自适应为 68vh，上方留白 32vh 可视地图并可轻触收起 */
+  /* 手机横屏模式下：重构为右侧滑入精致悬浮卡片 (全高视野 · 左图右文 · 双手握持分工) */
   @media (orientation: landscape) and (max-height: 500px) {
+    .viewer-modal.drawer-open .viewer-top-actions,
+    .viewer-modal:has(.viewer-drawer.open) .viewer-top-actions {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(-8px) !important;
+      transition: opacity 0.22s ease, transform 0.22s ease !important;
+    }
+
     .viewer-drawer,
     .viewer-meta-drawer {
-      max-height: 68vh !important;
-      width: min(620px, 92vw) !important;
-      left: 50% !important;
-      right: auto !important;
-      transform: translateX(-50%) translateY(100%) !important;
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+      top: 10px !important;
+      bottom: 10px !important;
+      right: calc(10px + env(safe-area-inset-right, 0px)) !important;
+      left: auto !important;
+      width: min(320px, 44vw) !important;
+      max-width: 330px !important;
+      max-height: none !important;
+      height: auto !important;
+      border-radius: var(--radius-lg) !important;
+      transform: translateX(calc(100% + 20px)) !important;
+      box-shadow: -12px 0 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+      transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease !important;
+      z-index: 35 !important;
     }
+
     .viewer-drawer.open,
     .viewer-meta-drawer.open {
-      transform: translateX(-50%) translateY(0) !important;
+      transform: translateX(0) !important;
+      opacity: 0.95 !important;
     }
   }
 }

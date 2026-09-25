@@ -2856,7 +2856,15 @@
     }
 
     const drawerEl = document.getElementById('viewerMetaDrawer') || document.getElementById('viewerDrawer');
-    if (drawerEl) drawerEl.classList.remove('open');
+    if (drawerEl) {
+      drawerEl.classList.remove('open');
+      drawerEl.style.removeProperty('left');
+      drawerEl.style.removeProperty('top');
+      drawerEl.style.removeProperty('width');
+      drawerEl.style.removeProperty('height');
+      drawerEl.style.removeProperty('right');
+      drawerEl.style.removeProperty('bottom');
+    }
     const toggleInfoBtn = document.getElementById('btnToggleInfo');
     if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
     modalEl.classList.remove('drawer-open');

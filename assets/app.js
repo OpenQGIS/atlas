@@ -37,63 +37,79 @@
 
   function bindZoomControllerEvents() {
     const wrapper = document.getElementById('zoomDropdownWrapper');
-    const badgeBtn = document.getElementById('toolZoomBadge');
+    const zoomPill = document.getElementById('toolZoomPill');
+    const zoomInput = document.getElementById('zoomInlineInput');
+    const chevronBtn = document.getElementById('btnZoomChevron');
     const popover = document.getElementById('zoomPopover');
-    const inputBox = document.getElementById('zoomInputBox');
-    const applyBtn = document.getElementById('btnApplyZoomInput');
-    if (!wrapper || !badgeBtn || !popover || !inputBox) return;
+    if (!wrapper || !zoomPill || !popover) return;
 
     function closeZoomPopover() {
       popover.classList.remove('open');
-      badgeBtn.setAttribute('aria-expanded', 'false');
+      zoomPill.classList.remove('active');
+      if (chevronBtn) chevronBtn.setAttribute('aria-expanded', 'false');
       popover.setAttribute('aria-hidden', 'true');
     }
 
     function openZoomPopover() {
       popover.classList.add('open');
-      badgeBtn.setAttribute('aria-expanded', 'true');
+      zoomPill.classList.add('active');
+      if (chevronBtn) chevronBtn.setAttribute('aria-expanded', 'true');
       popover.setAttribute('aria-hidden', 'false');
-      inputBox.focus();
-      inputBox.select();
     }
 
-    badgeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    function toggleZoomPopover() {
       if (popover.classList.contains('open')) {
         closeZoomPopover();
       } else {
         openZoomPopover();
       }
-    });
+    }
 
     function applyInputZoom() {
-      const val = parseInt(inputBox.value, 10);
+      if (!zoomInput) return;
+      const val = parseInt(zoomInput.value, 10);
       if (Number.isFinite(val) && val > 0 && osdViewer && osdViewer.viewport) {
         const targetZoom = getZoomFromPhysicalPercent(osdViewer, val);
         osdViewer.viewport.zoomTo(targetZoom);
         osdViewer.viewport.applyConstraints();
       }
-      closeZoomPopover();
     }
 
-    if (applyBtn) {
-      applyBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+    zoomPill.addEventListener('click', (e) => {
+      // 桌面端点击输入框时直接允许聚焦输入，不强制收起或展开下拉
+      if (e.target === zoomInput && window.innerWidth > 768) {
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      toggleZoomPopover();
+    });
+
+    if (zoomInput) {
+      zoomInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applyInputZoom();
+          zoomInput.blur();
+          closeZoomPopover();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          updateZoomUI();
+          zoomInput.blur();
+          closeZoomPopover();
+        }
+      });
+
+      zoomInput.addEventListener('blur', () => {
         applyInputZoom();
       });
-    }
 
-    inputBox.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        applyInputZoom();
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        closeZoomPopover();
-      }
-    });
+      zoomInput.addEventListener('focus', () => {
+        if (window.innerWidth > 768) {
+          zoomInput.select();
+        }
+      });
+    }
 
     popover.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -111,12 +127,9 @@
     const currentZoom = osdViewer.viewport.getZoom();
     const currentPercent = getPhysicalPercentFromZoom(osdViewer, currentZoom);
 
-    const zoomValEl = document.getElementById('toolZoomVal');
-    if (zoomValEl) zoomValEl.textContent = currentPercent + '%';
-
-    const inputBox = document.getElementById('zoomInputBox');
-    if (inputBox && document.activeElement !== inputBox) {
-      inputBox.value = currentPercent;
+    const zoomInput = document.getElementById('zoomInlineInput');
+    if (zoomInput && document.activeElement !== zoomInput) {
+      zoomInput.value = currentPercent;
     }
 
     const presetItems = document.querySelectorAll('.zoom-preset-item');
@@ -135,15 +148,13 @@
     const fitPercent = Math.max(1, Math.round((homeZoom / base100) * 100));
     const pixelNativePercent = Math.round((1 / PHYSICAL_100_RATIO) * 100); // 313%
 
-    const t = window.AtlasI18n ? window.AtlasI18n.t : (k => k);
-
     const rawPresets = [
-      { label: t('zoomFitOption') || '自适应全貌', percent: fitPercent, isFit: true },
-      { label: t('zoomPhysical50') || '50% 物理尺寸', percent: 50 },
-      { label: t('zoomPhysical100') || '100% 物理原寸 (真实幅面)', percent: 100 },
-      { label: t('zoomPhysical200') || '200% 精细刻画', percent: 200 },
-      { label: t('zoomPixel1to1') || '1:1 像素点对点 (超精细)', percent: pixelNativePercent },
-      { label: t('zoomUltraDetail') || '400% 超微细节', percent: 400 }
+      { percent: fitPercent, isFit: true },
+      { percent: 50 },
+      { percent: 100 },
+      { percent: 200 },
+      { percent: pixelNativePercent },
+      { percent: 400 }
     ];
 
     const presets = [];
@@ -160,7 +171,7 @@
       btn.type = 'button';
       btn.className = 'zoom-preset-item';
       btn.setAttribute('data-percent', p.percent);
-      btn.innerHTML = `<span class="zoom-preset-label">${p.label}</span><span class="zoom-preset-val">${p.percent}%</span>`;
+      btn.innerHTML = `<span class="zoom-preset-num">${p.percent}%</span>`;
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -172,9 +183,11 @@
           osdViewer.viewport.applyConstraints();
         }
         const popover = document.getElementById('zoomPopover');
-        const badgeBtn = document.getElementById('toolZoomBadge');
+        const zoomPill = document.getElementById('toolZoomPill');
+        const chevronBtn = document.getElementById('btnZoomChevron');
         if (popover) popover.classList.remove('open');
-        if (badgeBtn) badgeBtn.setAttribute('aria-expanded', 'false');
+        if (zoomPill) zoomPill.classList.remove('active');
+        if (chevronBtn) chevronBtn.setAttribute('aria-expanded', 'false');
       });
       presetsList.appendChild(btn);
     });
@@ -189,18 +202,18 @@
   const SVG_SPARKLE = '<svg class="badge-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1L9.8 6.2L15 8L9.8 9.8L8 15L6.2 9.8L1 8L6.2 6.2L8 1Z"/></svg>';
 
   const QMAPFLOW_BASE_SVG = '<svg width="100%" height="100%" viewBox="0 0 154.11621 25.478886" version="1.1" style="display:inline-block;vertical-align:middle;" xmlns="http://www.w3.org/2000/svg">' +
-    '<rect style="fill:#80cc28;fill-opacity:1;fill-rule:evenodd;stroke-width:1.48054;stroke-linecap:round;stroke-linejoin:round" width="79.043427" height="42.77319" x="292.11685" y="-135.73831" transform="matrix(0.26458333,0,0,0.26458333,-6.5528481,42.781699)" />' +
+    '<rect class="qmf-badge-bg" style="fill-opacity:1;fill-rule:evenodd;stroke-width:1.48054;stroke-linecap:round;stroke-linejoin:round" width="79.043427" height="42.77319" x="292.11685" y="-135.73831" transform="matrix(0.26458333,0,0,0.26458333,-6.5528481,42.781699)" />' +
     '<g transform="translate(-28.045834,-134.14375)"><g transform="matrix(0.26458333,0,0,0.26458333,21.492986,176.92545)">' +
-    '<path d="m 471.01947,-115.27477 c -1.45733,0 -2.68667,1.22933 -2.68667,2.68667 v 11.44533 c 0,1.454666 1.22934,2.683996 2.68667,2.683996 h 11.444 c 1.45733,0 2.68667,-1.22933 2.68667,-2.683996 v -11.44533 c 0,-1.45734 -1.22934,-2.68667 -2.68667,-2.68667 z m 11.444,25.138666 h -11.444 c -6.06933,0 -11.008,-4.93867 -11.008,-11.006666 v -11.44533 c 0,-6.07067 4.93867,-11.00934 11.008,-11.00934 h 11.444 c 6.06933,0 11.008,4.93867 11.008,11.00934 v 11.44533 c 0,6.067996 -4.93867,11.006666 -11.008,11.006666" style="fill:#80cc28;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
-    '<path d="m 148.51553,-138.56637 h -6.548 c -2.55067,0 -4.89333,0.952 -6.752,2.53467 -1.86,-1.58267 -4.20267,-2.53467 -6.752,-2.53467 h -6.54933 c -6.01734,0 -10.91467,5.26667 -10.91467,11.74267 v 35.950656 c 0,0.82667 0.67067,1.49734 1.49733,1.49734 h 5.328 c 0.82667,0 1.49734,-0.67067 1.49734,-1.49734 V -126.8237 c 0,-1.85334 1.18666,-3.42 2.592,-3.42 h 6.54933 c 1.404,0 2.59067,1.56666 2.59067,3.42 v 35.950656 c 0,0.82667 0.67066,1.49734 1.49733,1.49734 h 5.328 c 0.82667,0 1.49733,-0.67067 1.49733,-1.49734 V -126.8237 c 0,-1.85334 1.18667,-3.42 2.59067,-3.42 h 6.548 c 1.40667,0 2.59333,1.56666 2.59333,3.42 v 35.950656 c 0,0.82667 0.67067,1.49734 1.49734,1.49734 h 5.32666 c 0.828,0 1.49867,-0.67067 1.49867,-1.49734 V -126.8237 c 0,-6.476 -4.89733,-11.74267 -10.916,-11.74267" style="fill:#80cc28;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
-    '<path d="m 270.17707,-107.44597 c 0,4.956 -4.03067,8.986666 -8.98667,8.986666 h -13.81333 c -4.95333,0 -8.984,-4.030666 -8.984,-8.986666 v -6.904 -6.90667 c 0,-4.956 4.03067,-8.98666 8.984,-8.98666 h 13.81333 c 4.956,0 8.98667,4.03066 8.98667,8.98666 z m -8.98667,-31.12 h -13.81333 c -9.54267,0 -17.30667,7.76533 -17.30667,17.30933 v 6.90667 6.904 34.799996 h 8.32267 v -20.03467 c 2.62267,1.60267 5.692,2.544 8.984,2.544 h 13.81333 c 9.54267,0 17.30934,-7.76533 17.30934,-17.309326 v -13.81067 c 0,-9.544 -7.76667,-17.30933 -17.30934,-17.30933" style="fill:#80cc28;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
-    '<path d="m 200.35086,-138.56637 h -13.81067 c -9.544,0 -17.30933,7.76667 -17.30933,17.30933 v 13.81067 c 0,9.543996 7.76533,17.309326 17.30933,17.309326 h 13.81067 c 1.57067,0 3.08533,-0.22666 4.53067,-0.624 v -8.968 c -1.336,0.78667 -2.87067,1.27067 -4.53067,1.27067 h -13.81067 c -4.956,0 -8.98666,-4.031996 -8.98666,-8.987996 v -13.81067 c 0,-4.95466 4.03066,-8.98666 8.98666,-8.98666 h 13.81067 c 4.956,0 8.98667,4.032 8.98667,8.98666 v 6.90667 6.904 c 0,0.25067 -0.0533,0.48533 -0.0733,0.73067 v 14.073326 c 0.024,-0.0147 0.0507,-0.024 0.0733,-0.0387 v 2.41467 h 8.32266 v -17.179996 -6.904 -6.90667 c 0,-9.54266 -7.76533,-17.30933 -17.30933,-17.30933" style="fill:#80cc28;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
-    '<path d="m 403.6536,-144.18224 h 10.98267 v -8.32267 H 403.6536 c -8.58933,0 -15.57733,7.20934 -15.57733,16.068 v 47.811996 h 8.32266 v -25.219996 h 18.23734 v -8.32133 h -18.23734 v -14.27067 c 0,-4.27066 3.25334,-7.74533 7.25467,-7.74533" style="fill:#80cc28;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
-    '<path d="m 450.50787,-90.136644 h -7.96933 c -9.03067,0 -16.37867,-6.008 -16.37867,-13.391996 v -49.552 h 8.32267 v 49.552 c 0,2.39733 3.308,5.069326 8.056,5.069326 h 7.96933 z" style="fill:#80cc28;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
-    '<path d="m 568.63933,-142.86784 -0.552,5.17467 11.76667,1.25866 -42.456,32.19067 c -0.26667,0.20267 -0.64934,0.012 -0.64934,-0.32267 v -9.04666 c 0,-3.672 -4.17466,-5.784 -7.132,-3.60934 l -16.45066,12.09067 c -0.268,0.19733 -0.64534,0.005 -0.64534,-0.32667 v -18.49066 c 0,-1.01734 -0.82533,-1.84134 -1.84266,-1.84134 h -4.63734 c -1.01733,0 -1.84266,0.824 -1.84266,1.84134 v 28.091996 c 0,3.17066 3.60533,4.996 6.16,3.11733 l 18.068,-13.278666 v 11.233336 c 0,3.19733 3.65866,5.01466 6.20666,3.08266 l 50.31867,-38.154656 -1.31067,11.09333 5.16534,0.608 2.636,-22.27333 z" style="fill:#80cc28;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
-    '<path d="M 88.750667,-91.703174 H 53.436001 c -7.834666,0 -14.185333,-6.35067 -14.185333,-14.183996 v -32.04533 c 0,-7.83467 6.352,-14.18667 14.186667,-14.18667 h 32.473332 c 7.836,0 14.186663,6.352 14.186663,14.18667 v 33.33733 c 0,1.35867 -0.663997,2.63333 -1.779997,3.412 -1.116,0.78 -2.537333,0.964 -3.817333,0.49333 l -23.997333,-8.82 2.873334,-7.81066 18.398666,6.76133 v -27.37333 c 0,-3.23867 -2.625333,-5.864 -5.864,-5.864 H 53.436001 c -3.238666,0 -5.862666,2.624 -5.862666,5.86266 v 32.04667 c 0,3.23733 2.624,5.86133 5.862666,5.86133 H 70.198667 L 88.992,-93.047174 c 0.725334,0.26933 0.532,1.344 -0.241333,1.344" style="fill:#80cc28;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
+    '<path class="qmf-lettermark" d="m 471.01947,-115.27477 c -1.45733,0 -2.68667,1.22933 -2.68667,2.68667 v 11.44533 c 0,1.454666 1.22934,2.683996 2.68667,2.683996 h 11.444 c 1.45733,0 2.68667,-1.22933 2.68667,-2.683996 v -11.44533 c 0,-1.45734 -1.22934,-2.68667 -2.68667,-2.68667 z m 11.444,25.138666 h -11.444 c -6.06933,0 -11.008,-4.93867 -11.008,-11.006666 v -11.44533 c 0,-6.07067 4.93867,-11.00934 11.008,-11.00934 h 11.444 c 6.06933,0 11.008,4.93867 11.008,11.00934 v 11.44533 c 0,6.067996 -4.93867,11.006666 -11.008,11.006666" style="fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
+    '<path class="qmf-lettermark" d="m 148.51553,-138.56637 h -6.548 c -2.55067,0 -4.89333,0.952 -6.752,2.53467 -1.86,-1.58267 -4.20267,-2.53467 -6.752,-2.53467 h -6.54933 c -6.01734,0 -10.91467,5.26667 -10.91467,11.74267 v 35.950656 c 0,0.82667 0.67067,1.49734 1.49733,1.49734 h 5.328 c 0.82667,0 1.49734,-0.67067 1.49734,-1.49734 V -126.8237 c 0,-1.85334 1.18666,-3.42 2.592,-3.42 h 6.54933 c 1.404,0 2.59067,1.56666 2.59067,3.42 v 35.950656 c 0,0.82667 0.67066,1.49734 1.49733,1.49734 h 5.328 c 0.82667,0 1.49733,-0.67067 1.49733,-1.49734 V -126.8237 c 0,-1.85334 1.18667,-3.42 2.59067,-3.42 h 6.548 c 1.40667,0 2.59333,1.56666 2.59333,3.42 v 35.950656 c 0,0.82667 0.67067,1.49734 1.49734,1.49734 h 5.32666 c 0.828,0 1.49867,-0.67067 1.49867,-1.49734 V -126.8237 c 0,-6.476 -4.89733,-11.74267 -10.916,-11.74267" style="fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
+    '<path class="qmf-lettermark" d="m 270.17707,-107.44597 c 0,4.956 -4.03067,8.986666 -8.98667,8.986666 h -13.81333 c -4.95333,0 -8.984,-4.030666 -8.984,-8.986666 v -6.904 -6.90667 c 0,-4.956 4.03067,-8.98666 8.984,-8.98666 h 13.81333 c 4.956,0 8.98667,4.03066 8.98667,8.98666 z m -8.98667,-31.12 h -13.81333 c -9.54267,0 -17.30667,7.76533 -17.30667,17.30933 v 6.90667 6.904 34.799996 h 8.32267 v -20.03467 c 2.62267,1.60267 5.692,2.544 8.984,2.544 h 13.81333 c 9.54267,0 17.30934,-7.76533 17.30934,-17.309326 v -13.81067 c 0,-9.544 -7.76667,-17.30933 -17.30934,-17.30933" style="fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
+    '<path class="qmf-lettermark" d="m 200.35086,-138.56637 h -13.81067 c -9.544,0 -17.30933,7.76667 -17.30933,17.30933 v 13.81067 c 0,9.543996 7.76533,17.309326 17.30933,17.309326 h 13.81067 c 1.57067,0 3.08533,-0.22666 4.53067,-0.624 v -8.968 c -1.336,0.78667 -2.87067,1.27067 -4.53067,1.27067 h -13.81067 c -4.956,0 -8.98666,-4.031996 -8.98666,-8.987996 v -13.81067 c 0,-4.95466 4.03066,-8.98666 8.98666,-8.98666 h 13.81067 c 4.956,0 8.98667,4.032 8.98667,8.98666 v 6.90667 6.904 c 0,0.25067 -0.0533,0.48533 -0.0733,0.73067 v 14.073326 c 0.024,-0.0147 0.0507,-0.024 0.0733,-0.0387 v 2.41467 h 8.32266 v -17.179996 -6.904 -6.90667 c 0,-9.54266 -7.76533,-17.30933 -17.30933,-17.30933" style="fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
+    '<path class="qmf-lettermark" d="m 403.6536,-144.18224 h 10.98267 v -8.32267 H 403.6536 c -8.58933,0 -15.57733,7.20934 -15.57733,16.068 v 47.811996 h 8.32266 v -25.219996 h 18.23734 v -8.32133 h -18.23734 v -14.27067 c 0,-4.27066 3.25334,-7.74533 7.25467,-7.74533" style="fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
+    '<path class="qmf-lettermark" d="m 450.50787,-90.136644 h -7.96933 c -9.03067,0 -16.37867,-6.008 -16.37867,-13.391996 v -49.552 h 8.32267 v 49.552 c 0,2.39733 3.308,5.069326 8.056,5.069326 h 7.96933 z" style="fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
+    '<path class="qmf-lettermark" d="m 568.63933,-142.86784 -0.552,5.17467 11.76667,1.25866 -42.456,32.19067 c -0.26667,0.20267 -0.64934,0.012 -0.64934,-0.32267 v -9.04666 c 0,-3.672 -4.17466,-5.784 -7.132,-3.60934 l -16.45066,12.09067 c -0.268,0.19733 -0.64534,0.005 -0.64534,-0.32667 v -18.49066 c 0,-1.01734 -0.82533,-1.84134 -1.84266,-1.84134 h -4.63734 c -1.01733,0 -1.84266,0.824 -1.84266,1.84134 v 28.091996 c 0,3.17066 3.60533,4.996 6.16,3.11733 l 18.068,-13.278666 v 11.233336 c 0,3.19733 3.65866,5.01466 6.20666,3.08266 l 50.31867,-38.154656 -1.31067,11.09333 5.16534,0.608 2.636,-22.27333 z" style="fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
+    '<path class="qmf-lettermark" d="M 88.750667,-91.703174 H 53.436001 c -7.834666,0 -14.185333,-6.35067 -14.185333,-14.183996 v -32.04533 c 0,-7.83467 6.352,-14.18667 14.186667,-14.18667 h 32.473332 c 7.836,0 14.186663,6.352 14.186663,14.18667 v 33.33733 c 0,1.35867 -0.663997,2.63333 -1.779997,3.412 -1.116,0.78 -2.537333,0.964 -3.817333,0.49333 l -23.997333,-8.82 2.873334,-7.81066 18.398666,6.76133 v -27.37333 c 0,-3.23867 -2.625333,-5.864 -5.864,-5.864 H 53.436001 c -3.238666,0 -5.862666,2.624 -5.862666,5.86266 v 32.04667 c 0,3.23733 2.624,5.86133 5.862666,5.86133 H 70.198667 L 88.992,-93.047174 c 0.725334,0.26933 0.532,1.344 -0.241333,1.344" style="fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333" />' +
     '</g>' +
-    '<text xml:space="preserve" style="font-style:normal;font-weight:600;font-size:12.7032px;line-height:10.4398px;font-family:\'MiSans\',-apple-system,sans-serif;text-align:center;letter-spacing:-0.8px;text-anchor:middle;fill:#ffffff;fill-opacity:1;" x="108.68931" y="151.41119"><tspan x="108.68931" y="151.41119">__PRECISION__</tspan></text>' +
+    '<text class="qmf-badge-num" xml:space="preserve" style="font-style:normal;font-weight:700;font-size:12.7032px;line-height:10.4398px;font-family:\'MiSans\',-apple-system,sans-serif;text-align:center;letter-spacing:-0.8px;text-anchor:middle;fill-opacity:1;" x="108.68931" y="151.41119"><tspan x="108.68931" y="151.41119">__PRECISION__</tspan></text>' +
     '</g></svg>';
 
   function getQMapFlowSvg(precision = 100) {
@@ -591,12 +604,19 @@
     ];
 
     function closeAllLangDropdowns(exceptMenuId) {
-      dropdownConfigs.forEach(({ btnId, menuId }) => {
+      dropdownConfigs.forEach(({ btnId, menuId, wrapperId }) => {
         if (exceptMenuId && menuId === exceptMenuId) return;
         const menu = document.getElementById(menuId);
         const btn = document.getElementById(btnId);
         if (menu) menu.classList.remove('open');
         if (btn) btn.setAttribute('aria-expanded', 'false');
+        if (wrapperId === 'viewerLangDropdownWrapper') {
+          const topActions = document.getElementById('viewerTopActions');
+          if (topActions && !topActions.matches(':hover')) {
+            topActions.classList.remove('expanded');
+          }
+          if (typeof resetTopActionsIdleTimer === 'function') resetTopActionsIdleTimer();
+        }
       });
     }
 
@@ -612,6 +632,11 @@
         closeAllLangDropdowns(menuId);
         const isOpen = menu.classList.toggle('open');
         btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        if (wrapperId === 'viewerLangDropdownWrapper') {
+          const topActions = document.getElementById('viewerTopActions');
+          if (topActions) topActions.classList.toggle('expanded', isOpen);
+          if (typeof resetTopActionsIdleTimer === 'function') resetTopActionsIdleTimer();
+        }
       });
 
       menu.querySelectorAll('.lang-dropdown-item').forEach(item => {
@@ -676,6 +701,13 @@
       if (modalEl && modalEl.classList.contains('open') && currentFilteredItems[currentViewerIndex]) {
         updateArtworkMetadata(currentFilteredItems[currentViewerIndex]);
       }
+
+      // If poster modal is open, re-render artwork poster with localized typography
+      const posterModal = document.getElementById('sharePosterModal');
+      if (posterModal && posterModal.classList.contains('open') && currentPosterItem) {
+        updatePosterRatioUI();
+        renderCurrentPoster();
+      }
     });
   }
 
@@ -698,6 +730,8 @@
       modalEl.setAttribute('aria-hidden', 'false');
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.scrollbarGutter = 'auto';
+      document.body.style.scrollbarGutter = 'auto';
     }
 
     function closeAbout() {
@@ -705,6 +739,8 @@
       modalEl.setAttribute('aria-hidden', 'true');
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
+      document.documentElement.style.scrollbarGutter = '';
+      document.body.style.scrollbarGutter = '';
       setTimeout(() => {
         if (!modalEl.classList.contains('open')) {
           modalEl.style.display = 'none';
@@ -943,6 +979,72 @@
     });
   }
 
+  // ── 视口右上角全局操作胶囊：弹性手风琴悬停展开与看图沉浸式自动隐退引擎 ──
+  let topActionsIdleTimer = null;
+  const TOP_ACTIONS_IDLE_DELAY = 2800; // 2.8秒无操作后淡化为沉浸态
+
+  function resetTopActionsIdleTimer() {
+    const topActions = document.getElementById('viewerTopActions');
+    if (!topActions) return;
+
+    // 唤醒：立即恢复完全清晰
+    topActions.classList.remove('idle-dimmed');
+
+    if (topActionsIdleTimer) {
+      clearTimeout(topActionsIdleTimer);
+      topActionsIdleTimer = null;
+    }
+
+    // 检查是否正被鼠标悬停或下拉菜单处于打开状态
+    const langMenu = document.getElementById('viewerLangMenu');
+    const isMenuOpen = langMenu && langMenu.classList.contains('open');
+    let isHovered = false;
+    try { isHovered = topActions.matches(':hover'); } catch (e) {}
+
+    if (isMenuOpen || isHovered) return;
+
+    topActionsIdleTimer = setTimeout(() => {
+      const modalEl = document.getElementById('viewerModal');
+      if (!modalEl || !modalEl.classList.contains('open')) return;
+
+      const stillMenuOpen = langMenu && langMenu.classList.contains('open');
+      let stillHovered = false;
+      try { stillHovered = topActions.matches(':hover'); } catch (e) {}
+
+      if (!stillMenuOpen && !stillHovered) {
+        topActions.classList.add('idle-dimmed');
+        topActions.classList.remove('expanded');
+      }
+    }, TOP_ACTIONS_IDLE_DELAY);
+  }
+
+  function initViewerTopActions() {
+    const topActions = document.getElementById('viewerTopActions');
+    const modalEl = document.getElementById('viewerModal');
+    if (!topActions || !modalEl) return;
+
+    modalEl.addEventListener('mousemove', resetTopActionsIdleTimer, { passive: true });
+    modalEl.addEventListener('pointerdown', resetTopActionsIdleTimer, { passive: true });
+
+    topActions.addEventListener('mouseleave', () => {
+      resetTopActionsIdleTimer();
+    });
+
+    topActions.addEventListener('click', (e) => {
+      const closeBtn = e.target.closest('#btnCloseViewer');
+      if (closeBtn) return;
+
+      if (e.target.closest('.lang-dropdown-btn') || e.target.closest('.lang-dropdown-menu') || e.target.closest('#toolToggleTheme')) {
+        return;
+      }
+
+      if (!topActions.classList.contains('expanded')) {
+        topActions.classList.add('expanded');
+        resetTopActionsIdleTimer();
+      }
+    });
+  }
+
   /* -------------------------------------------------------------
      Deep Zoom Viewer Modal & Palette Drawer
      ------------------------------------------------------------- */
@@ -950,6 +1052,8 @@
     const modalEl = document.getElementById('viewerModal');
     if (!modalEl || modalEl.dataset.bound) return;
     modalEl.dataset.bound = 'true';
+
+    initViewerTopActions();
 
     const backdropEl = document.getElementById('viewerBackdrop');
     const closeBtn = document.getElementById('btnCloseViewer');
@@ -1075,21 +1179,23 @@
 
     const btnShareQrCopyLink = document.getElementById('btnShareQrCopyLink');
     if (btnShareQrCopyLink) {
-      btnShareQrCopyLink.addEventListener('click', () => {
+      btnShareQrCopyLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const item = getCurrentViewerItem();
-        if (item) shareDirectLink(item);
+        if (item) shareDirectLink(item, e);
       });
     }
 
     const btnShareQrDownload = document.getElementById('btnShareQrDownload');
     if (btnShareQrDownload) {
-      btnShareQrDownload.addEventListener('click', () => {
+      btnShareQrDownload.addEventListener('click', (e) => {
         const item = getCurrentViewerItem();
-        if (item) downloadQrCodeImage(item);
+        if (item) downloadQrCodeImage(item, e);
       });
     }
 
-    // 竖版海报弹窗事件
+    // 典藏海报弹窗事件
     const btnCloseSharePoster = document.getElementById('btnCloseSharePoster');
     const btnClosePosterBottom = document.getElementById('btnClosePosterBottom');
     const sharePosterBackdrop = document.getElementById('sharePosterBackdrop');
@@ -1101,6 +1207,9 @@
     if (btnDownloadPoster) {
       btnDownloadPoster.addEventListener('click', downloadPosterImage);
     }
+
+    // 初始化海报画幅多比例选单事件
+    initPosterRatioEvents();
 
     // 点击外部空白收起分享锚点弹窗
     document.addEventListener('click', (e) => {
@@ -1298,12 +1407,17 @@
 
       switch (e.key) {
         case 'Escape':
+          const posterRatioMenu = document.getElementById('posterRatioMenu');
           const posterModal = document.getElementById('sharePosterModal');
           const qrModal = document.getElementById('shareQrModal');
           const popover = document.getElementById('sharePopover');
           const vLangMenu = document.getElementById('viewerLangMenu');
           const zoomPopover = document.getElementById('zoomPopover');
-          if (zoomPopover && zoomPopover.classList.contains('open')) {
+          if (posterRatioMenu && posterRatioMenu.classList.contains('open')) {
+            posterRatioMenu.classList.remove('open');
+            const ratioBtn = document.getElementById('btnPosterRatioDropdown');
+            if (ratioBtn) ratioBtn.setAttribute('aria-expanded', 'false');
+          } else if (zoomPopover && zoomPopover.classList.contains('open')) {
             zoomPopover.classList.remove('open');
             const badgeBtn = document.getElementById('toolZoomBadge');
             if (badgeBtn) badgeBtn.setAttribute('aria-expanded', 'false');
@@ -1457,30 +1571,43 @@
     const buttons = dock.querySelectorAll('.tool-btn');
     buttons.forEach(btn => {
       let rafId = null;
-      let targetX = 0, targetY = 0;
-      let currentX = 0, currentY = 0;
+      let targetX = 0, targetY = 0, targetRotX = 0, targetRotY = 0, targetScale = 1;
+      let currentX = 0, currentY = 0, currentRotX = 0, currentRotY = 0, currentScale = 1;
       let isHovered = false;
       const innerTarget = btn.querySelector('.icon, .tool-btn-text, span') || btn.firstElementChild;
 
       function renderFrame() {
-        // 高性能 Spring-Lerp 弹性阻尼算法（刚度与阻尼系数平衡在 0.18）
-        currentX += (targetX - currentX) * 0.18;
-        currentY += (targetY - currentY) * 0.18;
+        const springK = 0.22;
+        currentX += (targetX - currentX) * springK;
+        currentY += (targetY - currentY) * springK;
+        currentRotX += (targetRotX - currentRotX) * springK;
+        currentRotY += (targetRotY - currentRotY) * springK;
+        currentScale += (targetScale - currentScale) * springK;
 
-        if (!isHovered && Math.abs(currentX) < 0.05 && Math.abs(currentY) < 0.05) {
+        if (!isHovered && 
+            Math.abs(currentX) < 0.05 && 
+            Math.abs(currentY) < 0.05 && 
+            Math.abs(currentRotX) < 0.05 && 
+            Math.abs(currentRotY) < 0.05 && 
+            Math.abs(currentScale - 1) < 0.005) {
           currentX = 0;
           currentY = 0;
+          currentRotX = 0;
+          currentRotY = 0;
+          currentScale = 1;
           btn.style.transform = '';
           if (innerTarget) innerTarget.style.transform = '';
           rafId = null;
           return;
         }
 
-        // 按钮主体微位移 (0.35x 磁吸位移)
-        btn.style.transform = 'translate3d(' + (currentX * 0.35).toFixed(2) + 'px, ' + (currentY * 0.35).toFixed(2) + 'px, 0)';
-        // 内部图标微视差深景深跟随 (0.22x 附加位移，产生 3D 浮雕深度感知)
+        // 3D 空间磁吸与透视倾角 + 放大
+        btn.style.transform = 'perspective(360px) translate3d(' + currentX.toFixed(2) + 'px, ' + currentY.toFixed(2) + 'px, 0) ' +
+                              'rotateX(' + currentRotX.toFixed(2) + 'deg) rotateY(' + currentRotY.toFixed(2) + 'deg) ' +
+                              'scale(' + currentScale.toFixed(3) + ')';
+        // 内部图标深景深微视差 (深度 6px)
         if (innerTarget) {
-          innerTarget.style.transform = 'translate3d(' + (currentX * 0.22).toFixed(2) + 'px, ' + (currentY * 0.22).toFixed(2) + 'px, 0)';
+          innerTarget.style.transform = 'translate3d(' + (currentX * 0.3).toFixed(2) + 'px, ' + (currentY * 0.3).toFixed(2) + 'px, 6px)';
         }
 
         rafId = requestAnimationFrame(renderFrame);
@@ -1488,19 +1615,39 @@
 
       btn.addEventListener('mouseenter', () => {
         isHovered = true;
+        targetScale = 1.18;
         if (!rafId) rafId = requestAnimationFrame(renderFrame);
       });
 
       btn.addEventListener('mousemove', (e) => {
         const rect = btn.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const dx = e.clientX - centerX;
-        const dy = e.clientY - centerY;
-        // 限制最大位移阈值 (±9px)，确保克制不浮夸、精细优雅
-        const maxPull = 9;
-        targetX = Math.max(-maxPull, Math.min(maxPull, dx * 0.48));
-        targetY = Math.max(-maxPull, Math.min(maxPull, dy * 0.48));
+        const halfW = rect.width / 2;
+        const halfH = rect.height / 2;
+        const dx = e.clientX - (rect.left + halfW);
+        const dy = e.clientY - (rect.top + halfH);
+        
+        // 强化位移 (±12px) 与 3D 空间倾角 (±14deg)
+        const maxPull = 12;
+        const maxRot = 14;
+        const normX = Math.max(-1, Math.min(1, dx / halfW));
+        const normY = Math.max(-1, Math.min(1, dy / halfH));
+
+        targetX = normX * maxPull;
+        targetY = normY * maxPull;
+        targetRotX = -normY * maxRot;
+        targetRotY = normX * maxRot;
+        targetScale = 1.18;
+
+        if (!rafId) rafId = requestAnimationFrame(renderFrame);
+      });
+
+      btn.addEventListener('mousedown', () => {
+        targetScale = 0.94;
+        if (!rafId) rafId = requestAnimationFrame(renderFrame);
+      });
+
+      btn.addEventListener('mouseup', () => {
+        targetScale = isHovered ? 1.18 : 1.0;
         if (!rafId) rafId = requestAnimationFrame(renderFrame);
       });
 
@@ -1508,8 +1655,77 @@
         isHovered = false;
         targetX = 0;
         targetY = 0;
+        targetRotX = 0;
+        targetRotY = 0;
+        targetScale = 1.0;
         if (!rafId) rafId = requestAnimationFrame(renderFrame);
       });
+    });
+
+    // 挂载高质感自定义毛玻璃悬浮气泡提示，彻底替换浏览器原生 title 丑提示
+    initDockTooltips();
+  }
+
+  /* -------------------------------------------------------------
+     Custom Frosted Tooltips for Bottom Dock (工具栏高质感悬浮气泡)
+     彻底消除操作系统/浏览器默认原生白底黑框 title，替换为全站统一毛玻璃气泡
+     ------------------------------------------------------------- */
+  function initDockTooltips() {
+    const dock = document.querySelector('.viewer-floating-toolbar');
+    const tooltipEl = document.getElementById('dockTooltip');
+    const tooltipText = document.getElementById('dockTooltipText');
+    const tooltipKbd = document.getElementById('dockTooltipKbd');
+    if (!dock || !tooltipEl || !tooltipText) return;
+
+    const interactiveItems = dock.querySelectorAll('.tool-btn, .tool-zoom-pill, .tool-zoom-badge, #btnZoomChevron');
+    interactiveItems.forEach(el => {
+      // 提取原生 title 或 data-i18n-title，并移除原生 title 属性以彻底屏蔽操作系统丑陋黑白提示框
+      const rawTitle = el.getAttribute('title') || '';
+      if (rawTitle) {
+        el.dataset.customTip = rawTitle;
+        el.removeAttribute('title');
+      }
+
+      function showTip() {
+        let text = '';
+        if (el.dataset.i18nTitle && window.AtlasI18n && typeof AtlasI18n.t === 'function') {
+          text = AtlasI18n.t(el.dataset.i18nTitle) || el.dataset.customTip || '';
+        } else {
+          text = el.dataset.customTip || '';
+        }
+        if (!text) return;
+
+        // 智能提取括号内的快捷键提示 (如 "(I)", "(0)", "(R)", "(F)", "(S)")
+        const match = text.match(/^(.*?)\s*\(([^)]+)\)$/);
+        if (match) {
+          tooltipText.textContent = match[1].trim();
+          tooltipKbd.textContent = match[2].trim();
+          tooltipKbd.style.display = 'inline-flex';
+        } else {
+          tooltipText.textContent = text.trim();
+          tooltipKbd.textContent = '';
+          tooltipKbd.style.display = 'none';
+        }
+
+        // 精确对齐到当前按钮正上方
+        const dockRect = dock.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        const centerOffset = (elRect.left + elRect.width / 2) - dockRect.left;
+        tooltipEl.style.left = centerOffset.toFixed(1) + 'px';
+        tooltipEl.classList.add('visible');
+      }
+
+      function hideTip() {
+        tooltipEl.classList.remove('visible');
+      }
+
+      el.addEventListener('mouseenter', showTip);
+      el.addEventListener('mouseleave', hideTip);
+      el.addEventListener('click', hideTip);
+    });
+
+    dock.addEventListener('mouseleave', () => {
+      tooltipEl.classList.remove('visible');
     });
   }
 
@@ -1538,10 +1754,17 @@
       if (targetH > maxH) targetH = maxH;
     }
 
+    const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
+    const borderOffset = 3; // 1.5px * 2 borders
+    const navPanel = document.getElementById('viewerNavigatorPanel');
+    if (navPanel) {
+      navPanel.style.width = (targetW + borderOffset) + 'px';
+      navPanel.style.height = (targetH + borderOffset) + 'px';
+      navPanel.style.setProperty('--nav-bg', dominantColor);
+    }
+
     navEl.style.width = targetW + 'px';
     navEl.style.height = targetH + 'px';
-
-    const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
     navEl.style.setProperty('--nav-bg', dominantColor);
     navEl.style.setProperty('background-color', dominantColor, 'important');
     navEl.style.setProperty('background', dominantColor, 'important');
@@ -1557,12 +1780,6 @@
     const navOsdCanvas = navEl.querySelector('.openseadragon-canvas');
     if (navOsdCanvas) {
       navOsdCanvas.style.setProperty('background-color', dominantColor, 'important');
-    }
-
-    const navPanel = document.getElementById('viewerNavigatorPanel');
-    if (navPanel) {
-      navPanel.style.width = 'auto';
-      navPanel.style.height = 'auto';
     }
 
     updateNavigatorCloseButtonColor(item);
@@ -1835,6 +2052,24 @@
     const mDesc = document.getElementById('mDescription');
 
     if (vTitle) vTitle.textContent = locItem.title;
+
+    // 依当前展品主底色智能计算反色（深底图->纯白字；浅底图->纯净深黑字，彻底杜绝白雾晕染）
+    let isDarkArtwork = true;
+    if (item && item.colors && item.colors.length > 0) {
+      const hex = String(item.colors[0]).replace(/^#/, '');
+      if (hex.length === 6) {
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        isDarkArtwork = lum < 135;
+      }
+    }
+    const badgeEl = document.getElementById('viewerArtworkBadge');
+    if (badgeEl) {
+      badgeEl.setAttribute('data-artwork-tone', isDarkArtwork ? 'dark' : 'light');
+    }
+
     const qmfEl = document.getElementById('viewerQmapFlow');
     if (qmfEl) {
       let precision = '100';
@@ -1909,6 +2144,9 @@
     document.body.classList.add('viewer-open');
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.scrollbarGutter = 'auto';
+    document.body.style.scrollbarGutter = 'auto';
+    resetTopActionsIdleTimer();
 
     updateAmbientBackdrop(item);
     updateArtworkMetadata(item);
@@ -2037,8 +2275,9 @@
         animationTime: 0.45,
         blendTime: 0.15,
         constrainDuringPan: true,
-        maxZoomPixelRatio: 3.5,
-        minZoomImageRatio: 0.8,
+        maxZoomPixelRatio: 4.5,
+        minZoomImageRatio: 0.1,
+        minZoomLevel: 0.001,
         visibilityRatio: 0.9,
         wrapHorizontal: false,
         wrapVertical: false,
@@ -2097,6 +2336,30 @@
       osdViewer.addHandler('zoom', function () {
         updateZoomUI();
       });
+
+      // 移动端在移动或捏合画布时，自动关闭过高的信息抽屉，提升浏览沉浸感
+      function autoCloseDrawerOnMobileCanvasMove() {
+        if (window.innerWidth <= 768) {
+          const drawerEl = document.getElementById('viewerMetaDrawer') || document.getElementById('viewerDrawer');
+          if (drawerEl && drawerEl.classList.contains('open')) {
+            const toggleInfoBtn = document.getElementById('btnToggleInfo');
+            const modalEl = document.getElementById('viewerModal');
+            drawerEl.classList.remove('open');
+            if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
+            if (modalEl) modalEl.classList.remove('drawer-open');
+          }
+        }
+      }
+
+      osdViewer.addHandler('canvas-drag', () => {
+        autoCloseDrawerOnMobileCanvasMove();
+        resetTopActionsIdleTimer();
+      });
+      osdViewer.addHandler('canvas-pinch', () => {
+        autoCloseDrawerOnMobileCanvasMove();
+        resetTopActionsIdleTimer();
+      });
+      osdViewer.addHandler('canvas-scroll', resetTopActionsIdleTimer);
 
       let tileFailCount = 0;
       let hasFailedOver = false;
@@ -2398,6 +2661,8 @@
     document.body.classList.remove('viewer-open');
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
+    document.documentElement.style.scrollbarGutter = '';
+    document.body.style.scrollbarGutter = '';
 
     // 关键步骤 1：解除锁定后第一时间立即将滚动位置锁死在 preViewerScrollY，防止浏览器重绘置零
     if (typeof preViewerScrollY === 'number' && preViewerScrollY >= 0) {
@@ -2415,10 +2680,21 @@
     closeSharePosterModal();
     if (window.closeAtlasLangDropdowns) window.closeAtlasLangDropdowns();
 
+    if (topActionsIdleTimer) {
+      clearTimeout(topActionsIdleTimer);
+      topActionsIdleTimer = null;
+    }
+    const topActions = document.getElementById('viewerTopActions');
+    if (topActions) {
+      topActions.classList.remove('idle-dimmed', 'expanded');
+    }
+
     const zoomPopover = document.getElementById('zoomPopover');
-    const zoomBadge = document.getElementById('toolZoomBadge');
+    const zoomPill = document.getElementById('toolZoomPill');
+    const zoomChevron = document.getElementById('btnZoomChevron');
     if (zoomPopover) zoomPopover.classList.remove('open');
-    if (zoomBadge) zoomBadge.setAttribute('aria-expanded', 'false');
+    if (zoomPill) zoomPill.classList.remove('active');
+    if (zoomChevron) zoomChevron.setAttribute('aria-expanded', 'false');
 
     if (osdViewer) {
       try { osdViewer.destroy(); } catch (e) {}
@@ -2511,13 +2787,27 @@
   }
 
   function showCursorTip(e, text) {
-    const msg = text || (window.AtlasI18n && window.AtlasI18n.getLang() === 'en' ? 'Link Copied ✓' : '网址已复制 ✓');
+    const isEn = window.AtlasI18n && (typeof window.AtlasI18n.getLang === 'function' ? window.AtlasI18n.getLang() : window.AtlasI18n.getCurrentLang()) === 'en';
+    const msg = text || (isEn ? 'Link Copied ✓' : '网址已复制 ✓');
     const tip = document.createElement('div');
     tip.className = 'cursor-toast-pill';
     tip.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span>' + escapeHtml(msg) + '</span>';
     
-    const x = (e && typeof e.clientX === 'number') ? e.clientX : window.innerWidth / 2;
-    const y = (e && typeof e.clientY === 'number') ? e.clientY - 12 : window.innerHeight - 80;
+    let x, y;
+    if (e && typeof e.clientX === 'number' && e.clientX > 0) {
+      x = e.clientX;
+      y = e.clientY - 12;
+    } else {
+      const activeEl = (e && e.target) || document.activeElement;
+      if (activeEl && activeEl.getBoundingClientRect) {
+        const r = activeEl.getBoundingClientRect();
+        x = r.left + r.width / 2;
+        y = r.top - 8;
+      } else {
+        x = window.innerWidth / 2;
+        y = window.innerHeight - 80;
+      }
+    }
     
     tip.style.left = x + 'px';
     tip.style.top = y + 'px';
@@ -2536,9 +2826,7 @@
     const url = getShareUrlForItem(item);
     copyToClipboard(url);
 
-    if (e) {
-      showCursorTip(e);
-    }
+    showCursorTip(e);
 
     const linkBtn = document.getElementById('btnShareOptLink');
     if (linkBtn) {
@@ -2549,6 +2837,18 @@
       setTimeout(() => {
         if (titleEl) titleEl.textContent = origText;
         linkBtn.classList.remove('copied');
+      }, 1500);
+    }
+
+    const qrCopyBtn = document.getElementById('btnShareQrCopyLink');
+    if (qrCopyBtn) {
+      const origQrText = qrCopyBtn.textContent;
+      const isEn = window.AtlasI18n && (typeof window.AtlasI18n.getLang === 'function' ? window.AtlasI18n.getLang() : window.AtlasI18n.getCurrentLang()) === 'en';
+      qrCopyBtn.textContent = isEn ? 'Link Copied ✓' : '网址已复制 ✓';
+      qrCopyBtn.classList.add('copied');
+      setTimeout(() => {
+        qrCopyBtn.textContent = origQrText;
+        qrCopyBtn.classList.remove('copied');
       }, 1500);
     }
 
@@ -2617,7 +2917,7 @@
     }
   }
 
-  function downloadQrCodeImage(item) {
+  function downloadQrCodeImage(item, e) {
     if (!item) return;
     const url = getShareUrlForItem(item);
     if (!window.qrcode) return;
@@ -2647,38 +2947,222 @@
       a.download = `${item.title || 'atlas'}_qrcode.png`;
       a.href = cvs.toDataURL('image/png');
       a.click();
+
+      const isEn = window.AtlasI18n && (typeof window.AtlasI18n.getLang === 'function' ? window.AtlasI18n.getLang() : window.AtlasI18n.getCurrentLang()) === 'en';
+      showCursorTip(e, isEn ? 'QR Code Saved ✓' : '二维码已保存 ✓');
+
+      const saveBtn = document.getElementById('btnShareQrDownload');
+      if (saveBtn) {
+        const origText = saveBtn.textContent;
+        saveBtn.textContent = isEn ? 'Saved ✓' : '已保存 ✓';
+        saveBtn.classList.add('copied');
+        setTimeout(() => {
+          saveBtn.textContent = origText;
+          saveBtn.classList.remove('copied');
+        }, 1500);
+      }
     } catch (e) {
       console.error('Download QR failed:', e);
     }
   }
 
-  // ── 3:4 竖版展卷典藏海报生成引擎 ──
+  /* -------------------------------------------------------------
+     Artwork Poster Multi-Aspect Ratio & Internationalized Engine
+     典藏画卷海报多画幅比例与全语境国际化生成引擎
+     支持 3:4 / 4:3 / 16:9 / 9:16 / 9:21 五主流比例与中英日韩自适应排版
+     ------------------------------------------------------------- */
   let currentPosterBlob = null;
   let currentPosterDataUrl = null;
   let currentPosterItem = null;
+  let currentPosterRatio = '3:4';
+  let isPosterRendering = false;
+
+  const POSTER_RATIO_CONFIGS = {
+    '3:4': { width: 1080, height: 1440, isHorizontal: false, aspectValue: '3 / 4' },
+    '4:3': { width: 1440, height: 1080, isHorizontal: true, aspectValue: '4 / 3' },
+    '16:9': { width: 1920, height: 1080, isHorizontal: true, aspectValue: '16 / 9' },
+    '9:16': { width: 1080, height: 1920, isHorizontal: false, aspectValue: '9 / 16' },
+    '9:21': { width: 1080, height: 2520, isHorizontal: false, aspectValue: '9 / 21' }
+  };
+
+  const POSTER_I18N_TEXTS = {
+    zh: {
+      brand: 'OPENQGIS · ATLASLOG',
+      slogan: '「一图一境 · 静观其详」',
+      edition: '2026 EDITION',
+      cartographerPrefix: '匠师：OpenQGIS',
+      paletteTitle: 'COLOR PALETTE',
+      qrTitle: '扫码 1:1 4K 原图深览',
+      qrDomain: 'openqgis.github.io/atlas',
+      copyright: '© 2026 OpenQGIS / AtlasLog · 个人空间工造与视觉成果典藏',
+      generating: '正在生成高清典藏海报...',
+      fallbackTitle: '空间地图成果',
+      fallbackCategory: '空间制图'
+    },
+    en: {
+      brand: 'OPENQGIS · ATLASLOG',
+      slogan: 'One Map, One Realm · Contemplate the Nuance',
+      edition: '2026 EDITION',
+      cartographerPrefix: 'Cartographer: OpenQGIS',
+      paletteTitle: 'COLOR PALETTE',
+      qrTitle: 'Scan for 1:1 4K Deep Zoom',
+      qrDomain: 'openqgis.github.io/atlas',
+      copyright: '© 2026 OpenQGIS / AtlasLog · Spatial Cartography & Visual Archive',
+      generating: 'Generating HD Artwork Poster...',
+      fallbackTitle: 'Cartographic Work',
+      fallbackCategory: 'Spatial Cartography'
+    },
+    ja: {
+      brand: 'OPENQGIS · ATLASLOG',
+      slogan: '「一図一境 · 静観其詳」',
+      edition: '2026 EDITION',
+      cartographerPrefix: '製作者：OpenQGIS',
+      paletteTitle: 'COLOR PALETTE',
+      qrTitle: 'スキャンして1:1 4K原図深覧',
+      qrDomain: 'openqgis.github.io/atlas',
+      copyright: '© 2026 OpenQGIS / AtlasLog · 空間地図工芸と視覚成果アーカイブ',
+      generating: '高精細ポスターを生成中...',
+      fallbackTitle: '空間地図成果',
+      fallbackCategory: '空間地図制作'
+    },
+    ko: {
+      brand: 'OPENQGIS · ATLASLOG',
+      slogan: '한 지도 한 세계 · 고요히 음미하다',
+      edition: '2026 EDITION',
+      cartographerPrefix: '제작자: OpenQGIS',
+      paletteTitle: 'COLOR PALETTE',
+      qrTitle: '1:1 4K 원본 심층 감상 QR',
+      qrDomain: 'openqgis.github.io/atlas',
+      copyright: '© 2026 OpenQGIS / AtlasLog · 공간 지도 제작 및 시각 예술 아카이브',
+      generating: '고해상도 소장용 포스터 생성 중...',
+      fallbackTitle: '공간 지도 작품',
+      fallbackCategory: '공간 지도 제작'
+    }
+  };
+
+  function initPosterRatioEvents() {
+    const dropdown = document.getElementById('posterRatioDropdown');
+    const btn = document.getElementById('btnPosterRatioDropdown');
+    const menu = document.getElementById('posterRatioMenu');
+    if (!dropdown || !btn || !menu) return;
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isOpen = menu.classList.contains('open');
+      if (isOpen) {
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      } else {
+        menu.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    const items = menu.querySelectorAll('.poster-ratio-item');
+    items.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const ratio = item.getAttribute('data-ratio');
+        if (ratio) {
+          setPosterRatio(ratio);
+        }
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target)) {
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  function setPosterRatio(ratio) {
+    if (!POSTER_RATIO_CONFIGS[ratio]) return;
+    currentPosterRatio = ratio;
+    updatePosterRatioUI();
+    if (currentPosterItem) {
+      renderCurrentPoster();
+    }
+  }
+
+  function updatePosterRatioUI() {
+    const ratio = currentPosterRatio;
+    const config = POSTER_RATIO_CONFIGS[ratio] || POSTER_RATIO_CONFIGS['3:4'];
+
+    const titleRatioEl = document.getElementById('posterTitleRatio');
+    if (titleRatioEl) titleRatioEl.textContent = ratio;
+
+    const curLabelEl = document.getElementById('posterCurrentRatioLabel');
+    if (curLabelEl) curLabelEl.textContent = ratio;
+
+    const menu = document.getElementById('posterRatioMenu');
+    if (menu) {
+      menu.querySelectorAll('.poster-ratio-item').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-ratio') === ratio);
+      });
+    }
+
+    const dialog = document.querySelector('.poster-dialog');
+    if (dialog) {
+      dialog.classList.toggle('ratio-horizontal', !!config.isHorizontal);
+    }
+
+    const stage = document.getElementById('posterPreviewStage');
+    if (stage) {
+      stage.style.setProperty('--poster-ratio', config.aspectValue);
+    }
+  }
 
   async function openSharePosterModal(item) {
     closeSharePopover();
     if (!item) return;
     currentPosterItem = item;
     const modal = document.getElementById('sharePosterModal');
-    const loading = document.getElementById('posterLoading');
-    const imgEl = document.getElementById('posterPreviewImg');
     if (!modal) return;
 
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
+
+    updatePosterRatioUI();
+    await renderCurrentPoster();
+  }
+
+  function closeSharePosterModal() {
+    const modal = document.getElementById('sharePosterModal');
+    if (modal) {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+    const menu = document.getElementById('posterRatioMenu');
+    const btn = document.getElementById('btnPosterRatioDropdown');
+    if (menu) menu.classList.remove('open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+
+  async function renderCurrentPoster() {
+    if (!currentPosterItem) return;
+    const loading = document.getElementById('posterLoading');
+    const imgEl = document.getElementById('posterPreviewImg');
+    const lang = (window.AtlasI18n && typeof window.AtlasI18n.getLang === 'function') ? window.AtlasI18n.getLang() : 'zh';
+    const i18nTexts = POSTER_I18N_TEXTS[lang] || POSTER_I18N_TEXTS.en;
+
     if (loading) {
       loading.style.display = 'flex';
-      loading.innerHTML = '<div class="poster-spinner"></div><span>正在生成高清典藏海报...</span>';
+      loading.innerHTML = '<div class="poster-spinner"></div><span>' + escapeHtml(i18nTexts.generating) + '</span>';
     }
     if (imgEl) {
       imgEl.style.display = 'none';
       imgEl.src = '';
     }
 
+    isPosterRendering = true;
     try {
-      const canvas = await generateArtworkPoster(item);
+      const canvas = await generateArtworkPoster(currentPosterItem, currentPosterRatio);
       if (canvas && imgEl) {
         const fallbackDataUrl = () => {
           try {
@@ -2718,21 +3202,24 @@
       if (loading) {
         loading.innerHTML = '<span style="color:#ff5555;font-size:0.85rem;">[海报生成失败，请重试]</span>';
       }
-    }
-  }
-
-  function closeSharePosterModal() {
-    const modal = document.getElementById('sharePosterModal');
-    if (modal) {
-      modal.classList.remove('open');
-      modal.setAttribute('aria-hidden', 'true');
+    } finally {
+      isPosterRendering = false;
     }
   }
 
   function downloadPosterImage() {
     if (!currentPosterItem) return;
+    const lang = (window.AtlasI18n && typeof window.AtlasI18n.getLang === 'function') ? window.AtlasI18n.getLang() : 'zh';
+    const locItem = (window.AtlasI18n && typeof window.AtlasI18n.getItem === 'function') ? window.AtlasI18n.getItem(currentPosterItem) : currentPosterItem;
+    const rawTitle = (locItem && locItem.title) || currentPosterItem.title || 'atlas';
+    const cleanTitle = rawTitle.replace(/[\\/:*?"<>|]/g, '_').trim();
+    const ratioSuffix = currentPosterRatio.replace(':', 'x');
+    const filename = (lang === 'zh')
+      ? `${cleanTitle}_${ratioSuffix}典藏海报.png`
+      : `${cleanTitle}_poster_${ratioSuffix}.png`;
+
     const a = document.createElement('a');
-    a.download = `${currentPosterItem.title || 'atlas'}_3x4典藏海报.png`;
+    a.download = filename;
     if (currentPosterBlob) {
       a.href = URL.createObjectURL(currentPosterBlob);
     } else if (currentPosterDataUrl) {
@@ -2743,10 +3230,72 @@
     a.click();
   }
 
-  async function generateArtworkPoster(item) {
+  function drawQrCodeMatrix(ctx, x, y, size, url) {
+    if (!window.qrcode) return;
+    try {
+      const qr = qrcode(0, 'M');
+      qr.addData(url);
+      qr.make();
+      const modCount = qr.getModuleCount();
+      const cellSize = size / modCount;
+      ctx.fillStyle = '#000000';
+      for (let r = 0; r < modCount; r++) {
+        for (let c = 0; c < modCount; c++) {
+          if (qr.isDark(r, c)) {
+            ctx.fillRect(x + c * cellSize, y + r * cellSize, cellSize + 0.4, cellSize + 0.4);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Poster QR render error:', e);
+    }
+  }
+
+  async function drawContainedImage(ctx, src, boxX, boxY, boxW, boxH, radius, bgCard, borderColor) {
+    ctx.fillStyle = bgCard;
+    roundRect(ctx, boxX, boxY, boxW, boxH, radius);
+    ctx.fill();
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    if (!src) return;
+    try {
+      const img = await loadImageAsync(src);
+      ctx.save();
+      roundRect(ctx, boxX, boxY, boxW, boxH, radius);
+      ctx.clip();
+
+      const imgAspect = img.naturalWidth / img.naturalHeight;
+      const boxAspect = boxW / boxH;
+      let dw, dh, dx, dy;
+      if (imgAspect > boxAspect) {
+        dw = boxW;
+        dh = boxW / imgAspect;
+        dx = boxX;
+        dy = boxY + (boxH - dh) / 2;
+      } else {
+        dh = boxH;
+        dw = boxH * imgAspect;
+        dx = boxX + (boxW - dw) / 2;
+        dy = boxY;
+      }
+      ctx.drawImage(img, dx, dy, dw, dh);
+      ctx.restore();
+    } catch (e) {
+      console.warn('Poster artwork image load failed:', e);
+    }
+  }
+
+  async function generateArtworkPoster(item, ratio = '3:4') {
+    const config = POSTER_RATIO_CONFIGS[ratio] || POSTER_RATIO_CONFIGS['3:4'];
+    const W = config.width;
+    const H = config.height;
+    const isHorizontal = !!config.isHorizontal;
+
     const canvas = document.createElement('canvas');
-    canvas.width = 1080;
-    canvas.height = 1440;
+    canvas.width = W;
+    canvas.height = H;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
@@ -2758,163 +3307,255 @@
     const accent = '#d4a373';
     const borderColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
 
-    // 1. 背景底色
-    ctx.fillStyle = bgPrimary;
-    ctx.fillRect(0, 0, 1080, 1440);
+    const lang = (window.AtlasI18n && typeof window.AtlasI18n.getLang === 'function') ? window.AtlasI18n.getLang() : 'zh';
+    const i18nTexts = POSTER_I18N_TEXTS[lang] || POSTER_I18N_TEXTS.en;
+    const locItem = (window.AtlasI18n && typeof window.AtlasI18n.getItem === 'function') ? window.AtlasI18n.getItem(item) : item;
 
-    // 雅致内双线边框
-    ctx.strokeStyle = borderColor;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(36, 36, 1080 - 72, 1440 - 72);
-
-    // 2. 顶部页眉
-    ctx.font = '700 20px "JetBrains Mono", Consolas, monospace';
-    ctx.fillStyle = accent;
-    ctx.fillText('OPENQGIS · ATLASLOG', 64, 86);
-
-    ctx.font = '500 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillStyle = textSecondary;
-    ctx.fillText('「一图一境 · 静观其详」', 64, 118);
-
-    const rightMeta = '2026 EDITION';
-    ctx.font = '600 18px "JetBrains Mono", Consolas, monospace';
-    const rmWidth = ctx.measureText(rightMeta).width;
-    ctx.fillText(rightMeta, 1080 - 64 - rmWidth, 102);
-
-    // 分隔线
-    ctx.strokeStyle = borderColor;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(64, 140);
-    ctx.lineTo(1080 - 64, 140);
-    ctx.stroke();
-
-    // 3. 画卷主展台
-    const imgX = 64, imgY = 165, imgW = 952, imgH = 730;
-    ctx.fillStyle = bgCard;
-    roundRect(ctx, imgX, imgY, imgW, imgH, 16);
-    ctx.fill();
-    ctx.strokeStyle = borderColor;
-    ctx.stroke();
-
-    const imgSrc = item.thumb || item.heroImage || (item.dzi && item.dzi.Image && item.dzi.Image.Url) || '';
-    if (imgSrc) {
-      try {
-        const img = await loadImageAsync(imgSrc);
-        ctx.save();
-        roundRect(ctx, imgX, imgY, imgW, imgH, 16);
-        ctx.clip();
-
-        const imgAspect = img.naturalWidth / img.naturalHeight;
-        const boxAspect = imgW / imgH;
-        let dw, dh, dx, dy;
-        if (imgAspect > boxAspect) {
-          dw = imgW;
-          dh = imgW / imgAspect;
-          dx = imgX;
-          dy = imgY + (imgH - dh) / 2;
-        } else {
-          dh = imgH;
-          dw = imgH * imgAspect;
-          dx = imgX + (imgW - dw) / 2;
-          dy = imgY;
-        }
-        ctx.drawImage(img, dx, dy, dw, dh);
-        ctx.restore();
-      } catch (e) {
-        console.warn('Poster artwork image load failed:', e);
-      }
-    }
-
-    // 4. 作品档案与题记区
-    const metaY = 935;
-    ctx.font = '700 38px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillStyle = textPrimary;
-    const titleText = item.title || '空间地图成果';
-    ctx.fillText(titleText, 64, metaY + 40);
-
-    ctx.font = '500 20px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillStyle = textSecondary;
-    const categoryText = (item.category || '空间制图') + '   |   匠师：OpenQGIS';
-    ctx.fillText(categoryText, 64, metaY + 78);
-
-    if (item.description) {
-      ctx.font = '400 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-      ctx.fillStyle = textSecondary;
-      wrapText(ctx, item.description, 64, metaY + 116, 620, 26, 2);
-    }
-
-    // 主调色板圆角色块
     const posterPalette = (Array.isArray(item.palette) && item.palette.length > 0) ? item.palette :
                           (Array.isArray(item.colors) && item.colors.length > 0) ? item.colors :
                           (Array.isArray(item.color) && item.color.length > 0) ? item.color :
                           (MASTER_PALETTES[item.id] || []);
-    if (Array.isArray(posterPalette) && posterPalette.length > 0) {
-      const swY = metaY + 175;
-      ctx.font = '600 14px "JetBrains Mono", Consolas, monospace';
-      ctx.fillStyle = textSecondary;
-      ctx.fillText('COLOR PALETTE', 64, swY);
 
-      const swW = 46, swH = 20, swGap = 8;
-      posterPalette.slice(0, 6).forEach((col, idx) => {
-        ctx.fillStyle = col;
-        roundRect(ctx, 64 + idx * (swW + swGap), swY + 8, swW, swH, 4);
-        ctx.fill();
-        ctx.strokeStyle = borderColor;
-        ctx.stroke();
-      });
-    }
+    const titleText = (locItem && locItem.title) || item.title || i18nTexts.fallbackTitle;
+    const categoryText = ((locItem && (locItem.categoryName || locItem.category)) || item.category || i18nTexts.fallbackCategory) +
+                         '   |   ' + i18nTexts.cartographerPrefix;
+    const descText = (locItem && locItem.description) || item.description || '';
+    const shareUrl = getShareUrlForItem(item);
+    const imgSrc = item.thumb || item.heroImage || (item.dzi && item.dzi.Image && item.dzi.Image.Url) || '';
 
-    // 5. 右下角专属二维码
-    const qrSize = 136;
-    const qrX = 1080 - 64 - qrSize;
-    const qrY = 1185;
+    // 1. 全局底色与边框
+    ctx.fillStyle = bgPrimary;
+    ctx.fillRect(0, 0, W, H);
 
-    // 白底圆角卡片
-    ctx.fillStyle = '#ffffff';
-    roundRect(ctx, qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 14);
-    ctx.fill();
-
-    // 绘制二维码矩阵
-    if (window.qrcode) {
-      try {
-        const url = getShareUrlForItem(item);
-        const qr = qrcode(0, 'M');
-        qr.addData(url);
-        qr.make();
-        const modCount = qr.getModuleCount();
-        const cellSize = qrSize / modCount;
-        ctx.fillStyle = '#000000';
-        for (let r = 0; r < modCount; r++) {
-          for (let c = 0; c < modCount; c++) {
-            if (qr.isDark(r, c)) {
-              ctx.fillRect(qrX + c * cellSize, qrY + r * cellSize, cellSize + 0.5, cellSize + 0.5);
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('Poster QR render error:', e);
-      }
-    }
-
-    ctx.font = '600 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.fillStyle = textPrimary;
-    ctx.fillText('扫码 1:1 4K 原图深览', qrX - 220, qrY + 48);
-
-    ctx.font = '400 15px "JetBrains Mono", Consolas, monospace';
-    ctx.fillStyle = textSecondary;
-    ctx.fillText('openqgis.github.io/atlas', qrX - 220, qrY + 76);
-
-    // 6. 底部版权与 Slogan
+    const framePad = isHorizontal ? 28 : 36;
     ctx.strokeStyle = borderColor;
-    ctx.beginPath();
-    ctx.moveTo(64, 1365);
-    ctx.lineTo(1080 - 64, 1365);
-    ctx.stroke();
+    ctx.lineWidth = 2;
+    ctx.strokeRect(framePad, framePad, W - framePad * 2, H - framePad * 2);
 
-    ctx.font = '400 16px "JetBrains Mono", Consolas, monospace';
-    ctx.fillStyle = textSecondary;
-    ctx.fillText('© 2026 OpenQGIS / AtlasLog · 个人空间工造与视觉成果典藏', 64, 1395);
+    if (!isHorizontal) {
+      // ── 竖版海报布局引擎 (3:4, 9:16, 9:21) ──
+
+      // 顶部页眉
+      ctx.font = '700 20px "JetBrains Mono", Consolas, monospace';
+      ctx.fillStyle = accent;
+      ctx.fillText(i18nTexts.brand, 64, 86);
+
+      ctx.font = '500 18px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = textSecondary;
+      ctx.fillText(i18nTexts.slogan, 64, 118);
+
+      ctx.save();
+      ctx.textAlign = 'right';
+      ctx.font = '600 18px "JetBrains Mono", Consolas, monospace';
+      ctx.fillStyle = textSecondary;
+      ctx.fillText(i18nTexts.edition, W - 64, 102);
+      ctx.restore();
+
+      // 分隔线
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(64, 140);
+      ctx.lineTo(W - 64, 140);
+      ctx.stroke();
+
+      // 画卷主展台
+      const imgX = 64;
+      const imgY = 165;
+      const imgW = W - 128;
+      let imgH = 730;
+      if (ratio === '9:16') imgH = 1080;
+      else if (ratio === '9:21') imgH = 1480;
+
+      await drawContainedImage(ctx, imgSrc, imgX, imgY, imgW, imgH, 16, bgCard, borderColor);
+
+      // 底部页脚线与版权声明
+      const footerLineY = H - 75;
+      const footerTextY = H - 45;
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(64, footerLineY);
+      ctx.lineTo(W - 64, footerLineY);
+      ctx.stroke();
+
+      ctx.font = '400 15px "JetBrains Mono", Consolas, monospace';
+      ctx.fillStyle = textSecondary;
+      ctx.fillText(i18nTexts.copyright, 64, footerTextY);
+
+      // 右下角专属二维码卡片
+      const qrSize = 136;
+      const qrX = W - 64 - qrSize;
+      const qrY = footerLineY - 175;
+
+      ctx.fillStyle = '#ffffff';
+      roundRect(ctx, qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 14);
+      ctx.fill();
+
+      drawQrCodeMatrix(ctx, qrX, qrY, qrSize, shareUrl);
+
+      // 二维码左侧导引文案 (设置右对齐，确保多语言从二维码边框向左伸展，杜绝重叠)
+      ctx.save();
+      ctx.textAlign = 'right';
+      ctx.font = '600 17px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = textPrimary;
+      ctx.fillText(i18nTexts.qrTitle, qrX - 24, qrY + 46);
+
+      ctx.font = '400 15px "JetBrains Mono", Consolas, monospace';
+      ctx.fillStyle = textSecondary;
+      ctx.fillText(i18nTexts.qrDomain, qrX - 24, qrY + 74);
+      ctx.restore();
+
+      // 作品题名与元数据
+      const metaY = imgY + imgH + 34;
+      const maxInfoWidth = qrX - 220 - 64;
+
+      ctx.font = '700 38px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = textPrimary;
+      wrapText(ctx, titleText, 64, metaY + 36, maxInfoWidth, 46, 2);
+
+      ctx.font = '500 20px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = textSecondary;
+      ctx.fillText(categoryText, 64, metaY + 88);
+
+      if (descText) {
+        ctx.font = '400 18px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.fillStyle = textSecondary;
+        const maxDescLines = (ratio === '3:4') ? 2 : (ratio === '9:16' ? 3 : 4);
+        wrapText(ctx, descText, 64, metaY + 126, maxInfoWidth, 26, maxDescLines);
+      }
+
+      // 艺术色板圆角色块
+      if (Array.isArray(posterPalette) && posterPalette.length > 0) {
+        const swY = (ratio === '3:4') ? (metaY + 185) : (metaY + 225);
+        ctx.font = '600 14px "JetBrains Mono", Consolas, monospace';
+        ctx.fillStyle = textSecondary;
+        ctx.fillText(i18nTexts.paletteTitle, 64, swY);
+
+        const swW = 46, swH = 20, swGap = 8;
+        posterPalette.slice(0, 6).forEach((col, idx) => {
+          ctx.fillStyle = col;
+          roundRect(ctx, 64 + idx * (swW + swGap), swY + 8, swW, swH, 4);
+          ctx.fill();
+          ctx.strokeStyle = borderColor;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        });
+      }
+    } else {
+      // ── 横版画廊与宽屏双栏布局引擎 (4:3, 16:9) ──
+      const is16x9 = (ratio === '16:9');
+      const imgX = is16x9 ? 48 : 40;
+      const imgY = is16x9 ? 48 : 40;
+      const imgW = is16x9 ? 1200 : 860;
+      const imgH = H - imgY * 2;
+      const rx = is16x9 ? 1284 : 932;
+      const rw = W - rx - (is16x9 ? 48 : 40);
+
+      // 左侧主展台
+      await drawContainedImage(ctx, imgSrc, imgX, imgY, imgW, imgH, 16, bgCard, borderColor);
+
+      // 右侧栏：页眉
+      ctx.font = is16x9 ? '700 20px "JetBrains Mono", Consolas, monospace' : '700 19px "JetBrains Mono", Consolas, monospace';
+      ctx.fillStyle = accent;
+      ctx.fillText(i18nTexts.brand, rx, 84);
+
+      ctx.font = is16x9 ? '500 17px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : '500 16px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = textSecondary;
+      ctx.fillText(i18nTexts.slogan, rx, 114);
+
+      ctx.save();
+      ctx.textAlign = 'right';
+      ctx.font = is16x9 ? '600 16px "JetBrains Mono", Consolas, monospace' : '600 15px "JetBrains Mono", Consolas, monospace';
+      ctx.fillStyle = textSecondary;
+      ctx.fillText(i18nTexts.edition, W - (is16x9 ? 48 : 40), 84);
+      ctx.restore();
+
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(rx, 136);
+      ctx.lineTo(W - (is16x9 ? 48 : 40), 136);
+      ctx.stroke();
+
+      // 右侧栏：作品题名与分类
+      ctx.font = is16x9 ? '700 36px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : '700 32px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = textPrimary;
+      const titleLineHeight = is16x9 ? 44 : 38;
+      const afterTitleY = wrapText(ctx, titleText, rx, 188, rw, titleLineHeight, 2);
+
+      const catY = Math.max(is16x9 ? 275 : 260, afterTitleY + 8);
+      ctx.font = is16x9 ? '500 19px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : '500 17px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = textSecondary;
+      ctx.fillText(categoryText, rx, catY);
+
+      // 右侧栏：说明题记
+      if (descText) {
+        ctx.font = is16x9 ? '400 17px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                          : '400 16px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.fillStyle = textSecondary;
+        wrapText(ctx, descText, rx, catY + 36, rw, 26, is16x9 ? 5 : 4);
+      }
+
+      // 右侧栏：调色板
+      if (Array.isArray(posterPalette) && posterPalette.length > 0) {
+        const swY = is16x9 ? 500 : 475;
+        ctx.font = '600 14px "JetBrains Mono", Consolas, monospace';
+        ctx.fillStyle = textSecondary;
+        ctx.fillText(i18nTexts.paletteTitle, rx, swY);
+
+        const swW = is16x9 ? 44 : 40, swH = 18, swGap = 8;
+        posterPalette.slice(0, 6).forEach((col, idx) => {
+          ctx.fillStyle = col;
+          roundRect(ctx, rx + idx * (swW + swGap), swY + 8, swW, swH, 4);
+          ctx.fill();
+          ctx.strokeStyle = borderColor;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        });
+      }
+
+      // 右侧栏：专属二维码
+      const qrSize = is16x9 ? 136 : 124;
+      const qx = rx;
+      const qy = is16x9 ? 705 : 710;
+
+      ctx.fillStyle = '#ffffff';
+      roundRect(ctx, qx - 8, qy - 8, qrSize + 16, qrSize + 16, 12);
+      ctx.fill();
+
+      drawQrCodeMatrix(ctx, qx, qy, qrSize, shareUrl);
+
+      // 二维码右侧导引文案
+      const guideX = qx + qrSize + 26;
+      ctx.save();
+      ctx.textAlign = 'left';
+      ctx.font = is16x9 ? '600 17px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : '600 16px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle = textPrimary;
+      ctx.fillText(i18nTexts.qrTitle, guideX, qy + 46);
+
+      ctx.font = '400 15px "JetBrains Mono", Consolas, monospace';
+      ctx.fillStyle = textSecondary;
+      ctx.fillText(i18nTexts.qrDomain, guideX, qy + 74);
+      ctx.restore();
+
+      // 右侧栏：页脚与版权
+      const rightFootY = 1000;
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(rx, rightFootY);
+      ctx.lineTo(W - (is16x9 ? 48 : 40), rightFootY);
+      ctx.stroke();
+
+      ctx.font = is16x9 ? '400 14px "JetBrains Mono", Consolas, monospace' : '400 12.5px "JetBrains Mono", Consolas, monospace';
+      ctx.fillStyle = textSecondary;
+      ctx.fillText(i18nTexts.copyright, rx, rightFootY + 28);
+    }
 
     return canvas;
   }
@@ -2939,26 +3580,33 @@
   }
 
   function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
-    if (!text) return;
+    if (!text) return y;
+    const tokens = text.match(/\S+\s*|[\u4e00-\u9fa5]|[\u3040-\u30ff]|[\uac00-\ud7af]|\s+/g) || [text];
     let line = '';
     let lineCount = 0;
-    for (let i = 0; i < text.length; i++) {
-      const testLine = line + text[i];
+    let currentY = y;
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+      const testLine = line + token;
       const metrics = ctx.measureText(testLine);
-      if (metrics.width > maxWidth && i > 0) {
+      if (metrics.width > maxWidth && line !== '') {
         lineCount++;
         if (lineCount >= maxLines) {
-          ctx.fillText(line + '...', x, y);
-          return;
+          ctx.fillText(line.trimEnd() + '...', x, currentY);
+          return currentY + lineHeight;
         }
-        ctx.fillText(line, x, y);
-        line = text[i];
-        y += lineHeight;
+        ctx.fillText(line.trimEnd(), x, currentY);
+        line = token.trimStart();
+        currentY += lineHeight;
       } else {
         line = testLine;
       }
     }
-    if (line) ctx.fillText(line, x, y);
+    if (line) {
+      ctx.fillText(line.trimEnd(), x, currentY);
+      currentY += lineHeight;
+    }
+    return currentY;
   }
 
   function loadImageAsync(src) {
@@ -3502,5 +4150,9 @@
     };
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

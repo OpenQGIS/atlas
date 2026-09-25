@@ -4,15 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20260925_v1">
+  <link rel="stylesheet" href="assets/style.css?v=20260925_v8">
   <script src="assets/config.js"></script>
-  <script src="assets/i18n.js?v=20260925_v1"></script>
+  <script src="assets/i18n.js?v=20260925_v8"></script>
   <script src="data/themes.js"></script>
   <script src="data/manifest.js"></script>
-  <script src="assets/theme.js"></script>
+  <script src="assets/theme.js?v=20260925_v8"></script>
   <script src="vendor/openseadragon.min.js"></script>
   <script src="assets/qrcode.min.js"></script>
-  <script src="assets/tile-compositor.js?v=20260925_v1"></script>
+  <script src="assets/tile-compositor.js?v=20260925_v8"></script>
 </head>
 <body data-page="atlas">
   <!-- Fullscreen Opening Screen (开屏全景与Slogan) -->
@@ -115,7 +115,7 @@
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
             </svg>
             <span class="lang-current-label" id="currentLangLabel">中</span>
-            <svg class="icon chevron-icon" style="width:10px; height:10px; margin-left:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <svg class="icon chevron-icon" style="width:10px; height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
@@ -176,41 +176,43 @@
 
       <!-- Top-Right Floating Actions · 视口右上角全局操作胶囊 (语言下拉、主题切换、退出阅览) -->
       <div class="viewer-top-actions" id="viewerTopActions">
-        <div class="lang-dropdown-wrapper viewer-lang-dropdown" id="viewerLangDropdownWrapper">
-          <button class="lang-dropdown-btn" id="viewerBtnLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" title="切换语言 / Switch Language" aria-label="切换语言">
-            <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="2" y1="12" x2="22" y2="12"></line>
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-            </svg>
-            <span class="lang-current-label" id="viewerCurrentLangLabel">中</span>
-            <svg class="icon chevron-icon" style="width:10px; height:10px; margin-left:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <div class="lang-dropdown-menu viewer-lang-menu" id="viewerLangMenu" role="menu" aria-hidden="true">
-            <button class="lang-dropdown-item active" data-lang="zh" role="menuitem">
-              <span class="lang-item-name">简体中文</span>
-              <span class="lang-item-badge">ZH</span>
+        <div class="viewer-top-actions-aux" id="viewerTopActionsAux">
+          <div class="lang-dropdown-wrapper viewer-lang-dropdown" id="viewerLangDropdownWrapper">
+            <button class="lang-dropdown-btn" id="viewerBtnLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" title="切换语言 / Switch Language" aria-label="切换语言">
+              <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              <span class="lang-current-label" id="viewerCurrentLangLabel">中</span>
+              <svg class="icon chevron-icon" style="width:10px; height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
             </button>
-            <button class="lang-dropdown-item" data-lang="en" role="menuitem">
-              <span class="lang-item-name">English</span>
-              <span class="lang-item-badge">EN</span>
-            </button>
-            <button class="lang-dropdown-item" data-lang="ja" role="menuitem">
-              <span class="lang-item-name">日本語</span>
-              <span class="lang-item-badge">JA</span>
-            </button>
-            <button class="lang-dropdown-item" data-lang="ko" role="menuitem">
-              <span class="lang-item-name">한국어</span>
-              <span class="lang-item-badge">KO</span>
-            </button>
+            <div class="lang-dropdown-menu viewer-lang-menu" id="viewerLangMenu" role="menu" aria-hidden="true">
+              <button class="lang-dropdown-item active" data-lang="zh" role="menuitem">
+                <span class="lang-item-name">简体中文</span>
+                <span class="lang-item-badge">ZH</span>
+              </button>
+              <button class="lang-dropdown-item" data-lang="en" role="menuitem">
+                <span class="lang-item-name">English</span>
+                <span class="lang-item-badge">EN</span>
+              </button>
+              <button class="lang-dropdown-item" data-lang="ja" role="menuitem">
+                <span class="lang-item-name">日本語</span>
+                <span class="lang-item-badge">JA</span>
+              </button>
+              <button class="lang-dropdown-item" data-lang="ko" role="menuitem">
+                <span class="lang-item-name">한국어</span>
+                <span class="lang-item-badge">KO</span>
+              </button>
+            </div>
           </div>
+          <button class="tool-btn theme-toggle-btn" id="toolToggleTheme" title="切换主题模式" data-i18n-title="navThemeToggle" aria-label="切换主题模式">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <div class="tool-divider"></div>
         </div>
-        <button class="tool-btn theme-toggle-btn" id="toolToggleTheme" title="切换主题模式" data-i18n-title="navThemeToggle" aria-label="切换主题模式">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-        <div class="tool-divider"></div>
         <button class="tool-btn close-btn" id="btnCloseViewer" title="退出阅览 (Esc)" aria-label="退出阅览" data-i18n-title="actionClose">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
@@ -246,39 +248,45 @@
         </div>
 
         <div class="viewer-floating-toolbar">
-          <!-- 动态比例控制器 (类似 Photoshop 比例控制器：支持直接输入数值 + 预设档位拉取) -->
+          <!-- 动态比例控制器 (底栏输入+显示二合一 · 展开窗口仅精简展示纯档位) -->
           <div class="zoom-dropdown-wrapper" id="zoomDropdownWrapper">
-            <button class="tool-zoom-badge" id="toolZoomBadge" aria-haspopup="true" aria-expanded="false" title="缩放比例与预设档位 (快捷键: 0适应, 1物理原寸)">
-              <span class="zoom-val" id="toolZoomVal">100%</span>
-              <svg class="icon chevron-icon" style="width:10px; height:10px; margin-left:3px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </button>
+            <div class="tool-zoom-pill" id="toolZoomPill" title="缩放比例与预设档位 (回车应用，点击展开档位)">
+              <input type="number" class="zoom-inline-input" id="zoomInlineInput" min="1" max="2500" step="1" value="100" aria-label="缩放百分比" />
+              <span class="zoom-unit">%</span>
+              <button type="button" class="zoom-chevron-btn" id="btnZoomChevron" aria-label="展开预设比例档位" aria-haspopup="true" aria-expanded="false">
+                <svg class="icon chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+            </div>
             <div class="zoom-popover" id="zoomPopover" role="menu" aria-hidden="true">
-              <div class="zoom-popover-header">
-                <span class="zoom-input-prefix" data-i18n="zoomInputPrefix">比例</span>
-                <input type="number" class="zoom-input-box" id="zoomInputBox" min="1" max="1000" step="1" value="100" />
-                <span class="zoom-input-suffix">%</span>
-                <button class="zoom-input-apply" id="btnApplyZoomInput" data-i18n="zoomInputApply">确定</button>
-              </div>
               <div class="zoom-presets-list" id="zoomPresetsList">
-                <!-- 动态根据当前作品的物理尺寸生成预设档位 -->
+                <!-- 纯净预设档位列表 -->
               </div>
             </div>
           </div>
           <button class="tool-btn" id="toolReset" title="整图展卷全貌 (0)" data-i18n-title="toolFitScreen">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 8V6a2 2 0 0 1 2-2h2"/>
+              <path d="M16 4h2a2 2 0 0 1 2 2v2"/>
+              <path d="M20 16v2a2 2 0 0 1-2 2h-2"/>
+              <path d="M8 20H6a2 2 0 0 1-2-2v-2"/>
+              <rect x="7" y="7" width="10" height="10" rx="1.5"/>
+            </svg>
           </button>
           <button class="tool-btn" id="toolRotate" title="顺时针旋转 (R)">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+              <polyline points="21 3 21 8 16 8"></polyline>
+            </svg>
           </button>
           <button class="tool-btn" id="toolFullscreen" title="视口全屏 (F)">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
           </button>
           <div class="tool-divider"></div>
           <button class="tool-btn info-btn" id="btnToggleInfo" title="作品档案与色板 (I)" data-i18n-title="actionToggleInfo">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="butt" stroke-linejoin="round">
-              <path d="M22 12C22 17.5228 17.5228 22 12 22C6.4771 22 2 17.5228 2 12C2 6.4771 6.4771 2 12 2C17.5228 2 22 6.4771 22 12Z"/>
-              <path d="M12 7L12 13"/>
-              <path d="M13 17C13 17.5523 12.5523 18 12 18C11.4477 18 11 17.5523 11 17C11 16.4477 11.4477 16 12 16C12.5523 16 13 16.4477 13 17Z" fill="currentColor" stroke="none"/>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
             </svg>
           </button>
           <div class="share-dropdown-wrapper" id="shareDropdownWrapper">
@@ -322,6 +330,12 @@
                 </div>
               </button>
             </div>
+          </div>
+
+          <!-- High-End Glassmorphic Floating Tooltip · 工具栏微胶囊悬浮气泡提示 -->
+          <div class="dock-tooltip" id="dockTooltip" aria-hidden="true">
+            <span class="dock-tooltip-text" id="dockTooltipText"></span>
+            <kbd class="dock-tooltip-kbd" id="dockTooltipKbd"></kbd>
           </div>
         </div>
       </div>
@@ -419,7 +433,7 @@
           </div>
           <div class="share-submodal-footer">
             <button class="share-submodal-btn secondary" id="btnShareQrCopyLink" data-i18n="shareOptLink">复制网址</button>
-            <button class="share-submodal-btn primary" id="btnShareQrDownload" data-i18n="shareQrSaveBtn">保存二维码图片</button>
+            <button class="share-submodal-btn primary" id="btnShareQrDownload" data-i18n="shareQrSaveBtn">保存二维码</button>
           </div>
         </div>
       </div>
@@ -428,8 +442,42 @@
       <div class="share-submodal" id="sharePosterModal" aria-hidden="true" role="dialog" aria-label="分享竖版海报">
         <div class="share-submodal-backdrop" id="sharePosterBackdrop"></div>
         <div class="share-submodal-dialog poster-dialog">
-          <div class="share-submodal-header">
-            <h3 class="share-submodal-title" data-i18n="sharePosterTitle">3:4 展卷典藏海报</h3>
+          <div class="share-submodal-header poster-header">
+            <div class="poster-header-left">
+              <h3 class="share-submodal-title" id="sharePosterModalTitle">
+                <span data-i18n="sharePosterTitle">典藏画卷海报</span>
+                <span class="poster-title-ratio" id="posterTitleRatio">3:4</span>
+              </h3>
+              <!-- Ratio Dropdown Selector · 海报画幅比例快捷切换下拉 -->
+              <div class="poster-ratio-dropdown" id="posterRatioDropdown">
+                <button type="button" class="poster-ratio-btn" id="btnPosterRatioDropdown" aria-haspopup="true" aria-expanded="false" title="切换海报画幅比例" aria-label="切换海报画幅比例">
+                  <span class="poster-ratio-current" id="posterCurrentRatioLabel">3:4</span>
+                  <svg class="icon chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="poster-ratio-menu" id="posterRatioMenu" role="menu" aria-hidden="true">
+                  <button class="poster-ratio-item active" data-ratio="3:4" role="menuitem">
+                    <span class="ratio-item-tag">3:4</span>
+                    <span class="ratio-item-desc" data-i18n="posterRatio3x4">3:4 竖版典藏</span>
+                  </button>
+                  <button class="poster-ratio-item" data-ratio="4:3" role="menuitem">
+                    <span class="ratio-item-tag">4:3</span>
+                    <span class="ratio-item-desc" data-i18n="posterRatio4x3">4:3 横版画廊</span>
+                  </button>
+                  <button class="poster-ratio-item" data-ratio="16:9" role="menuitem">
+                    <span class="ratio-item-tag">16:9</span>
+                    <span class="ratio-item-desc" data-i18n="posterRatio16x9">16:9 宽屏全景</span>
+                  </button>
+                  <button class="poster-ratio-item" data-ratio="9:16" role="menuitem">
+                    <span class="ratio-item-tag">9:16</span>
+                    <span class="ratio-item-desc" data-i18n="posterRatio9x16">9:16 移动全屏</span>
+                  </button>
+                  <button class="poster-ratio-item" data-ratio="9:21" role="menuitem">
+                    <span class="ratio-item-tag">9:21</span>
+                    <span class="ratio-item-desc" data-i18n="posterRatio9x21">9:21 极客长幅</span>
+                  </button>
+                </div>
+              </div>
+            </div>
             <button class="share-submodal-close icon-btn" id="btnCloseSharePoster" aria-label="关闭" data-i18n-title="actionClose">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
@@ -617,6 +665,6 @@
         </div>
       </div>
     </div>
-  <script src="assets/app.js?v=20260925_v1"></script>
+  <script src="assets/app.js?v=20260925_v8"></script>
 </body>
 </html>

@@ -1107,10 +1107,36 @@
     if (backdropEl) backdropEl.addEventListener('click', requestCloseViewer);
     if (closeBtn) closeBtn.addEventListener('click', requestCloseViewer);
     if (closeRightBtn) closeRightBtn.addEventListener('click', requestCloseViewer);
-    if (prevBtn) prevBtn.addEventListener('click', () => navigateArtwork(-1));
-    if (nextBtn) nextBtn.addEventListener('click', () => navigateArtwork(1));
-    if (edgePrevBtn) edgePrevBtn.addEventListener('click', () => navigateArtwork(-1));
-    if (edgeNextBtn) edgeNextBtn.addEventListener('click', () => navigateArtwork(1));
+    function blurBtn(btn) {
+      if (btn && typeof btn.blur === 'function') {
+        try { btn.blur(); } catch (e) {}
+      }
+    }
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => { navigateArtwork(-1); blurBtn(prevBtn); });
+      prevBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(prevBtn), 50), { passive: true });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => { navigateArtwork(1); blurBtn(nextBtn); });
+      nextBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(nextBtn), 50), { passive: true });
+    }
+    if (edgePrevBtn) {
+      edgePrevBtn.addEventListener('click', () => { navigateArtwork(-1); blurBtn(edgePrevBtn); });
+      edgePrevBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(edgePrevBtn), 50), { passive: true });
+    }
+    if (edgeNextBtn) {
+      edgeNextBtn.addEventListener('click', () => { navigateArtwork(1); blurBtn(edgeNextBtn); });
+      edgeNextBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(edgeNextBtn), 50), { passive: true });
+    }
+    if (toolReset) {
+      toolReset.addEventListener('click', () => {
+        if (osdViewer && osdViewer.viewport) {
+          osdViewer.viewport.goHome();
+        }
+        blurBtn(toolReset);
+      });
+      toolReset.addEventListener('touchend', () => setTimeout(() => blurBtn(toolReset), 50), { passive: true });
+    }
 
     const shareBtn = document.getElementById('btnShareArtwork');
     if (shareBtn) {
@@ -2085,6 +2111,9 @@
 
   function navigateArtwork(direction) {
     if (currentFilteredItems.length === 0) return;
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+      try { document.activeElement.blur(); } catch (e) {}
+    }
     currentViewerIndex = (currentViewerIndex + direction + currentFilteredItems.length) % currentFilteredItems.length;
     showArtwork(currentFilteredItems[currentViewerIndex], false);
   }

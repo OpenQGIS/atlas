@@ -4079,15 +4079,17 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   white-space: nowrap;
 }
 
-/* 鼠标悬停、展开、或语言下拉弹窗处于打开状态时，向左自然滑出 */
+/* 鼠标悬停、展开、或语言下拉弹窗处于打开状态时，向左自然滑出并解除溢出裁剪 */
 .viewer-top-actions:hover .viewer-top-actions-aux,
 .viewer-top-actions.expanded .viewer-top-actions-aux,
+.viewer-top-actions.has-open .viewer-top-actions-aux,
 .viewer-top-actions:has(.open) .viewer-top-actions-aux {
   max-width: 150px;
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);
   margin-right: 2px;
+  overflow: visible;
 }
 
 .viewer-top-actions .tool-btn {
@@ -4302,11 +4304,26 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     transform: translateX(-50%) translateY(0) !important;
   }
 
-  /* 移动端右上角紧凑化，并限制左上角图名徽章最大宽度避免重叠 */
+  /* 移动端右上角紧凑化，常驻展示语言和主题（免去触控屏无法 hover 的手风琴），并限制左上角图名徽章最大宽度避免重叠 */
   .viewer-top-actions {
     top: 14px;
     right: 14px;
     padding: 3px;
+  }
+
+  .viewer-top-actions-aux {
+    max-width: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    margin-right: 2px !important;
+    overflow: visible !important;
+  }
+
+  .viewer-lang-menu {
+    right: 0 !important;
+    top: calc(100% + 8px) !important;
+    min-width: 135px !important;
   }
 
   .viewer-top-actions .tool-btn {

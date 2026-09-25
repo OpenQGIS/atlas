@@ -1930,7 +1930,6 @@ body[data-page="portal"] {
 .card-meta-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.85);
@@ -1991,35 +1990,11 @@ body[data-page="portal"] {
   border-width: 1px;
 }
 
-.card-action-hint {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: rgba(255, 255, 255, 0.80);
-  font-size: 0.72rem;
-  font-weight: 500;
-  flex-shrink: 0;
-  transition: color var(--transition-fast), transform var(--transition-fast);
-}
-
-.gallery-card:hover .card-action-hint {
-  color: var(--accent);
-  transform: translateX(2px);
-}
-
 :root[data-theme="light"] .tag-pill {
   background: rgba(255, 255, 255, 0.90);
   border: 1px solid rgba(0, 0, 0, 0.14);
   color: #0f141c;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
-:root[data-theme="light"] .card-action-hint {
-  color: #3d4654;
-}
-
-:root[data-theme="light"] .gallery-card:hover .card-action-hint {
-  color: #6aa820;
 }
 
 /* Deep Zoom Modal */

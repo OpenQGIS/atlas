@@ -908,7 +908,6 @@
     const tagsHtml = (locItem.tags || [])
       .filter(t => !['no', 'no_hero', 'hero:no', 'hero=no'].includes(String(t).trim().toLowerCase()))
       .map(t => '<span class="tag-pill">' + escapeHtml(t) + '</span>').join('');
-    const actionLabel = window.AtlasI18n ? window.AtlasI18n.t('actionZoom') : '深览';
 
     const isNew = isNewArtwork(item);
     const newBadgeAria = window.AtlasI18n ? (window.AtlasI18n.t('badgeNewAria') || '新作') : '新作';
@@ -925,15 +924,7 @@
         '<div class="card-scrim-mask">' +
           '<div class="card-scrim-content">' +
             '<h3 class="card-title" title="' + escapeHtml(locItem.title) + '">' + escapeHtml(locItem.title) + '</h3>' +
-            '<div class="card-meta-row">' +
-              '<div class="card-tags">' +
-                tagsHtml +
-              '</div>' +
-              '<div class="card-action-hint">' +
-                SVG_ZOOM +
-                ' <span>' + actionLabel + '</span>' +
-              '</div>' +
-            '</div>' +
+            (tagsHtml ? ('<div class="card-meta-row"><div class="card-tags">' + tagsHtml + '</div></div>') : '') +
           '</div>' +
         '</div>' +
       '</div>';

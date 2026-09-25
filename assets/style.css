@@ -2464,20 +2464,29 @@ body:has(.about-modal.open) {
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(14, 18, 24, 0.60);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(14, 18, 24, 0.52) 32%,
+    rgba(10, 14, 20, 0.62) 100%
+  );
+  backdrop-filter: blur(18px) saturate(190%) brightness(1.06);
+  -webkit-backdrop-filter: blur(18px) saturate(190%) brightness(1.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top-color: rgba(255, 255, 255, 0.32);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
   padding: 6px 8px;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   gap: 4px;
   box-shadow: 
-    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.20),
-    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.18),
-    0px 10px 10px -3.75px rgba(0, 0, 0, 0.14),
-    0px 16px 32px -5px rgba(0, 0, 0, 0.35);
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.32),
+    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.18),
+    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.16),
+    0px 10px 10px -3.75px rgba(0, 0, 0, 0.12),
+    0px 18px 36px -5px rgba(0, 0, 0, 0.38);
   z-index: 20;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
               background 0.3s ease,
@@ -2498,34 +2507,61 @@ body:has(.about-modal.open) {
 .viewer-float-toolbar:hover,
 .viewer-floating-toolbar:hover {
   transform: translateX(-50%);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(14, 18, 24, 0.50) 32%,
+    rgba(10, 14, 20, 0.60) 100%
+  );
+  border-top-color: rgba(255, 255, 255, 0.42);
   box-shadow: 
-    0px 0.8px 1px -1px rgba(0, 0, 0, 0.25),
-    0px 3px 4px -2px rgba(0, 0, 0, 0.22),
-    0px 14px 18px -4px rgba(0, 0, 0, 0.18),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.32),
+    0px 0.8px 1px -1px rgba(0, 0, 0, 0.22),
+    0px 3px 4px -2px rgba(0, 0, 0, 0.20),
+    0px 14px 18px -4px rgba(0, 0, 0, 0.16),
     0px 22px 42px -6px rgba(0, 0, 0, 0.45);
 }
 
 :root[data-theme="light"] .viewer-float-toolbar,
 :root[data-theme="light"] .viewer-floating-toolbar {
-  background: rgba(255, 255, 255, 0.60);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(245, 248, 252, 0.58) 40%,
+    rgba(235, 240, 248, 0.65) 100%
+  );
+  backdrop-filter: blur(18px) saturate(190%) brightness(1.02);
+  -webkit-backdrop-filter: blur(18px) saturate(190%) brightness(1.02);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-top-color: rgba(255, 255, 255, 0.95);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
   box-shadow: 
-    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.08),
-    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.06),
-    0px 10px 10px -3.75px rgba(0, 0, 0, 0.05),
-    0px 16px 32px -4px rgba(0, 0, 0, 0.12);
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.90),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.04),
+    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.06),
+    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.05),
+    0px 10px 10px -3.75px rgba(0, 0, 0, 0.04),
+    0px 16px 32px -4px rgba(0, 0, 0, 0.10);
 }
 
 :root[data-theme="light"] .viewer-float-toolbar:hover,
 :root[data-theme="light"] .viewer-floating-toolbar:hover {
   transform: translateX(-50%);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.90) 0%,
+    rgba(245, 248, 252, 0.62) 40%,
+    rgba(235, 240, 248, 0.68) 100%
+  );
+  border-top-color: #ffffff;
   box-shadow: 
-    0px 0.8px 1px -1px rgba(0, 0, 0, 0.10),
-    0px 3px 4px -2px rgba(0, 0, 0, 0.08),
-    0px 12px 16px -3px rgba(0, 0, 0, 0.08),
-    0px 22px 42px -5px rgba(0, 0, 0, 0.18);
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.04),
+    0px 0.8px 1px -1px rgba(0, 0, 0, 0.08),
+    0px 3px 4px -2px rgba(0, 0, 0, 0.06),
+    0px 12px 16px -3px rgba(0, 0, 0, 0.06),
+    0px 20px 38px -5px rgba(0, 0, 0, 0.14);
 }
 
 .tool-btn {

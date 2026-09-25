@@ -1749,19 +1749,24 @@
     navEl.style.height = targetH + 'px';
     navEl.style.setProperty('--nav-bg', dominantColor);
     navEl.style.setProperty('background-color', dominantColor, 'important');
-    navEl.style.setProperty('background', dominantColor, 'important');
-    // 同步更新 navigator 内所有层级容器与 canvas 背景，消除白边
+    if (item && item.thumb) {
+      navEl.style.backgroundImage = 'url("' + item.thumb + '")';
+      navEl.style.backgroundSize = 'contain';
+      navEl.style.backgroundRepeat = 'no-repeat';
+      navEl.style.backgroundPosition = 'center';
+    }
+    // 同步更新 navigator 内所有层级容器与 canvas 背景，画布透明以便即时透出底图
     const navCanvas = navEl.querySelector('canvas');
     if (navCanvas) {
-      navCanvas.style.setProperty('background-color', dominantColor, 'important');
+      navCanvas.style.setProperty('background-color', 'transparent', 'important');
     }
     const navContainer = navEl.querySelector('.openseadragon-container');
     if (navContainer) {
-      navContainer.style.setProperty('background-color', dominantColor, 'important');
+      navContainer.style.setProperty('background-color', 'transparent', 'important');
     }
     const navOsdCanvas = navEl.querySelector('.openseadragon-canvas');
     if (navOsdCanvas) {
-      navOsdCanvas.style.setProperty('background-color', dominantColor, 'important');
+      navOsdCanvas.style.setProperty('background-color', 'transparent', 'important');
     }
 
     updateNavigatorCloseButtonColor(item);
@@ -2183,14 +2188,14 @@
 
   function ensureNavigatorElement(item) {
     const navBody = document.getElementById('navigatorBody');
-    let navEl = document.getElementById('viewerNavigator');
-    if (!navEl && navBody) {
-      navEl = document.createElement('div');
-      navEl.id = 'viewerNavigator';
-      navEl.className = 'viewer-navigator';
+    if (navBody) {
+      navBody.innerHTML = '';
+    }
+    const navEl = document.createElement('div');
+    navEl.id = 'viewerNavigator';
+    navEl.className = 'viewer-navigator';
+    if (navBody) {
       navBody.appendChild(navEl);
-    } else if (navEl) {
-      navEl.innerHTML = '';
     }
     if (navEl && item) {
       updateNavigatorDimensions(item);
@@ -2278,32 +2283,80 @@
         StealthWatermark.burnIn(osdViewer);
       });
 
-      // 鹰眼导航器白边根治：OSD 初始化后强制覆盖背景色、容器层级与精确重排画布
+      // 鹰眼导航器视野范围框边界自适应约束：防止宽屏 Letterbox 时视野框被切到图框外导致完全不可见
+      function clampNavigatorDisplayRegion() {
+        if (!osdViewer || !osdViewer.navigator) return;
+        const nav = osdViewer.navigator;
+        const dr = nav.displayRegion;
+        if (!dr || !nav.element) return;
+        const navW = nav.element.clientWidth || parseFloat(nav.element.style.width) || 0;
+        const navH = nav.element.clientHeight || parseFloat(nav.element.style.height) || 0;
+        if (navW <= 0 || navH <= 0) return;
+
+        let l = parseFloat(dr.style.left) || 0;
+        let t = parseFloat(dr.style.top) || 0;
+        let w = parseFloat(dr.style.width) || 0;
+        let h = parseFloat(dr.style.height) || 0;
+
+        let r = l + w;
+        let b = t + h;
+
+        let clampedL = Math.max(0, Math.min(navW, l));
+        let clampedT = Math.max(0, Math.min(navH, t));
+        let clampedR = Math.max(0, Math.min(navW, r));
+        let clampedB = Math.max(0, Math.min(navH, b));
+
+        let clampedW = Math.max(0, clampedR - clampedL);
+        let clampedH = Math.max(0, clampedB - clampedT);
+
+        dr.style.left = clampedL.toFixed(1) + 'px';
+        dr.style.top = clampedT.toFixed(1) + 'px';
+        dr.style.width = clampedW.toFixed(1) + 'px';
+        dr.style.height = clampedH.toFixed(1) + 'px';
+      }
+
+      if (osdViewer && osdViewer.navigator && typeof osdViewer.navigator.update === 'function') {
+        const origNavUpdate = osdViewer.navigator.update.bind(osdViewer.navigator);
+        osdViewer.navigator.update = function (viewport) {
+          origNavUpdate(viewport);
+          clampNavigatorDisplayRegion();
+        };
+      }
+
+      osdViewer.addHandler('update-viewport', clampNavigatorDisplayRegion);
+
+      // 鹰眼导航器白边根治与底图透出：OSD 初始化后强制覆盖背景色、容器层级与精确重排画布
       function fixNavigatorBackground() {
         const navEl = document.getElementById('viewerNavigator');
         if (!navEl) return;
         const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
         navEl.style.setProperty('--nav-bg', dominantColor);
         navEl.style.setProperty('background-color', dominantColor, 'important');
-        navEl.style.setProperty('background', dominantColor, 'important');
+        if (item && item.thumb) {
+          navEl.style.backgroundImage = 'url("' + item.thumb + '")';
+          navEl.style.backgroundSize = 'contain';
+          navEl.style.backgroundRepeat = 'no-repeat';
+          navEl.style.backgroundPosition = 'center';
+        }
         
         const container = navEl.querySelector('.openseadragon-container');
         if (container) {
-          container.style.setProperty('background-color', dominantColor, 'important');
+          container.style.setProperty('background-color', 'transparent', 'important');
         }
         const osdCanvas = navEl.querySelector('.openseadragon-canvas');
         if (osdCanvas) {
-          osdCanvas.style.setProperty('background-color', dominantColor, 'important');
+          osdCanvas.style.setProperty('background-color', 'transparent', 'important');
         }
         const canvas = navEl.querySelector('canvas');
         if (canvas) {
           canvas.style.setProperty('display', 'block', 'important');
           canvas.style.setProperty('width', '100%', 'important');
           canvas.style.setProperty('height', '100%', 'important');
-          canvas.style.setProperty('background-color', dominantColor, 'important');
+          canvas.style.setProperty('background-color', 'transparent', 'important');
         }
         if (osdViewer && osdViewer.navigator) {
           osdViewer.navigator.updateSize();
+          clampNavigatorDisplayRegion();
         }
       }
       osdViewer.addHandler('open', function () {

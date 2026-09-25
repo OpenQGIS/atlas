@@ -2609,9 +2609,9 @@ body:has(.about-modal.open) {
               color 0.2s ease;
 }
 
-/* 底栏嵌入式上/下一卷切换按钮：桌面端默认隐藏（已有侧边大翻页把手），移动端开启 */
+/* 底栏嵌入式上/下一卷切换按钮：全端开启（桌面端与移动端统一作为核心导航中枢） */
 .viewer-floating-toolbar .nav-artwork-btn {
-  display: none;
+  display: inline-flex;
 }
 
 /* 鼠标设备悬停动效：仅在具备真实鼠标指针的桌面端生效 */
@@ -3905,13 +3905,14 @@ body:has(.about-modal.open) {
   z-index: 25;
   transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1),
               left 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.25s ease,
+              opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               background 0.2s ease,
               color 0.2s ease,
               border-color 0.2s ease,
               box-shadow 0.25s ease;
-  opacity: 0.5;
+  opacity: 0;
+  pointer-events: none;
   outline: none;
 }
 
@@ -3929,7 +3930,16 @@ body:has(.about-modal.open) {
   right: var(--drawer-offset, 364px);
 }
 
-.viewer-edge-nav:hover {
+/* 边缘微隐唤出 (Hover-to-Reveal): 鼠标移入屏幕边缘或按键本身时柔和淡入，平时零遮挡画面 */
+.viewer-edge-nav.edge-revealed,
+.viewer-edge-nav:hover,
+.viewer-edge-nav:focus-visible {
+  opacity: 0.65;
+  pointer-events: auto;
+}
+
+.viewer-edge-nav:hover,
+.viewer-edge-nav:focus-visible {
   opacity: 1 !important;
   background: rgba(14, 17, 22, 0.94);
   border-color: var(--accent);
@@ -3953,10 +3963,19 @@ body:has(.about-modal.open) {
   border: 1px solid rgba(0, 0, 0, 0.14);
   color: #1e2633;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
-  opacity: 0.65;
+  opacity: 0;
+  pointer-events: none;
 }
 
-:root[data-theme="light"] .viewer-edge-nav:hover {
+:root[data-theme="light"] .viewer-edge-nav.edge-revealed,
+:root[data-theme="light"] .viewer-edge-nav:hover,
+:root[data-theme="light"] .viewer-edge-nav:focus-visible {
+  opacity: 0.75;
+  pointer-events: auto;
+}
+
+:root[data-theme="light"] .viewer-edge-nav:hover,
+:root[data-theme="light"] .viewer-edge-nav:focus-visible {
   background: #ffffff;
   border-color: var(--accent);
   color: var(--accent);
@@ -3964,10 +3983,17 @@ body:has(.about-modal.open) {
   box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.25);
 }
 
-/* In Fullscreen Mode: edge nav remains accessible and reactive */
+/* In Fullscreen Mode: edge nav remains stealth until cursor moves to the edge */
 .viewer-modal.fullscreen-mode .viewer-edge-nav {
-  opacity: 0.6 !important;
-  pointer-events: auto !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.viewer-modal.fullscreen-mode .viewer-edge-nav.edge-revealed,
+.viewer-modal.fullscreen-mode .viewer-edge-nav:hover,
+.viewer-modal.fullscreen-mode .viewer-edge-nav:focus-visible {
+  opacity: 0.7;
+  pointer-events: auto;
 }
 
 .viewer-modal.fullscreen-mode .viewer-edge-nav:hover {

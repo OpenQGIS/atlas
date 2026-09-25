@@ -1128,6 +1128,46 @@
       edgeNextBtn.addEventListener('click', () => { navigateArtwork(1); blurBtn(edgeNextBtn); });
       edgeNextBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(edgeNextBtn), 50), { passive: true });
     }
+
+    // 桌面端两侧大翻页按钮边缘微隐唤出 (Hover-to-Reveal · 零遮挡画布)
+    let edgeNavRaf = null;
+    function handleEdgeNavReveal(e) {
+      if (!edgePrevBtn || !edgeNextBtn) return;
+      if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      if (edgeNavRaf) return;
+      edgeNavRaf = requestAnimationFrame(() => {
+        edgeNavRaf = null;
+        const x = e.clientX;
+        const winWidth = window.innerWidth;
+        const isDrawerOpen = modalEl.classList.contains('drawer-open') || (drawerEl && drawerEl.classList.contains('open'));
+        const drawerWidth = (drawerEl && drawerEl.offsetWidth > 0) ? drawerEl.offsetWidth : 364;
+        const rightBoundary = isDrawerOpen ? (winWidth - drawerWidth) : winWidth;
+
+        // 视口左右两端 110px 灵敏感应区
+        const showPrev = x >= 0 && x <= 110;
+        const showNext = x >= (rightBoundary - 110) && x <= rightBoundary;
+
+        if (showPrev) {
+          edgePrevBtn.classList.add('edge-revealed');
+        } else {
+          edgePrevBtn.classList.remove('edge-revealed');
+        }
+
+        if (showNext) {
+          edgeNextBtn.classList.add('edge-revealed');
+        } else {
+          edgeNextBtn.classList.remove('edge-revealed');
+        }
+      });
+    }
+
+    function handleEdgeNavMouseLeave() {
+      if (edgePrevBtn) edgePrevBtn.classList.remove('edge-revealed');
+      if (edgeNextBtn) edgeNextBtn.classList.remove('edge-revealed');
+    }
+
+    modalEl.addEventListener('mousemove', handleEdgeNavReveal, { passive: true });
+    modalEl.addEventListener('mouseleave', handleEdgeNavMouseLeave, { passive: true });
     if (toolReset) {
       toolReset.addEventListener('click', () => {
         if (osdViewer && osdViewer.viewport) {

@@ -2479,6 +2479,14 @@ body:has(.about-modal.open) {
   will-change: transform;
 }
 
+/* 当缩放比例弹出层打开时，将浮动底栏的层叠上下文提权至 35（高于鹰眼图的 24），确保菜单层级压制并在最顶层展开 */
+.viewer-float-toolbar:has(#zoomPopover.open),
+.viewer-float-toolbar.popover-open,
+.viewer-floating-toolbar:has(#zoomPopover.open),
+.viewer-floating-toolbar.popover-open {
+  z-index: 35 !important;
+}
+
 /* 移除悬停 translateY(-2px)，底座保持绝对静止锚定，消除鼠标划入时的目标抖动 */
 .viewer-float-toolbar:hover,
 .viewer-floating-toolbar:hover {
@@ -3598,6 +3606,16 @@ body:has(.about-modal.open) {
   visibility: hidden !important;
   pointer-events: none !important;
   transform: scale(0.92) translateY(6px);
+}
+
+/* 当缩放比例弹出层打开时，鹰眼导航窗智能虚化淡出并禁用点击，防止物理与视觉重叠遮挡 */
+.viewer-modal:has(#zoomPopover.open) .viewer-navigator-panel,
+.viewer-modal:has(.zoom-popover.open) .viewer-navigator-panel,
+.viewer-modal.zoom-focus-active .viewer-navigator-panel {
+  opacity: 0.12 !important;
+  pointer-events: none !important;
+  transform: scale(0.96);
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .navigator-close-btn {
@@ -6057,11 +6075,20 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   background: var(--bg-surface-elevated);
 }
 
-/* 移动端竖屏优化：按钮均分通栏与舒适圆角 */
+/* 移动端竖屏优化：按钮均分通栏、适度尺寸与舒适圆角 */
 @media (max-width: 600px) {
   .share-submodal-dialog {
     width: min(340px, calc(100vw - 32px));
     border-radius: 16px;
+  }
+  .share-submodal-body {
+    padding: 18px 16px;
+  }
+  .share-qr-box {
+    width: 156px;
+    height: 156px;
+    padding: 8px;
+    border-radius: 10px;
   }
   .share-submodal-footer {
     display: flex;
@@ -6076,7 +6103,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
 }
 
 /* -------------------------------------------------------------
-   QR Code Submodal Spec
+   QR Code Submodal Spec (典藏装裱与专属微标排版)
    ------------------------------------------------------------- */
 .share-qr-card {
   display: flex;
@@ -6085,16 +6112,30 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   min-height: 0;
 }
 
+.share-qr-box-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .share-qr-box {
-  padding: 14px;
+  padding: 10px;
   background: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-  width: 210px;
-  height: 210px;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 184px;
+  height: 184px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.25s ease;
+}
+
+:root[data-theme="light"] .share-qr-box {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 .share-qr-box svg {
@@ -6103,11 +6144,78 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   display: block;
 }
 
+/* 二维码正中心品牌/印章微标（利用 15% 容错，秒级扫码兼具东方印章质感） */
+.share-qr-center-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  background: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  border: 2px solid #ffffff;
+  pointer-events: none;
+}
+
+.share-qr-badge-text {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #1b202c, #07080b);
+  color: #d4af37;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.02em;
+}
+
+/* 规格标签胶囊 */
+.share-qr-meta-chips {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 12px 0 4px;
+  flex-wrap: wrap;
+}
+
+.share-qr-chip {
+  font-size: 0.70rem;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.share-qr-chip-res {
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+:root[data-theme="light"] .share-qr-chip {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 .share-qr-artwork-title {
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 18px 0 4px;
+  margin: 4px 0 3px;
   text-align: center;
   max-width: 90%;
   white-space: nowrap;
@@ -6116,7 +6224,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
 }
 
 .share-qr-artwork-sub {
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-family: var(--font-mono);
   color: var(--accent);
   text-align: center;
@@ -6138,20 +6246,40 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     height: 26px;
   }
   .share-submodal-body {
-    padding: 8px 16px;
+    padding: 6px 16px;
   }
   .share-qr-box {
-    width: 124px;
-    height: 124px;
+    width: 116px;
+    height: 116px;
     padding: 6px;
     border-radius: 8px;
   }
+  .share-qr-center-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+  }
+  .share-qr-badge-text {
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    border-radius: 4px;
+  }
+  .share-qr-meta-chips {
+    margin: 4px 0 2px;
+    gap: 4px;
+  }
+  .share-qr-chip,
+  .share-qr-chip-res {
+    font-size: 0.62rem;
+    padding: 1px 6px;
+  }
   .share-qr-artwork-title {
-    margin: 6px 0 2px;
-    font-size: 0.88rem;
+    margin: 2px 0 1px;
+    font-size: 0.86rem;
   }
   .share-qr-artwork-sub {
-    font-size: 0.70rem;
+    font-size: 0.68rem;
   }
   .share-submodal-footer {
     padding: 8px 16px;

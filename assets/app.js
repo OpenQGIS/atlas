@@ -48,6 +48,10 @@
       zoomPill.classList.remove('active');
       if (chevronBtn) chevronBtn.setAttribute('aria-expanded', 'false');
       popover.setAttribute('aria-hidden', 'true');
+      const toolbar = wrapper.closest('.viewer-floating-toolbar') || wrapper.closest('.viewer-float-toolbar');
+      if (toolbar) toolbar.classList.remove('popover-open');
+      const viewerModal = document.getElementById('viewerModal');
+      if (viewerModal) viewerModal.classList.remove('zoom-focus-active');
     }
 
     function openZoomPopover() {
@@ -55,6 +59,10 @@
       zoomPill.classList.add('active');
       if (chevronBtn) chevronBtn.setAttribute('aria-expanded', 'true');
       popover.setAttribute('aria-hidden', 'false');
+      const toolbar = wrapper.closest('.viewer-floating-toolbar') || wrapper.closest('.viewer-float-toolbar');
+      if (toolbar) toolbar.classList.add('popover-open');
+      const viewerModal = document.getElementById('viewerModal');
+      if (viewerModal) viewerModal.classList.add('zoom-focus-active');
     }
 
     function toggleZoomPopover() {
@@ -184,9 +192,16 @@
         const popover = document.getElementById('zoomPopover');
         const zoomPill = document.getElementById('toolZoomPill');
         const chevronBtn = document.getElementById('btnZoomChevron');
-        if (popover) popover.classList.remove('open');
+        if (popover) {
+          popover.classList.remove('open');
+          popover.setAttribute('aria-hidden', 'true');
+        }
         if (zoomPill) zoomPill.classList.remove('active');
         if (chevronBtn) chevronBtn.setAttribute('aria-expanded', 'false');
+        const toolbar = document.querySelector('.viewer-floating-toolbar') || document.querySelector('.viewer-float-toolbar');
+        if (toolbar) toolbar.classList.remove('popover-open');
+        const viewerModal = document.getElementById('viewerModal');
+        if (viewerModal) viewerModal.classList.remove('zoom-focus-active');
       });
       presetsList.appendChild(btn);
     });
@@ -1415,6 +1430,15 @@
             if (ratioBtn) ratioBtn.setAttribute('aria-expanded', 'false');
           } else if (zoomPopover && zoomPopover.classList.contains('open')) {
             zoomPopover.classList.remove('open');
+            zoomPopover.setAttribute('aria-hidden', 'true');
+            const zoomPill = document.getElementById('toolZoomPill');
+            if (zoomPill) zoomPill.classList.remove('active');
+            const chevronBtn = document.getElementById('btnZoomChevron');
+            if (chevronBtn) chevronBtn.setAttribute('aria-expanded', 'false');
+            const toolbar = zoomPopover.closest('.viewer-floating-toolbar') || zoomPopover.closest('.viewer-float-toolbar');
+            if (toolbar) toolbar.classList.remove('popover-open');
+            const viewerModal = document.getElementById('viewerModal');
+            if (viewerModal) viewerModal.classList.remove('zoom-focus-active');
             const badgeBtn = document.getElementById('toolZoomBadge');
             if (badgeBtn) badgeBtn.setAttribute('aria-expanded', 'false');
           } else if (posterModal && posterModal.classList.contains('open')) {
@@ -2774,9 +2798,15 @@
     const zoomPopover = document.getElementById('zoomPopover');
     const zoomPill = document.getElementById('toolZoomPill');
     const zoomChevron = document.getElementById('btnZoomChevron');
-    if (zoomPopover) zoomPopover.classList.remove('open');
+    if (zoomPopover) {
+      zoomPopover.classList.remove('open');
+      zoomPopover.setAttribute('aria-hidden', 'true');
+    }
     if (zoomPill) zoomPill.classList.remove('active');
     if (zoomChevron) zoomChevron.setAttribute('aria-expanded', 'false');
+    const floatToolbar = document.querySelector('.viewer-floating-toolbar') || document.querySelector('.viewer-float-toolbar');
+    if (floatToolbar) floatToolbar.classList.remove('popover-open');
+    modalEl.classList.remove('zoom-focus-active');
 
     if (osdViewer) {
       try { osdViewer.destroy(); } catch (e) {}
@@ -2970,10 +3000,23 @@
     const modal = document.getElementById('shareQrModal');
     const container = document.getElementById('shareQrContainer');
     const titleEl = document.getElementById('shareQrArtworkTitle');
+    const catChip = document.getElementById('shareQrCategoryChip');
+    const resChip = document.getElementById('shareQrResChip');
     if (!modal || !container) return;
 
     const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
     if (titleEl) titleEl.textContent = (locItem && locItem.title) || item.title;
+
+    if (catChip) {
+      catChip.textContent = (locItem && locItem.category) || item.category || '空间制图';
+    }
+    if (resChip) {
+      if (item.width && item.height) {
+        resChip.textContent = `${item.width.toLocaleString()} × ${item.height.toLocaleString()} px`;
+      } else {
+        resChip.textContent = '4K Deep Zoom';
+      }
+    }
 
     const url = getShareUrlForItem(item);
     if (window.qrcode) {
@@ -3009,14 +3052,21 @@
       qr.make();
       const count = qr.getModuleCount();
       const cellSize = 10;
-      const margin = 30;
-      const size = count * cellSize + margin * 2;
+      const margin = 28;
+      const qrW = count * cellSize + margin * 2;
+      const bannerH = 88;
+      const totalH = qrW + bannerH;
+
       const cvs = document.createElement('canvas');
-      cvs.width = size;
-      cvs.height = size;
+      cvs.width = qrW;
+      cvs.height = totalH;
       const ctx = cvs.getContext('2d');
+
+      // Card Background
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, size, size);
+      ctx.fillRect(0, 0, qrW, totalH);
+
+      // QR Code Modules
       ctx.fillStyle = '#000000';
       for (let r = 0; r < count; r++) {
         for (let c = 0; c < count; c++) {
@@ -3025,6 +3075,55 @@
           }
         }
       }
+
+      // Center Brand Emblem
+      const cx = qrW / 2;
+      const cy = (count * cellSize + margin * 2) / 2;
+      const badgeSize = Math.max(44, Math.round(cellSize * 5.2));
+      ctx.fillStyle = '#ffffff';
+      roundRect(ctx, cx - badgeSize / 2, cy - badgeSize / 2, badgeSize, badgeSize, 10);
+      ctx.fill();
+
+      const innerBadge = badgeSize - 10;
+      ctx.fillStyle = '#161a23';
+      roundRect(ctx, cx - innerBadge / 2, cy - innerBadge / 2, innerBadge, innerBadge, 7);
+      ctx.fill();
+
+      ctx.fillStyle = '#d4af37';
+      ctx.font = `900 ${Math.round(innerBadge * 0.65)}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Q', cx, cy + 1);
+
+      // Separator Line
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(margin, qrW);
+      ctx.lineTo(qrW - margin, qrW);
+      ctx.stroke();
+
+      // Title & Metadata
+      const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
+      const title = (locItem && locItem.title) || item.title || '地图录';
+
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(title, cx, qrW + 16, qrW - margin * 2);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      const resText = (item.width && item.height)
+        ? `${item.width.toLocaleString()} × ${item.height.toLocaleString()} px · 1:1 4K Deep Zoom`
+        : '1:1 4K Deep Zoom';
+      ctx.fillText(resText, cx, qrW + 40);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText('OpenQGIS · 地图录', cx, qrW + 62);
+
       const a = document.createElement('a');
       a.download = `${item.title || 'atlas'}_qrcode.png`;
       a.href = cvs.toDataURL('image/png');

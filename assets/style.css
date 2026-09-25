@@ -5949,6 +5949,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   z-index: 2;
   width: 90%;
   max-width: 380px;
+  max-height: min(92vh, 92dvh);
   background: var(--bg-surface-elevated, #161a23);
   border: 1px solid var(--border-subtle);
   border-radius: 18px;
@@ -6010,6 +6011,8 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
 
 .share-submodal-body {
   padding: 24px 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .share-submodal-footer {
@@ -6054,6 +6057,24 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   background: var(--bg-surface-elevated);
 }
 
+/* 移动端竖屏优化：按钮均分通栏与舒适圆角 */
+@media (max-width: 600px) {
+  .share-submodal-dialog {
+    width: min(340px, calc(100vw - 32px));
+    border-radius: 16px;
+  }
+  .share-submodal-footer {
+    display: flex;
+    gap: 8px;
+  }
+  .share-submodal-footer .share-submodal-btn {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+    padding: 9px 12px;
+  }
+}
+
 /* -------------------------------------------------------------
    QR Code Submodal Spec
    ------------------------------------------------------------- */
@@ -6061,6 +6082,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 0;
 }
 
 .share-qr-box {
@@ -6099,6 +6121,46 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   color: var(--accent);
   text-align: center;
   margin: 0;
+}
+
+/* 手机横屏 / 矮屏紧凑模式 (业内标准触发阈值：高度 <= 520px) */
+@media (max-height: 520px) {
+  .share-submodal-dialog {
+    max-height: min(94vh, 94dvh);
+    border-radius: 14px;
+    width: min(340px, 90vw);
+  }
+  .share-submodal-header {
+    padding: 8px 16px;
+  }
+  .share-submodal-close {
+    width: 26px;
+    height: 26px;
+  }
+  .share-submodal-body {
+    padding: 8px 16px;
+  }
+  .share-qr-box {
+    width: 124px;
+    height: 124px;
+    padding: 6px;
+    border-radius: 8px;
+  }
+  .share-qr-artwork-title {
+    margin: 6px 0 2px;
+    font-size: 0.88rem;
+  }
+  .share-qr-artwork-sub {
+    font-size: 0.70rem;
+  }
+  .share-submodal-footer {
+    padding: 8px 16px;
+    gap: 8px;
+  }
+  .share-submodal-btn {
+    padding: 6px 12px;
+    font-size: 0.76rem;
+  }
 }
 
 /* -------------------------------------------------------------

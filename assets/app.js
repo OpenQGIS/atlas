@@ -146,14 +146,13 @@
     const base100 = getBase100PhysicalZoom(osdViewer);
     const homeZoom = osdViewer.viewport.getHomeZoom();
     const fitPercent = Math.max(1, Math.round((homeZoom / base100) * 100));
-    const pixelNativePercent = Math.round((1 / PHYSICAL_100_RATIO) * 100); // 313%
 
     const rawPresets = [
       { percent: fitPercent, isFit: true },
       { percent: 50 },
       { percent: 100 },
       { percent: 200 },
-      { percent: pixelNativePercent },
+      { percent: 300 },
       { percent: 400 }
     ];
 

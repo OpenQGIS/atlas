@@ -3024,7 +3024,7 @@
         const qr = qrcode(0, 'M');
         qr.addData(url);
         qr.make();
-        container.innerHTML = qr.createSvgTag({ cellSize: 6, margin: 4, scalable: true });
+        container.innerHTML = qr.createSvgTag({ cellSize: 5, margin: 1, scalable: true });
       } catch (err) {
         console.error('QR code generation error:', err);
       }
@@ -3076,24 +3076,18 @@
         }
       }
 
-      // Center Brand Emblem
+      // Center Brand Emblem with OpenQGIS Avatar
       const cx = qrW / 2;
       const cy = (count * cellSize + margin * 2) / 2;
-      const badgeSize = Math.max(44, Math.round(cellSize * 5.2));
+      const badgeSize = Math.max(46, Math.round(cellSize * 5.4));
       ctx.fillStyle = '#ffffff';
       roundRect(ctx, cx - badgeSize / 2, cy - badgeSize / 2, badgeSize, badgeSize, 10);
       ctx.fill();
 
       const innerBadge = badgeSize - 10;
-      ctx.fillStyle = '#161a23';
-      roundRect(ctx, cx - innerBadge / 2, cy - innerBadge / 2, innerBadge, innerBadge, 7);
+      ctx.fillStyle = '#000000';
+      roundRect(ctx, cx - innerBadge / 2, cy - innerBadge / 2, innerBadge, innerBadge, 8);
       ctx.fill();
-
-      ctx.fillStyle = '#d4af37';
-      ctx.font = `900 ${Math.round(innerBadge * 0.65)}px serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('Q', cx, cy + 1);
 
       // Separator Line
       ctx.strokeStyle = '#e2e8f0';
@@ -3124,24 +3118,41 @@
       ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillText('OpenQGIS · 地图录', cx, qrW + 62);
 
-      const a = document.createElement('a');
-      a.download = `${item.title || 'atlas'}_qrcode.png`;
-      a.href = cvs.toDataURL('image/png');
-      a.click();
+      function triggerDownload() {
+        const a = document.createElement('a');
+        a.download = `${item.title || 'atlas'}_qrcode.png`;
+        a.href = cvs.toDataURL('image/png');
+        a.click();
 
-      const isEn = window.AtlasI18n && (typeof window.AtlasI18n.getLang === 'function' ? window.AtlasI18n.getLang() : window.AtlasI18n.getCurrentLang()) === 'en';
-      showCursorTip(e, isEn ? 'QR Code Saved ✓' : '二维码已保存 ✓');
+        const isEn = window.AtlasI18n && (typeof window.AtlasI18n.getLang === 'function' ? window.AtlasI18n.getLang() : window.AtlasI18n.getCurrentLang()) === 'en';
+        showCursorTip(e, isEn ? 'QR Code Saved ✓' : '二维码已保存 ✓');
 
-      const saveBtn = document.getElementById('btnShareQrDownload');
-      if (saveBtn) {
-        const origText = saveBtn.textContent;
-        saveBtn.textContent = isEn ? 'Saved ✓' : '已保存 ✓';
-        saveBtn.classList.add('copied');
-        setTimeout(() => {
-          saveBtn.textContent = origText;
-          saveBtn.classList.remove('copied');
-        }, 1500);
+        const saveBtn = document.getElementById('btnShareQrDownload');
+        if (saveBtn) {
+          const origText = saveBtn.textContent;
+          saveBtn.textContent = isEn ? 'Saved ✓' : '已保存 ✓';
+          saveBtn.classList.add('copied');
+          setTimeout(() => {
+            saveBtn.textContent = origText;
+            saveBtn.classList.remove('copied');
+          }, 1500);
+        }
       }
+
+      // Draw avatar image in center of downloaded QR
+      const avatarImg = new Image();
+      avatarImg.onload = function () {
+        ctx.save();
+        roundRect(ctx, cx - innerBadge / 2, cy - innerBadge / 2, innerBadge, innerBadge, 8);
+        ctx.clip();
+        ctx.drawImage(avatarImg, cx - innerBadge / 2, cy - innerBadge / 2, innerBadge, innerBadge);
+        ctx.restore();
+        triggerDownload();
+      };
+      avatarImg.onerror = function () {
+        triggerDownload();
+      };
+      avatarImg.src = 'assets/avatar.png';
     } catch (e) {
       console.error('Download QR failed:', e);
     }

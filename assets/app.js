@@ -2292,7 +2292,7 @@
         tileSources: tileSource,
         placeholderImage: item.thumb,
         immediateRender: true,
-        placeholderFillStyle: dominantColor,
+        placeholderFillStyle: 'transparent',
         crossOriginPolicy: false,
         ajaxWithCredentials: false,
         backgroundColor: 'transparent'

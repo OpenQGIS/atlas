@@ -1764,13 +1764,27 @@
      彻底消除操作系统/浏览器默认原生白底黑框 title，替换为全站统一毛玻璃气泡
      ------------------------------------------------------------- */
   function initDockTooltips() {
-    const dock = document.querySelector('.viewer-floating-toolbar');
-    const tooltipEl = document.getElementById('dockTooltip');
-    const tooltipText = document.getElementById('dockTooltipText');
-    const tooltipKbd = document.getElementById('dockTooltipKbd');
-    if (!dock || !tooltipEl || !tooltipText) return;
+    setupGroupTooltip(
+      document.querySelector('.viewer-floating-toolbar'),
+      document.getElementById('dockTooltip'),
+      document.getElementById('dockTooltipText'),
+      document.getElementById('dockTooltipKbd'),
+      '.tool-btn, .tool-zoom-pill, .tool-zoom-badge, #btnZoomChevron'
+    );
 
-    const interactiveItems = dock.querySelectorAll('.tool-btn, .tool-zoom-pill, .tool-zoom-badge, #btnZoomChevron');
+    setupGroupTooltip(
+      document.querySelector('.viewer-top-actions'),
+      document.getElementById('topTooltip'),
+      document.getElementById('topTooltipText'),
+      document.getElementById('topTooltipKbd'),
+      '.lang-dropdown-btn, .tool-btn'
+    );
+  }
+
+  function setupGroupTooltip(container, tooltipEl, tooltipText, tooltipKbd, selector) {
+    if (!container || !tooltipEl || !tooltipText) return;
+
+    const interactiveItems = container.querySelectorAll(selector);
     interactiveItems.forEach(el => {
       // 提取原生 title 或 data-i18n-title，并移除原生 title 属性以彻底屏蔽操作系统丑陋黑白提示框
       const rawTitle = el.getAttribute('title') || '';
@@ -1794,7 +1808,7 @@
         }
         if (!text) return;
 
-        // 智能提取括号内的快捷键提示 (如 "(I)", "(0)", "(R)", "(F)", "(S)")
+        // 智能提取括号内的快捷键提示 (如 "(I)", "(0)", "(R)", "(F)", "(S)", "(Esc)", "(T)")
         const match = text.match(/^(.*?)\s*\(([^)]+)\)$/);
         if (match) {
           tooltipText.textContent = match[1].trim();
@@ -1806,10 +1820,10 @@
           tooltipKbd.style.display = 'none';
         }
 
-        // 精确对齐到当前按钮正上方
-        const dockRect = dock.getBoundingClientRect();
+        // 精确对齐到当前按钮正上方或正下方中轴线
+        const containerRect = container.getBoundingClientRect();
         const elRect = el.getBoundingClientRect();
-        const centerOffset = (elRect.left + elRect.width / 2) - dockRect.left;
+        const centerOffset = (elRect.left + elRect.width / 2) - containerRect.left;
         tooltipEl.style.left = centerOffset.toFixed(1) + 'px';
         tooltipEl.classList.add('visible');
       }
@@ -1823,7 +1837,7 @@
       el.addEventListener('click', hideTip);
     });
 
-    dock.addEventListener('mouseleave', () => {
+    container.addEventListener('mouseleave', () => {
       tooltipEl.classList.remove('visible');
     });
   }

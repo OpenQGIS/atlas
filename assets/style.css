@@ -2532,9 +2532,9 @@ body:has(.about-modal.open) {
     transform: translateX(-50%);
     background: linear-gradient(
       145deg,
-      rgba(255, 255, 255, 0.20) 0%,
-      rgba(14, 18, 24, 0.26) 35%,
-      rgba(10, 14, 20, 0.36) 100%
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(14, 18, 24, 0.72) 28%,
+      rgba(10, 14, 20, 0.85) 100%
     );
     border-top-color: rgba(255, 255, 255, 0.85);
     box-shadow: 
@@ -2937,6 +2937,102 @@ body:has(.about-modal.open) {
 }
 
 :root[data-theme="light"] .dock-tooltip-kbd {
+  background: rgba(0, 0, 0, 0.06);
+  color: #55931c;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* -------------------------------------------------------------
+   右上角全局操作高质感毛玻璃微胶囊提示 (Top-Right Actions Tooltip)
+   ------------------------------------------------------------- */
+.top-tooltip {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  padding: 4px 10px;
+  background: rgba(14, 18, 25, 0.94);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
+  color: #f8fafc;
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.16s ease;
+  box-shadow: 
+    0 4px 14px rgba(0, 0, 0, 0.38),
+    0 1px 3px rgba(0, 0, 0, 0.2);
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+
+.top-tooltip.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 顶部朝上的三角形定位锚点（精准指向右上角触发按钮中轴线） */
+.top-tooltip::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: rgba(14, 18, 25, 0.94);
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  transform: translateX(-50%) rotate(45deg);
+  border-top-left-radius: 1px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+:root[data-theme="light"] .top-tooltip {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #0f141c;
+  box-shadow: 
+    0 4px 14px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+:root[data-theme="light"] .top-tooltip::after {
+  background: rgba(255, 255, 255, 0.96);
+  border-left-color: rgba(0, 0, 0, 0.12);
+  border-top-color: rgba(0, 0, 0, 0.12);
+}
+
+.top-tooltip-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #80cc28;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  min-width: 14px;
+}
+
+:root[data-theme="light"] .top-tooltip-kbd {
   background: rgba(0, 0, 0, 0.06);
   color: #55931c;
   border-color: rgba(0, 0, 0, 0.1);

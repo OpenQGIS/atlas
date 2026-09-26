@@ -779,7 +779,7 @@
       const key = el.getAttribute('data-i18n-title');
       const title = t(key);
       if (title) {
-        if (el.closest('.viewer-floating-toolbar') || el.closest('#dockTooltip') || el.hasAttribute('data-custom-tip')) {
+        if (el.closest('.viewer-floating-toolbar') || el.closest('.viewer-top-actions') || el.closest('#dockTooltip') || el.closest('#topTooltip') || el.hasAttribute('data-custom-tip')) {
           el.dataset.customTip = title;
           el.removeAttribute('title');
         } else {

@@ -7,9 +7,9 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20260926_v8">
+  <link rel="stylesheet" href="assets/style.css?v=20260926_v9">
   <script src="assets/config.js"></script>
-  <script src="assets/i18n.js?v=20260926_v21"></script>
+  <script src="assets/i18n.js?v=20260926_v22"></script>
   <script src="data/themes.js"></script>
   <script src="data/manifest.js"></script>
   <script src="assets/theme.js?v=20260925_v20"></script>
@@ -181,7 +181,7 @@
       <div class="viewer-top-actions" id="viewerTopActions">
         <div class="viewer-top-actions-aux" id="viewerTopActionsAux">
           <div class="lang-dropdown-wrapper viewer-lang-dropdown" id="viewerLangDropdownWrapper">
-            <button class="lang-dropdown-btn" id="viewerBtnLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" title="切换语言 / Switch Language" aria-label="切换语言">
+            <button class="lang-dropdown-btn" id="viewerBtnLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" data-custom-tip="切换语言" aria-label="切换语言">
               <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="2" y1="12" x2="22" y2="12"></line>
@@ -211,14 +211,20 @@
               </button>
             </div>
           </div>
-          <button class="tool-btn theme-toggle-btn" id="toolToggleTheme" title="切换主题模式" data-i18n-title="navThemeToggle" aria-label="切换主题模式">
+          <button class="tool-btn theme-toggle-btn" id="toolToggleTheme" data-custom-tip="切换主题模式 (T)" data-i18n-title="navThemeToggle" aria-label="切换主题模式">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
           <div class="tool-divider"></div>
         </div>
-        <button class="tool-btn close-btn" id="btnCloseViewer" title="退出阅览 (Esc)" aria-label="退出阅览" data-i18n-title="actionClose">
+        <button class="tool-btn close-btn" id="btnCloseViewer" aria-label="退出阅览" data-i18n-title="actionClose" data-custom-tip="退出阅览 (Esc)">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
+
+        <!-- High-End Glassmorphic Floating Tooltip · 右上角高质感毛玻璃微胶囊提示 -->
+        <div class="top-tooltip" id="topTooltip" aria-hidden="true">
+          <span class="top-tooltip-text" id="topTooltipText"></span>
+          <kbd class="top-tooltip-kbd" id="topTooltipKbd"></kbd>
+        </div>
       </div>
 
       <!-- Left / Right Edge Navigation Paddles -->

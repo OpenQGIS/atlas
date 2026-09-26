@@ -18,6 +18,10 @@
   - 二维码导引文案采用右对齐反向伸展，杜绝多国语言长短不一与二维码卡片重叠。
 
 ### 优化 (Optimized)
+- **圆角矩形弹框与悬停微胶囊三角形定位锚点 (Triangular Positioning Anchor Beaks for Popovers & Tooltips)**：
+  - 为分享弹框（`#sharePopover`）与悬停微胶囊提示框（`#dockTooltip`）配置朝下的精细三角形定位锚点（Anchor Beak），与缩放预设弹框（`#zoomPopover`）在全局形成统一的空间指向与锚定感（Visual Affordance）；
+  - 基于 CSS 伪元素 `::after` 采用 45° 旋转正方形工艺，精准集成毛玻璃高透背景与 1px 微光边框，在暗色模式与亮色模式下均与卡片本体完全无缝融合；
+  - 尖端配备 `1px~2px` 微圆角（`border-bottom-right-radius`），避免折角过于锐利生硬，并在移动端与桌面端实现像素级水平垂直中轴对齐，指引触发按钮图标正中心。
 - **根除底栏悬停双重提示框冲突 (Eliminate Toolbar Dual Tooltip Collision)**：
   - 彻底剥离底部悬浮工具栏所有功能按钮在 HTML 静态标签中硬编码的原生 `title` 属性，升级为 `aria-label` 配合 `data-custom-tip`；
   - 优化国际化多语言翻译引擎（`i18n.js`），针对工具栏及其子项定向更新 `data-custom-tip`，禁止动态写回原生 `title`，从根源切断操作系统/浏览器老式矩形原生黑白提示框的触发源；

@@ -2675,7 +2675,7 @@ body:has(.about-modal.open) {
   height: 21px !important;
   stroke-width: 2.15px !important;
   stroke: currentColor;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75)) !important;
+  filter: none !important; /* 纯粹极简实体流：全面消除 drop-shadow，确保矢量线条极清锐利 */
   transition: stroke-width 0.2s cubic-bezier(0.16, 1, 0.3, 1),
               stroke 0.2s ease,
               color 0.2s ease;
@@ -2728,7 +2728,7 @@ body:has(.about-modal.open) {
 
 :root[data-theme="light"] .viewer-floating-toolbar .tool-btn .icon,
 :root[data-theme="light"] .viewer-float-toolbar .tool-btn .icon {
-  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.85)) !important;
+  filter: none !important;
 }
 
 /* 触屏与移动设备：彻底消除 Sticky Hover 与持久 Focus 导致的图标常亮绿色 */
@@ -2758,7 +2758,7 @@ body:has(.about-modal.open) {
   .viewer-float-toolbar .nav-artwork-btn:focus .icon {
     stroke: currentColor !important;
     stroke-width: 2.15px !important;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75)) !important;
+    filter: none !important;
   }
 
   :root[data-theme="light"] .viewer-floating-toolbar .tool-btn:not(.active):hover,
@@ -2985,7 +2985,7 @@ body:has(.about-modal.open) {
   outline: none;
   margin: 0;
   -moz-appearance: textfield;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  text-shadow: none !important;
 }
 
 .zoom-inline-input::-webkit-outer-spin-button,
@@ -3001,7 +3001,7 @@ body:has(.about-modal.open) {
   color: var(--accent);
   margin-right: 2px;
   pointer-events: none;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  text-shadow: none !important;
 }
 
 .zoom-chevron-btn {

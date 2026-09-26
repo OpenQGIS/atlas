@@ -9,7 +9,7 @@
   <title>地图录 OpenQGIS制图作品集</title>
   <link rel="stylesheet" href="assets/style.css?v=20260926_v7">
   <script src="assets/config.js"></script>
-  <script src="assets/i18n.js?v=20260925_v20"></script>
+  <script src="assets/i18n.js?v=20260926_v21"></script>
   <script src="data/themes.js"></script>
   <script src="data/manifest.js"></script>
   <script src="assets/theme.js?v=20260925_v20"></script>
@@ -251,14 +251,14 @@
         </div>
 
         <div class="viewer-floating-toolbar">
-          <button class="tool-btn nav-artwork-btn prev-artwork-btn" id="btnPrevArtwork" title="上一卷 (←)" aria-label="上一卷" data-i18n-title="actionPrev">
+          <button class="tool-btn nav-artwork-btn prev-artwork-btn" id="btnPrevArtwork" aria-label="上一卷" data-i18n-title="actionPrev">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
           </button>
           <!-- 动态比例控制器 (底栏输入+显示二合一 · 展开窗口仅精简展示纯档位) -->
           <div class="zoom-dropdown-wrapper" id="zoomDropdownWrapper">
-            <div class="tool-zoom-pill" id="toolZoomPill" title="缩放比例与预设档位 (回车应用，点击展开档位)">
+            <div class="tool-zoom-pill" id="toolZoomPill" data-custom-tip="缩放比例与预设档位 (回车应用，点击展开档位)">
               <input type="number" class="zoom-inline-input" id="zoomInlineInput" min="1" max="2500" step="1" value="100" aria-label="缩放百分比" />
               <span class="zoom-unit">%</span>
               <button type="button" class="zoom-chevron-btn" id="btnZoomChevron" aria-label="展开预设比例档位" aria-haspopup="true" aria-expanded="false">
@@ -271,7 +271,7 @@
               </div>
             </div>
           </div>
-          <button class="tool-btn" id="toolReset" title="整图展卷全貌 (0)" data-i18n-title="toolFitScreen">
+          <button class="tool-btn" id="toolReset" aria-label="整图展卷全貌" data-i18n-title="toolFitScreen">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 8V6a2 2 0 0 1 2-2h2"/>
               <path d="M16 4h2a2 2 0 0 1 2 2v2"/>
@@ -280,17 +280,17 @@
               <rect x="7" y="7" width="10" height="10" rx="1.5"/>
             </svg>
           </button>
-          <button class="tool-btn" id="toolRotate" title="顺时针旋转 (R)">
+          <button class="tool-btn" id="toolRotate" aria-label="顺时针旋转" data-i18n-title="actionRotate" data-custom-tip="顺时针旋转 (R)">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
               <polyline points="21 3 21 8 16 8"></polyline>
             </svg>
           </button>
-          <button class="tool-btn" id="toolFullscreen" title="视口全屏 (F)">
+          <button class="tool-btn" id="toolFullscreen" aria-label="视口全屏" data-i18n-title="actionFullscreen" data-custom-tip="视口全屏 (F)">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
           </button>
           <div class="tool-divider"></div>
-          <button class="tool-btn info-btn" id="btnToggleInfo" title="作品档案 (I)" data-i18n-title="actionToggleInfo">
+          <button class="tool-btn info-btn" id="btnToggleInfo" aria-label="作品档案" data-i18n-title="actionToggleInfo">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="16" x2="12" y2="12"></line>
@@ -298,7 +298,7 @@
             </svg>
           </button>
           <div class="share-dropdown-wrapper" id="shareDropdownWrapper">
-            <button class="tool-btn" id="btnShareArtwork" title="分享画卷 (S)" aria-label="分享画卷" data-i18n-title="actionShare" aria-haspopup="true" aria-expanded="false">
+            <button class="tool-btn" id="btnShareArtwork" aria-label="分享画卷" data-i18n-title="actionShare" aria-haspopup="true" aria-expanded="false">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
             </button>
             <div class="share-popover" id="sharePopover" role="menu" aria-hidden="true">
@@ -316,7 +316,7 @@
               <button class="share-popover-item" id="btnShareOptQr" role="menuitem">
                 <span class="share-item-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="butt" stroke-linejoin="round">
-                    <path d="M3 3L8 3L8 8L3 8L3 3ZM16 3L21 3L21 8L16 8L16 3ZM16 16L21 16L21 21L16 21L16 16ZM12 6L12 12L18 12M12 22L12 16L6 16M9 12L2 12M3 15L3 22" fill="none"/>
+                    <path d="M3 3L8 3L8 8L3 3ZM16 3L21 3L21 8L16 8L16 3ZM16 16L21 16L21 21L16 21L16 16ZM12 6L12 12L18 12M12 22L12 16L6 16M9 12L2 12M3 15L3 22" fill="none"/>
                     <path d="M20 11L22 11L22 13L20 13L20 11ZM6 20L8 20L8 22L6 22L6 20ZM11 2L13 2L13 4L11 4L11 2Z" fill="currentColor" stroke="none"/>
                   </svg>
                 </span>
@@ -339,7 +339,7 @@
               </button>
             </div>
           </div>
-          <button class="tool-btn nav-artwork-btn next-artwork-btn" id="btnNextArtwork" title="下一卷 (→)" aria-label="下一卷" data-i18n-title="actionNext">
+          <button class="tool-btn nav-artwork-btn next-artwork-btn" id="btnNextArtwork" aria-label="下一卷" data-i18n-title="actionNext">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
@@ -686,6 +686,6 @@
         </div>
       </div>
     </div>
-  <script src="assets/app.js?v=20260926_v1"></script>
+  <script src="assets/app.js?v=20260926_v2"></script>
 </body>
 </html>

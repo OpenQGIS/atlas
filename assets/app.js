@@ -1450,7 +1450,8 @@
       modalEl.classList.toggle('fullscreen-mode', isFs);
       if (toolFullscreen) {
         toolFullscreen.innerHTML = isFs ? SVG_EXIT_FULLSCREEN : SVG_FULLSCREEN;
-        toolFullscreen.title = isFs ? '退出全屏 (F / Esc)' : '全屏阅览 (F)';
+        toolFullscreen.dataset.customTip = isFs ? '退出全屏 (F / Esc)' : '全屏阅览 (F)';
+        toolFullscreen.removeAttribute('title');
       }
       if (isFs && drawerEl) {
         setDrawerOpen(false);
@@ -1779,6 +1780,12 @@
       }
 
       function showTip() {
+        // 彻底清除并拦截任何可能的原生 title 属性，杜绝系统老式黄色/深灰色矩形框双重弹出
+        if (el.hasAttribute('title')) {
+          const tVal = el.getAttribute('title');
+          if (tVal && !el.dataset.customTip) el.dataset.customTip = tVal;
+          el.removeAttribute('title');
+        }
         let text = '';
         if (el.dataset.i18nTitle && window.AtlasI18n && typeof AtlasI18n.t === 'function') {
           text = AtlasI18n.t(el.dataset.i18nTitle) || el.dataset.customTip || '';

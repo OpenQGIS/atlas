@@ -774,11 +774,18 @@
       if (html) el.innerHTML = html;
     });
 
-    // 4. data-i18n-title for attributes
+    // 4. data-i18n-title for attributes (免除底栏按钮原生 title 避免与高质感自定义气泡双重触发)
     document.querySelectorAll('[data-i18n-title]').forEach(el => {
       const key = el.getAttribute('data-i18n-title');
       const title = t(key);
-      if (title) el.title = title;
+      if (title) {
+        if (el.closest('.viewer-floating-toolbar') || el.closest('#dockTooltip') || el.hasAttribute('data-custom-tip')) {
+          el.dataset.customTip = title;
+          el.removeAttribute('title');
+        } else {
+          el.title = title;
+        }
+      }
     });
 
     // 5. Update Lang toggle / dropdown indicators

@@ -2491,7 +2491,7 @@ body:has(.about-modal.open) {
     0px 10px 10px -3.75px rgba(0, 0, 0, 0.14),
     0px 18px 36px -5px rgba(0, 0, 0, 0.40);
   z-index: 20;
-  overflow: hidden;
+  overflow: visible;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
               background 0.3s ease,
               border-color 0.3s ease,
@@ -2515,10 +2515,12 @@ body:has(.about-modal.open) {
   z-index: 0;
 }
 
-/* 当缩放比例弹出层打开时，将浮动底栏的层叠上下文提权至 35（高于鹰眼图的 24），确保菜单层级压制并在最顶层展开 */
+/* 当缩放比例或分享弹出层打开时，将浮动底栏的层叠上下文提权至 35（高于鹰眼图的 24），确保菜单层级压制并在最顶层展开 */
 .viewer-float-toolbar:has(#zoomPopover.open),
+.viewer-float-toolbar:has(#sharePopover.open),
 .viewer-float-toolbar.popover-open,
 .viewer-floating-toolbar:has(#zoomPopover.open),
+.viewer-floating-toolbar:has(#sharePopover.open),
 .viewer-floating-toolbar.popover-open {
   z-index: 35 !important;
 }

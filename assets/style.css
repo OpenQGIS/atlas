@@ -2466,15 +2466,15 @@ body:has(.about-modal.open) {
   transform: translateX(-50%);
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.12) 0%,
-    rgba(14, 18, 24, 0.65) 28%,
-    rgba(10, 14, 20, 0.78) 100%
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(15, 20, 28, 0.68) 28%,
+    rgba(8, 11, 16, 0.82) 100%
   );
-  backdrop-filter: blur(18px) saturate(180%) contrast(1.12);
-  -webkit-backdrop-filter: blur(18px) saturate(180%) contrast(1.12);
-  border: 1px solid rgba(255, 255, 255, 0.20);
-  border-top: 1.5px solid rgba(255, 255, 255, 0.65);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px) saturate(210%) contrast(1.10) brightness(1.02);
+  -webkit-backdrop-filter: blur(14px) saturate(210%) contrast(1.10) brightness(1.02);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.72);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.40);
   padding: 6px 8px;
   border-radius: 9999px;
   display: flex;
@@ -2483,8 +2483,8 @@ body:has(.about-modal.open) {
   box-shadow: 
     0 0 0 1px rgba(56, 189, 248, 0.22),
     0 0 0 2px rgba(244, 63, 94, 0.10),
-    inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.70),
-    inset 0 0 14px 0 rgba(255, 255, 255, 0.08),
+    inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.75),
+    inset 0 0 16px 0 rgba(255, 255, 255, 0.10),
     inset 0 -1.5px 3px 0 rgba(0, 0, 0, 0.45),
     0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.20),
     0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.18),
@@ -2532,21 +2532,21 @@ body:has(.about-modal.open) {
     transform: translateX(-50%);
     background: linear-gradient(
       145deg,
-      rgba(255, 255, 255, 0.16) 0%,
-      rgba(14, 18, 24, 0.72) 28%,
-      rgba(10, 14, 20, 0.85) 100%
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(15, 20, 28, 0.74) 28%,
+      rgba(8, 11, 16, 0.88) 100%
     );
-    border-top-color: rgba(255, 255, 255, 0.85);
+    border-top-color: rgba(255, 255, 255, 0.92);
     box-shadow: 
-      0 0 0 1px rgba(56, 189, 248, 0.35),
-      0 0 0 2.5px rgba(244, 63, 94, 0.16),
-      inset 0 2px 3px 0 rgba(255, 255, 255, 0.85),
+      0 0 0 1px rgba(56, 189, 248, 0.32),
+      0 0 0 2.5px rgba(244, 63, 94, 0.14),
+      inset 0 2px 3px 0 rgba(255, 255, 255, 0.90),
       inset 0 0 22px 0 rgba(255, 255, 255, 0.16),
       inset 0 -1px 2px 0 rgba(0, 0, 0, 0.35),
       0px 0.8px 1px -1px rgba(0, 0, 0, 0.20),
       0px 4px 6px -2px rgba(0, 0, 0, 0.18),
       0px 18px 24px -4px rgba(0, 0, 0, 0.14),
-      0px 28px 52px -6px rgba(0, 0, 0, 0.38);
+      0px 28px 52px -6px rgba(0, 0, 0, 0.42);
   }
 }
 
@@ -4631,8 +4631,8 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
     border-top: 1.5px solid rgba(255, 255, 255, 0.45) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
-    backdrop-filter: blur(10px) saturate(160%) brightness(1.05) !important;
-    -webkit-backdrop-filter: blur(10px) saturate(160%) brightness(1.05) !important;
+    backdrop-filter: blur(12px) saturate(210%) brightness(1.04) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(210%) brightness(1.04) !important;
   }
 
   /* 移动触屏按下反馈：水滴表面张力微挤压弹性恢复，绝不粘滞常亮 */

@@ -3029,14 +3029,23 @@ body:has(.about-modal.open) {
 }
 
 :root[data-theme="light"] .tool-zoom-pill {
-  background: rgba(var(--accent-rgb), 0.12);
-  border-color: rgba(var(--accent-rgb), 0.35);
+  background: rgba(var(--accent-rgb), 0.10);
+  border-color: rgba(var(--accent-rgb), 0.32);
+  box-shadow: none !important;
+}
+
+:root[data-theme="light"] .tool-zoom-pill:hover,
+:root[data-theme="light"] .tool-zoom-pill:focus-within {
+  background: rgba(var(--accent-rgb), 0.18);
+  border-color: rgba(var(--accent-rgb), 0.50);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.20) !important;
 }
 
 :root[data-theme="light"] .zoom-inline-input,
 :root[data-theme="light"] .zoom-unit,
 :root[data-theme="light"] .zoom-chevron-btn {
-  color: #436d14;
+  color: #244904 !important;
+  text-shadow: none !important; /* 彻底清除黑色文字阴影，还原极清锐利字形 */
 }
 
 .zoom-popover {

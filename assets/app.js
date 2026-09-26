@@ -4404,6 +4404,17 @@
       e.preventDefault();
     }, { capture: true });
 
+    // 3. 全景阅览模式下防止画板与UI意外触发文本选区或长按气泡 (保留输入框与分享直链正常交互)
+    document.addEventListener('selectstart', (e) => {
+      if (e.target && e.target.closest('#metaShareUrl, .meta-share-url, #zoomInlineInput, input, textarea')) {
+        return;
+      }
+      const modalEl = document.getElementById('viewerModal');
+      if (modalEl && modalEl.classList.contains('open')) {
+        e.preventDefault();
+      }
+    }, { capture: true });
+
     // 3. 拦截常见扒图/保存快捷键 (Ctrl+S, Ctrl+P, Ctrl+U)
     window.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P' || e.key === 'u' || e.key === 'U')) {

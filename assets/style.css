@@ -4083,12 +4083,37 @@ body:has(.about-modal.open) {
   50% { opacity: 0.75; transform: translateX(-50%) scale(0.98); }
 }
 
-/* Universal Anti-Theft Protection: Prevent image drag and touch-callout */
-img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
+/* Universal Anti-Theft & Gesture Protection: Prevent image drag, touch-callout and unwanted text selection */
+img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
+.viewer-modal, .viewer-container, .viewer-top-actions, .viewer-header,
+.viewer-artwork-badge, .viewer-floating-toolbar, .viewer-edge-nav,
+.lang-dropdown-wrapper, .lang-dropdown-btn, .lang-current-label,
+.tool-btn, .navigator-body, .viewer-navigator {
   -webkit-touch-callout: none !important;
   -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
   user-select: none !important;
   -webkit-user-drag: none !important;
+}
+
+/* 核心画板手势全权托管：彻底消除移动端浏览器双击选词与系统手势干涉 */
+.osd-stage,
+.osd-stage canvas,
+.openseadragon-container,
+.openseadragon-canvas {
+  touch-action: none !important;
+}
+
+/* 显式保留合法可复制/输入区域 */
+.meta-share-url {
+  -webkit-user-select: all !important;
+  user-select: all !important;
+  -webkit-touch-callout: default !important;
+}
+.zoom-inline-input {
+  -webkit-user-select: auto !important;
+  user-select: auto !important;
 }
 
 /* Anti-Print Protection */

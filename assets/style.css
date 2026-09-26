@@ -2466,15 +2466,15 @@ body:has(.about-modal.open) {
   transform: translateX(-50%);
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.14) 0%,
-    rgba(14, 18, 24, 0.32) 35%,
-    rgba(10, 14, 20, 0.42) 100%
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(14, 18, 24, 0.65) 28%,
+    rgba(10, 14, 20, 0.78) 100%
   );
-  backdrop-filter: blur(12px) saturate(210%) brightness(1.1);
-  -webkit-backdrop-filter: blur(12px) saturate(210%) brightness(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(18px) saturate(180%) contrast(1.12);
+  -webkit-backdrop-filter: blur(18px) saturate(180%) contrast(1.12);
+  border: 1px solid rgba(255, 255, 255, 0.20);
   border-top: 1.5px solid rgba(255, 255, 255, 0.65);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 6px 8px;
   border-radius: 9999px;
   display: flex;
@@ -2484,12 +2484,12 @@ body:has(.about-modal.open) {
     0 0 0 1px rgba(56, 189, 248, 0.22),
     0 0 0 2px rgba(244, 63, 94, 0.10),
     inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.70),
-    inset 0 0 14px 0 rgba(255, 255, 255, 0.10),
-    inset 0 -1.5px 3px 0 rgba(0, 0, 0, 0.35),
-    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.16),
-    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.14),
-    0px 10px 10px -3.75px rgba(0, 0, 0, 0.10),
-    0px 16px 32px -5px rgba(0, 0, 0, 0.32);
+    inset 0 0 14px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1.5px 3px 0 rgba(0, 0, 0, 0.45),
+    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.20),
+    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.18),
+    0px 10px 10px -3.75px rgba(0, 0, 0, 0.14),
+    0px 18px 36px -5px rgba(0, 0, 0, 0.40);
   z-index: 20;
   overflow: hidden;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
@@ -2499,14 +2499,17 @@ body:has(.about-modal.open) {
   will-change: transform;
 }
 
-/* 环境色彩吸收反射膜 (Color-Dodge/Overlay: 实时吸收底层地图真实色彩) */
+/* 顶部微弧面环境色彩吸收反射膜 (限制在顶部弧形，避免全局过曝发白) */
 .viewer-float-toolbar::before,
 .viewer-floating-toolbar::before {
   content: '';
   position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.45) 0%, transparent 70%);
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  border-radius: 9999px 9999px 0 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.30) 0%, transparent 100%);
   mix-blend-mode: overlay;
   pointer-events: none;
   z-index: 0;
@@ -2661,15 +2664,16 @@ body:has(.about-modal.open) {
   border-color: transparent !important;
   box-shadow: none !important;
   transform-style: preserve-3d;
+  color: #f8fafc !important;
 }
 
 .viewer-floating-toolbar .tool-btn .icon,
 .viewer-float-toolbar .tool-btn .icon {
   width: 21px !important;
   height: 21px !important;
-  stroke-width: 1.9px;
+  stroke-width: 2.15px !important;
   stroke: currentColor;
-  filter: none !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75)) !important;
   transition: stroke-width 0.2s cubic-bezier(0.16, 1, 0.3, 1),
               stroke 0.2s ease,
               color 0.2s ease;
@@ -2715,6 +2719,16 @@ body:has(.about-modal.open) {
   }
 }
 
+:root[data-theme="light"] .viewer-floating-toolbar .tool-btn,
+:root[data-theme="light"] .viewer-float-toolbar .tool-btn {
+  color: #1e293b !important;
+}
+
+:root[data-theme="light"] .viewer-floating-toolbar .tool-btn .icon,
+:root[data-theme="light"] .viewer-float-toolbar .tool-btn .icon {
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.85)) !important;
+}
+
 /* 触屏与移动设备：彻底消除 Sticky Hover 与持久 Focus 导致的图标常亮绿色 */
 @media (hover: none), (max-width: 768px), (orientation: landscape) and (max-height: 500px) {
   .viewer-floating-toolbar .tool-btn:not(.active):hover,
@@ -2725,7 +2739,7 @@ body:has(.about-modal.open) {
   .viewer-float-toolbar .nav-artwork-btn:hover,
   .viewer-floating-toolbar .nav-artwork-btn:focus,
   .viewer-float-toolbar .nav-artwork-btn:focus {
-    color: var(--text-secondary) !important;
+    color: #f8fafc !important;
     background: transparent !important;
     border-color: transparent !important;
     box-shadow: none !important;
@@ -2741,19 +2755,19 @@ body:has(.about-modal.open) {
   .viewer-floating-toolbar .nav-artwork-btn:focus .icon,
   .viewer-float-toolbar .nav-artwork-btn:focus .icon {
     stroke: currentColor !important;
-    stroke-width: 1.9px !important;
-    filter: none !important;
+    stroke-width: 2.15px !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75)) !important;
   }
 
   :root[data-theme="light"] .viewer-floating-toolbar .tool-btn:not(.active):hover,
   :root[data-theme="light"] .viewer-float-toolbar .tool-btn:not(.active):hover,
   :root[data-theme="light"] .viewer-floating-toolbar .tool-btn:not(.active):focus,
   :root[data-theme="light"] .viewer-float-toolbar .tool-btn:not(.active):focus,
-  :root[data-theme="light"] .viewer-floating-toolbar .nav-artwork-btn:hover,
-  :root[data-theme="light"] .viewer-float-toolbar .nav-artwork-btn:hover,
-  :root[data-theme="light"] .viewer-floating-toolbar .nav-artwork-btn:focus,
-  :root[data-theme="light"] .viewer-float-toolbar .nav-artwork-btn:focus {
-    color: #333d4b !important;
+  .viewer-floating-toolbar .nav-artwork-btn:hover,
+  .viewer-float-toolbar .nav-artwork-btn:hover,
+  .viewer-floating-toolbar .nav-artwork-btn:focus,
+  .viewer-float-toolbar .nav-artwork-btn:focus {
+    color: #1e293b !important;
   }
 
   :root[data-theme="light"] .viewer-floating-toolbar .tool-btn:not(.active):hover .icon,
@@ -2937,21 +2951,22 @@ body:has(.about-modal.open) {
   height: 38px;
   display: inline-flex;
   align-items: center;
-  background: var(--accent-subtle);
-  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  background: rgba(10, 14, 20, 0.55);
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
   border-radius: 9999px;
   padding: 0 4px 0 10px;
   gap: 2px;
   cursor: pointer;
   transition: all var(--transition-fast);
   user-select: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .tool-zoom-pill:hover,
 .tool-zoom-pill:focus-within {
-  background: rgba(var(--accent-rgb), 0.2);
-  border-color: rgba(var(--accent-rgb), 0.6);
-  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.35);
+  background: rgba(10, 14, 20, 0.75);
+  border-color: rgba(var(--accent-rgb), 0.65);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .zoom-inline-input {
@@ -2968,6 +2983,7 @@ body:has(.about-modal.open) {
   outline: none;
   margin: 0;
   -moz-appearance: textfield;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
 }
 
 .zoom-inline-input::-webkit-outer-spin-button,
@@ -2983,6 +2999,7 @@ body:has(.about-modal.open) {
   color: var(--accent);
   margin-right: 2px;
   pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
 }
 
 .zoom-chevron-btn {

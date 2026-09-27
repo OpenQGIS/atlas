@@ -1937,12 +1937,14 @@ body[data-page="portal"] {
 .card-meta-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.85);
   white-space: nowrap;
-  overflow: hidden;
-  opacity: 0.85;
+  position: relative;
+  min-height: 24px;
+  opacity: 0.88;
   transform: none;
   transition: opacity 0.25s ease;
 }
@@ -1962,7 +1964,79 @@ body[data-page="portal"] {
   align-items: center;
   overflow: hidden;
   white-space: nowrap;
-  flex-shrink: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  transition: -webkit-mask-image 0.28s ease, mask-image 0.28s ease;
+}
+
+/* 悬停时右侧滑出查看详图胶囊，长标签末尾柔和消隐，防止重叠碰撞 */
+.gallery-card:hover .card-tags {
+  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 105px), transparent calc(100% - 12px));
+  mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 105px), transparent calc(100% - 12px));
+}
+
+/* 悬停微动效：底栏右侧柔和滑出【点击查看详图】高质感微胶囊 */
+.card-action-hint {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%) translateX(8px);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2.5px 8px 2.5px 9px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  background: rgba(14, 18, 25, 0.90);
+  border: 1px solid rgba(var(--accent-rgb), 0.42);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45), 0 0 10px rgba(var(--accent-rgb), 0.16);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  white-space: nowrap;
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 3;
+}
+
+.gallery-card:hover .card-action-hint,
+.gallery-card:focus-visible .card-action-hint {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
+.card-action-hint-text {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: inherit;
+}
+
+.card-action-hint-icon {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  transition: transform 0.25s ease;
+}
+
+.gallery-card:hover .card-action-hint-icon {
+  transform: translateX(1.5px);
+}
+
+:root[data-theme="light"] .card-action-hint {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(67, 118, 22, 0.42);
+  color: #3b6b13;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 0 10px rgba(80, 140, 20, 0.15);
 }
 
 .tag-pill {

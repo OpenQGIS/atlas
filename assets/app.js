@@ -952,14 +952,24 @@
         '<span>NEW</span>' +
       '</span>' : '';
 
+    const clickHintText = window.AtlasI18n ? (window.AtlasI18n.t('cardClickHint') || '点击查看详图') : '点击查看详图';
+    const hintHtml = 
+      '<div class="card-action-hint" aria-hidden="true">' +
+        '<span class="card-action-hint-text" data-i18n="cardClickHint">' + escapeHtml(clickHintText) + '</span>' +
+        '<svg class="card-action-hint-icon" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>' +
+      '</div>';
+
     card.innerHTML = 
       '<div class="card-media">' +
         newBadgeHtml +
         '<img class="card-img" src="' + item.thumb + '" alt="' + escapeHtml(locItem.title) + '" loading="lazy" />' +
         '<div class="card-scrim-mask">' +
           '<div class="card-scrim-content">' +
-            '<h3 class="card-title" title="' + escapeHtml(locItem.title) + '">' + escapeHtml(locItem.title) + '</h3>' +
-            (tagsHtml ? ('<div class="card-meta-row"><div class="card-tags">' + tagsHtml + '</div></div>') : '') +
+            '<h3 class="card-title">' + escapeHtml(locItem.title) + '</h3>' +
+            '<div class="card-meta-row">' +
+              '<div class="card-tags">' + tagsHtml + '</div>' +
+              hintHtml +
+            '</div>' +
           '</div>' +
         '</div>' +
       '</div>';

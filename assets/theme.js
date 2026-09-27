@@ -99,11 +99,13 @@
     buttons.forEach(btn => {
       if (currentTheme === 'dark') {
         btn.innerHTML = SVG_SUN;
-        btn.title = '切换至浅色模式 (Light Mode)';
+        btn.dataset.customTip = '切换至浅色模式 (Light Mode)';
+        btn.removeAttribute('title');
         btn.setAttribute('aria-label', '切换至浅色模式');
       } else {
         btn.innerHTML = SVG_MOON;
-        btn.title = '切换至深色模式 (Dark Mode)';
+        btn.dataset.customTip = '切换至深色模式 (Dark Mode)';
+        btn.removeAttribute('title');
         btn.setAttribute('aria-label', '切换至深色模式');
       }
     });

@@ -4,6 +4,15 @@
 
 ---
 
+## [1.2.6] - 2026-09-27
+
+### 优化 (Optimized)
+- **视口翻卷导航与 QMapFlow 精度徽标全域毛玻璃提示覆盖 (Edge Navigation & QMapFlow Frosted Tooltips)**：
+  - 彻底剥离视口左/右悬浮翻卷按钮（`#btnEdgePrev`、`#btnEdgeNext`）与左上角 QMapFlow 工作流精度徽标（`#viewerQmapFlow`）的原生 `title` 属性，彻底消除浏览器老式矩形原生黑白提示框；
+  - 为左右翻卷按钮新增专用定位微胶囊提示（`#edgePrevTooltip` 与 `#edgeNextTooltip`），分别配置朝左与朝右的精细三角形定位锚点（Anchor Beak），动态贴合按钮侧翼并自适应抽屉避让与快捷键徽标（`[←]` / `[→]`）；
+  - 为 QMapFlow 徽标新增朝上的微胶囊高质感毛玻璃提示（`#qmapflowTooltip`），实时随多语言与制图内容精度占比百分比动态刷新；
+  - 增强 `i18n.js` 与 `theme.js` 的全域防御性过滤白名单，并在看图器初始化生命周期执行深层清理，将视口内残余原生 `title` 计数彻底归零（0 Native Titles）。
+
 ## [1.2.5] - 2026-09-26
 
 ### 优化 (Optimized)

@@ -1779,6 +1779,115 @@
       document.getElementById('topTooltipKbd'),
       '.lang-dropdown-btn, .tool-btn'
     );
+
+    // 左右侧边翻卷悬浮按钮气泡提示
+    initEdgeNavTooltips();
+
+    // 左上角 QMapFlow 精度徽标气泡提示
+    initQmapFlowTooltip();
+
+    // 防御性彻底清除看图器内所有原生 title 属性，绝不触发操作系统老式黑白/黄色方框提示
+    document.querySelectorAll('.viewer-container [title], .viewer-modal [title]').forEach(el => {
+      if (!el.dataset.customTip) {
+        el.dataset.customTip = el.getAttribute('title');
+      }
+      el.removeAttribute('title');
+    });
+  }
+
+  /* -------------------------------------------------------------
+     Edge Navigation Tooltips (两侧悬浮翻卷按钮微胶囊提示)
+     ------------------------------------------------------------- */
+  function initEdgeNavTooltips() {
+    const prevBtn = document.getElementById('btnEdgePrev');
+    const nextBtn = document.getElementById('btnEdgeNext');
+    const prevTip = document.getElementById('edgePrevTooltip');
+    const nextTip = document.getElementById('edgeNextTooltip');
+    const prevText = document.getElementById('edgePrevTooltipText');
+    const nextText = document.getElementById('edgeNextTooltipText');
+    const prevKbd = document.getElementById('edgePrevTooltipKbd');
+    const nextKbd = document.getElementById('edgeNextTooltipKbd');
+
+    function bindEdgeTip(btn, tip, textEl, kbdEl, fallbackTip, defaultKbd) {
+      if (!btn || !tip) return;
+      btn.removeAttribute('title');
+
+      function showTip() {
+        btn.removeAttribute('title');
+        let raw = '';
+        if (btn.dataset.i18nTitle && window.AtlasI18n && typeof AtlasI18n.t === 'function') {
+          raw = AtlasI18n.t(btn.dataset.i18nTitle) || btn.dataset.customTip || fallbackTip;
+        } else {
+          raw = btn.dataset.customTip || fallbackTip;
+        }
+        const m = raw.match(/^(.*?)\s*\(([^)]+)\)$/);
+        if (m) {
+          if (textEl) textEl.textContent = m[1].trim();
+          if (kbdEl) { kbdEl.textContent = m[2].trim(); kbdEl.style.display = 'inline-flex'; }
+        } else {
+          if (textEl) textEl.textContent = raw.trim();
+          if (kbdEl) { kbdEl.textContent = defaultKbd; kbdEl.style.display = defaultKbd ? 'inline-flex' : 'none'; }
+        }
+
+        const rect = btn.getBoundingClientRect();
+        if (btn.classList.contains('edge-prev')) {
+          tip.style.left = (rect.right + 12) + 'px';
+          tip.style.right = 'auto';
+          tip.style.top = (rect.top + rect.height / 2) + 'px';
+        } else {
+          tip.style.right = (window.innerWidth - rect.left + 12) + 'px';
+          tip.style.left = 'auto';
+          tip.style.top = (rect.top + rect.height / 2) + 'px';
+        }
+        tip.classList.add('visible');
+      }
+
+      function hideTip() {
+        tip.classList.remove('visible');
+      }
+
+      btn.addEventListener('mouseenter', showTip);
+      btn.addEventListener('mouseleave', hideTip);
+      btn.addEventListener('click', hideTip);
+    }
+
+    bindEdgeTip(prevBtn, prevTip, prevText, prevKbd, '上一卷 (←)', '←');
+    bindEdgeTip(nextBtn, nextTip, nextText, nextKbd, '下一卷 (→)', '→');
+  }
+
+  /* -------------------------------------------------------------
+     QMapFlow Tooltip (左上角制图工作流精度微胶囊提示)
+     ------------------------------------------------------------- */
+  function initQmapFlowTooltip() {
+    const qmfBtn = document.getElementById('viewerQmapFlow');
+    const qmfTip = document.getElementById('qmapflowTooltip');
+    const qmfText = document.getElementById('qmapflowTooltipText');
+    if (!qmfBtn || !qmfTip) return;
+
+    qmfBtn.removeAttribute('title');
+
+    function showTip() {
+      qmfBtn.removeAttribute('title');
+      const text = qmfBtn.dataset.customTip || (qmfText ? qmfText.textContent : 'QMapFlow: QGIS 独立制图内容占比 100%');
+      if (qmfText) qmfText.textContent = text;
+
+      const badge = document.getElementById('viewerArtworkBadge');
+      if (badge) {
+        const badgeRect = badge.getBoundingClientRect();
+        const qmfRect = qmfBtn.getBoundingClientRect();
+        const leftOffset = qmfRect.left - badgeRect.left;
+        qmfTip.style.left = Math.max(0, leftOffset) + 'px';
+      }
+      qmfTip.classList.add('visible');
+    }
+
+    function hideTip() {
+      qmfTip.classList.remove('visible');
+    }
+
+    qmfBtn.addEventListener('mouseenter', showTip);
+    qmfBtn.addEventListener('mouseleave', hideTip);
+    qmfBtn.addEventListener('click', hideTip);
   }
 
   function setupGroupTooltip(container, tooltipEl, tooltipText, tooltipKbd, selector) {
@@ -2226,7 +2335,10 @@
           : (window.AtlasI18n && window.AtlasI18n.getLang() === 'ko'
             ? `QMapFlow: QGIS 단독 지도 제작 비중 ${precision}%`
             : `QMapFlow: QGIS 独立制图内容占比 ${precision}%`));
-      qmfEl.title = qmfTitle;
+      qmfEl.dataset.customTip = qmfTitle;
+      qmfEl.removeAttribute('title');
+      const qmfTipText = document.getElementById('qmapflowTooltipText');
+      if (qmfTipText) qmfTipText.textContent = qmfTitle;
       if (!qmfEl.dataset.qmfBound) {
         qmfEl.dataset.qmfBound = 'true';
         qmfEl.addEventListener('click', (e) => {
@@ -2311,7 +2423,8 @@
         colors.forEach(function (hex) {
           const btn = document.createElement('button');
           btn.className = 'meta-swatch';
-          btn.title = t('metaPaletteHint') + hex;
+          btn.dataset.customTip = t('metaPaletteHint') + hex;
+          btn.setAttribute('aria-label', t('metaPaletteHint') + hex);
           btn.innerHTML = '<span class="meta-swatch-dot" style="background-color: ' + hex + ';"></span>' +
                           '<span class="meta-swatch-hex">' + hex + '</span>';
           btn.addEventListener('click', function () {
@@ -2333,7 +2446,8 @@
     const shareUrl = getShareUrlForItem(item);
     if (mShareUrl) {
       mShareUrl.textContent = shareUrl;
-      mShareUrl.title = shareUrl;
+      mShareUrl.dataset.customTip = shareUrl;
+      mShareUrl.removeAttribute('title');
     }
 
     updateBrowserUrl(item, isNewOpen);

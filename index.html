@@ -7,12 +7,12 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20260926_v10">
+  <link rel="stylesheet" href="assets/style.css?v=20260927_v1">
   <script src="assets/config.js"></script>
-  <script src="assets/i18n.js?v=20260926_v22"></script>
+  <script src="assets/i18n.js?v=20260927_v1"></script>
   <script src="data/themes.js"></script>
   <script src="data/manifest.js"></script>
-  <script src="assets/theme.js?v=20260925_v20"></script>
+  <script src="assets/theme.js?v=20260927_v1"></script>
   <script src="vendor/openseadragon.min.js"></script>
   <script src="assets/qrcode.min.js"></script>
   <script src="assets/tile-compositor.js?v=20260925_v10"></script>
@@ -173,7 +173,11 @@
       <div class="viewer-artwork-badge" id="viewerArtworkBadge">
         <div class="viewer-artwork-meta">
           <span class="viewer-artwork-title" id="viewerTitle">作品名称</span>
-          <div class="viewer-artwork-qmapflow" id="viewerQmapFlow" title="QGIS 制图工作流精度"></div>
+          <div class="viewer-artwork-qmapflow" id="viewerQmapFlow" data-custom-tip="QGIS 独立制图工作流精度"></div>
+        </div>
+        <!-- QMapFlow 高质感毛玻璃微胶囊提示 -->
+        <div class="qmapflow-tooltip" id="qmapflowTooltip" role="tooltip" aria-hidden="true">
+          <span class="qmapflow-tooltip-text" id="qmapflowTooltipText">QMapFlow: QGIS 独立制图内容占比 100%</span>
         </div>
       </div>
 
@@ -227,13 +231,22 @@
         </div>
       </div>
 
-      <!-- Left / Right Edge Navigation Paddles -->
-      <button class="viewer-edge-nav edge-prev" id="btnEdgePrev" title="上一卷 (←)" aria-label="上一卷">
+      <!-- Left / Right Edge Navigation Paddles (两侧悬浮翻卷按钮与微胶囊提示) -->
+      <button class="viewer-edge-nav edge-prev" id="btnEdgePrev" aria-label="上一卷" data-i18n-title="actionPrev" data-custom-tip="上一卷 (←)">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
       </button>
-      <button class="viewer-edge-nav edge-next" id="btnEdgeNext" title="下一卷 (→)" aria-label="下一卷">
+      <div class="edge-tooltip edge-tooltip-prev" id="edgePrevTooltip" role="tooltip" aria-hidden="true">
+        <span class="edge-tooltip-text" id="edgePrevTooltipText">上一卷</span>
+        <kbd class="edge-tooltip-kbd" id="edgePrevTooltipKbd">←</kbd>
+      </div>
+
+      <button class="viewer-edge-nav edge-next" id="btnEdgeNext" aria-label="下一卷" data-i18n-title="actionNext" data-custom-tip="下一卷 (→)">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </button>
+      <div class="edge-tooltip edge-tooltip-next" id="edgeNextTooltip" role="tooltip" aria-hidden="true">
+        <span class="edge-tooltip-text" id="edgeNextTooltipText">下一卷</span>
+        <kbd class="edge-tooltip-kbd" id="edgeNextTooltipKbd">→</kbd>
+      </div>
 
       <div class="viewer-body">
         <!-- Ambient Blurred Backdrop · 视口画板高斯模糊渐变色背板 -->
@@ -248,7 +261,7 @@
 
         <!-- Overview Navigator · 左下角全图导航窗口 (纯图框极简设计 + 右上角微型关闭按钮) -->
         <div class="viewer-navigator-panel" id="viewerNavigatorPanel">
-          <button class="navigator-close-btn" id="btnCloseNavigator" title="关闭全图导航 (N)" aria-label="关闭全图导航" data-i18n-title="navCloseHint">
+          <button class="navigator-close-btn" id="btnCloseNavigator" aria-label="关闭全图导航" data-i18n-title="navCloseHint" data-custom-tip="关闭全图导航 (N)">
             <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
           <div class="navigator-body" id="navigatorBody">
@@ -374,7 +387,7 @@
         <div class="drawer-header" id="drawerDragHandle">
           <div class="drawer-drag-grip" aria-hidden="true"><span></span><span></span><span></span></div>
           <h3 class="drawer-title" data-i18n="metaDrawerTitle">作品档案</h3>
-          <button class="drawer-close-btn nav-btn" id="btnCloseDrawer" data-i18n-title="actionClose" title="收起面板 (Tab / I)" aria-label="收起面板">
+          <button class="drawer-close-btn nav-btn" id="btnCloseDrawer" data-i18n-title="actionClose" data-custom-tip="收起面板 (Tab / I)" aria-label="收起面板">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
@@ -394,7 +407,7 @@
             <h4 class="meta-section-title" data-i18n="metaShareTitle">画卷直链分享</h4>
             <div class="meta-share-row">
               <span class="meta-share-url font-mono" id="metaShareUrl">-</span>
-              <button class="meta-copy-btn" id="btnCopyShareUrl" data-i18n-title="actionCopyShare" title="复制画卷专属直链" data-i18n="actionCopy">复制</button>
+              <button class="meta-copy-btn" id="btnCopyShareUrl" data-i18n-title="actionCopyShare" data-custom-tip="复制画卷专属直链" data-i18n="actionCopy">复制</button>
             </div>
           </div>
 
@@ -414,19 +427,19 @@
           <div class="spine-track">
             <div class="spine-progress-bar" id="spineProgressBar"></div>
           </div>
-          <button class="spine-node active" data-target="metaSectionInfo" title="基本信息" aria-label="基本信息" data-i18n-title="metaNavInfo">
+          <button class="spine-node active" data-target="metaSectionInfo" aria-label="基本信息" data-i18n-title="metaNavInfo">
             <span class="spine-dot"></span>
             <span class="spine-tooltip" data-i18n="metaNavInfo">基本信息</span>
           </button>
-          <button class="spine-node" data-target="metaShareSection" title="专属直链" aria-label="专属直链" data-i18n-title="metaNavShare">
+          <button class="spine-node" data-target="metaShareSection" aria-label="专属直链" data-i18n-title="metaNavShare">
             <span class="spine-dot"></span>
             <span class="spine-tooltip" data-i18n="metaNavShare">专属直链</span>
           </button>
-          <button class="spine-node" data-target="metaThemeSection" title="艺术色板" aria-label="艺术色板" data-i18n-title="metaNavPalette">
+          <button class="spine-node" data-target="metaThemeSection" aria-label="艺术色板" data-i18n-title="metaNavPalette">
             <span class="spine-dot"></span>
             <span class="spine-tooltip" data-i18n="metaNavPalette">艺术色板</span>
           </button>
-          <button class="spine-node" data-target="metaSectionDesc" title="工造题记" aria-label="工造题记" data-i18n-title="metaNavNotes">
+          <button class="spine-node" data-target="metaSectionDesc" aria-label="工造题记" data-i18n-title="metaNavNotes">
             <span class="spine-dot"></span>
             <span class="spine-tooltip" data-i18n="metaNavNotes">工造题记</span>
           </button>
@@ -670,7 +683,7 @@
           <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; background: rgba(var(--accent-rgb), 0.12); padding: 3px 8px; border-radius: 2px;" data-i18n="aboutTag">一图一境 · 静观其详</span>
           <span style="font-size: 0.76rem; color: var(--text-muted);" data-i18n="aboutSubtag">OpenQGIS 制图作品集</span>
         </div>
-        <button id="btnCloseAbout" class="icon-btn" data-i18n-title="actionClose" title="关闭 (Esc)" style="border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border-subtle); cursor: pointer; color: var(--text-secondary);">
+        <button id="btnCloseAbout" class="icon-btn" data-i18n-title="actionClose" data-custom-tip="关闭 (Esc)" style="border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border-subtle); cursor: pointer; color: var(--text-secondary);">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
@@ -692,6 +705,6 @@
         </div>
       </div>
     </div>
-  <script src="assets/app.js?v=20260926_v2"></script>
+  <script src="assets/app.js?v=20260927_v1"></script>
 </body>
 </html>

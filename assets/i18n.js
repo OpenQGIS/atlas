@@ -779,7 +779,7 @@
       const key = el.getAttribute('data-i18n-title');
       const title = t(key);
       if (title) {
-        if (el.closest('.viewer-floating-toolbar') || el.closest('.viewer-top-actions') || el.closest('#dockTooltip') || el.closest('#topTooltip') || el.hasAttribute('data-custom-tip')) {
+        if (el.closest('.viewer-modal') || el.closest('.viewer-container') || el.closest('.viewer-floating-toolbar') || el.closest('.viewer-top-actions') || el.closest('#dockTooltip') || el.closest('#topTooltip') || el.closest('.viewer-artwork-badge') || el.closest('.viewer-edge-nav') || el.hasAttribute('data-custom-tip')) {
           el.dataset.customTip = title;
           el.removeAttribute('title');
         } else {
@@ -795,7 +795,8 @@
     });
 
     document.querySelectorAll('#btnLangDropdown, #viewerBtnLangDropdown, #toolToggleLang').forEach(btn => {
-      btn.title = t('langSelectTitle');
+      btn.dataset.customTip = t('langSelectTitle');
+      btn.removeAttribute('title');
     });
 
     document.querySelectorAll('.lang-dropdown-item').forEach(item => {

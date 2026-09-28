@@ -2155,6 +2155,65 @@ body[data-page="portal"] {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
+/* Mobile Responsive Overlays for Gallery Cards (收拢移动端卡片底部标签偏移距离) */
+@media (max-width: 768px) {
+  .card-scrim-mask {
+    padding: 32px 12px 10px 12px;
+    min-height: 34%;
+  }
+  .card-title {
+    font-size: 0.88rem;
+    margin-bottom: 4px;
+    letter-spacing: 0.01em;
+  }
+  .card-meta-row {
+    min-height: 20px;
+  }
+  .tag-pill {
+    padding: 1.5px 5px;
+    font-size: 0.64rem;
+  }
+  .card-action-hint {
+    padding: 2px 7px;
+    font-size: 0.62rem;
+  }
+  .gallery-card:hover .card-scrim-mask {
+    min-height: 36%;
+  }
+  .gallery-card:hover .card-scrim-content {
+    transform: none;
+  }
+  .gallery-card:hover .card-title {
+    transform: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .card-scrim-mask {
+    padding: 24px 10px 8px 10px;
+    min-height: 38%;
+  }
+  .card-title {
+    font-size: 0.82rem;
+    margin-bottom: 3px;
+  }
+  .card-meta-row {
+    min-height: 18px;
+  }
+  .card-tags {
+    gap: 4px;
+  }
+  .tag-pill {
+    padding: 1px 4.5px;
+    font-size: 0.60rem;
+    border-radius: 3px;
+  }
+  .card-action-hint {
+    padding: 1.5px 6px;
+    font-size: 0.60rem;
+  }
+}
+
 /* Deep Zoom Modal */
 html.viewer-open,
 body.viewer-open,

@@ -7907,6 +7907,34 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   width: 100%;
 }
 
+/* ==========================================================================
+   Subcategory Dedicated View (独立专题画廊模式)
+   在子页面视图中，彻底隐藏首页开屏 Hero、首页版幅筛选栏及侧边导览轴，
+   确保子页面作为独立专题展厅呈现，向上滚动到顶即止，杜绝视觉割裂与冗余干扰。
+   ========================================================================== */
+body.in-subview .hero-screen {
+  display: none !important;
+}
+
+body.in-subview .gallery-subbar {
+  display: none !important;
+}
+
+body.in-subview .page-anchor-spine {
+  display: none !important;
+}
+
+body.in-subview .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+:root[data-theme="light"] body.in-subview .site-header {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+}
+
 
 
 

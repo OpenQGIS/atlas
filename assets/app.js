@@ -239,6 +239,14 @@
   async function init() {
     bindAntiTheft();
 
+    // 预先检测是否有子页面参数，若有立即施加 in-subview 类，避免首屏 Hero 闪烁
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('sub')) {
+        document.body.classList.add('in-subview');
+      }
+    } catch (e) {}
+
     if (window.OpenSeadragon && OpenSeadragon.setImageFormatsSupported) {
       OpenSeadragon.setImageFormatsSupported({ webp: true });
     }
@@ -297,12 +305,37 @@
     bindViewerModalEvents();
     bindAboutModalEvents();
     bindPortalScrollEvents();
+    bindHeaderBrandEvents();
     bindFooterAccordion();
     bindLanguageDropdown();
     bindI18nEvents();
     initHero();
 
     applyFilter('all');
+  }
+
+  function bindHeaderBrandEvents() {
+    const brandEl = document.querySelector('.site-header .brand');
+    if (brandEl) {
+      brandEl.style.cursor = 'pointer';
+      brandEl.setAttribute('role', 'button');
+      brandEl.setAttribute('tabindex', '0');
+      brandEl.setAttribute('title', '返回画廊首页 / Back to Home');
+      const handleHomeClick = () => {
+        if (currentSubCategory) {
+          exitSubcategoryView();
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
+      brandEl.addEventListener('click', handleHomeClick);
+      brandEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleHomeClick();
+        }
+      });
+    }
   }
 
   function bindPortalScrollEvents() {
@@ -575,6 +608,7 @@
     let isSnapping = false;
     window.addEventListener('wheel', (e) => {
       if (isSnapping) return;
+      if (currentSubCategory || document.body.classList.contains('in-subview')) return;
       const hero = document.getElementById('heroScreen');
       if (!hero) return;
 
@@ -597,12 +631,14 @@
     // 移动端触屏向上滑动时平滑过渡至下一屏
     let touchStartY = 0;
     window.addEventListener('touchstart', (e) => {
+      if (currentSubCategory || document.body.classList.contains('in-subview')) return;
       if (e.touches && e.touches.length > 0) {
         touchStartY = e.touches[0].clientY;
       }
     }, { passive: true });
 
     window.addEventListener('touchend', (e) => {
+      if (currentSubCategory || document.body.classList.contains('in-subview')) return;
       if (!touchStartY) return;
       const touchEndY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : 0;
       const diff = touchStartY - touchEndY;
@@ -835,20 +871,17 @@
     currentSubCategory = subCategoryName;
     currentSubTopic = 'all';
 
+    document.body.classList.add('in-subview');
+
     // 关键：临时将页面根元素的滚动行为设为 auto，防止平滑滚动引起向上回滚动画
     document.documentElement.style.scrollBehavior = 'auto';
-
-    const subbar = document.querySelector('.gallery-subbar');
-    const headerOffset = (subbar ? subbar.getBoundingClientRect().height : 48) + 24;
-    const galleryMain = document.getElementById('galleryMain') || document.getElementById('galleryGrid');
-    const targetTop = galleryMain ? Math.max(0, galleryMain.getBoundingClientRect().top + window.pageYOffset - headerOffset) : 0;
 
     const pool = getCurrentFilteredPool();
     renderGrid(pool);
 
-    // 直接无动画瞬时跳转至子界面顶部
+    // 直接无动画瞬时跳转至页面顶端，子页作为独立沉浸式专题呈现
     window.scrollTo({
-      top: targetTop,
+      top: 0,
       behavior: 'instant'
     });
 
@@ -865,7 +898,7 @@
 
     requestAnimationFrame(() => {
       window.scrollTo({
-        top: targetTop,
+        top: 0,
         behavior: 'instant'
       });
       document.documentElement.style.scrollBehavior = '';
@@ -876,6 +909,8 @@
     const prevSub = currentSubCategory;
     currentSubCategory = null;
     currentSubTopic = 'all';
+
+    document.body.classList.remove('in-subview');
 
     document.documentElement.style.scrollBehavior = 'auto';
 

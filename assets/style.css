@@ -2155,14 +2155,15 @@ body[data-page="portal"] {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-/* Mobile Responsive Overlays for Gallery Cards (收拢移动端卡片底部标签偏移距离) */
+/* Mobile Responsive Overlays for Gallery Cards (移动端专属字号与紧凑贴底排版) */
 @media (max-width: 768px) {
   .card-scrim-mask {
-    padding: 32px 12px 10px 12px;
+    padding: 28px 12px 10px 12px;
     min-height: 34%;
   }
   .card-title {
-    font-size: 0.88rem;
+    font-size: 0.82rem;
+    line-height: 1.25;
     margin-bottom: 4px;
     letter-spacing: 0.01em;
   }
@@ -2171,11 +2172,16 @@ body[data-page="portal"] {
   }
   .tag-pill {
     padding: 1.5px 5px;
-    font-size: 0.64rem;
+    font-size: 0.60rem;
+    line-height: 1.2;
   }
   .card-action-hint {
     padding: 2px 7px;
-    font-size: 0.62rem;
+    font-size: 0.58rem;
+  }
+  .card-new-badge {
+    font-size: 0.60rem;
+    padding: 2px 6px;
   }
   .gallery-card:hover .card-scrim-mask {
     min-height: 36%;
@@ -2190,27 +2196,32 @@ body[data-page="portal"] {
 
 @media (max-width: 540px) {
   .card-scrim-mask {
-    padding: 24px 10px 8px 10px;
+    padding: 22px 10px 8px 10px;
     min-height: 38%;
   }
   .card-title {
-    font-size: 0.82rem;
+    font-size: 0.74rem;
+    line-height: 1.2;
     margin-bottom: 3px;
   }
   .card-meta-row {
     min-height: 18px;
   }
   .card-tags {
-    gap: 4px;
+    gap: 3.5px;
   }
   .tag-pill {
-    padding: 1px 4.5px;
-    font-size: 0.60rem;
+    padding: 1px 4px;
+    font-size: 0.55rem;
     border-radius: 3px;
   }
   .card-action-hint {
-    padding: 1.5px 6px;
-    font-size: 0.60rem;
+    padding: 1.5px 5px;
+    font-size: 0.54rem;
+  }
+  .card-new-badge {
+    font-size: 0.54rem;
+    padding: 1.5px 5px;
   }
 }
 
@@ -7820,126 +7831,24 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.04);
 }
 
-/* Background Watermark in Subview */
-.subview-watermark {
-  position: absolute;
-  right: 24px;
-  bottom: 12px;
-  pointer-events: none;
-  user-select: none;
-  font-family: var(--font-mono, "JetBrains Mono", Consolas, monospace);
-  font-size: clamp(2.4rem, 4.5vw, 4.2rem);
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  color: #ffffff;
-  opacity: 0.035;
-  line-height: 1;
-  z-index: 0;
-  white-space: nowrap;
-}
-
-:root[data-theme="light"] .subview-watermark {
-  color: #000000;
-  opacity: 0.03;
-}
-
-/* Top Split Row: Left Content & Right Archive Spec Grid */
-.subview-hero-split {
+/* Subview Content Row (左侧标题与收录指标，右侧导言题记) */
+.subview-content-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-end;
-  gap: 28px;
-  position: relative;
-  z-index: 1;
-}
-
-.subview-hero-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.subview-hero-aside {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: flex-end;
-}
-
-.subview-nav-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  font-family: var(--font-mono, "JetBrains Mono", Consolas, monospace);
-  font-size: 0.82rem;
-}
-
-.subview-back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  padding: 6px 15px;
-  font-size: 0.82rem;
-  font-family: inherit;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.subview-back-btn:hover {
-  background: rgba(128, 204, 40, 0.14);
-  border-color: rgba(128, 204, 40, 0.4);
-  color: #80cc28;
-  transform: translateX(-2px);
-}
-
-:root[data-theme="light"] .subview-back-btn {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.1);
-  color: var(--text-primary);
-}
-
-:root[data-theme="light"] .subview-back-btn:hover {
-  background: rgba(107, 179, 30, 0.1);
-  border-color: rgba(107, 179, 30, 0.35);
-  color: #6bb31e;
-}
-
-.subview-back-icon {
-  width: 14px;
-  height: 14px;
-  transition: transform 0.2s ease;
-}
-
-.subview-back-btn:hover .subview-back-icon {
-  transform: translateX(-2px);
-}
-
-.subview-nav-divider {
-  color: var(--text-muted);
-  opacity: 0.4;
-}
-
-.subview-nav-current {
-  color: var(--text-muted);
-  font-size: 0.8rem;
+  gap: 36px;
 }
 
 .subview-lead-title-row {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .subview-idx {
   font-family: var(--font-mono, "JetBrains Mono", Consolas, monospace);
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #80cc28;
   letter-spacing: 0.06em;
@@ -7963,126 +7872,36 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   line-height: 1.2;
 }
 
-.subview-en-title {
-  font-family: var(--font-mono, "JetBrains Mono", Consolas, monospace);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+.subview-badge {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 0.78rem;
   color: var(--text-muted);
-  opacity: 0.8;
-  padding: 2px 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  padding: 3px 11px;
+  border-radius: 999px;
   align-self: center;
 }
 
-:root[data-theme="light"] .subview-en-title {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.06);
+:root[data-theme="light"] .subview-badge {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.subview-desc-col {
+  flex: 1;
+  max-width: 580px;
 }
 
 .subview-desc {
-  margin: 10px 0 0 0;
+  margin: 0;
   font-size: 0.88rem;
   color: var(--text-muted);
   line-height: 1.6;
-  max-width: 680px;
-}
-
-/* Archival Spec Grid (展厅收录指标盒) */
-.subview-spec-grid {
-  display: inline-flex;
-  align-items: center;
-  gap: 18px;
-  padding: 10px 18px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-:root[data-theme="light"] .subview-spec-grid {
-  background: rgba(0, 0, 0, 0.025);
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-.subview-spec-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.subview-spec-k {
-  font-size: 0.66rem;
-  font-family: var(--font-mono, monospace);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  opacity: 0.75;
-}
-
-.subview-spec-v {
-  font-size: 0.84rem;
-  color: var(--text-primary);
-  font-family: var(--font-mono, monospace);
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
-.subview-spec-num {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #80cc28;
-  letter-spacing: -0.01em;
-}
-
-:root[data-theme="light"] .subview-spec-num {
-  color: #6bb31e;
-}
-
-.subview-spec-v small {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  font-weight: normal;
-}
-
-.subview-spec-sep {
-  width: 1px;
-  height: 22px;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-:root[data-theme="light"] .subview-spec-sep {
-  background: rgba(0, 0, 0, 0.08);
 }
 
 .subview-cards-grid {
   width: 100%;
-}
-
-/* Responsive Subview Layout */
-@media (max-width: 860px) {
-  .subview-hero-split {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-  }
-  .subview-hero-aside {
-    width: 100%;
-    align-items: stretch;
-  }
-  .subview-spec-grid {
-    width: 100%;
-    justify-content: space-around;
-    padding: 10px 14px;
-    gap: 8px;
-  }
-  .subview-watermark {
-    display: none;
-  }
 }
 
 /* ==========================================================================
@@ -8121,31 +7940,58 @@ body.in-subview .gallery-main {
   padding-left: 28px !important;
 }
 
+/* 响应式断点：双端字号彻底解耦，为移动端定制专属字号大小 */
+@media (max-width: 860px) {
+  .subview-content-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .subview-desc-col {
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .subcategory-view-hero {
     margin-bottom: 14px;
-    padding: 16px 16px 14px 16px;
-    border-radius: 14px;
+    padding: 14px 16px 12px 16px;
+    border-radius: 12px;
   }
   .subview-nav-bar {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    font-size: 0.72rem;
+    gap: 6px;
   }
-  .subview-title {
-    font-size: 1.45rem;
+  .subview-back-btn {
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    gap: 5px;
   }
-  .subview-desc {
-    margin-top: 8px;
-    font-size: 0.82rem;
-    line-height: 1.5;
+  .subview-back-icon {
+    width: 12px;
+    height: 12px;
   }
-  .subview-topic-filter-row {
-    margin-top: 12px;
-    padding-top: 10px;
+  .subview-nav-current {
+    font-size: 0.72rem;
+  }
+  .subview-lead-title-row {
     gap: 8px;
   }
-  .subview-topic-chip {
-    padding: 3px 10px;
-    font-size: 0.74rem;
+  .subview-idx {
+    font-size: 0.95rem;
+  }
+  .subview-title {
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+  }
+  .subview-badge {
+    font-size: 0.65rem;
+    padding: 2px 7px;
+  }
+  .subview-desc {
+    font-size: 0.76rem;
+    line-height: 1.45;
   }
 }
 
@@ -8153,6 +7999,33 @@ body.in-subview .gallery-main {
   body.in-subview .gallery-main {
     padding-left: 12px !important;
     padding-right: 12px !important;
+  }
+  .subcategory-view-hero {
+    margin-bottom: 10px;
+    padding: 12px 12px 10px 12px;
+    border-radius: 10px;
+  }
+  .subview-nav-bar {
+    margin-bottom: 6px;
+    font-size: 0.68rem;
+  }
+  .subview-back-btn {
+    font-size: 0.68rem;
+    padding: 3px 8px;
+  }
+  .subview-idx {
+    font-size: 0.88rem;
+  }
+  .subview-title {
+    font-size: 1.05rem;
+  }
+  .subview-badge {
+    font-size: 0.62rem;
+    padding: 1.5px 6px;
+  }
+  .subview-desc {
+    font-size: 0.72rem;
+    line-height: 1.4;
   }
 }
 

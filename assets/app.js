@@ -1193,111 +1193,35 @@
     const idxStr = String(catIdx >= 0 ? catIdx + 1 : 1).padStart(2, '0');
     const meta = SUBCATEGORY_META[currentSubCategory] || {};
     const desc = meta.desc || '';
-    const enTitle = meta.en || '';
     const i18n = window.AtlasI18n || null;
     const countSuffix = (i18n && i18n.t('subviewCountSuffix')) || ' 件画卷收录';
     const backText = (i18n && i18n.t('subviewBack')) || '返回全部成果';
-    const specWorksText = (i18n && i18n.t('subviewSpecWorks')) || '收录成果';
-    const specUnitText = (i18n && i18n.t('subviewSpecWorksUnit')) || '件画卷';
-    const specEngineText = (i18n && i18n.t('subviewSpecEngine')) || '制图体系';
-    const specEngineVal = (i18n && i18n.t('subviewSpecEngineVal')) || 'QGIS 原生';
-    const specSeriesText = (i18n && i18n.t('subviewSpecSeries')) || '精选序列';
-    const topicLabelText = (i18n && i18n.t('subviewTopicLabel')) || '探索细分';
-    const allTopicsText = (i18n && i18n.t('subviewAllTopics')) || '全部';
 
-    // 统计该专题下的细分主题 (去重并按作品频次降序，提炼代表性切片)
-    const topicMap = new Map();
-    subItems.forEach(item => {
-      const ts = (Array.isArray(item.topics) && item.topics.length > 0)
-        ? item.topics
-        : (item.topic ? [item.topic] : []);
-      ts.forEach(t => {
-        const cleanT = String(t).trim();
-        if (!cleanT) return;
-        const parts = cleanT.split(/[\s·,、/|]+/).filter(Boolean);
-        parts.forEach(p => {
-          topicMap.set(p, (topicMap.get(p) || 0) + 1);
-        });
-      });
-    });
+    currentFilteredItems = subItems;
 
-    const sortedTopics = Array.from(topicMap.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 7);
-
-    // 根据 currentSubTopic 筛选待展示的作品
-    let displayItems = subItems;
-    if (currentSubTopic && currentSubTopic !== 'all') {
-      displayItems = subItems.filter(item => {
-        const ts = (Array.isArray(item.topics) && item.topics.length > 0)
-          ? item.topics
-          : (item.topic ? [item.topic] : []);
-        return ts.some(t => String(t).includes(currentSubTopic));
-      });
-    }
-
-    currentFilteredItems = displayItems;
-
-    // 1. 构建顶部专题子界面 Banner
+    // 1. 构建顶部专题子界面 Banner (干净双侧排版：左标题归属，右导言题记)
     const heroEl = document.createElement('div');
     heroEl.className = 'subcategory-view-hero';
     heroEl.innerHTML =
-      '<div class="subview-watermark" aria-hidden="true">' + idxStr + ' / ' + escapeHtml((enTitle || 'SPEC').toUpperCase()) + '</div>' +
-      '<div class="subview-hero-split">' +
-        '<div class="subview-hero-main">' +
-          '<div class="subview-nav-bar">' +
-            '<button class="subview-back-btn" id="btnBackToOverview" type="button" aria-label="' + escapeHtml(backText) + '">' +
-              '<svg class="subview-back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
-                '<polyline points="15 18 9 12 15 6"></polyline>' +
-              '</svg>' +
-              '<span>' + escapeHtml(backText) + '</span>' +
-            '</button>' +
-            '<span class="subview-nav-divider">/</span>' +
-            '<span class="subview-nav-current">' + escapeHtml(currentSubCategory) + '</span>' +
-          '</div>' +
-          '<div class="subview-lead-title-row">' +
-            '<span class="subview-idx">' + idxStr + '</span>' +
-            '<span class="subview-divider">/</span>' +
-            '<h1 class="subview-title">' + escapeHtml(currentSubCategory) + '</h1>' +
-            (enTitle ? ('<span class="subview-en-title">' + escapeHtml(enTitle.toUpperCase()) + '</span>') : '') +
-          '</div>' +
-          (desc ? ('<p class="subview-desc">' + escapeHtml(desc) + '</p>') : '') +
-        '</div>' +
-        '<div class="subview-hero-aside">' +
-          '<div class="subview-spec-grid">' +
-            '<div class="subview-spec-cell">' +
-              '<span class="subview-spec-k">' + escapeHtml(specWorksText) + '</span>' +
-              '<span class="subview-spec-v"><strong class="subview-spec-num">' + subItems.length + '</strong> <small>' + escapeHtml(specUnitText) + '</small></span>' +
-            '</div>' +
-            '<div class="subview-spec-sep"></div>' +
-            '<div class="subview-spec-cell">' +
-              '<span class="subview-spec-k">' + escapeHtml(specEngineText) + '</span>' +
-              '<span class="subview-spec-v"><strong class="subview-spec-num">100%</strong> <small>' + escapeHtml(specEngineVal) + '</small></span>' +
-            '</div>' +
-            '<div class="subview-spec-sep"></div>' +
-            '<div class="subview-spec-cell">' +
-              '<span class="subview-spec-k">' + escapeHtml(specSeriesText) + '</span>' +
-              '<span class="subview-spec-v"><strong class="subview-spec-num">CAT-' + idxStr + '</strong></span>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
+      '<div class="subview-nav-bar">' +
+        '<button class="subview-back-btn" id="btnBackToOverview" type="button" aria-label="' + escapeHtml(backText) + '">' +
+          '<svg class="subview-back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
+            '<polyline points="15 18 9 12 15 6"></polyline>' +
+          '</svg>' +
+          '<span>' + escapeHtml(backText) + '</span>' +
+        '</button>' +
+        '<span class="subview-nav-divider">/</span>' +
+        '<span class="subview-nav-current">' + escapeHtml(currentSubCategory) + '</span>' +
       '</div>' +
-      (sortedTopics.length > 0 ? (
-        '<div class="subview-topic-filter-row">' +
-          '<span class="subview-topic-label">' + escapeHtml(topicLabelText) + '</span>' +
-          '<div class="subview-topic-chips">' +
-            '<button type="button" class="subview-topic-chip' + (currentSubTopic === 'all' ? ' active' : '') + '" data-topic="all">' +
-              escapeHtml(allTopicsText) + ' (' + subItems.length + ')' +
-            '</button>' +
-            sortedTopics.map(t => {
-              return '<button type="button" class="subview-topic-chip' + (currentSubTopic === t.name ? ' active' : '') + '" data-topic="' + escapeHtml(t.name) + '">' +
-                escapeHtml(t.name) + ' (' + t.count + ')' +
-              '</button>';
-            }).join('') +
-          '</div>' +
-        '</div>'
-      ) : '');
+      '<div class="subview-content-row">' +
+        '<div class="subview-lead-title-row">' +
+          '<span class="subview-idx">' + idxStr + '</span>' +
+          '<span class="subview-divider">/</span>' +
+          '<h1 class="subview-title">' + escapeHtml(currentSubCategory) + '</h1>' +
+          '<span class="subview-badge">' + subItems.length + countSuffix + '</span>' +
+        '</div>' +
+        (desc ? ('<div class="subview-desc-col"><p class="subview-desc">' + escapeHtml(desc) + '</p></div>') : '') +
+      '</div>';
 
     const btnBack = heroEl.querySelector('#btnBackToOverview');
     if (btnBack) {
@@ -1311,24 +1235,10 @@
       });
     }
 
-    const topicChips = heroEl.querySelectorAll('.subview-topic-chip');
-    topicChips.forEach(chip => {
-      chip.addEventListener('click', (e) => {
-        e.preventDefault();
-        const clickedTopic = chip.dataset.topic || 'all';
-        if (currentSubTopic === clickedTopic && clickedTopic !== 'all') {
-          currentSubTopic = 'all';
-        } else {
-          currentSubTopic = clickedTopic;
-        }
-        renderGrid(getCurrentFilteredPool());
-      });
-    });
-
     grid.appendChild(heroEl);
 
     // 2. 瀑布流画卷卡片区：全量连续瀑布流拼贴，根据各图宽高比自由拼贴
-    if (displayItems.length === 0) {
+    if (subItems.length === 0) {
       const emptyWrap = document.createElement('div');
       emptyWrap.style.cssText = 'padding: 48px 24px; color: var(--text-muted); text-align: center; width: 100%;';
       emptyWrap.textContent = (window.AtlasI18n ? window.AtlasI18n.t('emptyFilter') : '当前专题下暂无收录成果');
@@ -1344,7 +1254,7 @@
     section.innerHTML = '<div class="masonry-grid section-grid' + (isComfort ? ' comfort' : '') + '"></div>';
 
     const sectionGrid = section.querySelector('.section-grid');
-    displayItems.forEach((item, idx) => {
+    subItems.forEach((item, idx) => {
       sectionGrid.appendChild(createCard(item, idx));
     });
 

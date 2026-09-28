@@ -912,7 +912,7 @@
     });
   }
 
-  const SUBCATEGORY_ORDER = ['艺术制图', '工程制图', '空间形态', '制图细节', '图面排版'];
+  const SUBCATEGORY_ORDER = ['艺术制图', '工程制图', '空间形态', '图面排版'];
   const SUBCATEGORY_META = {
     '艺术制图': {
       en: 'Artistic Cartography',
@@ -926,10 +926,6 @@
       en: 'Spatial Morphology',
       desc: '聚焦空间形态学，解构宏观路网肌理、水系拓扑演进与枢纽几何构型。'
     },
-    '制图细节': {
-      en: 'Cartographic Details',
-      desc: '聚焦制图工程技术细节、排版设计范式与微观地理要素精细呈现。'
-    },
     '图面排版': {
       en: 'Map Layout',
       desc: '侧重版面组织、图文配比与版式范式。'
@@ -941,10 +937,38 @@
       '艺术制图': 'art',
       '工程制图': 'engineering',
       '空间形态': 'morphology',
-      '制图细节': 'details',
       '图面排版': 'layout'
     };
     return map[sub] || ('sub_' + String(sub).replace(/[^a-zA-Z0-9_\u4e00-\u9fa5]/g, '_'));
+  }
+
+  function getItemSubCategories(item) {
+    if (!item) return [];
+    if (Array.isArray(item.subCategories) && item.subCategories.length > 0) {
+      return item.subCategories.filter(s => SUBCATEGORY_ORDER.includes(s));
+    }
+    if (typeof item.subCategory === 'string') {
+      const parts = item.subCategory.split(/[\s·,、/|]+/).filter(Boolean);
+      return parts.filter(s => SUBCATEGORY_ORDER.includes(s));
+    }
+    return [];
+  }
+
+  function itemMatchesSubCategory(item, targetCat) {
+    if (!item || !targetCat) return false;
+    const cats = getItemSubCategories(item);
+    return cats.includes(targetCat);
+  }
+
+  function getPrimarySubCategory(item) {
+    const cats = getItemSubCategories(item);
+    if (cats.length === 0) return '艺术制图';
+    if (cats.length === 1) return cats[0];
+    if (cats.includes('图面排版')) return '图面排版';
+    if (cats.includes('工程制图') && (item.id === 'tianfu_luxihe_xinglong_lake' || item.id === 'chengdu_greenway_ring')) {
+      return '工程制图';
+    }
+    return cats[0];
   }
 
   let pageSpineScrollBound = false;
@@ -973,12 +997,13 @@
 
       const idxStr = String(idx + 1).padStart(2, '0');
       const countSuffix = (window.AtlasI18n && window.AtlasI18n.getLang() === 'en') ? ' works' : '件';
+      const displayCount = group.totalCount !== undefined ? group.totalCount : group.items.length;
       node.innerHTML =
         '<span class="page-spine-dot"></span>' +
         '<div class="page-spine-tooltip">' +
           '<span class="page-spine-idx">' + idxStr + '</span>' +
           '<span>' + escapeHtml(group.name) + '</span>' +
-          '<span class="page-spine-count">(' + group.items.length + countSuffix + ')</span>' +
+          '<span class="page-spine-count">(' + displayCount + countSuffix + ')</span>' +
         '</div>';
 
       node.addEventListener('click', (e) => {
@@ -1083,7 +1108,7 @@
   }
 
   function renderSubcategoryView(grid, items) {
-    const subItems = items.filter(item => (item.subCategory || '未分类') === currentSubCategory);
+    const subItems = items.filter(item => itemMatchesSubCategory(item, currentSubCategory));
     const catIdx = SUBCATEGORY_ORDER.indexOf(currentSubCategory);
     const idxStr = String(catIdx >= 0 ? catIdx + 1 : 1).padStart(2, '0');
     const meta = SUBCATEGORY_META[currentSubCategory] || {};
@@ -1092,10 +1117,10 @@
     const backText = (window.AtlasI18n && window.AtlasI18n.t('subviewBack')) || '返回全部成果';
     const allTopicsText = (window.AtlasI18n && window.AtlasI18n.t('subviewAllTopics')) || '全部';
 
-    // 统计该 subCategory 内的所有 topic 标签（按作品出现顺序收集）
+    // 统计该 subCategory 内的所有 topic 标签（按首选 topic 归类，保证每幅作品在全量下只出现一次）
     const topicGroupedMap = new Map();
     subItems.forEach(item => {
-      const t = item.topic || '未归类';
+      const t = (Array.isArray(item.topics) && item.topics[0]) || item.topic || '精选探索';
       if (!topicGroupedMap.has(t)) {
         topicGroupedMap.set(t, []);
       }
@@ -1116,7 +1141,16 @@
     // 筛选当前选中的 topic 组
     let activeTopicGroups = allTopicGroups;
     if (currentSubTopic && currentSubTopic !== 'all') {
-      activeTopicGroups = allTopicGroups.filter(g => g.name === currentSubTopic);
+      const filteredByTopic = subItems.filter(item => {
+        if (Array.isArray(item.topics)) return item.topics.includes(currentSubTopic);
+        if (typeof item.topic === 'string') return item.topic.includes(currentSubTopic);
+        return false;
+      });
+      activeTopicGroups = [{
+        name: currentSubTopic,
+        slug: getTopicSlug(currentSubTopic),
+        items: filteredByTopic
+      }];
     }
 
     const displayItems = [];
@@ -1150,11 +1184,12 @@
             '<button type="button" class="subview-topic-chip' + (currentSubTopic === 'all' ? ' active' : '') + '" data-topic="all">' +
               escapeHtml(allTopicsText) + ' (' + subItems.length + ')' +
             '</button>' +
-            topics.map(t => (
-              '<button type="button" class="subview-topic-chip' + (currentSubTopic === t ? ' active' : '') + '" data-topic="' + escapeHtml(t) + '">' +
-                escapeHtml(t) + ' (' + (topicGroupedMap.get(t) ? topicGroupedMap.get(t).length : 0) + ')' +
-              '</button>'
-            )).join('') +
+            topics.map(t => {
+              const matchCount = subItems.filter(it => (Array.isArray(it.topics) && it.topics.includes(t)) || (it.topic && it.topic.includes(t))).length;
+              return '<button type="button" class="subview-topic-chip' + (currentSubTopic === t ? ' active' : '') + '" data-topic="' + escapeHtml(t) + '">' +
+                escapeHtml(t) + ' (' + matchCount + ')' +
+              '</button>';
+            }).join('') +
           '</div>' +
         '</div>'
       ) : '');
@@ -1225,38 +1260,65 @@
   }
 
   function renderOverviewSections(grid, items) {
-    // Group items by subCategory preserving canonical order
+    // 1. 统计当前池中各子分类的全量收录作品数
+    const subCatTotalCounts = {};
+    SUBCATEGORY_ORDER.forEach(cat => {
+      subCatTotalCounts[cat] = items.filter(it => itemMatchesSubCategory(it, cat)).length;
+    });
+
+    // 2. 主屏瀑布流去重：每张画卷仅出现在其主归属分类下，避免跨分类重复渲染
     const groupedMap = new Map();
     SUBCATEGORY_ORDER.forEach(cat => groupedMap.set(cat, []));
 
     items.forEach(item => {
-      const sub = item.subCategory || '未分类';
-      if (!groupedMap.has(sub)) {
-        groupedMap.set(sub, []);
+      const primaryCat = getPrimarySubCategory(item);
+      if (groupedMap.has(primaryCat)) {
+        groupedMap.get(primaryCat).push(item);
+      } else {
+        const firstCat = getItemSubCategories(item)[0] || SUBCATEGORY_ORDER[0];
+        if (groupedMap.has(firstCat)) {
+          groupedMap.get(firstCat).push(item);
+        }
       }
-      groupedMap.get(sub).push(item);
     });
 
     const groups = [];
     groupedMap.forEach((list, cat) => {
-      if (list.length > 0) {
+      const totalCount = subCatTotalCounts[cat] || 0;
+      if (list.length > 0 || totalCount > 0) {
         groups.push({
           name: cat,
           slug: getSubCategorySlug(cat),
-          items: list
+          items: list,
+          totalCount: totalCount
         });
       }
     });
 
     const isComfort = grid.classList.contains('comfort-mode');
     let globalIdx = 0;
-    const enterText = (window.AtlasI18n && window.AtlasI18n.t('subviewEnter')) || '进入专题';
+    const isEn = window.AtlasI18n && window.AtlasI18n.getLang() === 'en';
 
     groups.forEach((group, gIdx) => {
       const meta = SUBCATEGORY_META[group.name] || {};
       const idxStr = String(gIdx + 1).padStart(2, '0');
       const desc = meta.desc || '';
-      const countSuffix = (window.AtlasI18n && window.AtlasI18n.getLang() === 'en') ? ' Works' : ' 件画卷';
+      const countSuffix = isEn ? ' Works' : ' 件画卷';
+
+      const totalInCat = group.totalCount;
+      const displayedCount = group.items.length;
+      let badgeText = '';
+      if (totalInCat > displayedCount && displayedCount > 0) {
+        badgeText = isEn 
+          ? `${totalInCat} Works (${displayedCount} shown)`
+          : `共 ${totalInCat} 件 · 本屏 ${displayedCount} 件`;
+      } else {
+        badgeText = `${totalInCat}${countSuffix}`;
+      }
+
+      const enterText = isEn
+        ? (totalInCat > displayedCount ? `View All (${totalInCat})` : 'Enter')
+        : (totalInCat > displayedCount ? `进入分类全景 (${totalInCat} 件)` : (window.AtlasI18n ? window.AtlasI18n.t('subviewEnter') || '进入专题' : '进入专题'));
 
       const section = document.createElement('section');
       section.className = 'gallery-category-section';
@@ -1264,15 +1326,15 @@
       section.dataset.subcategory = group.name;
 
       section.innerHTML = 
-        '<header class="category-section-header clickable" role="button" tabindex="0" title="进入「' + escapeHtml(group.name) + '」专题子界面">' +
+        '<header class="category-section-header clickable" role="button" tabindex="0" title="' + (isEn ? `Enter ${escapeHtml(group.name)} Category View` : `进入「${escapeHtml(group.name)}」分类瀑布流（全 ${totalInCat} 件）`) + '">' +
           '<div class="category-header-main-row">' +
             '<div class="category-header-lead">' +
               '<span class="category-section-idx">' + idxStr + '</span>' +
               '<span class="category-section-divider">/</span>' +
               '<h2 class="category-section-title">' + escapeHtml(group.name) + '</h2>' +
-              '<span class="category-section-badge">' + group.items.length + countSuffix + '</span>' +
+              '<span class="category-section-badge">' + escapeHtml(badgeText) + '</span>' +
             '</div>' +
-            '<div class="category-header-action" aria-label="进入专题">' +
+            '<div class="category-header-action" aria-label="' + escapeHtml(enterText) + '">' +
               '<span class="category-enter-label">' + escapeHtml(enterText) + '</span>' +
               '<svg class="category-enter-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
                 '<polyline points="9 18 15 12 9 6"></polyline>' +

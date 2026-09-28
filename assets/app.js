@@ -1239,7 +1239,7 @@
         : (totalInCat > displayedCount ? `进入分类全景 (${totalInCat} 件)` : (window.AtlasI18n ? window.AtlasI18n.t('subviewEnter') || '进入专题' : '进入专题'));
 
       const section = document.createElement('section');
-      section.className = 'gallery-category-section';
+      section.className = 'gallery-category-section gallery-overview-section';
       section.id = 'sec_' + group.slug;
       section.dataset.subcategory = group.name;
 
@@ -1281,7 +1281,47 @@
         sectionGrid.appendChild(createCard(item, globalIdx++));
       });
 
+      // 如果属于作品较多、被截断为 3 行的分类，在底部追加高质感“进入该分类查看全部”操作按钮
+      const isMoreNeeded = (totalInCat > displayedCount) || (group.items.length > 5);
+      if (isMoreNeeded) {
+        const moreWrap = document.createElement('div');
+        moreWrap.className = 'category-section-bottom-action';
+        const moreBtnText = isEn
+          ? `View All ${totalInCat} Works in ${group.name} →`
+          : `进入「${group.name}」查看全部 ${totalInCat} 件画卷 →`;
+        moreWrap.innerHTML =
+          '<button type="button" class="category-section-more-btn" aria-label="' + escapeHtml(moreBtnText) + '">' +
+            '<span>' + escapeHtml(moreBtnText) + '</span>' +
+            '<svg class="category-enter-arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"></polyline></svg>' +
+          '</button>';
+        const btnMore = moreWrap.querySelector('.category-section-more-btn');
+        if (btnMore) {
+          btnMore.addEventListener('click', (e) => {
+            e.preventDefault();
+            enterSubcategoryView(group.name);
+          });
+        }
+        section.appendChild(moreWrap);
+      }
+
       grid.appendChild(section);
+    });
+
+    // 渲染完成后在下一帧检测并禁用被截断隐藏超出 3 行卡片的 Tab 聚焦
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.gallery-overview-section').forEach(sec => {
+        const g = sec.querySelector('.section-grid');
+        if (!g) return;
+        const maxH = g.clientHeight;
+        if (maxH > 0) {
+          g.querySelectorAll('.gallery-card').forEach(card => {
+            if (card.offsetTop >= maxH - 8) {
+              card.setAttribute('tabindex', '-1');
+              card.setAttribute('aria-hidden', 'true');
+            }
+          });
+        }
+      });
     });
 
     updatePageAnchorSpine(groups);

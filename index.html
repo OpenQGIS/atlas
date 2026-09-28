@@ -158,10 +158,18 @@
     </div>
   </section>
 
+  <!-- Left-side Cartographic Anchor Spine · 侧边测绘标尺导览轴 -->
+  <nav class="page-anchor-spine" id="pageAnchorSpine" aria-label="画廊分类导览">
+    <div class="page-spine-track">
+      <div class="page-spine-progress" id="pageSpineProgressBar"></div>
+    </div>
+    <div class="page-spine-nodes" id="pageSpineNodes"></div>
+  </nav>
+
   <!-- Gallery Main Grid -->
-  <main class="gallery-main">
-    <div class="masonry-grid" id="galleryGrid">
-      <!-- Dynamic CangFeng Artwork Cards -->
+  <main class="gallery-main" id="galleryMain">
+    <div class="gallery-sections-wrap" id="galleryGrid">
+      <!-- Dynamic Category Sections & Cards -->
     </div>
   </main>
 
@@ -403,17 +411,13 @@
             </dl>
           </div>
 
-          <div class="meta-section" id="metaShareSection">
-            <h4 class="meta-section-title" data-i18n="metaShareTitle">画卷直链分享</h4>
+          <div class="meta-section" id="metaSharePaletteSection">
+            <h4 class="meta-section-title" data-i18n="metaNavSharePalette">直链与色板</h4>
             <div class="meta-share-row">
               <span class="meta-share-url font-mono" id="metaShareUrl">-</span>
               <button class="meta-copy-btn" id="btnCopyShareUrl" data-i18n-title="actionCopyShare" data-custom-tip="复制画卷专属直链" data-i18n="actionCopy">复制</button>
             </div>
-          </div>
-
-          <div class="meta-section" id="metaThemeSection">
-            <h4 class="meta-section-title" data-i18n="metaPaletteTitle">主调色板萃取</h4>
-            <div class="palette-swatches" id="mPalette"></div>
+            <div class="palette-swatches" id="mPalette" style="margin-top: 12px;"></div>
           </div>
 
           <div class="meta-section" id="metaSectionDesc">
@@ -431,13 +435,9 @@
             <span class="spine-dot"></span>
             <span class="spine-tooltip" data-i18n="metaNavInfo">基本信息</span>
           </button>
-          <button class="spine-node" data-target="metaShareSection" aria-label="专属直链" data-i18n-title="metaNavShare">
+          <button class="spine-node" data-target="metaSharePaletteSection" aria-label="直链与色板" data-i18n-title="metaNavSharePalette">
             <span class="spine-dot"></span>
-            <span class="spine-tooltip" data-i18n="metaNavShare">专属直链</span>
-          </button>
-          <button class="spine-node" data-target="metaThemeSection" aria-label="艺术色板" data-i18n-title="metaNavPalette">
-            <span class="spine-dot"></span>
-            <span class="spine-tooltip" data-i18n="metaNavPalette">艺术色板</span>
+            <span class="spine-tooltip" data-i18n="metaNavSharePalette">直链与色板</span>
           </button>
           <button class="spine-node" data-target="metaSectionDesc" aria-label="工造题记" data-i18n-title="metaNavNotes">
             <span class="spine-dot"></span>

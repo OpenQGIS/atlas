@@ -810,18 +810,501 @@
     });
   }
 
-  function applyFilter(filterVal) {
-    currentFilter = filterVal;
-    let pool = [...galleryItems];
+  let currentSubCategory = null;
+  let currentSubTopic = 'all';
 
-    if (filterVal === 'wide') {
+  function getCurrentFilteredPool() {
+    let pool = [...galleryItems];
+    if (currentFilter === 'wide') {
       pool = pool.filter(i => i.aspectRatio >= 1.2);
-    } else if (filterVal === 'tall') {
+    } else if (currentFilter === 'tall') {
       pool = pool.filter(i => i.aspectRatio <= 0.8);
     }
+    return pool;
+  }
 
+  function applyFilter(filterVal) {
+    currentFilter = filterVal;
+    const pool = getCurrentFilteredPool();
     currentFilteredItems = pool;
     renderGrid(pool);
+  }
+
+  function enterSubcategoryView(subCategoryName, shouldPushHistory = true) {
+    if (!subCategoryName) return;
+    currentSubCategory = subCategoryName;
+    currentSubTopic = 'all';
+
+    // 关键：临时将页面根元素的滚动行为设为 auto，防止平滑滚动引起向上回滚动画
+    document.documentElement.style.scrollBehavior = 'auto';
+
+    const subbar = document.querySelector('.gallery-subbar');
+    const headerOffset = (subbar ? subbar.getBoundingClientRect().height : 48) + 24;
+    const galleryMain = document.getElementById('galleryMain') || document.getElementById('galleryGrid');
+    const targetTop = galleryMain ? Math.max(0, galleryMain.getBoundingClientRect().top + window.pageYOffset - headerOffset) : 0;
+
+    const pool = getCurrentFilteredPool();
+    renderGrid(pool);
+
+    // 直接无动画瞬时跳转至子界面顶部
+    window.scrollTo({
+      top: targetTop,
+      behavior: 'instant'
+    });
+
+    if (shouldPushHistory) {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('sub', subCategoryName);
+        url.searchParams.delete('id');
+        url.searchParams.delete('art');
+        url.hash = 'gallery';
+        window.history.pushState({ level: 1, view: 'gallery', subCategory: subCategoryName }, '', url.toString());
+      } catch (e) {}
+    }
+
+    requestAnimationFrame(() => {
+      window.scrollTo({
+        top: targetTop,
+        behavior: 'instant'
+      });
+      document.documentElement.style.scrollBehavior = '';
+    });
+  }
+
+  function exitSubcategoryView(shouldPushHistory = true) {
+    const prevSub = currentSubCategory;
+    currentSubCategory = null;
+    currentSubTopic = 'all';
+
+    document.documentElement.style.scrollBehavior = 'auto';
+
+    const pool = getCurrentFilteredPool();
+    currentFilteredItems = pool;
+    renderGrid(pool);
+
+    if (shouldPushHistory) {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('sub');
+        url.searchParams.delete('topic');
+        url.hash = 'gallery';
+        window.history.pushState({ level: 1, view: 'gallery' }, '', url.toString());
+      } catch (e) {}
+    }
+
+    if (prevSub) {
+      const slug = getSubCategorySlug(prevSub);
+      const targetEl = document.getElementById('sec_' + slug);
+      if (targetEl) {
+        const subbar = document.querySelector('.gallery-subbar');
+        const headerOffset = (subbar ? subbar.getBoundingClientRect().height : 48) + 32;
+        const top = targetEl.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+        window.scrollTo({
+          top: Math.max(0, top),
+          behavior: 'instant'
+        });
+      }
+    }
+
+    requestAnimationFrame(() => {
+      document.documentElement.style.scrollBehavior = '';
+    });
+  }
+
+  const SUBCATEGORY_ORDER = ['艺术制图', '工程制图', '空间形态', '制图细节', '图面排版'];
+  const SUBCATEGORY_META = {
+    '艺术制图': {
+      en: 'Artistic Cartography',
+      desc: '艺术风格化与抽象视觉探索，弱化复杂标注，强化设计质感与情绪表达。'
+    },
+    '工程制图': {
+      en: 'Engineering Cartography',
+      desc: '工程示意制图与施工走向，展示通道骨架、纵坡标高与实际工造生产。'
+    },
+    '空间形态': {
+      en: 'Spatial Morphology',
+      desc: '聚焦空间形态学，解构宏观路网肌理、水系拓扑演进与枢纽几何构型。'
+    },
+    '制图细节': {
+      en: 'Cartographic Details',
+      desc: '聚焦制图工程技术细节、排版设计范式与微观地理要素精细呈现。'
+    },
+    '图面排版': {
+      en: 'Map Layout',
+      desc: '侧重版面组织、图文配比与版式范式。'
+    }
+  };
+
+  function getSubCategorySlug(sub) {
+    const map = {
+      '艺术制图': 'art',
+      '工程制图': 'engineering',
+      '空间形态': 'morphology',
+      '制图细节': 'details',
+      '图面排版': 'layout'
+    };
+    return map[sub] || ('sub_' + String(sub).replace(/[^a-zA-Z0-9_\u4e00-\u9fa5]/g, '_'));
+  }
+
+  let pageSpineScrollBound = false;
+  let lastSpineGroups = [];
+
+  function updatePageAnchorSpine(groups) {
+    lastSpineGroups = groups;
+    const spine = document.getElementById('pageAnchorSpine');
+    const nodesContainer = document.getElementById('pageSpineNodes');
+    const progressBar = document.getElementById('pageSpineProgressBar');
+    if (!spine || !nodesContainer) return;
+
+    if (!groups || groups.length === 0) {
+      spine.style.display = 'none';
+      return;
+    }
+    spine.style.display = 'flex';
+    nodesContainer.innerHTML = '';
+
+    groups.forEach((group, idx) => {
+      const node = document.createElement('button');
+      node.className = 'page-spine-node' + (idx === 0 ? ' active' : '');
+      node.setAttribute('data-target', 'sec_' + group.slug);
+      node.setAttribute('aria-label', group.name);
+      node.tabIndex = 0;
+
+      const idxStr = String(idx + 1).padStart(2, '0');
+      const countSuffix = (window.AtlasI18n && window.AtlasI18n.getLang() === 'en') ? ' works' : '件';
+      node.innerHTML =
+        '<span class="page-spine-dot"></span>' +
+        '<div class="page-spine-tooltip">' +
+          '<span class="page-spine-idx">' + idxStr + '</span>' +
+          '<span>' + escapeHtml(group.name) + '</span>' +
+          '<span class="page-spine-count">(' + group.items.length + countSuffix + ')</span>' +
+        '</div>';
+
+      node.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetEl = document.getElementById('sec_' + group.slug);
+        if (targetEl) {
+          const subbar = document.querySelector('.gallery-subbar');
+          const headerOffset = (subbar ? subbar.getBoundingClientRect().height : 48) + 32;
+          const top = targetEl.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+          window.scrollTo({
+            top: Math.max(0, top),
+            behavior: 'smooth'
+          });
+        }
+      });
+
+      nodesContainer.appendChild(node);
+    });
+
+    function onScrollSpine() {
+      const galleryMain = document.getElementById('galleryMain') || document.querySelector('.gallery-main');
+      if (!galleryMain) return;
+
+      const rect = galleryMain.getBoundingClientRect();
+      const viewportH = window.innerHeight;
+
+      const footerEl = document.getElementById('portalFooter');
+      const footerRect = footerEl ? footerEl.getBoundingClientRect() : null;
+
+      // 仅当视口进入瀑布流卡片区域（首屏已滚出、且页脚未进入）时显示进度条
+      const isHeroVisible = rect.top > (viewportH * 0.4);
+      const isFooterVisible = footerRect ? (footerRect.top < viewportH * 0.75) : (rect.bottom < viewportH * 0.6);
+      const inWaterfallCards = !isHeroVisible && !isFooterVisible;
+
+      if (inWaterfallCards) {
+        spine.classList.add('visible');
+      } else {
+        spine.classList.remove('visible');
+      }
+
+      // 计算纯瀑布流区域内部的滚动百分比
+      const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+      const startY = galleryMain.offsetTop - 80;
+      const totalDist = galleryMain.offsetHeight - viewportH + 160;
+      let percent = 0;
+      if (totalDist > 0) {
+        percent = Math.min(100, Math.max(0, ((scrollY - startY) / totalDist) * 100));
+      }
+
+      if (progressBar) {
+        progressBar.style.height = percent + '%';
+      }
+
+      const nodes = nodesContainer.querySelectorAll('.page-spine-node');
+      let activeIdx = 0;
+      const triggerThreshold = viewportH * 0.45;
+
+      groups.forEach((group, idx) => {
+        const targetEl = document.getElementById('sec_' + group.slug);
+        if (targetEl) {
+          const sRect = targetEl.getBoundingClientRect();
+          if (sRect.top <= triggerThreshold) {
+            activeIdx = idx;
+          }
+        }
+      });
+
+      if (rect.bottom <= viewportH * 0.6) {
+        activeIdx = groups.length - 1;
+      }
+
+      nodes.forEach((node, idx) => {
+        if (idx === activeIdx) {
+          node.classList.add('active');
+        } else {
+          node.classList.remove('active');
+        }
+      });
+    }
+
+    if (!pageSpineScrollBound) {
+      window.addEventListener('scroll', () => {
+        requestAnimationFrame(onScrollSpine);
+      }, { passive: true });
+      window.addEventListener('resize', () => {
+        requestAnimationFrame(onScrollSpine);
+      }, { passive: true });
+      pageSpineScrollBound = true;
+    }
+
+    requestAnimationFrame(onScrollSpine);
+  }
+
+  function getTopicSlug(topic) {
+    let hash = 0;
+    const str = String(topic || 'topic');
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return 'topic_' + Math.abs(hash).toString(36);
+  }
+
+  function renderSubcategoryView(grid, items) {
+    const subItems = items.filter(item => (item.subCategory || '未分类') === currentSubCategory);
+    const catIdx = SUBCATEGORY_ORDER.indexOf(currentSubCategory);
+    const idxStr = String(catIdx >= 0 ? catIdx + 1 : 1).padStart(2, '0');
+    const meta = SUBCATEGORY_META[currentSubCategory] || {};
+    const desc = meta.desc || '';
+    const countSuffix = (window.AtlasI18n && window.AtlasI18n.t('subviewCountSuffix')) || ' 件画卷收录';
+    const backText = (window.AtlasI18n && window.AtlasI18n.t('subviewBack')) || '返回全部成果';
+    const allTopicsText = (window.AtlasI18n && window.AtlasI18n.t('subviewAllTopics')) || '全部';
+
+    // 统计该 subCategory 内的所有 topic 标签（按作品出现顺序收集）
+    const topicGroupedMap = new Map();
+    subItems.forEach(item => {
+      const t = item.topic || '未归类';
+      if (!topicGroupedMap.has(t)) {
+        topicGroupedMap.set(t, []);
+      }
+      topicGroupedMap.get(t).push(item);
+    });
+
+    const allTopicGroups = [];
+    topicGroupedMap.forEach((list, tName) => {
+      allTopicGroups.push({
+        name: tName,
+        slug: getTopicSlug(tName),
+        items: list
+      });
+    });
+
+    const topics = Array.from(topicGroupedMap.keys());
+
+    // 筛选当前选中的 topic 组
+    let activeTopicGroups = allTopicGroups;
+    if (currentSubTopic && currentSubTopic !== 'all') {
+      activeTopicGroups = allTopicGroups.filter(g => g.name === currentSubTopic);
+    }
+
+    const displayItems = [];
+    activeTopicGroups.forEach(g => displayItems.push(...g.items));
+    currentFilteredItems = displayItems;
+
+    // 1. 构建顶部专题子界面 Banner
+    const heroEl = document.createElement('div');
+    heroEl.className = 'subcategory-view-hero';
+    heroEl.innerHTML =
+      '<div class="subview-nav-bar">' +
+        '<button class="subview-back-btn" id="btnBackToOverview" type="button" aria-label="' + escapeHtml(backText) + '">' +
+          '<svg class="subview-back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
+            '<polyline points="15 18 9 12 15 6"></polyline>' +
+          '</svg>' +
+          '<span>' + escapeHtml(backText) + '</span>' +
+        '</button>' +
+        '<span class="subview-nav-divider">/</span>' +
+        '<span class="subview-nav-current">' + escapeHtml(currentSubCategory) + '</span>' +
+      '</div>' +
+      '<div class="subview-lead-title-row">' +
+        '<span class="subview-idx">' + idxStr + '</span>' +
+        '<span class="subview-divider">/</span>' +
+        '<h1 class="subview-title">' + escapeHtml(currentSubCategory) + '</h1>' +
+        '<span class="subview-badge">' + subItems.length + countSuffix + '</span>' +
+      '</div>' +
+      (desc ? ('<p class="subview-desc">' + escapeHtml(desc) + '</p>') : '') +
+      (topics.length > 0 ? (
+        '<div class="subview-topic-filter-row">' +
+          '<div class="subview-topic-chips" id="subviewTopicChips">' +
+            '<button type="button" class="subview-topic-chip' + (currentSubTopic === 'all' ? ' active' : '') + '" data-topic="all">' +
+              escapeHtml(allTopicsText) + ' (' + subItems.length + ')' +
+            '</button>' +
+            topics.map(t => (
+              '<button type="button" class="subview-topic-chip' + (currentSubTopic === t ? ' active' : '') + '" data-topic="' + escapeHtml(t) + '">' +
+                escapeHtml(t) + ' (' + (topicGroupedMap.get(t) ? topicGroupedMap.get(t).length : 0) + ')' +
+              '</button>'
+            )).join('') +
+          '</div>' +
+        '</div>'
+      ) : '');
+
+    const btnBack = heroEl.querySelector('#btnBackToOverview');
+    if (btnBack) {
+      btnBack.addEventListener('click', (e) => {
+        e.preventDefault();
+        exitSubcategoryView();
+      });
+    }
+
+    const topicChips = heroEl.querySelectorAll('.subview-topic-chip');
+    topicChips.forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentSubTopic = chip.dataset.topic || 'all';
+        renderGrid(getCurrentFilteredPool());
+      });
+    });
+
+    grid.appendChild(heroEl);
+
+    // 2. 瀑布流画卷卡片区：按 Topic 分节展示
+    if (activeTopicGroups.length === 0 || displayItems.length === 0) {
+      const emptyWrap = document.createElement('div');
+      emptyWrap.style.cssText = 'padding: 48px 24px; color: var(--text-muted); text-align: center; width: 100%;';
+      emptyWrap.textContent = (window.AtlasI18n ? window.AtlasI18n.t('emptyFilter') : '当前专题下暂无收录成果');
+      grid.appendChild(emptyWrap);
+      updatePageAnchorSpine([]);
+      return;
+    }
+
+    const isComfort = grid.classList.contains('comfort-mode');
+    let globalSubIdx = 0;
+    const workSuffix = (window.AtlasI18n && window.AtlasI18n.getLang() === 'en') ? ' Works' : ' 件画卷';
+
+    activeTopicGroups.forEach((group, gIdx) => {
+      const tIdxStr = String(gIdx + 1).padStart(2, '0');
+      const section = document.createElement('section');
+      section.className = 'gallery-category-section gallery-topic-section';
+      section.id = 'sec_' + group.slug;
+      section.dataset.topic = group.name;
+
+      section.innerHTML =
+        '<header class="category-section-header topic-section-header">' +
+          '<div class="category-header-main-row">' +
+            '<div class="category-header-lead">' +
+              '<span class="category-section-idx">' + tIdxStr + '</span>' +
+              '<span class="category-section-divider">/</span>' +
+              '<h2 class="category-section-title">' + escapeHtml(group.name) + '</h2>' +
+              '<span class="category-section-badge">' + group.items.length + workSuffix + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</header>' +
+        '<div class="masonry-grid section-grid' + (isComfort ? ' comfort' : '') + '"></div>';
+
+      const sectionGrid = section.querySelector('.section-grid');
+      group.items.forEach(item => {
+        sectionGrid.appendChild(createCard(item, globalSubIdx++));
+      });
+
+      grid.appendChild(section);
+    });
+
+    // 3. 更新左侧导航标尺 Spine：在子界面下完全按 topic 进行各锚点定位与进度展示
+    updatePageAnchorSpine(activeTopicGroups);
+  }
+
+  function renderOverviewSections(grid, items) {
+    // Group items by subCategory preserving canonical order
+    const groupedMap = new Map();
+    SUBCATEGORY_ORDER.forEach(cat => groupedMap.set(cat, []));
+
+    items.forEach(item => {
+      const sub = item.subCategory || '未分类';
+      if (!groupedMap.has(sub)) {
+        groupedMap.set(sub, []);
+      }
+      groupedMap.get(sub).push(item);
+    });
+
+    const groups = [];
+    groupedMap.forEach((list, cat) => {
+      if (list.length > 0) {
+        groups.push({
+          name: cat,
+          slug: getSubCategorySlug(cat),
+          items: list
+        });
+      }
+    });
+
+    const isComfort = grid.classList.contains('comfort-mode');
+    let globalIdx = 0;
+    const enterText = (window.AtlasI18n && window.AtlasI18n.t('subviewEnter')) || '进入专题';
+
+    groups.forEach((group, gIdx) => {
+      const meta = SUBCATEGORY_META[group.name] || {};
+      const idxStr = String(gIdx + 1).padStart(2, '0');
+      const desc = meta.desc || '';
+      const countSuffix = (window.AtlasI18n && window.AtlasI18n.getLang() === 'en') ? ' Works' : ' 件画卷';
+
+      const section = document.createElement('section');
+      section.className = 'gallery-category-section';
+      section.id = 'sec_' + group.slug;
+      section.dataset.subcategory = group.name;
+
+      section.innerHTML = 
+        '<header class="category-section-header clickable" role="button" tabindex="0" title="进入「' + escapeHtml(group.name) + '」专题子界面">' +
+          '<div class="category-header-main-row">' +
+            '<div class="category-header-lead">' +
+              '<span class="category-section-idx">' + idxStr + '</span>' +
+              '<span class="category-section-divider">/</span>' +
+              '<h2 class="category-section-title">' + escapeHtml(group.name) + '</h2>' +
+              '<span class="category-section-badge">' + group.items.length + countSuffix + '</span>' +
+            '</div>' +
+            '<div class="category-header-action" aria-label="进入专题">' +
+              '<span class="category-enter-label">' + escapeHtml(enterText) + '</span>' +
+              '<svg class="category-enter-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
+                '<polyline points="9 18 15 12 9 6"></polyline>' +
+              '</svg>' +
+            '</div>' +
+          '</div>' +
+          (desc ? ('<p class="category-section-desc">' + escapeHtml(desc) + '</p>') : '') +
+        '</header>' +
+        '<div class="masonry-grid section-grid' + (isComfort ? ' comfort' : '') + '"></div>';
+
+      const header = section.querySelector('.category-section-header');
+      if (header) {
+        header.addEventListener('click', () => {
+          enterSubcategoryView(group.name);
+        });
+        header.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            enterSubcategoryView(group.name);
+          }
+        });
+      }
+
+      const sectionGrid = section.querySelector('.section-grid');
+      group.items.forEach(item => {
+        sectionGrid.appendChild(createCard(item, globalIdx++));
+      });
+
+      grid.appendChild(section);
+    });
+
+    updatePageAnchorSpine(groups);
   }
 
   function renderGrid(items) {
@@ -833,12 +1316,15 @@
       const emptyText = window.AtlasI18n ? window.AtlasI18n.t('emptyFilter') : '当前筛选条件下暂无收录成果';
       grid.innerHTML = '<div style="padding: 48px 24px; color: var(--text-muted); text-align: center; width: 100%;">' +
         emptyText + '</div>';
+      updatePageAnchorSpine([]);
       return;
     }
 
-    items.forEach((item, localIdx) => {
-      grid.appendChild(createCard(item, localIdx));
-    });
+    if (currentSubCategory) {
+      renderSubcategoryView(grid, items);
+    } else {
+      renderOverviewSections(grid, items);
+    }
   }
 
   /**
@@ -913,7 +1399,7 @@
     const match = str.match(/^(\d{4})[-/.年](\d{1,2})/);
     if (match) {
       const year = match[1];
-      const month = String(parseInt(match[2], 10)).padStart(2, '0');
+      const month = parseInt(match[2], 10);
       return year + '.' + month;
     }
     const matchYear = str.match(/^(\d{4})$/);
@@ -924,7 +1410,7 @@
     if (!isNaN(timestamp)) {
       const d = new Date(timestamp);
       const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const month = d.getMonth() + 1;
       return year + '.' + month;
     }
     return str;
@@ -1006,12 +1492,14 @@
       btnDense.classList.add('active');
       btnComfort.classList.remove('active');
       grid.classList.remove('comfort-mode');
+      grid.querySelectorAll('.section-grid').forEach(g => g.classList.remove('comfort'));
     });
 
     btnComfort.addEventListener('click', () => {
       btnComfort.classList.add('active');
       btnDense.classList.remove('active');
       grid.classList.add('comfort-mode');
+      grid.querySelectorAll('.section-grid').forEach(g => g.classList.add('comfort'));
     });
   }
 
@@ -1611,6 +2099,7 @@
       const modalEl = document.getElementById('viewerModal');
       const urlParams = new URLSearchParams(window.location.search);
       const id = urlParams.get('id') || urlParams.get('art');
+      const sub = urlParams.get('sub');
       const state = e.state || {};
 
       if (id) {
@@ -1626,8 +2115,18 @@
           closeViewer(false);
         }
 
+        if (sub) {
+          if (currentSubCategory !== sub) {
+            enterSubcategoryView(sub, false);
+          }
+        } else {
+          if (currentSubCategory !== null) {
+            exitSubcategoryView(false);
+          }
+        }
+
         // 判断是否退回到了首屏 Level 0
-        if (state.level === 0 || (!window.location.hash && !state.level)) {
+        if ((state.level === 0 || (!window.location.hash && !state.level)) && !sub) {
           currentHistoryLevel = 0;
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
@@ -2358,9 +2857,12 @@
       }
     }
     if (vDims) vDims.textContent = item.width + ' × ' + item.height + ' px';
-    if (mTitle) mTitle.textContent = locItem.title;
-    if (mCat) mCat.textContent = locItem.categoryName + (locItem.subCategory ? ' · ' + locItem.subCategory : '');
-    if (mAuthor) mAuthor.textContent = locItem.author || 'OpenQGIS';
+    if (mCat) {
+      let catStr = locItem.categoryName || locItem.category || '';
+      if (locItem.subCategory) catStr += ' · ' + locItem.subCategory;
+      if (locItem.topic) catStr += ' · ' + locItem.topic;
+      mCat.textContent = catStr;
+    }
 
     // 日期仅显示年月
     const rawDate = locItem.date || locItem.year || item.date || item.year;
@@ -3241,7 +3743,9 @@
     if (titleEl) titleEl.textContent = (locItem && locItem.title) || item.title;
 
     if (catChip) {
-      catChip.textContent = (locItem && locItem.category) || item.category || '空间制图';
+      let chipText = (locItem && (locItem.subCategory || locItem.category)) || item.category || '空间制图';
+      if (locItem && locItem.topic) chipText += ' · ' + locItem.topic;
+      catChip.textContent = chipText;
     }
     if (resChip) {
       if (item.width && item.height) {
@@ -3741,9 +4245,10 @@
                           (Array.isArray(item.color) && item.color.length > 0) ? item.color :
                           (MASTER_PALETTES[item.id] || []);
 
-    const titleText = (locItem && locItem.title) || item.title || i18nTexts.fallbackTitle;
-    const categoryText = ((locItem && (locItem.categoryName || locItem.category)) || item.category || i18nTexts.fallbackCategory) +
-                         '   |   ' + i18nTexts.cartographerPrefix;
+    let catMain = ((locItem && (locItem.categoryName || locItem.category)) || item.category || i18nTexts.fallbackCategory);
+    if (locItem && locItem.subCategory) catMain += ' · ' + locItem.subCategory;
+    if (locItem && locItem.topic) catMain += ' · ' + locItem.topic;
+    const categoryText = catMain + '   |   ' + i18nTexts.cartographerPrefix;
     const descText = (locItem && locItem.description) || item.description || '';
     const shareUrl = getShareUrlForItem(item);
     const imgSrc = item.thumb || item.heroImage || (item.dzi && item.dzi.Image && item.dzi.Image.Url) || '';
@@ -4080,8 +4585,11 @@
       if (url.searchParams.has('id') || url.searchParams.has('art') || window.location.hash) {
         url.searchParams.delete('id');
         url.searchParams.delete('art');
+        if (currentSubCategory) {
+          url.searchParams.set('sub', currentSubCategory);
+        }
         url.hash = 'gallery';
-        window.history.replaceState({ level: 1, view: 'gallery' }, '', url.toString());
+        window.history.replaceState({ level: 1, view: 'gallery', subCategory: currentSubCategory }, '', url.toString());
         currentHistoryLevel = 1;
       }
     } catch (e) {}
@@ -4113,12 +4621,28 @@
   function checkUrlDeepLink() {
     try {
       const urlParams = new URLSearchParams(window.location.search);
+
+      // 检查是否深链至特定 subCategory 专题子界面
+      let subTarget = urlParams.get('sub');
+      if (!subTarget && window.location.hash) {
+        const hash = window.location.hash.replace(/^#\/?/, '');
+        if (hash.startsWith('sub=')) {
+          subTarget = decodeURIComponent(hash.replace('sub=', ''));
+        }
+      }
+      if (subTarget) {
+        const canonical = SUBCATEGORY_ORDER.find(s => s === subTarget || getSubCategorySlug(s) === subTarget);
+        if (canonical) {
+          enterSubcategoryView(canonical, false);
+        }
+      }
+
       let target = urlParams.get('id') || urlParams.get('art');
       if (!target && window.location.hash) {
         const hash = window.location.hash.replace(/^#\/?/, '');
         if (hash.startsWith('id=')) target = hash.replace('id=', '');
         else if (hash.startsWith('art=')) target = hash.replace('art=', '');
-        else target = hash;
+        else if (!hash.startsWith('sub=') && hash !== 'gallery') target = hash;
       }
       if (target) {
         const match = findArtworkByQuery(target);
@@ -4127,8 +4651,11 @@
             const galleryUrl = new URL(window.location.href);
             galleryUrl.searchParams.delete('id');
             galleryUrl.searchParams.delete('art');
+            if (currentSubCategory) {
+              galleryUrl.searchParams.set('sub', currentSubCategory);
+            }
             galleryUrl.hash = 'gallery';
-            window.history.replaceState({ level: 1, view: 'gallery' }, '', galleryUrl.toString());
+            window.history.replaceState({ level: 1, view: 'gallery', subCategory: currentSubCategory }, '', galleryUrl.toString());
           } catch (e) {}
           setTimeout(() => {
             openViewerByItem(match, true);

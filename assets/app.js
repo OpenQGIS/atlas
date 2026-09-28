@@ -230,6 +230,43 @@
     '<text class="qmf-badge-num" xml:space="preserve" style="font-style:normal;font-weight:700;font-size:12.7032px;line-height:10.4398px;font-family:\'MiSans\',-apple-system,sans-serif;text-align:center;letter-spacing:-0.8px;text-anchor:middle;fill-opacity:1;" x="108.68931" y="151.41119"><tspan x="108.68931" y="151.41119">__PRECISION__</tspan></text>' +
     '</g></svg>';
 
+  const SUBCATEGORY_ORDER = ['艺术制图', '工程制图', '空间形态', '图面排版'];
+
+  function getSubCategoryParam(sub) {
+    if (!sub) return '1';
+    const idx = SUBCATEGORY_ORDER.indexOf(sub);
+    if (idx !== -1) return String(idx + 1);
+    return '1';
+  }
+
+  function parseSubCategoryParam(val) {
+    if (!val && val !== 0) return null;
+    val = String(val).trim().toLowerCase();
+    if (!val) return null;
+    // 支持数字与超简洁参数: '1', 's1', 'sub1', 'art' 等
+    if (val === '1' || val === 's1' || val === 'sub1' || val === 'art') return SUBCATEGORY_ORDER[0];
+    if (val === '2' || val === 's2' || val === 'sub2' || val === 'engineering' || val === 'eng') return SUBCATEGORY_ORDER[1];
+    if (val === '3' || val === 's3' || val === 'sub3' || val === 'morphology' || val === 'morph') return SUBCATEGORY_ORDER[2];
+    if (val === '4' || val === 's4' || val === 'sub4' || val === 'layout') return SUBCATEGORY_ORDER[3];
+    if (SUBCATEGORY_ORDER.includes(val)) return val;
+    const match = SUBCATEGORY_ORDER.find(s => s.toLowerCase() === val);
+    return match || null;
+  }
+
+  function getSubFromUrl(urlParams) {
+    if (!urlParams) return null;
+    let val = urlParams.get('sub') || urlParams.get('s');
+    if (!val) {
+      for (let i = 1; i <= 4; i++) {
+        if (urlParams.has('s' + i)) {
+          val = String(i);
+          break;
+        }
+      }
+    }
+    return parseSubCategoryParam(val);
+  }
+
   function getQMapFlowSvg(precision = 100) {
     const cleanVal = String(precision).replace(/%/g, '').trim() || '100';
     return QMAPFLOW_BASE_SVG.replace('__PRECISION__', cleanVal);
@@ -242,7 +279,7 @@
     // 预先检测是否有子页面参数，若有立即施加 in-subview 类，避免首屏 Hero 闪烁
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('sub')) {
+      if (getSubFromUrl(urlParams)) {
         document.body.classList.add('in-subview');
       }
     } catch (e) {}
@@ -888,7 +925,9 @@
     if (shouldPushHistory) {
       try {
         const url = new URL(window.location.href);
-        url.searchParams.set('sub', subCategoryName);
+        url.searchParams.delete('s');
+        for (let i = 1; i <= 4; i++) url.searchParams.delete('s' + i);
+        url.searchParams.set('sub', getSubCategoryParam(subCategoryName));
         url.searchParams.delete('id');
         url.searchParams.delete('art');
         url.hash = 'gallery';
@@ -922,6 +961,8 @@
       try {
         const url = new URL(window.location.href);
         url.searchParams.delete('sub');
+        url.searchParams.delete('s');
+        for (let i = 1; i <= 4; i++) url.searchParams.delete('s' + i);
         url.searchParams.delete('topic');
         url.hash = 'gallery';
         window.history.pushState({ level: 1, view: 'gallery' }, '', url.toString());
@@ -947,7 +988,6 @@
     });
   }
 
-  const SUBCATEGORY_ORDER = ['艺术制图', '工程制图', '空间形态', '图面排版'];
   const SUBCATEGORY_META = {
     '艺术制图': {
       en: 'Artistic Cartography',
@@ -2171,7 +2211,7 @@
       const modalEl = document.getElementById('viewerModal');
       const urlParams = new URLSearchParams(window.location.search);
       const id = urlParams.get('id') || urlParams.get('art');
-      const sub = urlParams.get('sub');
+      const sub = getSubFromUrl(urlParams);
       const state = e.state || {};
 
       if (id) {
@@ -3686,13 +3726,15 @@
   function getShareUrlForItem(item) {
     if (!item) return window.location.href;
     try {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('art');
+      const url = new URL(window.location.origin + window.location.pathname);
+      if (currentSubCategory) {
+        url.searchParams.set('sub', getSubCategoryParam(currentSubCategory));
+      }
       url.searchParams.set('id', item.id);
-      url.hash = '';
       return url.toString();
     } catch (e) {
-      return window.location.origin + window.location.pathname + '?id=' + encodeURIComponent(item.id);
+      const subPrefix = currentSubCategory ? ('sub=' + getSubCategoryParam(currentSubCategory) + '&') : '';
+      return window.location.origin + window.location.pathname + '?' + subPrefix + 'id=' + encodeURIComponent(item.id);
     }
   }
 
@@ -4657,6 +4699,13 @@
       const url = new URL(window.location.href);
       if (url.searchParams.get('id') !== item.id) {
         url.searchParams.delete('art');
+        url.searchParams.delete('s');
+        for (let i = 1; i <= 4; i++) url.searchParams.delete('s' + i);
+        if (currentSubCategory) {
+          url.searchParams.set('sub', getSubCategoryParam(currentSubCategory));
+        } else {
+          url.searchParams.delete('sub');
+        }
         url.searchParams.set('id', item.id);
         url.hash = '';
         if (isNewOpen) {
@@ -4675,8 +4724,12 @@
       if (url.searchParams.has('id') || url.searchParams.has('art') || window.location.hash) {
         url.searchParams.delete('id');
         url.searchParams.delete('art');
+        url.searchParams.delete('s');
+        for (let i = 1; i <= 4; i++) url.searchParams.delete('s' + i);
         if (currentSubCategory) {
-          url.searchParams.set('sub', currentSubCategory);
+          url.searchParams.set('sub', getSubCategoryParam(currentSubCategory));
+        } else {
+          url.searchParams.delete('sub');
         }
         url.hash = 'gallery';
         window.history.replaceState({ level: 1, view: 'gallery', subCategory: currentSubCategory }, '', url.toString());
@@ -4712,36 +4765,42 @@
     try {
       const urlParams = new URLSearchParams(window.location.search);
 
-      // 检查是否深链至特定 subCategory 专题子界面
-      let subTarget = urlParams.get('sub');
+      // 检查是否深链至特定 subCategory 专题子界面 (支持 ?sub=1, ?s=1, ?s1, ?sub=art, ?sub=艺术制图 等)
+      let subTarget = getSubFromUrl(urlParams);
       if (!subTarget && window.location.hash) {
         const hash = window.location.hash.replace(/^#\/?/, '');
         if (hash.startsWith('sub=')) {
-          subTarget = decodeURIComponent(hash.replace('sub=', ''));
+          subTarget = parseSubCategoryParam(decodeURIComponent(hash.replace('sub=', '')));
+        } else if (hash.startsWith('s=')) {
+          subTarget = parseSubCategoryParam(decodeURIComponent(hash.replace('s=', '')));
+        } else if (/^s[1-4]$/i.test(hash)) {
+          subTarget = parseSubCategoryParam(hash);
         }
       }
       if (subTarget) {
-        const canonical = SUBCATEGORY_ORDER.find(s => s === subTarget || getSubCategorySlug(s) === subTarget);
-        if (canonical) {
-          try {
-            // 将历史基底设为画廊全景概览 (#gallery)，如此用户点击浏览器“后退”时会返回上一层画廊全景，绝不会直接关掉网页
-            const overviewUrl = new URL(window.location.href);
-            overviewUrl.searchParams.delete('sub');
-            overviewUrl.searchParams.delete('topic');
-            overviewUrl.searchParams.delete('id');
-            overviewUrl.searchParams.delete('art');
-            overviewUrl.hash = 'gallery';
-            window.history.replaceState({ level: 1, view: 'gallery' }, '', overviewUrl.toString());
+        const canonical = subTarget;
+        try {
+          // 将历史基底设为画廊全景概览 (#gallery)，如此用户点击浏览器“后退”时会返回上一层画廊全景，绝不会直接关掉网页
+          const overviewUrl = new URL(window.location.href);
+          overviewUrl.searchParams.delete('sub');
+          overviewUrl.searchParams.delete('s');
+          for (let i = 1; i <= 4; i++) overviewUrl.searchParams.delete('s' + i);
+          overviewUrl.searchParams.delete('topic');
+          overviewUrl.searchParams.delete('id');
+          overviewUrl.searchParams.delete('art');
+          overviewUrl.hash = 'gallery';
+          window.history.replaceState({ level: 1, view: 'gallery' }, '', overviewUrl.toString());
 
-            // 将当前状态推入子分类视图，使浏览器后退键生效
-            const subUrl = new URL(window.location.href);
-            subUrl.searchParams.set('sub', canonical);
-            subUrl.hash = 'gallery';
-            window.history.pushState({ level: 1, view: 'gallery', subCategory: canonical }, '', subUrl.toString());
-          } catch (e) {}
+          // 将当前状态推入子分类视图，使浏览器后退键生效 (URL 强制保持纯净数字无中文 sub=1)
+          const subUrl = new URL(window.location.href);
+          subUrl.searchParams.delete('s');
+          for (let i = 1; i <= 4; i++) subUrl.searchParams.delete('s' + i);
+          subUrl.searchParams.set('sub', getSubCategoryParam(canonical));
+          subUrl.hash = 'gallery';
+          window.history.pushState({ level: 1, view: 'gallery', subCategory: canonical }, '', subUrl.toString());
+        } catch (e) {}
 
-          enterSubcategoryView(canonical, false);
-        }
+        enterSubcategoryView(canonical, false);
       }
 
       let target = urlParams.get('id') || urlParams.get('art');
@@ -4749,7 +4808,7 @@
         const hash = window.location.hash.replace(/^#\/?/, '');
         if (hash.startsWith('id=')) target = hash.replace('id=', '');
         else if (hash.startsWith('art=')) target = hash.replace('art=', '');
-        else if (!hash.startsWith('sub=') && hash !== 'gallery') target = hash;
+        else if (!hash.startsWith('sub=') && !hash.startsWith('s=') && hash !== 'gallery') target = hash;
       }
       if (target) {
         const match = findArtworkByQuery(target);
@@ -4758,8 +4817,12 @@
             const galleryUrl = new URL(window.location.href);
             galleryUrl.searchParams.delete('id');
             galleryUrl.searchParams.delete('art');
+            galleryUrl.searchParams.delete('s');
+            for (let i = 1; i <= 4; i++) galleryUrl.searchParams.delete('s' + i);
             if (currentSubCategory) {
-              galleryUrl.searchParams.set('sub', currentSubCategory);
+              galleryUrl.searchParams.set('sub', getSubCategoryParam(currentSubCategory));
+            } else {
+              galleryUrl.searchParams.delete('sub');
             }
             galleryUrl.hash = 'gallery';
             window.history.replaceState({ level: 1, view: 'gallery', subCategory: currentSubCategory }, '', galleryUrl.toString());

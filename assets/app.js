@@ -1115,47 +1115,8 @@
     const desc = meta.desc || '';
     const countSuffix = (window.AtlasI18n && window.AtlasI18n.t('subviewCountSuffix')) || ' 件画卷收录';
     const backText = (window.AtlasI18n && window.AtlasI18n.t('subviewBack')) || '返回全部成果';
-    const allTopicsText = (window.AtlasI18n && window.AtlasI18n.t('subviewAllTopics')) || '全部';
 
-    // 统计该 subCategory 内的所有 topic 标签（按首选 topic 归类，保证每幅作品在全量下只出现一次）
-    const topicGroupedMap = new Map();
-    subItems.forEach(item => {
-      const t = (Array.isArray(item.topics) && item.topics[0]) || item.topic || '精选探索';
-      if (!topicGroupedMap.has(t)) {
-        topicGroupedMap.set(t, []);
-      }
-      topicGroupedMap.get(t).push(item);
-    });
-
-    const allTopicGroups = [];
-    topicGroupedMap.forEach((list, tName) => {
-      allTopicGroups.push({
-        name: tName,
-        slug: getTopicSlug(tName),
-        items: list
-      });
-    });
-
-    const topics = Array.from(topicGroupedMap.keys());
-
-    // 筛选当前选中的 topic 组
-    let activeTopicGroups = allTopicGroups;
-    if (currentSubTopic && currentSubTopic !== 'all') {
-      const filteredByTopic = subItems.filter(item => {
-        if (Array.isArray(item.topics)) return item.topics.includes(currentSubTopic);
-        if (typeof item.topic === 'string') return item.topic.includes(currentSubTopic);
-        return false;
-      });
-      activeTopicGroups = [{
-        name: currentSubTopic,
-        slug: getTopicSlug(currentSubTopic),
-        items: filteredByTopic
-      }];
-    }
-
-    const displayItems = [];
-    activeTopicGroups.forEach(g => displayItems.push(...g.items));
-    currentFilteredItems = displayItems;
+    currentFilteredItems = subItems;
 
     // 1. 构建顶部专题子界面 Banner
     const heroEl = document.createElement('div');
@@ -1177,22 +1138,7 @@
         '<h1 class="subview-title">' + escapeHtml(currentSubCategory) + '</h1>' +
         '<span class="subview-badge">' + subItems.length + countSuffix + '</span>' +
       '</div>' +
-      (desc ? ('<p class="subview-desc">' + escapeHtml(desc) + '</p>') : '') +
-      (topics.length > 0 ? (
-        '<div class="subview-topic-filter-row">' +
-          '<div class="subview-topic-chips" id="subviewTopicChips">' +
-            '<button type="button" class="subview-topic-chip' + (currentSubTopic === 'all' ? ' active' : '') + '" data-topic="all">' +
-              escapeHtml(allTopicsText) + ' (' + subItems.length + ')' +
-            '</button>' +
-            topics.map(t => {
-              const matchCount = subItems.filter(it => (Array.isArray(it.topics) && it.topics.includes(t)) || (it.topic && it.topic.includes(t))).length;
-              return '<button type="button" class="subview-topic-chip' + (currentSubTopic === t ? ' active' : '') + '" data-topic="' + escapeHtml(t) + '">' +
-                escapeHtml(t) + ' (' + matchCount + ')' +
-              '</button>';
-            }).join('') +
-          '</div>' +
-        '</div>'
-      ) : '');
+      (desc ? ('<p class="subview-desc">' + escapeHtml(desc) + '</p>') : '');
 
     const btnBack = heroEl.querySelector('#btnBackToOverview');
     if (btnBack) {
@@ -1202,19 +1148,10 @@
       });
     }
 
-    const topicChips = heroEl.querySelectorAll('.subview-topic-chip');
-    topicChips.forEach(chip => {
-      chip.addEventListener('click', (e) => {
-        e.preventDefault();
-        currentSubTopic = chip.dataset.topic || 'all';
-        renderGrid(getCurrentFilteredPool());
-      });
-    });
-
     grid.appendChild(heroEl);
 
-    // 2. 瀑布流画卷卡片区：按 Topic 分节展示
-    if (activeTopicGroups.length === 0 || displayItems.length === 0) {
+    // 2. 瀑布流画卷卡片区：全量连续瀑布流拼贴，根据各图宽高比自由拼贴
+    if (subItems.length === 0) {
       const emptyWrap = document.createElement('div');
       emptyWrap.style.cssText = 'padding: 48px 24px; color: var(--text-muted); text-align: center; width: 100%;';
       emptyWrap.textContent = (window.AtlasI18n ? window.AtlasI18n.t('emptyFilter') : '当前专题下暂无收录成果');
@@ -1224,39 +1161,20 @@
     }
 
     const isComfort = grid.classList.contains('comfort-mode');
-    let globalSubIdx = 0;
-    const workSuffix = (window.AtlasI18n && window.AtlasI18n.getLang() === 'en') ? ' Works' : ' 件画卷';
+    const section = document.createElement('section');
+    section.className = 'gallery-category-section subview-unified-section';
+    section.id = 'sec_' + getSubCategorySlug(currentSubCategory);
+    section.innerHTML = '<div class="masonry-grid section-grid' + (isComfort ? ' comfort' : '') + '"></div>';
 
-    activeTopicGroups.forEach((group, gIdx) => {
-      const tIdxStr = String(gIdx + 1).padStart(2, '0');
-      const section = document.createElement('section');
-      section.className = 'gallery-category-section gallery-topic-section';
-      section.id = 'sec_' + group.slug;
-      section.dataset.topic = group.name;
-
-      section.innerHTML =
-        '<header class="category-section-header topic-section-header">' +
-          '<div class="category-header-main-row">' +
-            '<div class="category-header-lead">' +
-              '<span class="category-section-idx">' + tIdxStr + '</span>' +
-              '<span class="category-section-divider">/</span>' +
-              '<h2 class="category-section-title">' + escapeHtml(group.name) + '</h2>' +
-              '<span class="category-section-badge">' + group.items.length + workSuffix + '</span>' +
-            '</div>' +
-          '</div>' +
-        '</header>' +
-        '<div class="masonry-grid section-grid' + (isComfort ? ' comfort' : '') + '"></div>';
-
-      const sectionGrid = section.querySelector('.section-grid');
-      group.items.forEach(item => {
-        sectionGrid.appendChild(createCard(item, globalSubIdx++));
-      });
-
-      grid.appendChild(section);
+    const sectionGrid = section.querySelector('.section-grid');
+    subItems.forEach((item, idx) => {
+      sectionGrid.appendChild(createCard(item, idx));
     });
 
-    // 3. 更新左侧导航标尺 Spine：在子界面下完全按 topic 进行各锚点定位与进度展示
-    updatePageAnchorSpine(activeTopicGroups);
+    grid.appendChild(section);
+
+    // 子界面采用单体统一瀑布流，隐藏多段锚点导览轴
+    updatePageAnchorSpine([]);
   }
 
   function renderOverviewSections(grid, items) {

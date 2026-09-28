@@ -3109,12 +3109,13 @@
     const t = window.AtlasI18n ? window.AtlasI18n.t : (k => k);
     const activeItem = item;
 
-    // Extract dominant palette
+    // Extract dominant palette / render markdown annotated palette
     if (mSwatches) {
-      mSwatches.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">' + t('metaPaletteExtracting') + '</span>';
-      extractDominantColors(item, 5, function (colors) {
+      function renderSwatches(colors) {
         if (!modalEl.classList.contains('open')) return;
-        if (currentViewerIndex >= 0 && galleryItems[currentViewerIndex] && galleryItems[currentViewerIndex].id !== activeItem.id) return;
+        const currentItem = (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) ? currentFilteredItems[currentViewerIndex] : activeItem;
+        if (currentItem && currentItem.id !== activeItem.id) return;
+
         mSwatches.innerHTML = '';
         if (!colors || colors.length === 0) {
           mSwatches.innerHTML = '<span style="font-size:0.72rem;color:var(--text-muted);">' + t('metaPaletteEmpty') + '</span>';
@@ -3139,7 +3140,28 @@
           });
           mSwatches.appendChild(btn);
         });
-      });
+      }
+
+      // 优先从当前对象或全局列表中提取 Markdown 标注的色板
+      let explicitColors = (item.colors && item.colors.length > 0) ? item.colors : ((item.color && item.color.length > 0) ? item.color : null);
+      if ((!explicitColors || explicitColors.length === 0) && item.id) {
+        const found = galleryItems.find(i => i.id === item.id);
+        if (found) explicitColors = found.colors || found.color;
+      }
+      if (typeof explicitColors === 'string') {
+        explicitColors = explicitColors.match(/#[0-9a-fA-F]{3,8}/g) || [explicitColors];
+      }
+
+      if (Array.isArray(explicitColors) && explicitColors.length > 0) {
+        // Markdown 中已标定色板：直接秒级同步呈现，彻底杜绝“提取中...”停留
+        renderSwatches(explicitColors.slice(0, 5));
+      } else {
+        // 未标定时才异步提取
+        mSwatches.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">' + t('metaPaletteExtracting') + '</span>';
+        extractDominantColors(item, 5, function (colors) {
+          renderSwatches(colors);
+        });
+      }
     }
 
     const mShareUrl = document.getElementById('metaShareUrl');
@@ -5139,6 +5161,10 @@
     } else if (typeof target === 'string') {
       const found = galleryItems.find(i => i.id === target || i.thumb === target);
       if (found) explicitColors = found.colors || found.color;
+    }
+
+    if (typeof explicitColors === 'string') {
+      explicitColors = explicitColors.match(/#[0-9a-fA-F]{3,8}/g) || [explicitColors];
     }
 
     if (Array.isArray(explicitColors) && explicitColors.length > 0) {

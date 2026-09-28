@@ -1746,6 +1746,26 @@ body[data-page="portal"] {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
 }
+
+/* 保护非超长图（宽高比 < 2.5）在最后一行或单独成行时不被过度拉伸撑满整屏 */
+.gallery-card:not(.is-ultrawide) {
+  max-width: min(calc(var(--target-row-height, 320px) * var(--aspect-ratio) * 1.38), 100%);
+}
+
+/* 超长图（如平陆运河等全景长卷，宽高比 >= 2.5）支持横跨整屏展示 */
+.gallery-card.is-ultrawide {
+  flex-basis: min(calc(var(--target-row-height, 320px) * var(--aspect-ratio)), 100%);
+  max-width: 100%;
+}
+
+/* 在多图网格尾部放置 flex 占位伪元素，吸收末行剩余空白，彻底杜绝孤立卡片拉扯变形 */
+.masonry-grid::after {
+  content: '';
+  flex-grow: 999999;
+  min-width: 60px;
+  height: 0;
+  pointer-events: none;
+}
 .gallery-card:hover,
 .gallery-card:focus-visible {
   border-color: var(--accent);

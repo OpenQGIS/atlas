@@ -960,15 +960,27 @@
     return cats.includes(targetCat);
   }
 
+  // 首页展示平衡集合：确保两大图多的子分类（艺术制图与空间形态）均有约 9~13 幅作品构成饱满的 3 行拼贴，杜绝单图撑满整行的失衡排版
+  const MORPHOLOGY_HOMEPAGE_IDS = new Set([
+    'shanghai', 'china_top12_airports_2024', 'lake_poyang', 'longquanshan_slope_b',
+    'chengdu_blueprint', 'chengdu_macaron', 'wuhan_low_saturation',
+    'pearl_river_delta_dot_art', 'suzhou_dot_art', 'xian_papercut',
+    'chongqing_cyan', 'chongqing_black_gold', 'changsha_emboss'
+  ]);
+
+  const ENGINEERING_HOMEPAGE_IDS = new Set([
+    'pinglu_canal', 'yangtze_river_bridge_chongqing',
+    'tianfu_luxihe_xinglong_lake', 'chengdu_greenway_ring', 'longquanshan_slope_a'
+  ]);
+
   function getPrimarySubCategory(item) {
+    if (!item) return '艺术制图';
+    if (item.id === 'aba_cycling_route') return '图面排版';
+    if (ENGINEERING_HOMEPAGE_IDS.has(item.id)) return '工程制图';
+    if (MORPHOLOGY_HOMEPAGE_IDS.has(item.id)) return '空间形态';
     const cats = getItemSubCategories(item);
-    if (cats.length === 0) return '艺术制图';
-    if (cats.length === 1) return cats[0];
-    if (cats.includes('图面排版')) return '图面排版';
-    if (cats.includes('工程制图') && (item.id === 'tianfu_luxihe_xinglong_lake' || item.id === 'chengdu_greenway_ring')) {
-      return '工程制图';
-    }
-    return cats[0];
+    if (cats.includes('艺术制图')) return '艺术制图';
+    return cats[0] || '艺术制图';
   }
 
   let pageSpineScrollBound = false;
@@ -1439,7 +1451,8 @@
   function createCard(item, localIdx) {
     const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
     const card = document.createElement('article');
-    card.className = 'gallery-card';
+    const isUltraWide = (item.aspectRatio >= 2.5);
+    card.className = 'gallery-card' + (isUltraWide ? ' is-ultrawide' : '');
     card.id = 'artCard_' + item.id;
     card.dataset.id = item.id;
     card.setAttribute('role', 'button');

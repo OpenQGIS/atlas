@@ -925,11 +925,7 @@
     if (shouldPushHistory) {
       try {
         const url = new URL(window.location.href);
-        url.searchParams.delete('s');
-        for (let i = 1; i <= 4; i++) url.searchParams.delete('s' + i);
-        url.searchParams.set('sub', getSubCategoryParam(subCategoryName));
-        url.searchParams.delete('id');
-        url.searchParams.delete('art');
+        url.search = 's' + getSubCategoryParam(subCategoryName);
         url.hash = 'gallery';
         window.history.pushState({ level: 1, view: 'gallery', subCategory: subCategoryName }, '', url.toString());
       } catch (e) {}
@@ -960,10 +956,7 @@
     if (shouldPushHistory) {
       try {
         const url = new URL(window.location.href);
-        url.searchParams.delete('sub');
-        url.searchParams.delete('s');
-        for (let i = 1; i <= 4; i++) url.searchParams.delete('s' + i);
-        url.searchParams.delete('topic');
+        url.search = '';
         url.hash = 'gallery';
         window.history.pushState({ level: 1, view: 'gallery' }, '', url.toString());
       } catch (e) {}
@@ -3726,15 +3719,19 @@
   function getShareUrlForItem(item) {
     if (!item) return window.location.href;
     try {
-      const url = new URL(window.location.origin + window.location.pathname);
+      const base = window.location.origin + window.location.pathname;
+      let sNum = '1';
       if (currentSubCategory) {
-        url.searchParams.set('sub', getSubCategoryParam(currentSubCategory));
+        sNum = getSubCategoryParam(currentSubCategory);
+      } else if (item) {
+        const subCats = getItemSubCategories(item);
+        if (subCats && subCats.length > 0) {
+          sNum = getSubCategoryParam(subCats[0]);
+        }
       }
-      url.searchParams.set('id', item.id);
-      return url.toString();
+      return `${base}?s${sNum}&id=${encodeURIComponent(item.id)}`;
     } catch (e) {
-      const subPrefix = currentSubCategory ? ('sub=' + getSubCategoryParam(currentSubCategory) + '&') : '';
-      return window.location.origin + window.location.pathname + '?' + subPrefix + 'id=' + encodeURIComponent(item.id);
+      return `${window.location.origin}${window.location.pathname}?s1&id=${encodeURIComponent(item.id)}`;
     }
   }
 
@@ -4697,24 +4694,23 @@
     if (!item) return;
     try {
       const url = new URL(window.location.href);
-      if (url.searchParams.get('id') !== item.id) {
-        url.searchParams.delete('art');
-        url.searchParams.delete('s');
-        for (let i = 1; i <= 4; i++) url.searchParams.delete('s' + i);
-        if (currentSubCategory) {
-          url.searchParams.set('sub', getSubCategoryParam(currentSubCategory));
-        } else {
-          url.searchParams.delete('sub');
+      let sNum = '1';
+      if (currentSubCategory) {
+        sNum = getSubCategoryParam(currentSubCategory);
+      } else if (item) {
+        const subCats = getItemSubCategories(item);
+        if (subCats && subCats.length > 0) {
+          sNum = getSubCategoryParam(subCats[0]);
         }
-        url.searchParams.set('id', item.id);
-        url.hash = '';
-        if (isNewOpen) {
-          window.history.pushState({ level: 2, view: 'viewer', artworkId: item.id }, '', url.toString());
-        } else {
-          window.history.replaceState({ level: 2, view: 'viewer', artworkId: item.id }, '', url.toString());
-        }
-        currentHistoryLevel = 2;
       }
+      url.search = `s${sNum}&id=${encodeURIComponent(item.id)}`;
+      url.hash = '';
+      if (isNewOpen) {
+        window.history.pushState({ level: 2, view: 'viewer', artworkId: item.id }, '', url.toString());
+      } else {
+        window.history.replaceState({ level: 2, view: 'viewer', artworkId: item.id }, '', url.toString());
+      }
+      currentHistoryLevel = 2;
     } catch (e) {}
   }
 
@@ -4722,16 +4718,13 @@
     try {
       const url = new URL(window.location.href);
       if (url.searchParams.has('id') || url.searchParams.has('art') || window.location.hash) {
-        url.searchParams.delete('id');
-        url.searchParams.delete('art');
-        url.searchParams.delete('s');
-        for (let i = 1; i <= 4; i++) url.searchParams.delete('s' + i);
         if (currentSubCategory) {
-          url.searchParams.set('sub', getSubCategoryParam(currentSubCategory));
+          url.search = 's' + getSubCategoryParam(currentSubCategory);
+          url.hash = 'gallery';
         } else {
-          url.searchParams.delete('sub');
+          url.search = '';
+          url.hash = 'gallery';
         }
-        url.hash = 'gallery';
         window.history.replaceState({ level: 1, view: 'gallery', subCategory: currentSubCategory }, '', url.toString());
         currentHistoryLevel = 1;
       }
@@ -4765,16 +4758,22 @@
     try {
       const urlParams = new URLSearchParams(window.location.search);
 
-      // 检查是否深链至特定 subCategory 专题子界面 (支持 ?sub=1, ?s=1, ?s1, ?sub=art, ?sub=艺术制图 等)
+      // 检查是否深链至特定 subCategory 专题子界面 (支持 ?s1, ?s=1, ?sub=1, ?sub=art, ?sub=艺术制图 等)
       let subTarget = getSubFromUrl(urlParams);
       if (!subTarget && window.location.hash) {
         const hash = window.location.hash.replace(/^#\/?/, '');
-        if (hash.startsWith('sub=')) {
-          subTarget = parseSubCategoryParam(decodeURIComponent(hash.replace('sub=', '')));
-        } else if (hash.startsWith('s=')) {
-          subTarget = parseSubCategoryParam(decodeURIComponent(hash.replace('s=', '')));
-        } else if (/^s[1-4]$/i.test(hash)) {
-          subTarget = parseSubCategoryParam(hash);
+        for (let i = 1; i <= 4; i++) {
+          if (hash === 's' + i || hash.startsWith('s' + i + '&') || hash.startsWith('s' + i + '/')) {
+            subTarget = SUBCATEGORY_ORDER[i - 1];
+            break;
+          }
+        }
+        if (!subTarget) {
+          if (hash.startsWith('sub=')) {
+            subTarget = parseSubCategoryParam(decodeURIComponent(hash.replace('sub=', '')));
+          } else if (hash.startsWith('s=')) {
+            subTarget = parseSubCategoryParam(decodeURIComponent(hash.replace('s=', '')));
+          }
         }
       }
       if (subTarget) {
@@ -4782,20 +4781,13 @@
         try {
           // 将历史基底设为画廊全景概览 (#gallery)，如此用户点击浏览器“后退”时会返回上一层画廊全景，绝不会直接关掉网页
           const overviewUrl = new URL(window.location.href);
-          overviewUrl.searchParams.delete('sub');
-          overviewUrl.searchParams.delete('s');
-          for (let i = 1; i <= 4; i++) overviewUrl.searchParams.delete('s' + i);
-          overviewUrl.searchParams.delete('topic');
-          overviewUrl.searchParams.delete('id');
-          overviewUrl.searchParams.delete('art');
+          overviewUrl.search = '';
           overviewUrl.hash = 'gallery';
           window.history.replaceState({ level: 1, view: 'gallery' }, '', overviewUrl.toString());
 
-          // 将当前状态推入子分类视图，使浏览器后退键生效 (URL 强制保持纯净数字无中文 sub=1)
+          // 将当前状态推入子分类视图，使浏览器后退键生效 (URL 强制保持纯净数字无中文 ?s1)
           const subUrl = new URL(window.location.href);
-          subUrl.searchParams.delete('s');
-          for (let i = 1; i <= 4; i++) subUrl.searchParams.delete('s' + i);
-          subUrl.searchParams.set('sub', getSubCategoryParam(canonical));
+          subUrl.search = 's' + getSubCategoryParam(canonical);
           subUrl.hash = 'gallery';
           window.history.pushState({ level: 1, view: 'gallery', subCategory: canonical }, '', subUrl.toString());
         } catch (e) {}
@@ -4808,23 +4800,24 @@
         const hash = window.location.hash.replace(/^#\/?/, '');
         if (hash.startsWith('id=')) target = hash.replace('id=', '');
         else if (hash.startsWith('art=')) target = hash.replace('art=', '');
-        else if (!hash.startsWith('sub=') && !hash.startsWith('s=') && hash !== 'gallery') target = hash;
+        else if (!hash.startsWith('sub=') && !hash.startsWith('s=') && !/^s[1-4]$/i.test(hash) && hash !== 'gallery') target = hash;
       }
       if (target) {
         const match = findArtworkByQuery(target);
         if (match) {
           try {
             const galleryUrl = new URL(window.location.href);
-            galleryUrl.searchParams.delete('id');
-            galleryUrl.searchParams.delete('art');
-            galleryUrl.searchParams.delete('s');
-            for (let i = 1; i <= 4; i++) galleryUrl.searchParams.delete('s' + i);
+            let sNum = '1';
             if (currentSubCategory) {
-              galleryUrl.searchParams.set('sub', getSubCategoryParam(currentSubCategory));
+              sNum = getSubCategoryParam(currentSubCategory);
             } else {
-              galleryUrl.searchParams.delete('sub');
+              const subCats = getItemSubCategories(match);
+              if (subCats && subCats.length > 0) {
+                sNum = getSubCategoryParam(subCats[0]);
+              }
             }
-            galleryUrl.hash = 'gallery';
+            galleryUrl.search = `s${sNum}&id=${encodeURIComponent(match.id)}`;
+            galleryUrl.hash = '';
             window.history.replaceState({ level: 1, view: 'gallery', subCategory: currentSubCategory }, '', galleryUrl.toString());
           } catch (e) {}
           setTimeout(() => {

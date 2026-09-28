@@ -2889,16 +2889,24 @@ body:has(.about-modal.open) {
   filter: none !important;
 }
 
-/* 触屏与移动设备：彻底消除 Sticky Hover 与持久 Focus 导致的图标常亮绿色 */
+/* 触屏与移动设备：彻底消除 Sticky Hover 与持久 Focus 导致的图标常亮绿色与边框白底残留 */
 @media (hover: none), (max-width: 768px), (orientation: landscape) and (max-height: 500px) {
+  .viewer-floating-toolbar .tool-btn,
+  .viewer-float-toolbar .tool-btn,
+  .viewer-floating-toolbar .nav-artwork-btn,
+  .viewer-float-toolbar .nav-artwork-btn,
   .viewer-floating-toolbar .tool-btn:not(.active):hover,
   .viewer-float-toolbar .tool-btn:not(.active):hover,
   .viewer-floating-toolbar .tool-btn:not(.active):focus,
   .viewer-float-toolbar .tool-btn:not(.active):focus,
+  .viewer-floating-toolbar .tool-btn:not(.active):focus-visible,
+  .viewer-float-toolbar .tool-btn:not(.active):focus-visible,
   .viewer-floating-toolbar .nav-artwork-btn:hover,
   .viewer-float-toolbar .nav-artwork-btn:hover,
   .viewer-floating-toolbar .nav-artwork-btn:focus,
-  .viewer-float-toolbar .nav-artwork-btn:focus {
+  .viewer-float-toolbar .nav-artwork-btn:focus,
+  .viewer-floating-toolbar .nav-artwork-btn:focus-visible,
+  .viewer-float-toolbar .nav-artwork-btn:focus-visible {
     color: #f8fafc !important;
     background: transparent !important;
     border-color: transparent !important;
@@ -2910,34 +2918,54 @@ body:has(.about-modal.open) {
   .viewer-float-toolbar .tool-btn:not(.active):hover .icon,
   .viewer-floating-toolbar .tool-btn:not(.active):focus .icon,
   .viewer-float-toolbar .tool-btn:not(.active):focus .icon,
+  .viewer-floating-toolbar .tool-btn:not(.active):focus-visible .icon,
+  .viewer-float-toolbar .tool-btn:not(.active):focus-visible .icon,
   .viewer-floating-toolbar .nav-artwork-btn:hover .icon,
   .viewer-float-toolbar .nav-artwork-btn:hover .icon,
   .viewer-floating-toolbar .nav-artwork-btn:focus .icon,
-  .viewer-float-toolbar .nav-artwork-btn:focus .icon {
+  .viewer-float-toolbar .nav-artwork-btn:focus .icon,
+  .viewer-floating-toolbar .nav-artwork-btn:focus-visible .icon,
+  .viewer-float-toolbar .nav-artwork-btn:focus-visible .icon {
     stroke: currentColor !important;
     stroke-width: 2.15px !important;
     filter: none !important;
   }
 
+  :root[data-theme="light"] .viewer-floating-toolbar .tool-btn,
+  :root[data-theme="light"] .viewer-float-toolbar .tool-btn,
+  :root[data-theme="light"] .viewer-floating-toolbar .nav-artwork-btn,
+  :root[data-theme="light"] .viewer-float-toolbar .nav-artwork-btn,
   :root[data-theme="light"] .viewer-floating-toolbar .tool-btn:not(.active):hover,
   :root[data-theme="light"] .viewer-float-toolbar .tool-btn:not(.active):hover,
   :root[data-theme="light"] .viewer-floating-toolbar .tool-btn:not(.active):focus,
   :root[data-theme="light"] .viewer-float-toolbar .tool-btn:not(.active):focus,
-  .viewer-floating-toolbar .nav-artwork-btn:hover,
-  .viewer-float-toolbar .nav-artwork-btn:hover,
-  .viewer-floating-toolbar .nav-artwork-btn:focus,
-  .viewer-float-toolbar .nav-artwork-btn:focus {
+  :root[data-theme="light"] .viewer-floating-toolbar .tool-btn:not(.active):focus-visible,
+  :root[data-theme="light"] .viewer-float-toolbar .tool-btn:not(.active):focus-visible,
+  :root[data-theme="light"] .viewer-floating-toolbar .nav-artwork-btn:hover,
+  :root[data-theme="light"] .viewer-float-toolbar .nav-artwork-btn:hover,
+  :root[data-theme="light"] .viewer-floating-toolbar .nav-artwork-btn:focus,
+  :root[data-theme="light"] .viewer-float-toolbar .nav-artwork-btn:focus,
+  :root[data-theme="light"] .viewer-floating-toolbar .nav-artwork-btn:focus-visible,
+  :root[data-theme="light"] .viewer-float-toolbar .nav-artwork-btn:focus-visible {
     color: #1e293b !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
   }
 
   :root[data-theme="light"] .viewer-floating-toolbar .tool-btn:not(.active):hover .icon,
   :root[data-theme="light"] .viewer-float-toolbar .tool-btn:not(.active):hover .icon,
   :root[data-theme="light"] .viewer-floating-toolbar .tool-btn:not(.active):focus .icon,
   :root[data-theme="light"] .viewer-float-toolbar .tool-btn:not(.active):focus .icon,
+  :root[data-theme="light"] .viewer-floating-toolbar .tool-btn:not(.active):focus-visible .icon,
+  :root[data-theme="light"] .viewer-float-toolbar .tool-btn:not(.active):focus-visible .icon,
   :root[data-theme="light"] .viewer-floating-toolbar .nav-artwork-btn:hover .icon,
   :root[data-theme="light"] .viewer-float-toolbar .nav-artwork-btn:hover .icon,
   :root[data-theme="light"] .viewer-floating-toolbar .nav-artwork-btn:focus .icon,
-  :root[data-theme="light"] .viewer-float-toolbar .nav-artwork-btn:focus .icon {
+  :root[data-theme="light"] .viewer-float-toolbar .nav-artwork-btn:focus .icon,
+  :root[data-theme="light"] .viewer-floating-toolbar .nav-artwork-btn:focus-visible .icon,
+  :root[data-theme="light"] .viewer-float-toolbar .nav-artwork-btn:focus-visible .icon {
     stroke: currentColor !important;
     stroke-width: 1.9px !important;
   }
@@ -4999,10 +5027,16 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
   }
 
-  .viewer-floating-toolbar .tool-btn {
+  .viewer-floating-toolbar .tool-btn,
+  .viewer-floating-toolbar .nav-artwork-btn {
     width: 34px !important;
     height: 34px !important;
     flex-shrink: 0 !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
   }
 
   /* 移动端/触屏设备自然支持双指捏合与物理屏幕旋转，隐藏冗余项：放大、缩小、旋转、全屏与多余分割线 */

@@ -1711,25 +1711,34 @@
     if (closeBtn) closeBtn.addEventListener('click', requestCloseViewer);
     if (closeRightBtn) closeRightBtn.addEventListener('click', requestCloseViewer);
     function blurBtn(btn) {
-      if (btn && typeof btn.blur === 'function') {
-        try { btn.blur(); } catch (e) {}
+      if (btn) {
+        btn.style.transform = '';
+        const inner = btn.querySelector('.icon, .tool-btn-text, span') || btn.firstElementChild;
+        if (inner) inner.style.transform = '';
+        if (typeof btn._resetMagnetic === 'function') btn._resetMagnetic();
+        if (typeof btn.blur === 'function') {
+          try { btn.blur(); } catch (e) {}
+        }
+      }
+      if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        try { document.activeElement.blur(); } catch (e) {}
       }
     }
     if (prevBtn) {
-      prevBtn.addEventListener('click', () => { navigateArtwork(-1); blurBtn(prevBtn); });
-      prevBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(prevBtn), 50), { passive: true });
+      prevBtn.addEventListener('click', () => { blurBtn(prevBtn); navigateArtwork(-1); });
+      prevBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(prevBtn), 20), { passive: true });
     }
     if (nextBtn) {
-      nextBtn.addEventListener('click', () => { navigateArtwork(1); blurBtn(nextBtn); });
-      nextBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(nextBtn), 50), { passive: true });
+      nextBtn.addEventListener('click', () => { blurBtn(nextBtn); navigateArtwork(1); });
+      nextBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(nextBtn), 20), { passive: true });
     }
     if (edgePrevBtn) {
-      edgePrevBtn.addEventListener('click', () => { navigateArtwork(-1); blurBtn(edgePrevBtn); });
-      edgePrevBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(edgePrevBtn), 50), { passive: true });
+      edgePrevBtn.addEventListener('click', () => { blurBtn(edgePrevBtn); navigateArtwork(-1); });
+      edgePrevBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(edgePrevBtn), 20), { passive: true });
     }
     if (edgeNextBtn) {
-      edgeNextBtn.addEventListener('click', () => { navigateArtwork(1); blurBtn(edgeNextBtn); });
-      edgeNextBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(edgeNextBtn), 50), { passive: true });
+      edgeNextBtn.addEventListener('click', () => { blurBtn(edgeNextBtn); navigateArtwork(1); });
+      edgeNextBtn.addEventListener('touchend', () => setTimeout(() => blurBtn(edgeNextBtn), 20), { passive: true });
     }
 
     // 桌面端两侧大翻页按钮边缘微隐唤出 (Hover-to-Reveal · 零遮挡画布)
@@ -2272,8 +2281,13 @@
     if (!dock || dock.dataset.magneticBound) return;
     dock.dataset.magneticBound = 'true';
 
-    // 触屏设备（移动端/平板）自然支持直接触控，跳过鼠标磁吸微动以确保零开销
-    if (window.matchMedia('(hover: none)').matches) return;
+    function isTouchOrMobile() {
+      return window.innerWidth <= 768 ||
+             window.matchMedia('(hover: none)').matches ||
+             window.matchMedia('(pointer: coarse)').matches ||
+             ('ontouchstart' in window && window.innerWidth <= 1024) ||
+             (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0 && window.innerWidth <= 1024);
+    }
 
     const buttons = dock.querySelectorAll('.tool-btn');
     buttons.forEach(btn => {
@@ -2283,7 +2297,34 @@
       let isHovered = false;
       const innerTarget = btn.querySelector('.icon, .tool-btn-text, span') || btn.firstElementChild;
 
+      function resetBtn() {
+        isHovered = false;
+        targetX = 0;
+        targetY = 0;
+        targetRotX = 0;
+        targetRotY = 0;
+        targetScale = 1.0;
+        currentX = 0;
+        currentY = 0;
+        currentRotX = 0;
+        currentRotY = 0;
+        currentScale = 1.0;
+        btn.style.transform = '';
+        if (innerTarget) innerTarget.style.transform = '';
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+      }
+
+      btn._resetMagnetic = resetBtn;
+
       function renderFrame() {
+        if (isTouchOrMobile()) {
+          resetBtn();
+          return;
+        }
+
         const springK = 0.22;
         currentX += (targetX - currentX) * springK;
         currentY += (targetY - currentY) * springK;
@@ -2297,14 +2338,7 @@
             Math.abs(currentRotX) < 0.05 && 
             Math.abs(currentRotY) < 0.05 && 
             Math.abs(currentScale - 1) < 0.005) {
-          currentX = 0;
-          currentY = 0;
-          currentRotX = 0;
-          currentRotY = 0;
-          currentScale = 1;
-          btn.style.transform = '';
-          if (innerTarget) innerTarget.style.transform = '';
-          rafId = null;
+          resetBtn();
           return;
         }
 
@@ -2320,13 +2354,18 @@
         rafId = requestAnimationFrame(renderFrame);
       }
 
-      btn.addEventListener('mouseenter', () => {
+      btn.addEventListener('mouseenter', (e) => {
+        if (isTouchOrMobile() || (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents)) return;
         isHovered = true;
         targetScale = 1.18;
         if (!rafId) rafId = requestAnimationFrame(renderFrame);
       });
 
       btn.addEventListener('mousemove', (e) => {
+        if (isTouchOrMobile() || (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents)) {
+          resetBtn();
+          return;
+        }
         const rect = btn.getBoundingClientRect();
         const halfW = rect.width / 2;
         const halfH = rect.height / 2;
@@ -2348,26 +2387,37 @@
         if (!rafId) rafId = requestAnimationFrame(renderFrame);
       });
 
-      btn.addEventListener('mousedown', () => {
+      btn.addEventListener('mousedown', (e) => {
+        if (isTouchOrMobile() || (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents)) return;
         targetScale = 0.94;
         if (!rafId) rafId = requestAnimationFrame(renderFrame);
       });
 
       btn.addEventListener('mouseup', () => {
+        if (isTouchOrMobile()) {
+          resetBtn();
+          return;
+        }
         targetScale = isHovered ? 1.18 : 1.0;
         if (!rafId) rafId = requestAnimationFrame(renderFrame);
       });
 
-      btn.addEventListener('mouseleave', () => {
-        isHovered = false;
-        targetX = 0;
-        targetY = 0;
-        targetRotX = 0;
-        targetRotY = 0;
-        targetScale = 1.0;
-        if (!rafId) rafId = requestAnimationFrame(renderFrame);
+      btn.addEventListener('mouseleave', resetBtn);
+      btn.addEventListener('click', () => {
+        if (isTouchOrMobile()) resetBtn();
       });
+      btn.addEventListener('touchend', resetBtn, { passive: true });
+      btn.addEventListener('touchcancel', resetBtn, { passive: true });
+      btn.addEventListener('blur', resetBtn);
     });
+
+    window.addEventListener('resize', () => {
+      if (isTouchOrMobile()) {
+        buttons.forEach(b => {
+          if (typeof b._resetMagnetic === 'function') b._resetMagnetic();
+        });
+      }
+    }, { passive: true });
 
     // 挂载高质感自定义毛玻璃悬浮气泡提示，彻底替换浏览器原生 title 丑提示
     initDockTooltips();
@@ -2897,6 +2947,21 @@
     if (currentFilteredItems.length === 0) return;
     if (document.activeElement && typeof document.activeElement.blur === 'function') {
       try { document.activeElement.blur(); } catch (e) {}
+    }
+    const dock = document.querySelector('.viewer-floating-toolbar');
+    if (dock) {
+      dock.querySelectorAll('.tool-btn').forEach(btn => {
+        if (typeof btn._resetMagnetic === 'function') {
+          btn._resetMagnetic();
+        } else {
+          btn.style.transform = '';
+          const inner = btn.querySelector('.icon, .tool-btn-text, span') || btn.firstElementChild;
+          if (inner) inner.style.transform = '';
+        }
+        if (typeof btn.blur === 'function') {
+          try { btn.blur(); } catch (e) {}
+        }
+      });
     }
     currentViewerIndex = (currentViewerIndex + direction + currentFilteredItems.length) % currentFilteredItems.length;
     showArtwork(currentFilteredItems[currentViewerIndex], false);

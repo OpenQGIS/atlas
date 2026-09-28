@@ -7733,8 +7733,8 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 /* SubCategory Dedicated Sub-view (专题子界面) */
 .subcategory-view-hero {
   width: 100%;
-  margin-bottom: 34px;
-  padding: 24px 28px 20px 28px;
+  margin-bottom: 20px;
+  padding: 22px 26px 18px 26px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
@@ -7976,6 +7976,36 @@ body.in-subview .site-header {
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
 }
 
+body.in-subview .gallery-sections-wrap {
+  gap: 0 !important;
+}
 
+body.in-subview .gallery-main {
+  padding-left: 28px !important;
+}
 
+@media (max-width: 768px) {
+  .subcategory-view-hero {
+    margin-bottom: 14px;
+    padding: 16px 16px 14px 16px;
+    border-radius: 14px;
+  }
+  .subview-nav-bar {
+    margin-bottom: 12px;
+  }
+  .subview-title {
+    font-size: 1.45rem;
+  }
+  .subview-desc {
+    margin-top: 8px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+}
 
+@media (max-width: 540px) {
+  body.in-subview .gallery-main {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+}

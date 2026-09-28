@@ -1156,7 +1156,11 @@
     if (btnBack) {
       btnBack.addEventListener('click', (e) => {
         e.preventDefault();
-        exitSubcategoryView();
+        if (window.history.state && window.history.state.subCategory) {
+          window.history.back();
+        } else {
+          exitSubcategoryView();
+        }
       });
     }
 
@@ -4666,6 +4670,23 @@
       if (subTarget) {
         const canonical = SUBCATEGORY_ORDER.find(s => s === subTarget || getSubCategorySlug(s) === subTarget);
         if (canonical) {
+          try {
+            // 将历史基底设为画廊全景概览 (#gallery)，如此用户点击浏览器“后退”时会返回上一层画廊全景，绝不会直接关掉网页
+            const overviewUrl = new URL(window.location.href);
+            overviewUrl.searchParams.delete('sub');
+            overviewUrl.searchParams.delete('topic');
+            overviewUrl.searchParams.delete('id');
+            overviewUrl.searchParams.delete('art');
+            overviewUrl.hash = 'gallery';
+            window.history.replaceState({ level: 1, view: 'gallery' }, '', overviewUrl.toString());
+
+            // 将当前状态推入子分类视图，使浏览器后退键生效
+            const subUrl = new URL(window.location.href);
+            subUrl.searchParams.set('sub', canonical);
+            subUrl.hash = 'gallery';
+            window.history.pushState({ level: 1, view: 'gallery', subCategory: canonical }, '', subUrl.toString());
+          } catch (e) {}
+
           enterSubcategoryView(canonical, false);
         }
       }

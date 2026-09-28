@@ -2245,32 +2245,37 @@ body:has(.about-modal.open) {
   min-width: 0;
 }
 
-/* 第一行：地图名纯粹通透排版（依底色智能反色自适应） */
+/* 第一行：地图名通用反色方案 (Universal Inversion via mix-blend-mode: difference)
+   - 在黑底地图上毫秒级反色为纯白锐利字 (#ffffff)
+   - 在白底地图上毫秒级反色为纯黑清晰字 (#000000)
+   - 随用户平移、缩放全图，逐像素瞬时数学差值自适应，彻底杜绝黑色地图文字湮灭 */
 .viewer-artwork-title {
   font-size: 0.95rem;
-  font-weight: 600;
-  color: #ffffff;
+  font-weight: 700;
+  color: #ffffff !important;
   letter-spacing: 0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 360px;
   line-height: 1.25;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
-  transition: color 0.25s ease;
-}
-
-/* 浅色底图反色：纯净锐利深色字（还原左图原版质感，彻底消除白雾/晕染） */
-.viewer-artwork-badge[data-artwork-tone="light"] .viewer-artwork-title,
-:root[data-theme="light"] .viewer-artwork-badge:not([data-artwork-tone="dark"]) .viewer-artwork-title {
-  color: #0f141c;
+  mix-blend-mode: difference;
   text-shadow: none !important;
+  transition: opacity 0.25s ease;
+  user-select: none;
 }
 
-/* 深色底图反色：纯白锐利字，仅保留1px极微阴影防地图纹理干扰 */
-.viewer-artwork-badge[data-artwork-tone="dark"] .viewer-artwork-title {
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+/* 渐进增强降级保护：在不支持 mix-blend-mode 的老式浏览器中依 tone 备用 */
+@supports not (mix-blend-mode: difference) {
+  .viewer-artwork-badge[data-artwork-tone="light"] .viewer-artwork-title {
+    color: #0f141c !important;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6) !important;
+  }
+  .viewer-artwork-badge[data-artwork-tone="dark"] .viewer-artwork-title,
+  .viewer-artwork-badge:not([data-artwork-tone="light"]) .viewer-artwork-title {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85) !important;
+  }
 }
 
 /* 第二行：QMapFlow SVG 精度徽标 (明暗两相反转卡片) */
@@ -2321,48 +2326,50 @@ body:has(.about-modal.open) {
 }
 
 /* 浅色底图时：QMapFlow 反转为白底黑字卡片 */
-.viewer-artwork-badge[data-artwork-tone="light"] .viewer-artwork-qmapflow,
-:root[data-theme="light"] .viewer-artwork-badge:not([data-artwork-tone="dark"]) .viewer-artwork-qmapflow {
+.viewer-artwork-badge[data-artwork-tone="light"] .viewer-artwork-qmapflow {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.14);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.viewer-artwork-badge[data-artwork-tone="light"] .viewer-artwork-qmapflow:hover,
-:root[data-theme="light"] .viewer-artwork-badge:not([data-artwork-tone="dark"]) .viewer-artwork-qmapflow:hover {
+.viewer-artwork-badge[data-artwork-tone="light"] .viewer-artwork-qmapflow:hover {
   background: #f7f8fa;
   border-color: rgba(0, 0, 0, 0.28);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .viewer-artwork-badge[data-artwork-tone="light"] .viewer-artwork-qmapflow .qmf-lettermark,
-:root[data-theme="light"] .viewer-artwork-badge:not([data-artwork-tone="dark"]) .viewer-artwork-qmapflow .qmf-lettermark {
+.viewer-artwork-badge[data-artwork-tone="light"] .viewer-artwork-qmapflow .qmf-badge-bg {
   fill: #111317;
 }
 
-.viewer-artwork-badge[data-artwork-tone="light"] .viewer-artwork-qmapflow .qmf-badge-bg,
-:root[data-theme="light"] .viewer-artwork-badge:not([data-artwork-tone="dark"]) .viewer-artwork-qmapflow .qmf-badge-bg {
-  fill: #111317;
-}
-
-.viewer-artwork-badge[data-artwork-tone="light"] .viewer-artwork-qmapflow .qmf-badge-num,
-:root[data-theme="light"] .viewer-artwork-badge:not([data-artwork-tone="dark"]) .viewer-artwork-qmapflow .qmf-badge-num {
+.viewer-artwork-badge[data-artwork-tone="light"] .viewer-artwork-qmapflow .qmf-badge-num {
   fill: #ffffff;
 }
 
-/* 深色底图时：QMapFlow 确保为深色卡片 */
-.viewer-artwork-badge[data-artwork-tone="dark"] .viewer-artwork-qmapflow {
+/* 深色底图时（或默认）：QMapFlow 确保为深色卡片 */
+.viewer-artwork-badge[data-artwork-tone="dark"] .viewer-artwork-qmapflow,
+.viewer-artwork-badge:not([data-artwork-tone="light"]) .viewer-artwork-qmapflow {
   background: #16181d;
   border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
 
+.viewer-artwork-badge[data-artwork-tone="dark"] .viewer-artwork-qmapflow:hover,
+.viewer-artwork-badge:not([data-artwork-tone="light"]) .viewer-artwork-qmapflow:hover {
+  background: #232732;
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
 .viewer-artwork-badge[data-artwork-tone="dark"] .viewer-artwork-qmapflow .qmf-lettermark,
-.viewer-artwork-badge[data-artwork-tone="dark"] .viewer-artwork-qmapflow .qmf-badge-bg {
+.viewer-artwork-badge[data-artwork-tone="dark"] .viewer-artwork-qmapflow .qmf-badge-bg,
+.viewer-artwork-badge:not([data-artwork-tone="light"]) .viewer-artwork-qmapflow .qmf-lettermark,
+.viewer-artwork-badge:not([data-artwork-tone="light"]) .viewer-artwork-qmapflow .qmf-badge-bg {
   fill: #ffffff;
 }
 
-.viewer-artwork-badge[data-artwork-tone="dark"] .viewer-artwork-qmapflow .qmf-badge-num {
+.viewer-artwork-badge[data-artwork-tone="dark"] .viewer-artwork-qmapflow .qmf-badge-num,
+.viewer-artwork-badge:not([data-artwork-tone="light"]) .viewer-artwork-qmapflow .qmf-badge-num {
   fill: #16181d;
 }
 

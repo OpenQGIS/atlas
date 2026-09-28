@@ -2869,6 +2869,34 @@
     showArtwork(currentFilteredItems[currentViewerIndex], false);
   }
 
+  function detectArtworkIsDark(item) {
+    if (!item) return true;
+    const textMeta = (item.title || '') + ' ' + (item.topics || []).join(' ') + ' ' + (item.tags || []).join(' ') + ' ' + (item.description || '').substring(0, 80);
+    if (/(?:黑金|暗夜|暗黑|夜景|深色|黑底|蓝图|black|dark|night)/i.test(textMeta)) {
+      return true;
+    }
+    if (/(?:剪纸|白底|拟态|纸质|浅色|马卡龙|papercut|light|white)/i.test(textMeta)) {
+      return false;
+    }
+    if (item.colors && item.colors.length > 0) {
+      const lums = item.colors.map(c => {
+        const hex = String(c).replace(/^#/, '');
+        if (hex.length !== 6) return 128;
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return 0.299 * r + 0.587 * g + 0.114 * b;
+      });
+      const hasPitchBlack = lums.some(l => l < 35);
+      if (hasPitchBlack && !/(?:剪纸|拟态|白)/.test(textMeta)) {
+        return true;
+      }
+      const avgLum = lums.reduce((a, b) => a + b, 0) / lums.length;
+      return avgLum < 135;
+    }
+    return true;
+  }
+
   function updateArtworkMetadata(item) {
     if (!item) return;
     const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
@@ -2885,18 +2913,8 @@
 
     if (vTitle) vTitle.textContent = locItem.title;
 
-    // 依当前展品主底色智能计算反色（深底图->纯白字；浅底图->纯净深黑字，彻底杜绝白雾晕染）
-    let isDarkArtwork = true;
-    if (item && item.colors && item.colors.length > 0) {
-      const hex = String(item.colors[0]).replace(/^#/, '');
-      if (hex.length === 6) {
-        const r = parseInt(hex.substring(0, 2), 16);
-        const g = parseInt(hex.substring(2, 4), 16);
-        const b = parseInt(hex.substring(4, 6), 16);
-        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-        isDarkArtwork = lum < 135;
-      }
-    }
+    // 依当前展品综合色板与元数据智能计算作品调性 (dark/light)
+    const isDarkArtwork = detectArtworkIsDark(item);
     const badgeEl = document.getElementById('viewerArtworkBadge');
     if (badgeEl) {
       badgeEl.setAttribute('data-artwork-tone', isDarkArtwork ? 'dark' : 'light');

@@ -4500,7 +4500,10 @@ body:has(.about-modal.open) {
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  background: var(--nav-bg, #07080b) !important;
+  background-color: var(--nav-bg, #07080b) !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
   overflow: hidden !important;
   cursor: crosshair !important;
   box-sizing: border-box !important;
@@ -4510,7 +4513,7 @@ body:has(.about-modal.open) {
 :root[data-theme="light"] .navigator {
   border: none !important;
   box-shadow: none !important;
-  background: var(--nav-bg, #07080b) !important;
+  background-color: var(--nav-bg, #07080b) !important;
 }
 
 .viewer-navigator .openseadragon-container,

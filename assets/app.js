@@ -2663,10 +2663,10 @@
     navEl.style.setProperty('--nav-bg', dominantColor);
     navEl.style.setProperty('background-color', dominantColor, 'important');
     if (item && item.thumb) {
-      navEl.style.backgroundImage = 'url("' + item.thumb + '")';
-      navEl.style.backgroundSize = 'contain';
-      navEl.style.backgroundRepeat = 'no-repeat';
-      navEl.style.backgroundPosition = 'center';
+      navEl.style.setProperty('background-image', 'url("' + item.thumb + '")', 'important');
+      navEl.style.setProperty('background-size', 'contain', 'important');
+      navEl.style.setProperty('background-repeat', 'no-repeat', 'important');
+      navEl.style.setProperty('background-position', 'center', 'important');
     }
     // 同步更新 navigator 内所有层级容器与 canvas 背景，画布透明以便即时透出底图
     const navCanvas = navEl.querySelector('canvas');
@@ -3392,10 +3392,10 @@
         navEl.style.setProperty('--nav-bg', dominantColor);
         navEl.style.setProperty('background-color', dominantColor, 'important');
         if (item && item.thumb) {
-          navEl.style.backgroundImage = 'url("' + item.thumb + '")';
-          navEl.style.backgroundSize = 'contain';
-          navEl.style.backgroundRepeat = 'no-repeat';
-          navEl.style.backgroundPosition = 'center';
+          navEl.style.setProperty('background-image', 'url("' + item.thumb + '")', 'important');
+          navEl.style.setProperty('background-size', 'contain', 'important');
+          navEl.style.setProperty('background-repeat', 'no-repeat', 'important');
+          navEl.style.setProperty('background-position', 'center', 'important');
         }
         
         const container = navEl.querySelector('.openseadragon-container');

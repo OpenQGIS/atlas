@@ -3254,7 +3254,8 @@
     }
     // 2. 视口 0ms 瞬时缩略底图占位（在切片到达前，Retina 级 640px 缩略图铺满居中，消灭黑屏真空期）
     if (stage && item && item.thumb) {
-      stage.style.setProperty('--stage-thumb', 'url("' + item.thumb + '")');
+      const fullThumbUrl = new URL(item.thumb, window.location.href).href;
+      stage.style.setProperty('--stage-thumb', 'url("' + fullThumbUrl + '")');
       stage.style.setProperty('--stage-thumb-opacity', '1');
     }
 
@@ -3379,10 +3380,7 @@
         progressTimer = setTimeout(() => {
           if (tileProgressBar) tileProgressBar.classList.remove('active');
         }, 320);
-        if (stage) {
-          // 仅在瓦片已充分覆盖或渲染完毕后，优雅平滑淡出低清缩略垫底图
-          stage.style.setProperty('--stage-thumb-opacity', '0');
-        }
+        // stage-thumb-opacity 常驻保持为 1 垫底，切片在其上方叠加渲染，彻底消除白屏与等待感
       }
 
       triggerTileProgressStart();
@@ -3553,12 +3551,12 @@
       osdViewer.addHandler('tile-load-failed', function (e) {
         console.warn('OpenSeadragon tile-load-failed:', e);
         tileFailCount++;
-        // 若远程切片请求连续失败（如移动端 GFW 拦截 *.workers.dev），自动优雅降级
-        if (!hasFailedOver && tileFailCount >= 3) {
+        // 若远程切片请求连续失败（如移动端 GFW 拦截 *.workers.dev），极速平滑降级
+        if (!hasFailedOver && tileFailCount >= 2) {
           hasFailedOver = true;
           console.warn('CangFeng: 远程瓦片请求受阻，正在自动无缝切换到本地同源切片/高清预览模式...');
-          // 若原先使用的是远程 HTTP CDN，先尝试切换为本地同源相对路径 tiles/
-          if (tileBase.startsWith('http')) {
+          // 若原先使用的是远程 HTTP CDN 且本地有切片白名单，先尝试切换为本地同源相对路径 tiles/
+          if (tileBase.startsWith('http') && LOCAL_TILE_SLUGS.has(item.id)) {
             const localBase = 'tiles/' + item.id + '_files/';
             const fallbackTileSource = Object.assign({}, tileSource, {
               getTileUrl: function (level, x, y) {
@@ -3572,11 +3570,12 @@
               console.warn('CangFeng: 本地瓦片加载尝试失败，将转入单图全览模式:', err);
             }
           }
-          // 最终兜底：使用已成功加载的缩略/预览图全幅深览
+          // 最终兜底：使用已成功加载的 100% 同源绝对路径缩略/预览图全幅深览
           try {
+            const fullThumb = new URL(item.thumb, window.location.href).href;
             osdViewer.open({
               type: 'image',
-              url: item.thumb
+              url: fullThumb
             });
           } catch (err2) {
             console.error('CangFeng: 占位预览图降级失败:', err2);
@@ -3905,7 +3904,10 @@
       osdViewer = null;
     }
     const stage = document.getElementById('osdStage');
-    if (stage) stage.innerHTML = '';
+    if (stage) {
+      stage.innerHTML = '';
+      stage.style.setProperty('--stage-thumb-opacity', '0');
+    }
     ensureNavigatorElement(null);
     const navPanel = document.getElementById('viewerNavigatorPanel');
     if (navPanel) navPanel.classList.remove('closed');

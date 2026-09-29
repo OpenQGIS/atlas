@@ -85,6 +85,11 @@
   async function compositeCardTiles(cardEl, item) {
     if (!cardEl || !item) return;
 
+    // 移动端设备（手机窄屏）直接复用轻量 WebP 缩略图，避免消耗宝贵的移动端并发连接与内存
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      return;
+    }
+
     // 防止同一个 DOM 节点重复执行拼片
     if (activeCompositors.has(cardEl)) return;
     activeCompositors.set(cardEl, true);

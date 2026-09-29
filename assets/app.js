@@ -966,8 +966,11 @@
       const slug = getSubCategorySlug(prevSub);
       const targetEl = document.getElementById('sec_' + slug);
       if (targetEl) {
+        const siteHeader = document.querySelector('.site-header');
         const subbar = document.querySelector('.gallery-subbar');
-        const headerOffset = (subbar ? subbar.getBoundingClientRect().height : 48) + 32;
+        const headerH = (siteHeader ? siteHeader.getBoundingClientRect().height : 60);
+        const subbarH = (subbar && window.getComputedStyle(subbar).display !== 'none' ? subbar.getBoundingClientRect().height : 0);
+        const headerOffset = headerH + subbarH + 20;
         const top = targetEl.getBoundingClientRect().top + window.pageYOffset - headerOffset;
         window.scrollTo({
           top: Math.max(0, top),
@@ -1090,8 +1093,11 @@
         e.preventDefault();
         const targetEl = document.getElementById('sec_' + group.slug);
         if (targetEl) {
+          const siteHeader = document.querySelector('.site-header');
           const subbar = document.querySelector('.gallery-subbar');
-          const headerOffset = (subbar ? subbar.getBoundingClientRect().height : 48) + 32;
+          const headerH = (siteHeader ? siteHeader.getBoundingClientRect().height : 60);
+          const subbarH = (subbar && window.getComputedStyle(subbar).display !== 'none' ? subbar.getBoundingClientRect().height : 0);
+          const headerOffset = headerH + subbarH + 20;
           const top = targetEl.getBoundingClientRect().top + window.pageYOffset - headerOffset;
           window.scrollTo({
             top: Math.max(0, top),
@@ -1526,8 +1532,12 @@
   function createCard(item, localIdx) {
     const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
     const card = document.createElement('article');
-    const isUltraWide = (item.aspectRatio >= 2.5);
-    card.className = 'gallery-card' + (isUltraWide ? ' is-ultrawide' : '');
+    const isUltraWide = (item.aspectRatio >= 2.0);
+    const isLandscape = (item.aspectRatio >= 1.2);
+    const isPortrait = (item.aspectRatio < 1.2);
+    card.className = 'gallery-card' +
+      (isUltraWide ? ' is-ultrawide' : '') +
+      (isLandscape ? ' is-landscape' : ' is-portrait');
     card.id = 'artCard_' + item.id;
     card.dataset.id = item.id;
     card.setAttribute('role', 'button');
@@ -3241,6 +3251,7 @@
 
     try {
       const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
+      const isPhone = window.innerWidth <= 768;
 
       osdViewer = OpenSeadragon({
         element: stage,
@@ -3254,9 +3265,12 @@
         navigatorBackground: dominantColor,
         autoResize: true,
         animationTime: 0.45,
-        blendTime: 0.15,
+        blendTime: isPhone ? 0.05 : 0.15,
         constrainDuringPan: true,
-        maxZoomPixelRatio: 4.5,
+        maxZoomPixelRatio: isPhone ? 2.0 : 4.5,
+        minPixelRatio: isPhone ? 0.8 : 0.5,
+        imageLoaderLimit: isPhone ? 5 : 8,
+        maxImageCacheCount: isPhone ? 100 : 250,
         minZoomImageRatio: 0.1,
         minZoomLevel: 0.001,
         visibilityRatio: 0.9,
@@ -3272,6 +3286,45 @@
       });
 
       StealthWatermark.init(stage, item);
+
+      // 视口顶端 2px 极细微光流线进度条（瓦片加载状态反馈）
+      let tileProgressBar = document.getElementById('viewerTileProgress');
+      if (!tileProgressBar) {
+        tileProgressBar = document.createElement('div');
+        tileProgressBar.id = 'viewerTileProgress';
+        tileProgressBar.className = 'viewer-tile-progress';
+        const viewerBody = document.querySelector('.viewer-body');
+        if (viewerBody) {
+          viewerBody.appendChild(tileProgressBar);
+        } else if (stage) {
+          stage.appendChild(tileProgressBar);
+        }
+      }
+
+      let progressTimer = null;
+      function triggerTileProgressStart() {
+        if (!tileProgressBar) return;
+        tileProgressBar.classList.add('active');
+        clearTimeout(progressTimer);
+        progressTimer = setTimeout(() => {
+          if (tileProgressBar) tileProgressBar.classList.remove('active');
+        }, 4000);
+      }
+
+      function triggerTileProgressDone() {
+        if (!tileProgressBar) return;
+        clearTimeout(progressTimer);
+        progressTimer = setTimeout(() => {
+          if (tileProgressBar) tileProgressBar.classList.remove('active');
+        }, 320);
+      }
+
+      triggerTileProgressStart();
+
+      osdViewer.addHandler('open', triggerTileProgressStart);
+      osdViewer.addHandler('tile-loaded', triggerTileProgressDone);
+      osdViewer.addHandler('tile-load-failed', triggerTileProgressDone);
+      osdViewer.addHandler('tile-drawn', triggerTileProgressDone);
 
       osdViewer.addHandler('update-viewport', function () {
         StealthWatermark.burnIn(osdViewer);
@@ -3463,11 +3516,15 @@
       // 若因 Navigator 相关 DOM 问题失败，尝试无 Navigator 纯深览模式自愈恢复
       if (stage && !osdViewer) {
         try {
+          const isPhoneFallback = window.innerWidth <= 768;
           osdViewer = OpenSeadragon({
             element: stage,
             prefixUrl: '',
             showNavigationControl: false,
             showNavigator: false,
+            imageLoaderLimit: isPhoneFallback ? 5 : 8,
+            maxZoomPixelRatio: isPhoneFallback ? 2.0 : 4.5,
+            minPixelRatio: isPhoneFallback ? 0.8 : 0.5,
             tileSources: tileSource,
             placeholderImage: item.thumb,
             immediateRender: true,

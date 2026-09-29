@@ -1668,11 +1668,55 @@ body[data-page="portal"] {
   .masonry-grid.comfort { --target-row-height: 340px; --grid-gap: 14px; gap: var(--grid-gap); }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 640px) {
   .gallery-main { padding: 12px; }
   .column-header { padding: 10px 14px; }
   .column-subtitle { display: none; }
-  .masonry-grid { --target-row-height: 180px; --grid-gap: 10px; gap: var(--grid-gap); }
+
+  /* 移动端画卷比例智能编排：双列网格基底 + dense 致密配平 */
+  .masonry-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-flow: dense !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+  .masonry-grid::after {
+    display: none !important;
+  }
+  .gallery-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-grow: 0 !important;
+    flex-basis: auto !important;
+    margin: 0 !important;
+    border-radius: var(--radius-md, 8px) !important;
+  }
+  /* 竖幅/近方幅画卷（宽高比 < 1.2）：占 1 列（单行两张，左右平分） */
+  .gallery-card.is-portrait {
+    grid-column: span 1 !important;
+    height: 240px !important;
+  }
+  /* 横幅画卷与全景长卷（宽高比 >= 1.2）：占满 2 列（单行一张独占整屏） */
+  .gallery-card.is-landscape,
+  .gallery-card.is-ultrawide {
+    grid-column: span 2 !important;
+    height: 220px !important;
+  }
+  /* 尾部孤立竖卡保护：当某分类末行恰好落单一个竖卡时，优雅居中拉满 2 列，防止右侧死白 */
+  .gallery-card.is-portrait:last-child:nth-child(odd) {
+    grid-column: span 2 !important;
+    height: 230px !important;
+  }
+  /* 首页总览各分类在移动端高度自适应，支持完整露出 3 行整齐作品 */
+  .gallery-overview-section .masonry-grid {
+    max-height: calc(3 * 235px + 2 * 12px) !important;
+    overflow: hidden !important;
+  }
+  /* 移动端分类锚点防遮挡边距 */
+  .gallery-category-section {
+    scroll-margin-top: calc(var(--header-height, 64px) + 24px) !important;
+  }
 }
 
 /* 首页瀑布流各分类默认至多展示 3 行拼贴效果 */
@@ -2686,6 +2730,30 @@ body:has(.about-modal.open) {
 .osd-stage:active {
   cursor: grabbing;
 }
+
+/* Top Slim Shimmer Progress Bar for 4K Tile Loading */
+.viewer-tile-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2.5px;
+  background: linear-gradient(90deg, #ecbc5e 0%, #80cc28 45%, #ffffff 75%, #ecbc5e 100%);
+  background-size: 200% 100%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.35s ease;
+}
+.viewer-tile-progress.active {
+  opacity: 0.95;
+  animation: tileProgressShimmer 1.1s infinite linear;
+}
+@keyframes tileProgressShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .viewer-float-toolbar,
 .viewer-floating-toolbar {
   position: absolute;

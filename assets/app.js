@@ -313,13 +313,23 @@
     }
   }
 
+  // 本地内置切片白名单（直接同源相对路径直达，彻底绕过海外 Workers 2.3s 跨国延迟）
+  const LOCAL_TILE_SLUGS = new Set([
+    'shanghai',
+    'city_papercut_14pro',
+    'chengdu_papercut_ipad',
+    'jinjiang_greenway_section',
+    'layout_pattern_02',
+    'pinglu_canal'
+  ]);
+
   function setupData(rawItems) {
     const config = window.ATLAS_CONFIG || window.CANGFENG_CONFIG || {};
     const assetBase = (config.assetBaseUrl || '').replace(/\/+$/, '');
 
     galleryItems = rawItems.map((item, idx) => {
       item.globalIndex = idx;
-      if (assetBase) {
+      if (assetBase && !LOCAL_TILE_SLUGS.has(item.id)) {
         if (item.tileUrl && !item.tileUrl.startsWith('http')) {
           item.tileUrl = assetBase + '/' + item.tileUrl.replace(/^\/+/, '');
         }
@@ -3298,7 +3308,7 @@
     const tileWidth = item.width || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Width) || 2000;
     const tileHeight = item.height || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Height) || 2000;
     const tileMaxLevel = item.maxLevel !== undefined ? item.maxLevel : Math.ceil(Math.log2(Math.max(tileWidth, tileHeight)));
-    const calculatedMinLevel = isPhone ? Math.max(0, tileMaxLevel - 4) : 0;
+    const calculatedMinLevel = 0;
 
     const tileSource = {
       width: tileWidth,
@@ -3362,6 +3372,12 @@
         }
       }
 
+      function fadeOutStageThumb() {
+        if (stage) {
+          stage.style.setProperty('--stage-thumb-opacity', '0');
+        }
+      }
+
       let progressTimer = null;
       let tilesLoadedCount = 0;
       function triggerTileProgressStart() {
@@ -3380,10 +3396,15 @@
         progressTimer = setTimeout(() => {
           if (tileProgressBar) tileProgressBar.classList.remove('active');
         }, 320);
-        // stage-thumb-opacity 常驻保持为 1 垫底，切片在其上方叠加渲染，彻底消除白屏与等待感
+        fadeOutStageThumb();
       }
 
       triggerTileProgressStart();
+
+      // 当 Canvas 真正开始绘制瓦片，或者用户开始手势缩放/拖动时，静态 CSS 底图立即淡出，交由 Canvas 矩阵动态渲染！
+      osdViewer.addHandler('tile-drawn', fadeOutStageThumb);
+      osdViewer.addHandler('zoom', fadeOutStageThumb);
+      osdViewer.addHandler('pan', fadeOutStageThumb);
 
       osdViewer.addHandler('open', function () {
         triggerTileProgressStart();

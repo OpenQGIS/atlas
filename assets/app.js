@@ -3312,7 +3312,7 @@
         blendTime: isPhone ? 0.05 : 0.15,
         constrainDuringPan: true,
         maxZoomPixelRatio: isPhone ? 2.0 : 4.5,
-        minPixelRatio: isPhone ? 0.8 : 0.5,
+        minPixelRatio: isPhone ? ((window.devicePixelRatio || 1) >= 2.5 ? 1.25 : 0.8) : 0.5,
         imageLoaderLimit: isPhone ? 16 : 24,
         maxImageCacheCount: isPhone ? 160 : 300,
         minZoomImageRatio: 0.1,
@@ -3346,13 +3346,15 @@
       }
 
       let progressTimer = null;
+      let tilesLoadedCount = 0;
       function triggerTileProgressStart() {
         if (!tileProgressBar) return;
+        tilesLoadedCount = 0;
         tileProgressBar.classList.add('active');
         clearTimeout(progressTimer);
         progressTimer = setTimeout(() => {
-          if (tileProgressBar) tileProgressBar.classList.remove('active');
-        }, 4000);
+          triggerTileProgressDone();
+        }, 3500);
       }
 
       function triggerTileProgressDone() {
@@ -3362,16 +3364,36 @@
           if (tileProgressBar) tileProgressBar.classList.remove('active');
         }, 320);
         if (stage) {
+          // 仅在瓦片已充分覆盖或渲染完毕后，优雅平滑淡出低清缩略垫底图
           stage.style.setProperty('--stage-thumb-opacity', '0');
         }
       }
 
       triggerTileProgressStart();
 
-      osdViewer.addHandler('open', triggerTileProgressStart);
-      osdViewer.addHandler('tile-loaded', triggerTileProgressDone);
-      osdViewer.addHandler('tile-load-failed', triggerTileProgressDone);
-      osdViewer.addHandler('tile-drawn', triggerTileProgressDone);
+      osdViewer.addHandler('open', function () {
+        triggerTileProgressStart();
+        if (osdViewer.world) {
+          const tiledImg = osdViewer.world.getItemAt(0);
+          if (tiledImg) {
+            tiledImg.addHandler('fully-loaded-change', function (e) {
+              if (e && e.fullyLoaded) {
+                triggerTileProgressDone();
+              }
+            });
+          }
+        }
+      });
+      osdViewer.addHandler('tile-loaded', function () {
+        tilesLoadedCount++;
+        // 移动端若加载超过首屏基础瓦片数（通常10-16块），亦可视为首屏基本就绪
+        if (isPhone && tilesLoadedCount >= 12) {
+          triggerTileProgressDone();
+        }
+      });
+      osdViewer.addHandler('tile-load-failed', function () {
+        triggerTileProgressDone();
+      });
 
       osdViewer.addHandler('update-viewport', function () {
         StealthWatermark.burnIn(osdViewer);

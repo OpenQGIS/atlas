@@ -3328,6 +3328,7 @@
         ajaxWithCredentials: false,
         backgroundColor: 'transparent'
       });
+      window.osdViewer = osdViewer;
 
       StealthWatermark.init(stage, item);
 

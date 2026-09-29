@@ -2650,19 +2650,32 @@
     }
 
     const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
+    const gradientCss = (function (it) {
+      if (it && it.navGradient && Array.isArray(it.navGradient) && it.navGradient.length >= 2) {
+        if (it.navGradient.length === 3) {
+          return `linear-gradient(135deg, ${it.navGradient[0]} 0%, ${it.navGradient[1]} 50%, ${it.navGradient[2]} 100%)`;
+        }
+        return `linear-gradient(135deg, ${it.navGradient[0]} 0%, ${it.navGradient[1]} 100%)`;
+      }
+      return `linear-gradient(135deg, ${dominantColor} 0%, #07080b 100%)`;
+    })(item);
+
     const borderOffset = 3; // 1.5px * 2 borders
     const navPanel = document.getElementById('viewerNavigatorPanel');
     if (navPanel) {
       navPanel.style.width = (targetW + borderOffset) + 'px';
       navPanel.style.height = (targetH + borderOffset) + 'px';
       navPanel.style.setProperty('--nav-bg', dominantColor);
+      navPanel.style.setProperty('--nav-gradient', gradientCss);
     }
 
     navEl.style.width = targetW + 'px';
     navEl.style.height = targetH + 'px';
     navEl.style.setProperty('--nav-bg', dominantColor);
-    navEl.style.setProperty('background-color', dominantColor, 'important');
+    navEl.style.setProperty('--nav-gradient', gradientCss);
     if (item && item.thumb) {
+      navEl.style.setProperty('--nav-thumb', 'url("' + item.thumb + '")');
+      navEl.style.setProperty('--nav-thumb-opacity', '1');
       navEl.style.setProperty('background-image', 'url("' + item.thumb + '")', 'important');
       navEl.style.setProperty('background-size', 'contain', 'important');
       navEl.style.setProperty('background-repeat', 'no-repeat', 'important');
@@ -3223,26 +3236,60 @@
     const isDark = (document.documentElement.getAttribute('data-theme') !== 'light');
     const stageBg = isDark ? '#07080b' : '#e5e8ed';
 
+    const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
+    const gradientCss = (function (it) {
+      if (it && it.navGradient && Array.isArray(it.navGradient) && it.navGradient.length >= 2) {
+        if (it.navGradient.length === 3) {
+          return `linear-gradient(135deg, ${it.navGradient[0]} 0%, ${it.navGradient[1]} 50%, ${it.navGradient[2]} 100%)`;
+        }
+        return `linear-gradient(135deg, ${it.navGradient[0]} 0%, ${it.navGradient[1]} 100%)`;
+      }
+      return `linear-gradient(135deg, ${dominantColor} 0%, #07080b 100%)`;
+    })(item);
+
+    // 1. 大图背景环境光：0ms 同步应用 3 锚点空间柔光渐变，彻底消灭黑屏死底板
+    const ambientBackdrop = document.getElementById('viewerAmbientBackdrop');
+    if (ambientBackdrop) {
+      ambientBackdrop.style.setProperty('--viewer-ambient-gradient', gradientCss);
+    }
+    // 2. 视口 0ms 瞬时缩略底图占位（在切片到达前，Retina 级 640px 缩略图铺满居中，消灭黑屏真空期）
+    if (stage && item && item.thumb) {
+      stage.style.setProperty('--stage-thumb', 'url("' + item.thumb + '")');
+      stage.style.setProperty('--stage-thumb-opacity', '1');
+    }
+
     const config = window.ATLAS_CONFIG || window.CANGFENG_CONFIG || {};
     const assetBase = (config.assetBaseUrl || '').replace(/\/+$/, '');
 
-    // Resolve tileBase URL (support remote Cloudflare CDN or local tiles)
+    // 本地内置切片白名单（直接同源相对路径直达，彻底绕过海外 Workers 2.3s 跨国延迟）
+    const LOCAL_TILE_SLUGS = new Set([
+      'shanghai',
+      'city_papercut_14pro',
+      'chengdu_papercut_ipad',
+      'jinjiang_greenway_section',
+      'layout_pattern_02',
+      'pinglu_canal'
+    ]);
+
+    // Resolve tileBase URL (support local same-origin bypass or remote Cloudflare CDN)
     let tileBase = (item.tileUrl || (item.dzi && item.dzi.Image && item.dzi.Image.Url) || '');
-    if (assetBase && !tileBase.startsWith('http')) {
+    if (assetBase && !tileBase.startsWith('http') && !LOCAL_TILE_SLUGS.has(item.id)) {
       tileBase = assetBase + '/' + tileBase.replace(/^\/+/, '');
     }
     tileBase = tileBase.replace(/\/+$/, '') + '/';
 
+    const isPhone = window.innerWidth <= 768;
     const tileWidth = item.width || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Width) || 2000;
     const tileHeight = item.height || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Height) || 2000;
     const tileMaxLevel = item.maxLevel !== undefined ? item.maxLevel : Math.ceil(Math.log2(Math.max(tileWidth, tileHeight)));
+    const calculatedMinLevel = isPhone ? Math.max(0, tileMaxLevel - 4) : 0;
 
     const tileSource = {
       width: tileWidth,
       height: tileHeight,
       tileSize: item.tileSize || 256,
       tileOverlap: item.overlap || 0,
-      minLevel: 0,
+      minLevel: calculatedMinLevel,
       maxLevel: tileMaxLevel,
       getTileUrl: function (level, x, y) {
         return tileBase + level + '/' + x + '_' + y + '.' + (item.format || 'webp');
@@ -3250,9 +3297,6 @@
     };
 
     try {
-      const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
-      const isPhone = window.innerWidth <= 768;
-
       osdViewer = OpenSeadragon({
         element: stage,
         prefixUrl: '',
@@ -3269,8 +3313,8 @@
         constrainDuringPan: true,
         maxZoomPixelRatio: isPhone ? 2.0 : 4.5,
         minPixelRatio: isPhone ? 0.8 : 0.5,
-        imageLoaderLimit: isPhone ? 5 : 8,
-        maxImageCacheCount: isPhone ? 100 : 250,
+        imageLoaderLimit: isPhone ? 16 : 24,
+        maxImageCacheCount: isPhone ? 160 : 300,
         minZoomImageRatio: 0.1,
         minZoomLevel: 0.001,
         visibilityRatio: 0.9,
@@ -3317,6 +3361,9 @@
         progressTimer = setTimeout(() => {
           if (tileProgressBar) tileProgressBar.classList.remove('active');
         }, 320);
+        if (stage) {
+          stage.style.setProperty('--stage-thumb-opacity', '0');
+        }
       }
 
       triggerTileProgressStart();
@@ -3390,8 +3437,10 @@
         if (!navEl) return;
         const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
         navEl.style.setProperty('--nav-bg', dominantColor);
-        navEl.style.setProperty('background-color', dominantColor, 'important');
+        navEl.style.setProperty('--nav-gradient', gradientCss);
         if (item && item.thumb) {
+          navEl.style.setProperty('--nav-thumb', 'url("' + item.thumb + '")');
+          navEl.style.setProperty('--nav-thumb-opacity', '1');
           navEl.style.setProperty('background-image', 'url("' + item.thumb + '")', 'important');
           navEl.style.setProperty('background-size', 'contain', 'important');
           navEl.style.setProperty('background-repeat', 'no-repeat', 'important');

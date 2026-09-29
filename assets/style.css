@@ -2654,12 +2654,12 @@ body:has(.about-modal.open) {
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
-  background-color: #07080b;
-  transition: background-color 0.85s ease;
+  background: var(--viewer-ambient-gradient, linear-gradient(135deg, #12141a 0%, #0c0d12 50%, #07080b 100%));
+  transition: background 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .viewer-ambient-backdrop.artwork-light {
-  background-color: #f0f2f5;
+  background: var(--viewer-ambient-gradient, linear-gradient(135deg, #fafbfc 0%, #f0f2f5 50%, #e4e7eb 100%));
 }
 
 .ambient-glow-layer {
@@ -2726,6 +2726,19 @@ body:has(.about-modal.open) {
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
+}
+.osd-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--stage-thumb, none);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: var(--stage-thumb-opacity, 0);
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 0;
 }
 .osd-stage:active {
   cursor: grabbing;
@@ -4500,20 +4513,33 @@ body:has(.about-modal.open) {
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  background-color: var(--nav-bg, #07080b) !important;
-  background-size: contain !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
+  background: var(--nav-gradient, linear-gradient(135deg, #1e222b 0%, #15181f 50%, #0d0e12 100%)) !important;
+  background-size: cover !important;
   overflow: hidden !important;
   cursor: crosshair !important;
   box-sizing: border-box !important;
+  transition: background 0.4s ease;
+}
+
+.viewer-navigator::before,
+.navigator::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--nav-thumb, none);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: var(--nav-thumb-opacity, 0);
+  transition: opacity 0.35s ease-out;
+  pointer-events: none;
+  z-index: 0;
 }
 
 :root[data-theme="light"] .viewer-navigator,
 :root[data-theme="light"] .navigator {
   border: none !important;
   box-shadow: none !important;
-  background-color: var(--nav-bg, #07080b) !important;
 }
 
 .viewer-navigator .openseadragon-container,

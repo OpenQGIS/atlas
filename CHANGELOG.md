@@ -4,6 +4,21 @@
 
 ---
 
+## [1.2.8] - 2026-09-29
+
+### 优化 (Optimized)
+- **鹰眼图与全屏视口 3 锚点空间柔光渐变系统 (3-Anchor Spatial Ambient Gradient System)**：
+  - 彻底终结鹰眼图在切片未就绪时出现的单调纯色死块（如绿道亮粉色、城墙青绿色或死黑色），全量引入由左上 0%、空间中心 50%、右下 100% 构成的专属 3 锚点空间微光渐变（`navGradient`）；
+  - 全屏大图主视口背景（`viewerAmbientBackdrop` 与 `osdStage`）与左下角鹰眼图（`viewerNavigator`）在打开第 0 毫秒同步点亮该环境光渐变，彻底消灭全屏打开时的黑屏死底板与视觉真空；
+  - 鹰眼图与主图切片下载队列彻底解耦：0ms 渐变着色，10~50ms 挂载 640px 缩略图平滑淡入（Crossfade），在 80px 容器中呈现 8 倍超清全景，且不再占用任何瓦片网络连接，将 100% 网络信道留给主图。
+- **移动端全屏浏览“0 秒秒开”与并发提速 (Mobile Instant Viewport & HTTP/2 Concurrency)**：
+  - 引入 0ms 缩略图即时底图占位（Instant Backdrop）：点击卡片瞬间，视口底层立即铺满已缓存在手机内存的 640px 缩略图（iPhone 14 Pro 390px 视口下清晰度达 1.6 倍 Retina 超清），视觉体感瞬间就绪，彻底消除黑屏等待；切片绘制完毕后平滑淡出占位层；
+  - 移动端并发限制 `imageLoaderLimit` 由 5 放宽至 16，释放 HTTP/2 多路复用性能，将初始切片从“4 批串行等待”大幅提速为“1 批并行拉取”；
+  - 瓦片起始层级优化 `minLevel = Math.max(0, maxLevel - 4)`，跳过 0~7 级无用微切片，节省 8 次网络握手开销；
+  - 本地同源切片直连（Local Tile Bypass）：锦江绿道、成都剪纸等 6 套本地瓦片优先同源直出，摆脱海外 Workers 单片 2.3s 跨国延迟。
+- **古城墙制图底纸色彩规范统一 (Citywall Palette Alignment)**：
+  - 将成都古城墙（`chengdu_citywall_gates`）等作品的调色板首位从特征城垣线条色规范为真实的地图底纸色（`#D2DCE8`），实现全站调色板规范高度一致。
+
 ## [1.2.7] - 2026-09-27
 
 ### 优化 (Optimized)

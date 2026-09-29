@@ -73,7 +73,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#2d2a27",
+      "#1c1811",
+      "#373736"
+    ]
   },
   {
     "id": "city_papercut_14pro",
@@ -149,7 +154,12 @@
           "Height": 2532
         }
       }
-    }
+    },
+    "navGradient": [
+      "#ecebd7",
+      "#e1e2d1",
+      "#f9f5e3"
+    ]
   },
   {
     "id": "chengdu_papercut_ipad",
@@ -226,7 +236,12 @@
           "Height": 1668
         }
       }
-    }
+    },
+    "navGradient": [
+      "#efedda",
+      "#e9e7d4",
+      "#e1dfcc"
+    ]
   },
   {
     "id": "jinjiang_greenway_section",
@@ -303,7 +318,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#d5ecdf",
+      "#cfe6d9",
+      "#c7ded1"
+    ]
   },
   {
     "id": "aba_cycling_route",
@@ -382,7 +402,12 @@
           "Height": 3543
         }
       }
-    }
+    },
+    "navGradient": [
+      "#70895c",
+      "#7a7d6c",
+      "#8ba586"
+    ]
   },
   {
     "id": "pinglu_canal",
@@ -460,7 +485,12 @@
           "Height": 3307
         }
       }
-    }
+    },
+    "navGradient": [
+      "#3c220f",
+      "#2e1b0d",
+      "#341f12"
+    ]
   },
   {
     "id": "china_top12_airports_2024",
@@ -536,7 +566,12 @@
           "Height": 2162
         }
       }
-    }
+    },
+    "navGradient": [
+      "#173f98",
+      "#093597",
+      "#083597"
+    ]
   },
   {
     "id": "lake_poyang",
@@ -609,7 +644,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#065363",
+      "#0d3843",
+      "#1b5969"
+    ]
   },
   {
     "id": "yangtze_river_bridge_chongqing",
@@ -687,7 +727,12 @@
           "Height": 4725
         }
       }
-    }
+    },
+    "navGradient": [
+      "#bcc6b1",
+      "#d5dad9",
+      "#bfc0c0"
+    ]
   },
   {
     "id": "chengdu_citywall_gates",
@@ -727,16 +772,18 @@
       "成都"
     ],
     "colors": [
+      "#D2DCE8",
       "#12A5B9",
       "#3E56B8",
-      "#BAE748",
-      "#8D74CE"
+      "#8D74CE",
+      "#BAE748"
     ],
     "color": [
+      "#D2DCE8",
       "#12A5B9",
       "#3E56B8",
-      "#BAE748",
-      "#8D74CE"
+      "#8D74CE",
+      "#BAE748"
     ],
     "width": 2834,
     "height": 2125,
@@ -759,7 +806,12 @@
           "Height": 2125
         }
       }
-    }
+    },
+    "navGradient": [
+      "#c8d2e4",
+      "#bdcbdc",
+      "#c4cee0"
+    ]
   },
   {
     "id": "chongqing_ancient_city",
@@ -834,7 +886,12 @@
           "Height": 1771
         }
       }
-    }
+    },
+    "navGradient": [
+      "#87a6d1",
+      "#c1ccdf",
+      "#adc1de"
+    ]
   },
   {
     "id": "changsha_citywall",
@@ -910,7 +967,12 @@
           "Height": 2834
         }
       }
-    }
+    },
+    "navGradient": [
+      "#8eacd2",
+      "#bfcdde",
+      "#cbd5e5"
+    ]
   },
   {
     "id": "nanjing_silver_black",
@@ -987,7 +1049,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#111111",
+      "#0b0b0b",
+      "#030303"
+    ]
   },
   {
     "id": "datong_papercut",
@@ -1065,7 +1132,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#edebe6",
+      "#eae3d6",
+      "#f5f3ee"
+    ]
   },
   {
     "id": "chengdu_blueprint",
@@ -1139,7 +1211,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#c3cee4",
+      "#afbde0",
+      "#cad4e6"
+    ]
   },
   {
     "id": "chengdu_macaron",
@@ -1219,7 +1296,12 @@
           "Height": 8267
         }
       }
-    }
+    },
+    "navGradient": [
+      "#d9d8d9",
+      "#c8caca",
+      "#dde1db"
+    ]
   },
   {
     "id": "hangzhou_low_saturation",
@@ -1294,7 +1376,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#d6bbad",
+      "#c8a290",
+      "#dac2b6"
+    ]
   },
   {
     "id": "wuhan_low_saturation",
@@ -1370,7 +1457,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#e2d9ca",
+      "#dcd3c4",
+      "#d4cbbc"
+    ]
   },
   {
     "id": "pearl_river_delta_dot_art",
@@ -1452,7 +1544,12 @@
           "Height": 1181
         }
       }
-    }
+    },
+    "navGradient": [
+      "#d9d3c8",
+      "#abd3d2",
+      "#c0d4cc"
+    ]
   },
   {
     "id": "suzhou_dot_art",
@@ -1528,7 +1625,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#d4cfc0",
+      "#a3ced0",
+      "#ddd6cb"
+    ]
   },
   {
     "id": "xian_papercut",
@@ -1605,7 +1707,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#ded8ce",
+      "#d2c9bc",
+      "#e7e5dd"
+    ]
   },
   {
     "id": "chongqing_cyan",
@@ -1679,7 +1786,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#249394",
+      "#1e8d8e",
+      "#168586"
+    ]
   },
   {
     "id": "chongqing_black_gold",
@@ -1755,7 +1867,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#100e09",
+      "#0a0803",
+      "#020000"
+    ]
   },
   {
     "id": "changsha_emboss",
@@ -1832,7 +1949,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#ece9e4",
+      "#e6e3de",
+      "#dedbd6"
+    ]
   },
   {
     "id": "tianfu_luxihe_xinglong_lake",
@@ -1909,7 +2031,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#d4e4da",
+      "#e2e6e1",
+      "#d8e9de"
+    ]
   },
   {
     "id": "chengdu_greenway_ring",
@@ -1985,7 +2112,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#daeae0",
+      "#d4e4da",
+      "#ccdcd2"
+    ]
   },
   {
     "id": "longquanshan_slope_a",
@@ -2062,7 +2194,12 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#c7d9ce",
+      "#cfe1d6",
+      "#aec5b7"
+    ]
   },
   {
     "id": "longquanshan_slope_b",
@@ -2137,6 +2274,11 @@
           "Height": 2362
         }
       }
-    }
+    },
+    "navGradient": [
+      "#c3cec6",
+      "#b2c9bb",
+      "#b9ccc0"
+    ]
   }
 ]

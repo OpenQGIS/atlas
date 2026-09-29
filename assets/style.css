@@ -4571,7 +4571,7 @@ body:has(.about-modal.open) {
 
 @media (max-width: 768px) {
   .viewer-navigator-panel {
-    bottom: 74px;
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px));
     left: 14px;
   }
 }

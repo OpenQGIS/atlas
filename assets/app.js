@@ -3278,7 +3278,22 @@
     }
     tileBase = tileBase.replace(/\/+$/, '') + '/';
 
+    const dpr = window.devicePixelRatio || 1;
     const isPhone = window.innerWidth <= 768;
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 1024;
+
+    // 全设备通用 DPR 自适应阈值：
+    // 1. 触控移动端/平板（iPhone DPR=3, 安卓旗舰 DPR=3.5, iPad Retina DPR=2）：
+    //    将阈值精调为 1.0 ~ 1.25，彻底杜绝开屏即过载拉取 70+ 张最高清切片，确保全景瞬开；
+    // 2. 4K / 5K / Retina PC 桌面端：
+    //    维持 0.5 ~ 0.75，充分释放宽带与桌面显卡性能，保障 27-32 寸大屏原生极致细节。
+    let optimalMinPixelRatio = 0.5;
+    if (isTouchDevice) {
+      optimalMinPixelRatio = dpr >= 2.5 ? 1.25 : (dpr >= 1.8 ? 1.0 : 0.8);
+    } else if (dpr >= 2.0) {
+      optimalMinPixelRatio = 0.75;
+    }
+
     const tileWidth = item.width || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Width) || 2000;
     const tileHeight = item.height || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Height) || 2000;
     const tileMaxLevel = item.maxLevel !== undefined ? item.maxLevel : Math.ceil(Math.log2(Math.max(tileWidth, tileHeight)));
@@ -3312,7 +3327,7 @@
         blendTime: isPhone ? 0.05 : 0.15,
         constrainDuringPan: true,
         maxZoomPixelRatio: isPhone ? 2.0 : 4.5,
-        minPixelRatio: isPhone ? ((window.devicePixelRatio || 1) >= 2.5 ? 1.25 : 0.8) : 0.5,
+        minPixelRatio: optimalMinPixelRatio,
         imageLoaderLimit: isPhone ? 16 : 24,
         maxImageCacheCount: isPhone ? 160 : 300,
         minZoomImageRatio: 0.1,

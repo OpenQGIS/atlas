@@ -733,6 +733,20 @@
       });
     }
 
+    const heroBrandCapsule = document.getElementById('heroBrandCapsule');
+    if (heroBrandCapsule) {
+      heroBrandCapsule.addEventListener('click', (e) => {
+        e.preventDefault();
+        enterGalleryView(true);
+      });
+      heroBrandCapsule.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          enterGalleryView(true);
+        }
+      });
+    }
+
     // 鼠标在开屏区域向下滚动时，平滑进入展厅
     let isSnapping = false;
     window.addEventListener('wheel', (e) => {

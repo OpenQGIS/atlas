@@ -1500,9 +1500,19 @@
       subCatTotalCounts[cat] = items.filter(it => itemMatchesSubCategory(it, cat)).length;
     });
 
-    // 2. 动态两行自适应装箱引擎（含全景长卷拼版、随机打乱探索与全局去重）
-    const containerW = grid.clientWidth || window.innerWidth || 1400;
+    // 2. 动态两行自适应装箱引擎（含全景长卷拼版、动态视窗配平、智能候补与单分类去重）
+    const containerW = grid.clientWidth || (window.innerWidth ? Math.max(320, window.innerWidth - 48) : 1400);
     const isDesktop = containerW >= 900;
+    const computedGridStyle = window.getComputedStyle ? window.getComputedStyle(grid) : null;
+    const targetRowHeight = (computedGridStyle && parseFloat(computedGridStyle.getPropertyValue('--target-row-height'))) || ((containerW >= 1920) ? 280 : (containerW >= 2560 ? 250 : (containerW <= 1200 ? 260 : 320)));
+    const gridGap = (computedGridStyle && parseFloat(computedGridStyle.getPropertyValue('--grid-gap'))) || 16;
+
+    // 单行在当前容器物理宽度下的宽高比安全视窗 [minRowAr, maxRowAr]
+    // maxRowAr：单行容积上限，确保严格不折行溢出至第 3 行
+    // minRowAr：单行容积下限，配合 flex-grow 撑满容器，确保末行右侧 0 死白空隙
+    const maxRowAr = isDesktop ? Math.max(2.8, (containerW - 3 * gridGap) / targetRowHeight) : 3.65;
+    const minRowAr = isDesktop ? (maxRowAr / 1.55) : 1.8;
+
     const usedGlobally = new Set();
     const groups = [];
 
@@ -1529,28 +1539,34 @@
         return;
       }
 
-      // 每次加载打乱候选池
+      // 每次加载打乱候选池：优先挑选本屏之前分类未展出的画卷；若未展出画卷不足以丰满填满两整行，
+      // 由分类其余画卷无缝候补，确保每一分类展区都充盈饱满，绝不在末行出现大片空白
       const pool = shuffleList(allInCat);
-      let available = pool.filter(it => !usedGlobally.has(it.id));
+      let unused = pool.filter(it => !usedGlobally.has(it.id));
       if (cat === '艺术制图') {
-        available = available.filter(it => !reservedItems.has(it.id));
+        unused = unused.filter(it => !reservedItems.has(it.id));
       }
-      if (available.length < 4 && allInCat.length >= 4) {
-        available = pool;
-      }
+      const used = pool.filter(it => usedGlobally.has(it.id));
+      const candidatePool = [...unused, ...used];
 
       const selected = [];
-      const wideItem = available.find(it => getCardAspect(it) >= 2.5);
+      const selectedIds = new Set();
+      function getRemaining() {
+        return candidatePool.filter(it => !selectedIds.has(it.id));
+      }
+
       let rowCount = 0;
+      const rem1 = getRemaining();
+      const wideItem = rem1.find(it => getCardAspect(it) >= 2.5);
 
       // 若有全景长图且为桌面宽屏：长图占 ~75% + 搭配 1 张方/竖图占 ~25%，严丝合缝拼满第 1 行
       if (wideItem && isDesktop) {
         selected.push(wideItem);
-        usedGlobally.add(wideItem.id);
-        const comp = available.find(it => it.id !== wideItem.id && !usedGlobally.has(it.id) && getCardAspect(it) <= 1.05);
+        selectedIds.add(wideItem.id);
+        const comp = rem1.find(it => it.id !== wideItem.id && getCardAspect(it) <= 1.05);
         if (comp) {
           selected.push(comp);
-          usedGlobally.add(comp.id);
+          selectedIds.add(comp.id);
         }
         rowCount = 1;
       }
@@ -1559,17 +1575,22 @@
       if (rowCount === 0) {
         let sumAr1 = 0;
         let count1 = 0;
-        const rem1 = available.filter(it => !usedGlobally.has(it.id));
-        for (const it of rem1) {
+        const candidates1 = getRemaining();
+        for (const it of candidates1) {
           const ar = getCardAspect(it);
-          // 预判：若加入当前卡片导致第 1 行总宽高比溢出（> 3.65）或已满 4 张，即刻成行封顶
-          if (count1 >= 2 && (sumAr1 + ar > 3.65 || count1 >= 4)) {
-            break;
+          const effectiveAr = ar >= 2.5 ? ar * 0.72 : ar;
+          // 预判：若加入当前卡片导致第 1 行总宽高比溢出（> maxRowAr），跳过此卡尝试更紧凑卡片
+          if (count1 >= 2 && (sumAr1 + effectiveAr > maxRowAr)) {
+            continue;
           }
           selected.push(it);
-          usedGlobally.add(it.id);
-          sumAr1 += ar;
+          selectedIds.add(it.id);
+          sumAr1 += effectiveAr;
           count1++;
+          // 达标即刻成行封顶
+          if (sumAr1 >= minRowAr && count1 >= (containerW >= 1400 ? 3 : 2)) {
+            break;
+          }
         }
         rowCount = 1;
       }
@@ -1577,29 +1598,34 @@
       if (rowCount === 1) {
         let sumAr2 = 0;
         let count2 = 0;
-        const rem2 = available.filter(it => !selected.some(s => s.id === it.id) && !usedGlobally.has(it.id));
+        const candidates2 = getRemaining();
         // 判断第 2 行末尾是否需要压入 MoreCard 终点卡片（MoreCard 宽高比约 0.92）
-        const willHaveMore = totalCount > (selected.length + 3);
+        const willHaveMore = isDesktop && (totalCount > (selected.length + 2));
+        const moreAr = willHaveMore ? 0.92 : 0;
 
-        for (const it of rem2) {
+        for (const it of candidates2) {
           const ar = getCardAspect(it);
           const effectiveAr = ar >= 2.5 ? ar * 0.72 : ar;
-          const moreAr = willHaveMore ? 0.92 : 0;
-          const maxLimit = 3.65;
-          const maxCards = willHaveMore ? 3 : 4;
 
-          // 预判：若加入当前卡片会导致第 2 行加上 MoreCard 后溢出折行，则不予加入，把末席稳稳留给 MoreCard
-          if (count2 >= 1 && (sumAr2 + effectiveAr + moreAr > maxLimit || count2 >= maxCards)) {
-            break;
+          // 预判：若加入当前卡片会导致第 2 行加上 MoreCard 后溢出折行，跳过尝试更紧凑卡片
+          if (count2 >= 1 && (sumAr2 + effectiveAr + moreAr > maxRowAr)) {
+            continue;
           }
 
           selected.push(it);
-          usedGlobally.add(it.id);
+          selectedIds.add(it.id);
           sumAr2 += effectiveAr;
           count2++;
+
+          // 达标即刻成行封顶，把末席稳稳留给 MoreCard
+          if ((sumAr2 + moreAr) >= minRowAr && count2 >= (willHaveMore ? (containerW >= 1400 ? 3 : 2) : 2)) {
+            break;
+          }
         }
         rowCount = 2;
       }
+
+      selected.forEach(it => usedGlobally.add(it.id));
 
       groups.push({
         name: cat,

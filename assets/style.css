@@ -2016,9 +2016,9 @@ body[data-page="portal"] {
 .gallery-card.gallery-more-card {
   --aspect-ratio: 0.92;
   height: var(--target-row-height, 320px);
-  flex-grow: 120;
+  flex-grow: 180;
   flex-basis: min(calc(var(--target-row-height, 320px) * 0.92), 100%);
-  max-width: min(calc(var(--target-row-height, 320px) * 1.8), 100%) !important;
+  max-width: min(calc(var(--target-row-height, 320px) * 2.2), 100%) !important;
   background: var(--bg-surface, #141a24);
   border: 1px dashed rgba(var(--accent-rgb, 128, 204, 40), 0.38);
   border-radius: var(--radius-md, 8px);
@@ -2333,6 +2333,11 @@ body[data-page="portal"] {
 /* 保护非超长图在成行时不被过度拉伸撑满整屏 */
 .gallery-card:not(.is-ultrawide) {
   max-width: min(calc(var(--target-row-height, 320px) * var(--aspect-ratio) * 1.45), 100%);
+}
+
+/* 首页总览双行装箱展区：赋予常规画卷 1.65x 弹性拉伸容差，与 MoreCard 协同吸附整行边界，杜绝右侧留白空隙 */
+.gallery-overview-section .gallery-card:not(.is-ultrawide) {
+  max-width: min(calc(var(--target-row-height, 320px) * var(--aspect-ratio) * 1.65), 100%);
 }
 
 /* 超长图（如平陆运河等全景长卷，宽高比 >= 2.5）默认规则 */

@@ -145,8 +145,7 @@
       footerEdition: '2026 EDITION',
       footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.',
       viewerHdLoading: '加载中…',
-      viewerHdSlowHint: '网络传输稍慢，已保持当前清晰度，后台持续连接中',
-      viewerHdReady: '4K 超清已就绪'
+      viewerHdSlowHint: '网络传输稍慢，已保持当前清晰度，后台持续连接中'
     },
     en: {
       siteTitle: 'AtlasLog · OpenQGIS Cartography Portfolio',
@@ -285,8 +284,7 @@
       footerEdition: '2026 EDITION',
       footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.',
       viewerHdLoading: 'Loading...',
-      viewerHdSlowHint: 'Slow network; preview held, continuing connection...',
-      viewerHdReady: '4K Ultra-HD Ready'
+      viewerHdSlowHint: 'Slow network; preview held, continuing connection...'
     },
     ja: {
       siteTitle: '地図録 OpenQGIS地図作品集',
@@ -425,8 +423,7 @@
       footerEdition: '2026 EDITION',
       footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.',
       viewerHdLoading: '読み込み中…',
-      viewerHdSlowHint: '低速回線のため現在の解像度を維持し、接続を継続中...',
-      viewerHdReady: '4K超高精細準備完了'
+      viewerHdSlowHint: '低速回線のため現在の解像度を維持し、接続を継続中...'
     },
     ko: {
       siteTitle: '지도록 OpenQGIS 지도 작품집',
@@ -565,8 +562,7 @@
       footerEdition: '2026 EDITION',
       footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.',
       viewerHdLoading: '로딩 중…',
-      viewerHdSlowHint: '네트워크 지연; 현재 해상도를 유지하며 연결 지속 중...',
-      viewerHdReady: '4K 초고화질 준비 완료'
+      viewerHdSlowHint: '네트워크 지연; 현재 해상도를 유지하며 연결 지속 중...'
     }
   };
 

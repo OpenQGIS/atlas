@@ -1942,7 +1942,8 @@ body[data-page="portal"] {
     height: 220px !important;
   }
   /* 尾部孤立竖卡保护：当某分类末行恰好落单一个竖卡时，优雅居中拉满 2 列，防止右侧死白 */
-  .gallery-card.is-portrait:last-child:nth-child(odd) {
+  .gallery-card.is-portrait:last-child:nth-child(odd),
+  .gallery-card.mobile-span-full {
     grid-column: span 2 !important;
     height: 230px !important;
   }

@@ -1282,8 +1282,27 @@
       window.addEventListener('scroll', () => {
         requestAnimationFrame(onScrollSpine);
       }, { passive: true });
+      let lastWasDesktop = (window.innerWidth >= 900);
       window.addEventListener('resize', () => {
         requestAnimationFrame(onScrollSpine);
+        const isNowDesktop = (window.innerWidth >= 900);
+        if (isNowDesktop !== lastWasDesktop) {
+          lastWasDesktop = isNowDesktop;
+          if (!currentSubCategory) {
+            renderGrid(currentFilteredItems);
+            return;
+          }
+        }
+        document.querySelectorAll('.masonry-grid').forEach(g => {
+          balanceMobileGrid(g);
+        });
+      }, { passive: true });
+      window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+          document.querySelectorAll('.masonry-grid').forEach(g => {
+            balanceMobileGrid(g);
+          });
+        }, 150);
       }, { passive: true });
       pageSpineScrollBound = true;
     }
@@ -1374,6 +1393,7 @@
     subItems.forEach((item, idx) => {
       sectionGrid.appendChild(createCard(item, idx));
     });
+    balanceMobileGrid(sectionGrid);
 
     grid.appendChild(section);
 
@@ -1393,6 +1413,29 @@
   function getCardAspect(item) {
     if (item.width && item.height) return item.width / item.height;
     return item.aspectRatio || 1;
+  }
+
+  /**
+   * 移动端双列网格智能平衡与孤图修复函数
+   * 确保网格内每行严密铺满 2 列，若存在落单无法成对的单张竖卡（宽高比 < 1.2），
+   * 自动赋予 mobile-span-full 类拉满整行，彻底根治右侧空白死穴
+   */
+  function balanceMobileGrid(gridEl) {
+    if (!gridEl) return;
+    const cards = Array.from(gridEl.querySelectorAll('.gallery-card:not(.gallery-more-card)'));
+    if (cards.length === 0) return;
+
+    cards.forEach(c => c.classList.remove('mobile-span-full'));
+
+    // 仅在移动端屏幕（<= 640px）执行双列配平
+    const isMobile = window.innerWidth <= 640;
+    if (!isMobile) return;
+
+    const portraitCards = cards.filter(c => c.classList.contains('is-portrait'));
+    if (portraitCards.length % 2 === 1) {
+      const oddCard = portraitCards[portraitCards.length - 1];
+      oddCard.classList.add('mobile-span-full');
+    }
   }
 
   function createMoreCard(group, totalInCat, remainingCount, curLang, unshownItems, allInCat) {
@@ -1559,74 +1602,109 @@
         return candidatePool.filter(it => !selectedIds.has(it.id));
       }
 
-      let rowCount = 0;
-      const rem1 = getRemaining();
-      const wideItem = rem1.find(it => getCardAspect(it) >= 2.5);
+      if (!isDesktop) {
+        // 移动端专用双列网格紧致配平逻辑：
+        // 挑选 2 至 3 整行（4 或 6 个栏位单元），严格保证竖卡数量为偶数，彻底根绝空洞
+        const portraits = candidatePool.filter(it => (it.aspectRatio || 1) < 1.2);
+        const landscapes = candidatePool.filter(it => (it.aspectRatio || 1) >= 1.2);
 
-      // 若有全景长图且为桌面宽屏：长图占 ~75% + 搭配 1 张方/竖图占 ~25%，严丝合缝拼满第 1 行
-      if (wideItem && isDesktop) {
-        selected.push(wideItem);
-        selectedIds.add(wideItem.id);
-        const comp = rem1.find(it => it.id !== wideItem.id && getCardAspect(it) <= 1.05);
-        if (comp) {
-          selected.push(comp);
-          selectedIds.add(comp.id);
+        let mobileSelected = [];
+        if (landscapes.length >= 2 && portraits.length >= 2) {
+          // 2 竖卡 + 2 横卡（共 4 件，占 6 单元 = 3 个完整双列行）
+          mobileSelected = [portraits[0], portraits[1], landscapes[0], landscapes[1]];
+        } else if (landscapes.length >= 1 && portraits.length >= 4) {
+          // 4 竖卡 + 1 横卡（共 5 件，占 6 单元 = 3 个完整双列行）
+          mobileSelected = [portraits[0], portraits[1], landscapes[0], portraits[2], portraits[3]];
+        } else if (landscapes.length >= 1 && portraits.length >= 2) {
+          // 2 竖卡 + 1 横卡（共 3 件，占 4 单元 = 2 个完整双列行）
+          mobileSelected = [portraits[0], portraits[1], landscapes[0]];
+        } else if (portraits.length >= 4) {
+          // 4 竖卡（共 4 件，占 4 单元 = 2 个完整双列行）
+          mobileSelected = portraits.slice(0, 4);
+        } else if (landscapes.length >= 2) {
+          // 2 横卡（共 2 件，占 4 单元 = 2 个完整双列行）
+          mobileSelected = landscapes.slice(0, 2);
+        } else if (portraits.length >= 2) {
+          // 2 竖卡（共 2 件，占 2 单元 = 1 个完整双列行）
+          mobileSelected = portraits.slice(0, 2);
+        } else {
+          mobileSelected = candidatePool.slice(0, Math.min(candidatePool.length, 2));
         }
-        rowCount = 1;
-      }
 
-      // 拼满剩余行至严格 2 整行即止，绝不在末行遗留落单孤图或挤入第 3 行
-      if (rowCount === 0) {
-        let sumAr1 = 0;
-        let count1 = 0;
-        const candidates1 = getRemaining();
-        for (const it of candidates1) {
-          const ar = getCardAspect(it);
-          const effectiveAr = ar >= 2.5 ? ar * 0.72 : ar;
-          // 预判：若加入当前卡片导致第 1 行总宽高比溢出（> maxRowAr），跳过此卡尝试更紧凑卡片
-          if (count1 >= 2 && (sumAr1 + effectiveAr > maxRowAr)) {
-            continue;
-          }
+        mobileSelected.forEach(it => {
           selected.push(it);
           selectedIds.add(it.id);
-          sumAr1 += effectiveAr;
-          count1++;
-          // 达标即刻成行封顶
-          if (sumAr1 >= minRowAr && count1 >= (containerW >= 1400 ? 3 : 2)) {
-            break;
+        });
+      } else {
+        let rowCount = 0;
+        const rem1 = getRemaining();
+        const wideItem = rem1.find(it => getCardAspect(it) >= 2.5);
+
+        // 若有全景长图且为桌面宽屏：长图占 ~75% + 搭配 1 张方/竖图占 ~25%，严丝合缝拼满第 1 行
+        if (wideItem && isDesktop) {
+          selected.push(wideItem);
+          selectedIds.add(wideItem.id);
+          const comp = rem1.find(it => it.id !== wideItem.id && getCardAspect(it) <= 1.05);
+          if (comp) {
+            selected.push(comp);
+            selectedIds.add(comp.id);
           }
+          rowCount = 1;
         }
-        rowCount = 1;
-      }
 
-      if (rowCount === 1) {
-        let sumAr2 = 0;
-        let count2 = 0;
-        const candidates2 = getRemaining();
-        // 判断第 2 行末尾是否需要压入 MoreCard 终点卡片（MoreCard 宽高比约 0.92）
-        const willHaveMore = isDesktop && (totalCount > (selected.length + 2));
-        const moreAr = willHaveMore ? 0.92 : 0;
-
-        for (const it of candidates2) {
-          const ar = getCardAspect(it);
-          const effectiveAr = ar >= 2.5 ? ar * 0.72 : ar;
-
-          // 预判：若加入当前卡片会导致第 2 行加上 MoreCard 后溢出折行，跳过尝试更紧凑卡片
-          if (count2 >= 1 && (sumAr2 + effectiveAr + moreAr > maxRowAr)) {
-            continue;
+        // 拼满剩余行至严格 2 整行即止，绝不在末行遗留落单孤图或挤入第 3 行
+        if (rowCount === 0) {
+          let sumAr1 = 0;
+          let count1 = 0;
+          const candidates1 = getRemaining();
+          for (const it of candidates1) {
+            const ar = getCardAspect(it);
+            const effectiveAr = ar >= 2.5 ? ar * 0.72 : ar;
+            // 预判：若加入当前卡片导致第 1 行总宽高比溢出（> maxRowAr），跳过此卡尝试更紧凑卡片
+            if (count1 >= 2 && (sumAr1 + effectiveAr > maxRowAr)) {
+              continue;
+            }
+            selected.push(it);
+            selectedIds.add(it.id);
+            sumAr1 += effectiveAr;
+            count1++;
+            // 达标即刻成行封顶
+            if (sumAr1 >= minRowAr && count1 >= (containerW >= 1400 ? 3 : 2)) {
+              break;
+            }
           }
-
-          selected.push(it);
-          selectedIds.add(it.id);
-          sumAr2 += effectiveAr;
-          count2++;
-
-          // 达标即刻成行封顶，把末席稳稳留给 MoreCard
-          if ((sumAr2 + moreAr) >= minRowAr && count2 >= (willHaveMore ? (containerW >= 1400 ? 3 : 2) : 2)) {
-            break;
-          }
+          rowCount = 1;
         }
-        rowCount = 2;
+
+        if (rowCount === 1) {
+          let sumAr2 = 0;
+          let count2 = 0;
+          const candidates2 = getRemaining();
+          // 判断第 2 行末尾是否需要压入 MoreCard 终点卡片（MoreCard 宽高比约 0.92）
+          const willHaveMore = isDesktop && (totalCount > (selected.length + 2));
+          const moreAr = willHaveMore ? 0.92 : 0;
+
+          for (const it of candidates2) {
+            const ar = getCardAspect(it);
+            const effectiveAr = ar >= 2.5 ? ar * 0.72 : ar;
+
+            // 预判：若加入当前卡片会导致第 2 行加上 MoreCard 后溢出折行，跳过尝试更紧凑卡片
+            if (count2 >= 1 && (sumAr2 + effectiveAr + moreAr > maxRowAr)) {
+              continue;
+            }
+
+            selected.push(it);
+            selectedIds.add(it.id);
+            sumAr2 += effectiveAr;
+            count2++;
+
+            // 达标即刻成行封顶，把末席稳稳留给 MoreCard
+            if ((sumAr2 + moreAr) >= minRowAr && count2 >= (willHaveMore ? (containerW >= 1400 ? 3 : 2) : 2)) {
+              break;
+            }
+          }
+          rowCount = 2;
+        }
       }
 
       selected.forEach(it => usedGlobally.add(it.id));
@@ -1722,10 +1800,12 @@
       const isMoreNeeded = (totalInCat > displayedCount);
       if (isMoreNeeded) {
         // 1. 桌面端网格内嵌“合集终点卡片”（More Card），完美填补末行留空
-        const remainingCount = totalInCat - displayedCount;
-        const unshownItems = (items || []).filter(it => itemMatchesSubCategory(it, group.name) && !group.items.some(s => s.id === it.id));
-        const allCatItems = (items || []).filter(it => itemMatchesSubCategory(it, group.name));
-        sectionGrid.appendChild(createMoreCard(group, totalInCat, remainingCount, curLang, unshownItems, allCatItems));
+        if (isDesktop) {
+          const remainingCount = totalInCat - displayedCount;
+          const unshownItems = (items || []).filter(it => itemMatchesSubCategory(it, group.name) && !group.items.some(s => s.id === it.id));
+          const allCatItems = (items || []).filter(it => itemMatchesSubCategory(it, group.name));
+          sectionGrid.appendChild(createMoreCard(group, totalInCat, remainingCount, curLang, unshownItems, allCatItems));
+        }
 
         // 2. 移动端独立底部胶囊操作栏（大拇指舒适触控区）
         const moreWrap = document.createElement('div');
@@ -1747,6 +1827,9 @@
         }
         section.appendChild(moreWrap);
       }
+
+      // 移动端动态双列平衡检查与修复，确保零死白空洞
+      balanceMobileGrid(sectionGrid);
 
       grid.appendChild(section);
     });

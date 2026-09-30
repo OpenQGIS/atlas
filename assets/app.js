@@ -5134,7 +5134,11 @@
     isPosterRendering = true;
     try {
       const canvas = await generateArtworkPoster(currentPosterItem, currentPosterRatio);
-      if (canvas && imgEl) {
+      if (!canvas) {
+        throw new Error('Canvas 绘图上下文创建失败');
+      }
+
+      if (imgEl) {
         const fallbackDataUrl = () => {
           try {
             const dataUrl = canvas.toDataURL('image/png');
@@ -5146,7 +5150,14 @@
           } catch (err2) {
             console.error('Poster export fallback failed:', err2);
             if (loading) {
-              loading.innerHTML = '<span style="color:#ff5555;font-size:0.85rem;">[海报生成失败，请重试]</span>';
+              const isFileProto = typeof window !== 'undefined' && window.location && window.location.protocol === 'file:';
+              const isSecurity = (err2 && (err2.name === 'SecurityError' || String(err2).includes('Security') || String(err2).includes('insecure') || String(err2).includes('Tainted')));
+              let msg = isFileProto
+                ? '[受浏览器本地 file:// 沙箱限制，Canvas 无法直接导出，请在 HTTP 本地服务或线上站点使用]'
+                : (isSecurity
+                  ? '[图片跨域安全限制导致海报导出受阻，请刷新后重试]'
+                  : `[海报导出失败: ${escapeHtml((err2 && err2.message) || String(err2))}]`);
+              loading.innerHTML = `<span style="color:#ff5555;font-size:0.82rem;line-height:1.4;padding:12px;text-align:center;">${msg}</span>`;
             }
           }
         };
@@ -5163,7 +5174,7 @@
             } else {
               fallbackDataUrl();
             }
-          }, 'image/png', 0.95);
+          }, 'image/png');
         } catch (e) {
           fallbackDataUrl();
         }
@@ -5171,7 +5182,14 @@
     } catch (err) {
       console.error('Poster generation failed:', err);
       if (loading) {
-        loading.innerHTML = '<span style="color:#ff5555;font-size:0.85rem;">[海报生成失败，请重试]</span>';
+        const isFileProto = typeof window !== 'undefined' && window.location && window.location.protocol === 'file:';
+        const isSecurity = (err && (err.name === 'SecurityError' || String(err).includes('Security') || String(err).includes('insecure') || String(err).includes('Tainted')));
+        let msg = isFileProto
+          ? '[受浏览器本地 file:// 沙箱限制，Canvas 无法直接导出，请在 HTTP 本地服务或线上站点使用]'
+          : (isSecurity
+            ? '[图片跨域安全限制导致海报生成受阻，请刷新后重试]'
+            : `[海报生成失败: ${escapeHtml((err && err.message) || String(err))}]`);
+        loading.innerHTML = `<span style="color:#ff5555;font-size:0.82rem;line-height:1.4;padding:12px;text-align:center;">${msg}</span>`;
       }
     } finally {
       isPosterRendering = false;
@@ -5191,6 +5209,9 @@
 
     const a = document.createElement('a');
     a.download = filename;
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+      a.target = '_blank';
+    }
     if (currentPosterBlob) {
       a.href = URL.createObjectURL(currentPosterBlob);
     } else if (currentPosterDataUrl) {
@@ -5202,12 +5223,14 @@
   }
 
   function drawQrCodeMatrix(ctx, x, y, size, url) {
-    if (!window.qrcode) return;
+    const qrFn = (typeof window !== 'undefined' && window.qrcode) || (typeof qrcode !== 'undefined' && qrcode);
+    if (!qrFn) return;
     try {
-      const qr = qrcode(0, 'M');
+      const qr = qrFn(0, 'M');
       qr.addData(url);
       qr.make();
       const modCount = qr.getModuleCount();
+      if (!modCount || modCount <= 0) return;
       const cellSize = size / modCount;
       ctx.fillStyle = '#000000';
       for (let r = 0; r < modCount; r++) {
@@ -5233,6 +5256,8 @@
     if (!src) return;
     try {
       const img = await loadImageAsync(src);
+      if (!img || !img.naturalWidth || !img.naturalHeight) return;
+
       ctx.save();
       roundRect(ctx, boxX, boxY, boxW, boxH, radius);
       ctx.clip();
@@ -5285,7 +5310,7 @@
     const posterPalette = (Array.isArray(item.palette) && item.palette.length > 0) ? item.palette :
                           (Array.isArray(item.colors) && item.colors.length > 0) ? item.colors :
                           (Array.isArray(item.color) && item.color.length > 0) ? item.color :
-                          (MASTER_PALETTES[item.id] || []);
+                          ((typeof MASTER_PALETTES !== 'undefined' && MASTER_PALETTES && MASTER_PALETTES[item.id]) || []);
 
     const titleText = (locItem && locItem.title) || item.title || i18nTexts.fallbackTitle;
 
@@ -5536,9 +5561,11 @@
 
   function roundRect(ctx, x, y, w, h, r) {
     if (typeof ctx.roundRect === 'function') {
-      ctx.beginPath();
-      ctx.roundRect(x, y, w, h, r);
-      return;
+      try {
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, r);
+        return;
+      } catch (e) {}
     }
     ctx.beginPath();
     ctx.moveTo(x + r, y);
@@ -5583,16 +5610,49 @@
     return currentY;
   }
 
-  function loadImageAsync(src) {
+  async function loadImageAsync(src) {
+    if (!src) throw new Error('No image source provided');
+
+    // 1. 如果本身已是 blob: 或 data: URI，直接加载
+    if (src.startsWith('blob:') || src.startsWith('data:')) {
+      return await loadHtmlImage(src, false);
+    }
+
+    // 2. 核心跨域与 Safari WebKit 缓存防污染引擎 (彻底解决 WebKit Bug #135379)
+    // 优先通过带有 mode: 'cors' 的 fetch 请求转换为本地同源 Blob URL。
+    // 这将从根本上杜绝 Safari 因复用前置无 CORS 缓存而导致的 Canvas Tainted SecurityError
+    try {
+      const fetchUrl = src + (src.includes('?') ? '&' : '?') + '_cvs=1';
+      const response = await fetch(fetchUrl, { mode: 'cors' });
+      if (response.ok) {
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const img = await loadHtmlImage(blobUrl, false);
+        // 延时释放 ObjectURL，保证绘制完毕后回收内存
+        setTimeout(() => {
+          try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+        }, 5000);
+        return img;
+      }
+    } catch (fetchErr) {
+      // 常见于 file:// 本地环境或不支持 CORS fetch 的源，降级到 Image 标签直载
+      console.warn('CORS blob fetch fallback to Image tag:', fetchErr);
+    }
+
+    // 3. 降级方案：带 crossOrigin='anonymous' 的原生 Image 实例
+    const isFileProto = typeof window !== 'undefined' && window.location && window.location.protocol === 'file:';
+    return await loadHtmlImage(src, !isFileProto);
+  }
+
+  function loadHtmlImage(url, useCors) {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      const isExternal = /^https?:\/\//i.test(src) && (!window.location.origin || !src.startsWith(window.location.origin));
-      if (isExternal) {
+      if (useCors) {
         img.crossOrigin = 'anonymous';
       }
       img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error('Image failed to load: ' + src));
-      img.src = src;
+      img.onerror = () => reject(new Error('Image failed to load: ' + url));
+      img.src = url;
     });
   }
 

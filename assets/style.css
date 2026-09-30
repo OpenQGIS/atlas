@@ -231,6 +231,180 @@ body {
   gap: 10px;
   flex-shrink: 0;
 }
+
+/* =====================================================================
+   Header Actions Capsule · 顶栏一体化微晶操作胶囊 (绝对等高 · 三键常驻不折叠)
+   ==================================================================== */
+.header-actions-capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 4px;
+  background: rgba(14, 18, 24, 0.78);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9999px;
+  box-shadow: 
+    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.16),
+    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.14),
+    0px 6px 16px -3px rgba(0, 0, 0, 0.20);
+  user-select: none;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+:root[data-theme="light"] .header-actions-capsule {
+  background: rgba(255, 255, 255, 0.90);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.06),
+    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.05),
+    0px 6px 16px -3px rgba(0, 0, 0, 0.08);
+}
+
+.header-actions-capsule:hover {
+  border-color: var(--border-medium);
+}
+
+:root[data-theme="light"] .header-actions-capsule:hover {
+  border-color: rgba(0, 0, 0, 0.14);
+}
+
+/* 胶囊内按键基类：严格统一 30px 高度与垂直居中基准线 */
+.header-actions-capsule .capsule-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  border-radius: 9999px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all var(--transition-fast);
+  padding: 0;
+  outline: none;
+}
+
+/* 1. 多语言下拉切换按键 */
+.header-actions-capsule .lang-dropdown-btn {
+  height: 30px;
+  padding: 0 8px;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+}
+
+.header-actions-capsule .lang-dropdown-btn:hover,
+.header-actions-capsule .lang-dropdown-btn[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text-primary);
+  border-color: transparent;
+}
+
+:root[data-theme="light"] .header-actions-capsule .lang-dropdown-btn:hover,
+:root[data-theme="light"] .header-actions-capsule .lang-dropdown-btn[aria-expanded="true"] {
+  background: rgba(0, 0, 0, 0.06);
+  color: #0f141c;
+}
+
+.header-actions-capsule .lang-dropdown-btn .icon.mini {
+  width: 14px;
+  height: 14px;
+}
+
+.header-actions-capsule .lang-dropdown-btn .lang-current-label {
+  font-size: 0.74rem;
+  min-width: 16px;
+}
+
+/* 2. 主题切换按键 */
+.header-actions-capsule .theme-toggle-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+}
+
+.header-actions-capsule .theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text-primary);
+  border-color: transparent;
+}
+
+:root[data-theme="light"] .header-actions-capsule .theme-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #0f141c;
+}
+
+.header-actions-capsule .theme-toggle-btn .icon {
+  width: 15px;
+  height: 15px;
+}
+
+/* 3. 垂直微细刻度线 */
+.header-actions-capsule .capsule-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.14);
+  margin: 0 3px;
+  flex-shrink: 0;
+}
+
+:root[data-theme="light"] .header-actions-capsule .capsule-divider {
+  background: rgba(0, 0, 0, 0.10);
+}
+
+/* 4. 返回首屏画卷（Home）翡翠微晶独立圆键 */
+.header-actions-capsule .home-return-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  background: rgba(var(--accent-rgb, 128, 204, 40), 0.12);
+  border: 1px solid rgba(var(--accent-rgb, 128, 204, 40), 0.28);
+  color: var(--accent, #80cc28);
+  flex-shrink: 0;
+}
+
+.header-actions-capsule .home-return-btn:hover {
+  background: rgba(var(--accent-rgb, 128, 204, 40), 0.24);
+  border-color: rgba(var(--accent-rgb, 128, 204, 40), 0.48);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb, 128, 204, 40), 0.35);
+  color: var(--accent, #80cc28);
+  transform: translateY(-0.5px);
+}
+
+.header-actions-capsule .home-return-btn:active {
+  transform: scale(0.95);
+}
+
+:root[data-theme="light"] .header-actions-capsule .home-return-btn {
+  background: rgba(var(--accent-rgb, 106, 168, 32), 0.10);
+  border-color: rgba(var(--accent-rgb, 106, 168, 32), 0.24);
+  color: var(--accent, #6aa820);
+}
+
+:root[data-theme="light"] .header-actions-capsule .home-return-btn:hover {
+  background: rgba(var(--accent-rgb, 106, 168, 32), 0.20);
+  border-color: rgba(var(--accent-rgb, 106, 168, 32), 0.38);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb, 106, 168, 32), 0.25);
+  color: var(--accent, #6aa820);
+}
+
+.header-actions-capsule .home-return-btn .icon {
+  width: 15px;
+  height: 15px;
+}
+
 .stat-pill {
   display: inline-flex;
   align-items: center;
@@ -6549,6 +6723,36 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 
   .header-meta {
     gap: 4px;
+  }
+
+  .header-actions-capsule {
+    padding: 2px 3px;
+    gap: 2px;
+  }
+
+  .header-actions-capsule .capsule-btn {
+    height: 28px;
+  }
+
+  .header-actions-capsule .lang-dropdown-btn {
+    height: 28px;
+    padding: 0 6px;
+    font-size: 0.68rem;
+  }
+
+  .header-actions-capsule .theme-toggle-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header-actions-capsule .home-return-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header-actions-capsule .capsule-divider {
+    height: 14px;
+    margin: 0 2px;
   }
 
   .stat-pill.icon-pill,

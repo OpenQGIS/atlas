@@ -396,15 +396,31 @@
     }
   }
 
+  function returnToHeroCover(smooth = true) {
+    if (typeof startHeroTimer === 'function') {
+      try { startHeroTimer(); } catch (_) {}
+    }
+    document.documentElement.classList.remove('has-entered-gallery');
+    document.body.classList.remove('in-gallery');
+    currentHistoryLevel = 0;
+
+    if (smooth) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo(0, 0);
+    }
+
+    try {
+      window.history.pushState({ level: 0, view: 'hero' }, '', window.location.pathname + window.location.search);
+    } catch (_) {}
+  }
+
   function bindPortalScrollEvents() {
-    const portalBtn = document.getElementById('btnScrollToPortal');
-    if (portalBtn) {
-      portalBtn.addEventListener('click', (e) => {
+    const homeBtn = document.getElementById('btnReturnHero') || document.getElementById('btnScrollToPortal');
+    if (homeBtn) {
+      homeBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        const footer = document.getElementById('portalFooter');
-        if (footer) {
-          footer.scrollIntoView({ behavior: 'smooth' });
-        }
+        returnToHeroCover(true);
       });
     }
   }

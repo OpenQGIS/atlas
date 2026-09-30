@@ -4,6 +4,26 @@
 
 ---
 
+## [1.3.13] - 2026-09-30
+
+### 缺陷修复与体验增强 (Bug Fixes & Safari Compatibility)
+- **修复 Safari 浏览器首页未能真全屏缺陷 (Fix Safari Hero Fullscreen Viewport Height)**：
+  - **根本原因**：此前首屏高度规则采用了 `100svh` 与 `visualViewport` 像素锁高，在 Safari 下因小视口（svh）预留了最大化工具栏空间，且固定像素快照未能动态适配收起后的视口高度，加上原规则缺少 `min-height: 100dvh` 硬性约束，导致首屏底部露边、露底栏，未能达成 100% 满屏无界沉浸体验；
+  - **现代化真全屏视口重塑**：
+    - 升级为 `height: 100dvh; min-height: 100dvh; min-height: 100vh; min-height: -webkit-fill-available;` 级联标准，确保在 iOS Safari、macOS Safari 及所有现代浏览器中始终严丝合缝填满整个可见视口，零漏缝、零下移；
+    - `syncHeroViewportHeight` 增强 `Math.max(window.innerHeight, ...)` 兜底，杜绝视口变量计算偏小；
+    - 在脚本载入最前沿立即启用 `history.scrollRestoration = 'manual'`，杜绝 Safari 页面初载时因恢复历史滚动位置导致开屏画面被提前滚越。
+- **修复滚动到瀑布页后仍可回滚首屏全景图缺陷 (Fix Safari Zero-Backscroll Guarantee)**：
+  - **根本原因**：此前进入画廊常驻模式（`in-gallery`，彻底收起隐藏首屏）仅挂载在按钮点击与极严苛的 `wheel`（`deltaY > 15 && scrollY < 40`）和 `touchend` 上。而在 Safari 环境下，Mac 触控板惯性微动量（`deltaY < 15`）与 iOS 触屏滑动均会直接触发原生滚动使 `scrollY` 瞬时超过 40px，导致原有手势拦截器全盘失效，读者自由滚入瀑布流却从未激活 `in-gallery` 模式，首屏依然停留在 DOM 顶端，造成向上依然可以回滚到全屏封面的严重体验缺陷；
+  - **原生滚动事件全域拦截与原子化展厅锁定 (`lockIntoGallery`)**：
+    - 在原生 `scroll` 事件中构建核心熔断防线：无论读者通过触屏拖拽、Mac 触控板惯性动量、鼠标滚轮还是右侧原生滚动条，只要滚动距离抵达瀑布流阈值（`scrollY >= heroHeight - 12`），立即原子化激活 `lockIntoGallery`；
+    - 无缝平移视口：激活 `in-gallery` 彻底隐藏首屏（`display: none !important`）的同时，自动将当前滚动位移减去 `heroHeight`，视觉画面纹丝不动，而 `siteHeader` 物理确立为整个网页唯一最顶端；
+    - 读者在瀑布流中向上滚动到顶即止，100% 彻底杜绝回滚到全屏图；
+    - 同步将 `wheel` 动量识别门槛下调至 `> 2`、触控滑动距离门槛下调至 `> 35px`，实现跨端极致丝滑步入展厅；
+  - 资源版本号升级至 `v=20260930_v56`。
+
+---
+
 ## [1.3.12] - 2026-09-30
 
 ### 缺陷修复 (Bug Fixes)

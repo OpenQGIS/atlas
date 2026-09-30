@@ -6253,9 +6253,10 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   position: relative;
   width: 100%;
   height: 100vh;
-  height: 100svh;
-  height: var(--hero-real-vh, 100svh);
-  min-height: 380px;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -6892,9 +6893,10 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 /* 横版 / 短屏视口适配 (高度 <= 600px，如手机横屏 667x375, 800x400, 538x540 等) */
 @media (max-height: 600px) {
   .hero-screen {
-    height: 100svh;
-    height: var(--hero-real-vh, 100svh);
-    min-height: 100svh;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     min-height: -webkit-fill-available;
   }
   .hero-content {

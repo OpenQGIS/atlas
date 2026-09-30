@@ -7,6 +7,13 @@
 (function () {
   'use strict';
 
+  // 立即关闭浏览器默认滚动恢复机制，杜绝刷新时跳过首屏封面
+  if ('scrollRestoration' in history) {
+    try {
+      history.scrollRestoration = 'manual';
+    } catch (e) {}
+  }
+
   // Global State
   let galleryItems = [];
   let currentFilteredItems = [];
@@ -497,9 +504,9 @@
     const heroScrollBtn = document.getElementById('heroScrollBtn');
     if (!heroScreen || !galleryItems || galleryItems.length === 0) return;
 
-    // 跨端精准视口高度测量 (彻底解决 iOS Safari 底部展开工具栏导致高度溢出漏边的问题)
+    // 跨端精准视口高度测量 (确保动态锁高不低于窗口内部高度)
     function syncHeroViewportHeight() {
-      const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      const vh = Math.max(window.innerHeight, (window.visualViewport ? window.visualViewport.height : 0));
       document.documentElement.style.setProperty('--hero-real-vh', `${vh}px`);
     }
     syncHeroViewportHeight();
@@ -626,6 +633,33 @@
       }
     });
 
+    // 将页面视口原子化锁定进入 in-gallery 展厅模式，彻底移除首屏全景图，确保向上滚动到顶即止
+    function lockIntoGallery(currentScrollY, heroHeight) {
+      if (document.body.classList.contains('in-gallery')) return;
+      stopHeroTimer();
+      const hHeight = heroHeight || (heroScreen ? heroScreen.offsetHeight : window.innerHeight);
+      document.documentElement.style.scrollBehavior = 'auto';
+      document.documentElement.classList.add('has-entered-gallery');
+      document.body.classList.add('in-gallery');
+      const newScrollY = Math.max(0, currentScrollY - hHeight);
+      window.scrollTo(0, newScrollY);
+      requestAnimationFrame(() => {
+        document.documentElement.style.scrollBehavior = '';
+      });
+
+      if (currentHistoryLevel === 0) {
+        currentHistoryLevel = 1;
+        try {
+          window.history.pushState({ level: 1, view: 'gallery' }, '', window.location.pathname + window.location.search);
+        } catch (e) {}
+      }
+
+      const siteHeaderEl = document.getElementById('siteHeader');
+      if (siteHeaderEl) {
+        siteHeaderEl.classList.toggle('is-sticky', newScrollY > 8);
+      }
+    }
+
     window.addEventListener('scroll', () => {
       const scrollY = window.scrollY || window.pageYOffset;
       if (document.body.classList.contains('in-gallery')) {
@@ -643,15 +677,21 @@
         if (!heroTimer) scheduleNextTransition();
       }
 
-      // 处于开屏状态下的瀑布流吸顶标记
+      const heroHeight = heroScreen ? (heroScreen.offsetHeight || window.innerHeight) : window.innerHeight;
+
+      // 核心防线：无论通过触控、触控板动量或滚动条拖拽，只要读者滚动越过首屏到达瀑布流，
+      // 立即原子化锁入 in-gallery 展厅模式，彻底收起首屏，使 siteHeader 确立为页面最顶端，彻底杜绝向上回滚
+      if (!currentSubCategory && !document.body.classList.contains('in-subview')) {
+        if (scrollY >= heroHeight - 12) {
+          lockIntoGallery(scrollY, heroHeight);
+          return;
+        }
+      }
+
+      // 处于开屏过渡期间的瀑布流吸顶标记
       const siteHeaderEl = document.getElementById('siteHeader');
       if (siteHeaderEl) {
-        const heroHeight = heroScreen.offsetHeight || window.innerHeight;
-        if (scrollY >= heroHeight - 8) {
-          siteHeaderEl.classList.add('is-sticky');
-        } else {
-          siteHeaderEl.classList.remove('is-sticky');
-        }
+        siteHeaderEl.classList.toggle('is-sticky', scrollY >= heroHeight - 8);
       }
 
       // 同步 Level 0 / Level 1 历史状态
@@ -690,39 +730,20 @@
 
       stopHeroTimer();
       const target = document.getElementById('siteHeader') || document.querySelector('.site-header');
+      const heroHeight = heroScreen ? (heroScreen.offsetHeight || window.innerHeight) : window.innerHeight;
 
       if (smooth) {
         if (target) {
           target.scrollIntoView({ behavior: 'smooth' });
         } else {
-          window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+          window.scrollTo({ top: heroHeight, behavior: 'smooth' });
         }
 
-        // 平滑滚动到位后无缝切换为 in-gallery，将首屏全景收起，使 siteHeader 确立为页面最顶端
         setTimeout(() => {
-          document.documentElement.style.scrollBehavior = 'auto';
-          document.documentElement.classList.add('has-entered-gallery');
-          document.body.classList.add('in-gallery');
-          window.scrollTo(0, 0);
-          requestAnimationFrame(() => {
-            document.documentElement.style.scrollBehavior = '';
-          });
+          lockIntoGallery(heroHeight, heroHeight);
         }, 650);
       } else {
-        document.documentElement.style.scrollBehavior = 'auto';
-        document.documentElement.classList.add('has-entered-gallery');
-        document.body.classList.add('in-gallery');
-        window.scrollTo(0, 0);
-        requestAnimationFrame(() => {
-          document.documentElement.style.scrollBehavior = '';
-        });
-      }
-
-      if (currentHistoryLevel === 0) {
-        currentHistoryLevel = 1;
-        try {
-          window.history.pushState({ level: 1, view: 'gallery' }, '', window.location.pathname + window.location.search);
-        } catch (e) {}
+        lockIntoGallery(heroHeight, heroHeight);
       }
     }
 
@@ -755,8 +776,8 @@
       const hero = document.getElementById('heroScreen');
       if (!hero) return;
 
-      // 处于开屏视图顶部且向下滚轮滑动时，平滑步入展厅
-      if (window.scrollY < 40 && e.deltaY > 15) {
+      // 处于开屏视图顶部且向下滚轮/触控板滑动时，平滑步入展厅 (门槛降至 > 2，适配 Mac Safari 触控板微动量)
+      if (window.scrollY < 80 && e.deltaY > 2) {
         isSnapping = true;
         enterGalleryView(true);
         setTimeout(() => { isSnapping = false; }, 850);
@@ -777,7 +798,8 @@
       if (!touchStartY) return;
       const touchEndY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : 0;
       const diff = touchStartY - touchEndY;
-      if (window.scrollY < 40 && diff > 50) {
+      // 只要向上滑动距离超过 35px，无论当前 scrollY 是否已发生偏移，均视为向下探索意图
+      if (diff > 35) {
         enterGalleryView(true);
       }
       touchStartY = 0;

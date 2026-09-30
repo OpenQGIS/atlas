@@ -1878,6 +1878,7 @@
 
   function createCard(item, localIdx) {
     const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
+    const curLang = window.AtlasI18n ? window.AtlasI18n.getLang() : 'zh';
     const card = document.createElement('article');
     const isUltraWide = (item.aspectRatio >= 2.0);
     const isLandscape = (item.aspectRatio >= 1.2);
@@ -1891,9 +1892,19 @@
     card.tabIndex = 0;
     card.style.setProperty('--aspect-ratio', item.aspectRatio);
 
-    const tagsHtml = (locItem.tags || [])
-      .filter(t => !['no', 'no_hero', 'hero:no', 'hero=no'].includes(String(t).trim().toLowerCase()))
+    const FORMAT_TAGS = new Set([
+      'no', 'no_hero', 'hero:no', 'hero=no',
+      '标准竖构图', '标准横幅画幅', '排版横版', 'iPad画幅', '手机壁纸',
+      '标准海报', '标准登书版', '排版横幅'
+    ]);
+    const validTags = (locItem.tags || [])
+      .filter(t => !FORMAT_TAGS.has(String(t).trim()));
+
+    const tagsHtml = validTags
       .map(t => '<span class="tag-pill">' + escapeHtml(t) + '</span>').join('');
+    const allTagsTooltip = validTags.length > 0 
+      ? (curLang === 'en' ? `Tags: ${validTags.join(' · ')}` : (curLang === 'ja' ? `タグ: ${validTags.join(' · ')}` : (curLang === 'ko' ? `태그: ${validTags.join(' · ')}` : `标签：${validTags.join(' · ')}`)))
+      : '';
 
     const isNew = isNewArtwork(item);
     const newBadgeAria = window.AtlasI18n ? (window.AtlasI18n.t('badgeNewAria') || '新作') : '新作';
@@ -1926,7 +1937,7 @@
           '<div class="card-scrim-content">' +
             '<h3 class="card-title">' + escapeHtml(locItem.title) + '</h3>' +
             '<div class="card-meta-row">' +
-              '<div class="card-tags">' + tagsHtml + '</div>' +
+              '<div class="card-tags"' + (allTagsTooltip ? ' title="' + escapeHtml(allTagsTooltip) + '"' : '') + '>' + tagsHtml + '</div>' +
             '</div>' +
           '</div>' +
         '</div>' +

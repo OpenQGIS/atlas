@@ -2645,13 +2645,15 @@ body[data-page="portal"] {
 
 .card-tags {
   display: flex;
+  flex-wrap: wrap;
   gap: 5px;
   align-items: center;
+  height: 22px;
+  max-height: 22px;
   overflow: hidden;
-  white-space: nowrap;
   flex: 1 1 auto;
   min-width: 0;
-  transition: -webkit-mask-image 0.28s ease, mask-image 0.28s ease;
+  line-height: 1;
 }
 
 /* 卡片正中央【点击查看详图】高质感微晶毛玻璃胶囊（去 AI 廉价感，居中醒目呈现） */
@@ -2747,7 +2749,13 @@ body[data-page="portal"] {
   border-radius: 4px;
   color: rgba(255, 255, 255, 0.92);
   font-size: 0.70rem;
+  line-height: 1.2;
   flex-shrink: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
 }
 
 .tag-pill-secondary {
@@ -2791,6 +2799,10 @@ body[data-page="portal"] {
   .card-meta-row {
     min-height: 20px;
   }
+  .card-tags {
+    height: 20px;
+    max-height: 20px;
+  }
   .tag-pill {
     padding: 1.5px 5px;
     font-size: 0.60rem;
@@ -2829,6 +2841,8 @@ body[data-page="portal"] {
     min-height: 18px;
   }
   .card-tags {
+    height: 17px;
+    max-height: 17px;
     gap: 3.5px;
   }
   .tag-pill {

@@ -2687,7 +2687,7 @@
       targetW = Math.max(Math.round(maxH * aspect), 28);
     }
 
-    const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
+    const dominantColor = (item.navGradient && item.navGradient[1]) || (item.navGradient && item.navGradient[0]) || (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
     const gradientCss = (function (it) {
       if (it && it.navGradient && Array.isArray(it.navGradient) && it.navGradient.length >= 2) {
         if (it.navGradient.length === 3) {
@@ -2715,12 +2715,8 @@
       const fullThumbUrl = new URL(item.thumb, window.location.href).href;
       navEl.style.setProperty('--nav-thumb', 'url("' + fullThumbUrl + '")');
       navEl.style.setProperty('--nav-thumb-opacity', '1');
-      navEl.style.setProperty('background-image', 'url("' + fullThumbUrl + '")', 'important');
-      navEl.style.setProperty('background-size', 'contain', 'important');
-      navEl.style.setProperty('background-repeat', 'no-repeat', 'important');
-      navEl.style.setProperty('background-position', 'center', 'important');
     }
-    // 同步更新 navigator 内所有层级容器与 canvas 背景，画布透明以便即时透出底图
+    // 同步更新 navigator 内所有层级容器与 canvas 背景，画布透明以便即时透出三锚点底图
     const navCanvas = navEl.querySelector('canvas');
     if (navCanvas) {
       navCanvas.style.setProperty('background-color', 'transparent', 'important');
@@ -2904,6 +2900,38 @@
     const meshLayer = document.getElementById('ambientMeshLayer');
     if (!layerA || !layerB) return;
 
+    // 0ms 同步提取三锚点专属渐变色，消灭黑屏与上一幅图残留杂色
+    const dominantColor = (item.navGradient && item.navGradient[1]) || (item.navGradient && item.navGradient[0]) || (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
+    const gradientCss = (function (it) {
+      if (it && it.navGradient && Array.isArray(it.navGradient) && it.navGradient.length >= 2) {
+        if (it.navGradient.length === 3) {
+          return `linear-gradient(135deg, ${it.navGradient[0]} 0%, ${it.navGradient[1]} 50%, ${it.navGradient[2]} 100%)`;
+        }
+        return `linear-gradient(135deg, ${it.navGradient[0]} 0%, ${it.navGradient[1]} 100%)`;
+      }
+      return `linear-gradient(135deg, ${dominantColor} 0%, #07080b 100%)`;
+    })(item);
+
+    // 依三锚点采样色即时测算明暗调性
+    let isDarkInitial = detectArtworkIsDark(item);
+    if (item.navGradient && Array.isArray(item.navGradient) && item.navGradient.length > 0) {
+      const hex = item.navGradient[1] || item.navGradient[0];
+      const rgb = hexToRgb(hex);
+      const lum = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
+      isDarkInitial = lum < 135;
+    }
+
+    if (backdropEl) {
+      backdropEl.style.setProperty('--viewer-ambient-gradient', gradientCss);
+      backdropEl.classList.toggle('artwork-dark', isDarkInitial);
+      backdropEl.classList.toggle('artwork-light', !isDarkInitial);
+    }
+
+    // 0ms 瞬间清空上一幅作品的残留模糊光斑，确保当前作品的三锚点专属渐变色 0ms 纯净首发透出
+    layerA.classList.remove('active');
+    layerB.classList.remove('active');
+    if (meshLayer) meshLayer.classList.remove('active');
+
     // Cross-fade between layers A and B for silky smooth transitions
     const nextLayer = (activeAmbientLayer === 'A') ? layerB : layerA;
     const prevLayer = (activeAmbientLayer === 'A') ? layerA : layerB;
@@ -2912,8 +2940,9 @@
     // 辅助函数：将已解码图像通过 24x24 离屏 Canvas 双线性低频采样，消除压缩色偏与高频噪点并生成弥散底图
     function applyAmbientData(source) {
       try {
-        let dataUrl = ambientCanvasCache.get(item.id);
-        let avgLum = 100;
+        let cached = ambientCanvasCache.get(item.id);
+        let dataUrl = cached ? cached.dataUrl : null;
+        let avgLum = cached ? cached.avgLum : 100;
 
         if (!dataUrl) {
           const canvas = document.createElement('canvas');
@@ -2939,7 +2968,7 @@
             dataUrl = canvas.toDataURL('image/jpeg', 0.85);
           }
           if (dataUrl) {
-            ambientCanvasCache.set(item.id, dataUrl);
+            ambientCanvasCache.set(item.id, { dataUrl, avgLum });
           }
         }
 
@@ -2983,7 +3012,7 @@
         applyAmbientData(img);
       };
       img.onerror = () => {
-        const fallbackColor = (item.colors && item.colors[0]) || '#12161D';
+        const fallbackColor = dominantColor;
         nextLayer.style.backgroundImage = 'radial-gradient(circle at 50% 50%, ' + fallbackColor + ' 0%, #07080b 100%)';
         nextLayer.classList.add('active');
         prevLayer.classList.remove('active');
@@ -3276,7 +3305,7 @@
     const isDark = (document.documentElement.getAttribute('data-theme') !== 'light');
     const stageBg = isDark ? '#07080b' : '#e5e8ed';
 
-    const dominantColor = (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
+    const dominantColor = (item.navGradient && item.navGradient[1]) || (item.navGradient && item.navGradient[0]) || (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
     const gradientCss = (function (it) {
       if (it && it.navGradient && Array.isArray(it.navGradient) && it.navGradient.length >= 2) {
         if (it.navGradient.length === 3) {
@@ -3441,7 +3470,7 @@
         navigatorId: 'viewerNavigator',
         navigatorAutoFade: false,
         navigatorRotate: true,
-        navigatorBackground: dominantColor,
+        navigatorBackground: 'transparent',
         autoResize: true,
         animationTime: 0.45,
         blendTime: isPhone ? 0.05 : 0.15,
@@ -3464,6 +3493,13 @@
         backgroundColor: 'transparent'
       });
       window.osdViewer = osdViewer;
+
+      if (navEl) {
+        navEl.querySelectorAll('.openseadragon-container, .openseadragon-canvas, canvas').forEach(el => {
+          el.style.setProperty('background', 'transparent', 'important');
+          el.style.setProperty('background-color', 'transparent', 'important');
+        });
+      }
 
       StealthWatermark.init(stage, item);
 
@@ -3527,8 +3563,8 @@
       // 缩放监听：仅当地图发生剧烈跨越（差异很大如跳变 >= 2.5 倍），且高保真切片加载持续超 600ms 时才唤起提示
       // 简单的平滑放大、清晰度差异不明显时偷偷加载，不弹任何加载动画
       osdViewer.addHandler('zoom', function () {
-        fadeOutStageThumb();
         if (isInitialOpening) return;
+        fadeOutStageThumb();
         if (!osdViewer || !osdViewer.viewport) return;
 
         const currentZoom = osdViewer.viewport.getZoom();
@@ -3541,7 +3577,10 @@
         }
       });
 
-      osdViewer.addHandler('pan', fadeOutStageThumb);
+      osdViewer.addHandler('pan', function () {
+        if (isInitialOpening) return;
+        fadeOutStageThumb();
+      });
 
       function handleTileCompletionCleanup() {
         if (hasRequestedCdnForZoom && pendingCdnTiles.size === 0) {
@@ -3560,6 +3599,12 @@
 
       osdViewer.addHandler('open', function () {
         triggerTileProgressStart();
+        if (osdViewer && osdViewer.navigator && osdViewer.navigator.element) {
+          osdViewer.navigator.element.querySelectorAll('.openseadragon-container, .openseadragon-canvas, canvas').forEach(el => {
+            el.style.setProperty('background', 'transparent', 'important');
+            el.style.setProperty('background-color', 'transparent', 'important');
+          });
+        }
         if (osdViewer.world) {
           const tiledImg = osdViewer.world.getItemAt(0);
           if (tiledImg) {

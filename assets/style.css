@@ -2678,17 +2678,17 @@ body:has(.about-modal.open) {
 }
 
 .ambient-glow-layer.active {
-  opacity: 0.92;
+  opacity: 0.52;
   transform: scale(1);
 }
 
 /* 浅色底画作 (如宣纸米色) 适配微调 */
 .viewer-ambient-backdrop.artwork-light .ambient-glow-layer {
-  filter: blur(65px) saturate(125%) brightness(1.05);
+  filter: blur(65px) saturate(118%) brightness(1.02);
 }
 
 .viewer-ambient-backdrop.artwork-light .ambient-glow-layer.active {
-  opacity: 0.88;
+  opacity: 0.45;
 }
 
 .ambient-mesh-layer {
@@ -4504,7 +4504,7 @@ body:has(.about-modal.open) {
   bottom: 24px;
   left: 24px;
   z-index: 24;
-  background: var(--nav-bg, #07080b);
+  background: var(--nav-gradient, var(--nav-bg, #07080b));
   padding: 0;
   border: 1.5px solid var(--accent);
   border-radius: 6px;

@@ -313,53 +313,9 @@
     }
   }
 
-  // 本地内置切片全量白名单（全量 28 卷画作切片已 100% 同源分发，彻底实现零延迟秒开）
-  const LOCAL_TILE_SLUGS = new Set([
-    'shanghai',
-    'city_papercut_14pro',
-    'chengdu_papercut_ipad',
-    'jinjiang_greenway_section',
-    'layout_pattern_02',
-    'pinglu_canal',
-    'aba_cycling_route',
-    'china_top12_airports_2024',
-    'lake_poyang',
-    'yangtze_river_bridge_chongqing',
-    'chengdu_citywall_gates',
-    'chongqing_ancient_city',
-    'changsha_citywall',
-    'nanjing_silver_black',
-    'datong_papercut',
-    'chengdu_blueprint',
-    'chengdu_macaron',
-    'hangzhou_low_saturation',
-    'wuhan_low_saturation',
-    'pearl_river_delta_dot_art',
-    'suzhou_dot_art',
-    'xian_papercut',
-    'chongqing_cyan',
-    'chongqing_black_gold',
-    'changsha_emboss',
-    'tianfu_luxihe_xinglong_lake',
-    'chengdu_greenway_ring',
-    'longquanshan_slope_a',
-    'longquanshan_slope_b'
-  ]);
-
   function setupData(rawItems) {
-    const config = window.ATLAS_CONFIG || window.CANGFENG_CONFIG || {};
-    const assetBase = (config.assetBaseUrl || '').replace(/\/+$/, '');
-
     galleryItems = rawItems.map((item, idx) => {
       item.globalIndex = idx;
-      if (assetBase && !LOCAL_TILE_SLUGS.has(item.id)) {
-        if (item.tileUrl && !item.tileUrl.startsWith('http')) {
-          item.tileUrl = assetBase + '/' + item.tileUrl.replace(/^\/+/, '');
-        }
-        if (item.dzi && item.dzi.Image && item.dzi.Image.Url && !item.dzi.Image.Url.startsWith('http')) {
-          item.dzi.Image.Url = assetBase + '/' + item.dzi.Image.Url.replace(/^\/+/, '');
-        }
-      }
       return item;
     });
   }
@@ -3330,45 +3286,8 @@
     const config = window.ATLAS_CONFIG || window.CANGFENG_CONFIG || {};
     const assetBase = (config.assetBaseUrl || '').replace(/\/+$/, '');
 
-    // 本地内置切片全量白名单（全量 28 卷画作切片已 100% 同源分发，彻底实现零延迟秒开）
-    const LOCAL_TILE_SLUGS = new Set([
-      'shanghai',
-      'city_papercut_14pro',
-      'chengdu_papercut_ipad',
-      'jinjiang_greenway_section',
-      'layout_pattern_02',
-      'pinglu_canal',
-      'aba_cycling_route',
-      'china_top12_airports_2024',
-      'lake_poyang',
-      'yangtze_river_bridge_chongqing',
-      'chengdu_citywall_gates',
-      'chongqing_ancient_city',
-      'changsha_citywall',
-      'nanjing_silver_black',
-      'datong_papercut',
-      'chengdu_blueprint',
-      'chengdu_macaron',
-      'hangzhou_low_saturation',
-      'wuhan_low_saturation',
-      'pearl_river_delta_dot_art',
-      'suzhou_dot_art',
-      'xian_papercut',
-      'chongqing_cyan',
-      'chongqing_black_gold',
-      'changsha_emboss',
-      'tianfu_luxihe_xinglong_lake',
-      'chengdu_greenway_ring',
-      'longquanshan_slope_a',
-      'longquanshan_slope_b'
-    ]);
-
-    // Resolve tileBase URL (support local same-origin bypass or remote Cloudflare CDN)
-    let tileBase = (item.tileUrl || (item.dzi && item.dzi.Image && item.dzi.Image.Url) || '');
-    if (assetBase && !tileBase.startsWith('http') && !LOCAL_TILE_SLUGS.has(item.id)) {
-      tileBase = assetBase + '/' + tileBase.replace(/^\/+/, '');
-    }
-    tileBase = tileBase.replace(/\/+$/, '') + '/';
+    const localTileBase = 'tiles/' + item.id + '_files/';
+    const remoteTileBase = assetBase ? (assetBase + '/tiles/' + item.id + '_files/') : localTileBase;
 
     const dpr = window.devicePixelRatio || 1;
     const isPhone = window.innerWidth <= 768;
@@ -3399,7 +3318,11 @@
       minLevel: calculatedMinLevel,
       maxLevel: tileMaxLevel,
       getTileUrl: function (level, x, y) {
-        return tileBase + level + '/' + x + '_' + y + '.' + (item.format || 'webp');
+        // 混合切片加载架构：
+        // 0~9 级骨架切片走 GitHub Pages 同源 (0ms 本地瞬开，完全不可逆向原图)
+        // 10 级及以上高保真切片走 Cloudflare Workers CDN (按需深度放大拉取，源图隔离保护)
+        const base = (level >= 10 && assetBase) ? remoteTileBase : localTileBase;
+        return base + level + '/' + x + '_' + y + '.' + (item.format || 'webp');
       }
     };
 
@@ -3418,7 +3341,7 @@
         animationTime: 0.45,
         blendTime: isPhone ? 0.05 : 0.15,
         constrainDuringPan: true,
-        maxZoomPixelRatio: isPhone ? 2.0 : 4.5,
+        maxZoomPixelRatio: 4.5,
         minPixelRatio: optimalMinPixelRatio,
         imageLoaderLimit: isPhone ? 16 : 24,
         maxImageCacheCount: isPhone ? 160 : 300,
@@ -3647,45 +3570,8 @@
       });
       osdViewer.addHandler('canvas-scroll', resetTopActionsIdleTimer);
 
-      let tileFailCount = 0;
-      let hasFailedOver = false;
-
       osdViewer.addHandler('tile-load-failed', function (e) {
-        console.warn('OpenSeadragon tile-load-failed:', e);
-        tileFailCount++;
-        // 若远程切片请求连续失败（如移动端 GFW 拦截 *.workers.dev），极速平滑降级
-        if (!hasFailedOver && tileFailCount >= 2) {
-          hasFailedOver = true;
-          console.warn('CangFeng: 远程瓦片请求受阻，正在自动无缝切换到本地同源切片/高清预览模式...');
-          // 若原先使用的是远程 HTTP CDN 且本地有切片白名单，先尝试切换为本地同源相对路径 tiles/
-          if (tileBase.startsWith('http') && LOCAL_TILE_SLUGS.has(item.id)) {
-            const localBase = 'tiles/' + item.id + '_files/';
-            const fallbackTileSource = Object.assign({}, tileSource, {
-              getTileUrl: function (level, x, y) {
-                return localBase + level + '/' + x + '_' + y + '.' + (item.format || 'webp');
-              }
-            });
-            try {
-              osdViewer.open(fallbackTileSource);
-              return;
-            } catch (err) {
-              console.warn('CangFeng: 本地瓦片加载尝试失败，将转入单图全览模式:', err);
-            }
-          }
-          // 最终兜底：使用已成功加载的 100% 同源绝对路径缩略/预览图全幅深览
-          try {
-            const fullThumb = new URL(item.thumb, window.location.href).href;
-            osdViewer.open({
-              type: 'image',
-              url: fullThumb
-            });
-            if (osdViewer.viewport) {
-              osdViewer.viewport.maxZoomPixelRatio = 5.0;
-            }
-          } catch (err2) {
-            console.error('CangFeng: 占位预览图降级失败:', err2);
-          }
-        }
+        console.warn('OpenSeadragon tile-load-failed:', e && e.tile ? e.tile.url : e);
       });
 
       osdViewer.addHandler('open-failed', function (e) {
@@ -3713,8 +3599,8 @@
             prefixUrl: '',
             showNavigationControl: false,
             showNavigator: false,
-            imageLoaderLimit: isPhoneFallback ? 5 : 8,
-            maxZoomPixelRatio: isPhoneFallback ? 2.0 : 4.5,
+            imageLoaderLimit: isPhoneFallback ? 8 : 16,
+            maxZoomPixelRatio: 4.5,
             minPixelRatio: isPhoneFallback ? 0.8 : 0.5,
             tileSources: tileSource,
             placeholderImage: item.thumb,

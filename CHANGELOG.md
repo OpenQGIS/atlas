@@ -4,6 +4,16 @@
 
 ---
 
+## [1.3.6] - 2026-09-30
+
+### 新增与优化 (Features & Optimized)
+- **首屏双字标转曲矢量化 (Vectorized Outlined Brand & Slogan Marks)**：
+  - **首屏左上角品牌艺术字标 (`OpenQGIS Atlaslog`)**：采用转曲纯矢量 SVG 呈现经典 Yellowtail 手写艺术字体，自带柔和环境光投影与翡翠微光悬停呼吸动效，彻底杜绝 WebFont 加载延迟、闪烁（FOUT）与 DirectWrite 字体毛刺；
+  - **首屏中文主标「一图一境 · 静观其详」矢量同构 (Source Han Serif CN Heavy Outlined Slogan)**：采用思源宋体 Heavy 原作纯矢量路径转曲渲染，三画板自适应多端响应（桌面端横排齐展、移动端无缝分行居中堆叠、多语言切换无缝保留外文翻译），以 100% 锐利的贝塞尔曲线取代动态字体依赖，无惧任何网络阻断与跨平台字体缺失；
+- 资源版本号升级至 `v=20260930_v49`。
+
+---
+
 ## [1.3.5] - 2026-09-30
 
 ### 新增与重构 (Features & Refactoring)

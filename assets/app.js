@@ -595,13 +595,22 @@
 
     window.addEventListener('scroll', () => {
       const scrollY = window.scrollY || window.pageYOffset;
+      if (document.body.classList.contains('in-gallery')) {
+        stopHeroTimer();
+        const siteHeaderEl = document.getElementById('siteHeader');
+        if (siteHeaderEl) {
+          siteHeaderEl.classList.toggle('is-sticky', scrollY > 8);
+        }
+        return;
+      }
+
       if (scrollY > 120) {
         stopHeroTimer();
       } else {
         if (!heroTimer) scheduleNextTransition();
       }
 
-      // 瀑布流吸顶状态标记 (为固定在顶部的 siteHeader 提供层次微阴影与毛玻璃增强)
+      // 处于开屏状态下的瀑布流吸顶标记
       const siteHeaderEl = document.getElementById('siteHeader');
       if (siteHeaderEl) {
         const heroHeight = heroScreen.offsetHeight || window.innerHeight;
@@ -621,11 +630,6 @@
           const url = new URL(window.location.href);
           url.hash = 'gallery';
           window.history.pushState({ level: 1, view: 'gallery' }, '', url.toString());
-        } else if (scrollY < 60 && currentHistoryLevel === 1) {
-          currentHistoryLevel = 0;
-          const url = new URL(window.location.href);
-          url.hash = '';
-          window.history.replaceState({ level: 0, view: 'hero' }, '', url.pathname + url.search);
         }
       }
     }, { passive: true });
@@ -647,14 +651,38 @@
       mql.addListener(handleOrientationChange);
     }
 
-    // 精准滚动定位至下一屏（即 siteHeader 与瀑布流大厅）
-    function scrollToNextScreen() {
+    // 精准步入瀑布流展厅，并将首屏收起，彻底杜绝向上回滚到全屏图
+    function enterGalleryView(smooth = true) {
+      if (document.body.classList.contains('in-gallery')) return;
+
+      stopHeroTimer();
       const target = document.getElementById('siteHeader') || document.querySelector('.site-header');
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
+
+      if (smooth) {
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+        }
+
+        // 平滑滚动到位后无缝切换为 in-gallery，将首屏全景收起，使 siteHeader 确立为页面最顶端
+        setTimeout(() => {
+          document.documentElement.style.scrollBehavior = 'auto';
+          document.body.classList.add('in-gallery');
+          window.scrollTo(0, 0);
+          requestAnimationFrame(() => {
+            document.documentElement.style.scrollBehavior = '';
+          });
+        }, 650);
       } else {
-        window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+        document.documentElement.style.scrollBehavior = 'auto';
+        document.body.classList.add('in-gallery');
+        window.scrollTo(0, 0);
+        requestAnimationFrame(() => {
+          document.documentElement.style.scrollBehavior = '';
+        });
       }
+
       if (currentHistoryLevel === 0) {
         currentHistoryLevel = 1;
         const url = new URL(window.location.href);
@@ -666,48 +694,50 @@
     if (heroScrollBtn) {
       heroScrollBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        scrollToNextScreen();
+        enterGalleryView(true);
       });
     }
 
-    // 鼠标在开屏区域向下滚动时，平滑精准定位到下一屏
+    // 鼠标在开屏区域向下滚动时，平滑进入展厅
     let isSnapping = false;
     window.addEventListener('wheel', (e) => {
       if (isSnapping) return;
-      if (currentSubCategory || document.body.classList.contains('in-subview')) return;
+      if (document.body.classList.contains('in-gallery') || currentSubCategory || document.body.classList.contains('in-subview')) return;
       const hero = document.getElementById('heroScreen');
       if (!hero) return;
 
-      const heroHeight = hero.offsetHeight || window.innerHeight;
-
-      // 处于开屏视图顶部且向下滚轮滑动时，平滑精准定位到下一屏
+      // 处于开屏视图顶部且向下滚轮滑动时，平滑步入展厅
       if (window.scrollY < 40 && e.deltaY > 15) {
         isSnapping = true;
-        scrollToNextScreen();
+        enterGalleryView(true);
         setTimeout(() => { isSnapping = false; }, 850);
       }
-      // 取消向上滚动的强制吸附回卷逻辑，赋予读者完全自由的物理滚动控制感
     }, { passive: true });
 
-    // 移动端触屏向上滑动时平滑过渡至下一屏
+    // 移动端触屏向上滑动时平滑过渡至展厅
     let touchStartY = 0;
     window.addEventListener('touchstart', (e) => {
-      if (currentSubCategory || document.body.classList.contains('in-subview')) return;
+      if (document.body.classList.contains('in-gallery') || currentSubCategory || document.body.classList.contains('in-subview')) return;
       if (e.touches && e.touches.length > 0) {
         touchStartY = e.touches[0].clientY;
       }
     }, { passive: true });
 
     window.addEventListener('touchend', (e) => {
-      if (currentSubCategory || document.body.classList.contains('in-subview')) return;
+      if (document.body.classList.contains('in-gallery') || currentSubCategory || document.body.classList.contains('in-subview')) return;
       if (!touchStartY) return;
       const touchEndY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : 0;
       const diff = touchStartY - touchEndY;
       if (window.scrollY < 40 && diff > 50) {
-        scrollToNextScreen();
+        enterGalleryView(true);
       }
       touchStartY = 0;
     }, { passive: true });
+
+    // 若初始打开时已携带 #gallery 锚点，直接以展厅模式呈现
+    if (window.location.hash === '#gallery') {
+      enterGalleryView(false);
+    }
   }
 
   /* -------------------------------------------------------------
@@ -2390,6 +2420,7 @@
         // 判断是否退回到了首屏 Level 0
         if ((state.level === 0 || (!window.location.hash && !state.level)) && !sub) {
           currentHistoryLevel = 0;
+          document.body.classList.remove('in-gallery');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
           currentHistoryLevel = 1;

@@ -4,6 +4,20 @@
 
 ---
 
+## [1.3.0] - 2026-09-30
+
+### 优化 (Optimized)
+- **展厅常驻模式与彻底根除全屏图回滚 (Permanent In-Gallery Mode)**：
+  - 确立“开屏入场 ➔ 展厅常驻”机制：步入瀑布流后首屏全景自动隐入后台（`body.in-gallery .hero-screen { display: none !important; }`），将 `siteHeader` 锁定为页面物理顶端；
+  - 彻底终结在瀑布流中向上滚动回滚到全屏图的问题，向上滚动到顶即止，沉浸式专注于作品探索；可通过浏览器后退键自然退回封面；
+- **单层极简通透吸顶导航 (Sticky Header & Clean Architecture)**：
+  - 彻底移除冗余的横幅/条屏比例筛选栏（Subbar），释放约 50px 黄金垂直可视高度；
+  - 主导航栏平滑吸顶常驻，配备 14px 高斯模糊与微投影，章节锚点跳转偏移量对齐至 84px；
+- **跨端与 iOS Safari 移动端首屏真全屏 (100svh & visualViewport)**：
+  - 引入现代 `100svh` 与 JS `visualViewport` 动态锁高，彻底解决移动端 Safari 展开工具栏导致高度溢出漏边的问题。
+
+---
+
 ## [1.2.9] - 2026-09-30
 
 ### 修复 (Fixed)

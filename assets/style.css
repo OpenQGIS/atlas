@@ -8243,10 +8243,11 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 }
 
 /* ==========================================================================
-   Subcategory Dedicated View (独立专题画廊模式)
-   在子页面视图中，彻底隐藏首页开屏 Hero、首页版幅筛选栏及侧边导览轴，
-   确保子页面作为独立专题展厅呈现，向上滚动到顶即止，杜绝视觉割裂与冗余干扰。
+   Gallery Mode & Subcategory View (独立画廊大厅与专题画廊模式)
+   在进入画廊大厅后，彻底隐藏开屏 Hero，使 siteHeader 确立为页面物理顶端，
+   读者在瀑布流中向上滚动到顶即止，彻底杜绝回滚到全屏图。
    ========================================================================== */
+body.in-gallery .hero-screen,
 body.in-subview .hero-screen {
   display: none !important;
 }

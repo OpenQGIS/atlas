@@ -4953,7 +4953,8 @@
     '4:3': { width: 1440, height: 1080, isHorizontal: true, aspectValue: '4 / 3' },
     '16:9': { width: 1920, height: 1080, isHorizontal: true, aspectValue: '16 / 9' },
     '9:16': { width: 1080, height: 1920, isHorizontal: false, aspectValue: '9 / 16' },
-    '9:21': { width: 1080, height: 2520, isHorizontal: false, aspectValue: '9 / 21' }
+    '21:9': { width: 2520, height: 1080, isHorizontal: true, aspectValue: '21 / 9' },
+    '9:21': { width: 2520, height: 1080, isHorizontal: true, aspectValue: '21 / 9' }
   };
 
   const POSTER_I18N_TEXTS = {
@@ -4963,8 +4964,8 @@
       edition: '2026 EDITION',
       cartographerPrefix: '匠师：OpenQGIS',
       paletteTitle: 'COLOR PALETTE',
-      qrTitle: '扫码 1:1 4K 原图深览',
-      qrDomain: 'openqgis.github.io/atlas',
+      qrTitle: 'Atlas 地图录',
+      qrDomain: '探索QGIS能力边界',
       copyright: '© 2026 OpenQGIS / AtlasLog · 个人空间工造与视觉成果典藏',
       generating: '正在生成高清典藏海报...',
       fallbackTitle: '空间地图成果',
@@ -4976,8 +4977,8 @@
       edition: '2026 EDITION',
       cartographerPrefix: 'Cartographer: OpenQGIS',
       paletteTitle: 'COLOR PALETTE',
-      qrTitle: 'Scan for 1:1 4K Deep Zoom',
-      qrDomain: 'openqgis.github.io/atlas',
+      qrTitle: 'Atlas · AtlasLog',
+      qrDomain: 'Exploring the Limits of QGIS',
       copyright: '© 2026 OpenQGIS / AtlasLog · Spatial Cartography & Visual Archive',
       generating: 'Generating HD Artwork Poster...',
       fallbackTitle: 'Cartographic Work',
@@ -4989,8 +4990,8 @@
       edition: '2026 EDITION',
       cartographerPrefix: '製作者：OpenQGIS',
       paletteTitle: 'COLOR PALETTE',
-      qrTitle: 'スキャンして1:1 4K原図深覧',
-      qrDomain: 'openqgis.github.io/atlas',
+      qrTitle: 'Atlas 地図録',
+      qrDomain: 'QGISの表現力の限界を探求',
       copyright: '© 2026 OpenQGIS / AtlasLog · 空間地図工芸と視覚成果アーカイブ',
       generating: '高精細ポスターを生成中...',
       fallbackTitle: '空間地図成果',
@@ -5002,8 +5003,8 @@
       edition: '2026 EDITION',
       cartographerPrefix: '제작자: OpenQGIS',
       paletteTitle: 'COLOR PALETTE',
-      qrTitle: '1:1 4K 원본 심층 감상 QR',
-      qrDomain: 'openqgis.github.io/atlas',
+      qrTitle: 'Atlas 지도록',
+      qrDomain: 'QGIS 역량의 한계를 탐색',
       copyright: '© 2026 OpenQGIS / AtlasLog · 공간 지도 제작 및 시각 예술 아카이브',
       generating: '고해상도 소장용 포스터 생성 중...',
       fallbackTitle: '공간 지도 작품',
@@ -5095,6 +5096,12 @@
     currentPosterItem = item;
     const modal = document.getElementById('sharePosterModal');
     if (!modal) return;
+
+    // 智能根据作品本身的实际横竖方向，默认匹配最佳画幅比例（横版图默认横版比例，竖版图默认竖版比例）
+    const isItemWide = (item.aspectRatio && item.aspectRatio > 1.05) ||
+                       (item.width && item.height && item.width > item.height) ||
+                       (item.orientation === 'wide' || item.aspect === 'wide');
+    currentPosterRatio = isItemWide ? '16:9' : '3:4';
 
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
@@ -5262,19 +5269,22 @@
       roundRect(ctx, boxX, boxY, boxW, boxH, radius);
       ctx.clip();
 
+      // object-fit: cover 撑满画框，去除大白边
       const imgAspect = img.naturalWidth / img.naturalHeight;
       const boxAspect = boxW / boxH;
       let dw, dh, dx, dy;
       if (imgAspect > boxAspect) {
-        dw = boxW;
-        dh = boxW / imgAspect;
-        dx = boxX;
-        dy = boxY + (boxH - dh) / 2;
-      } else {
+        // 图片更宽，高度填满，横向居中裁剪
         dh = boxH;
         dw = boxH * imgAspect;
         dx = boxX + (boxW - dw) / 2;
         dy = boxY;
+      } else {
+        // 图片更高或等比，宽度填满，纵向居中裁剪
+        dw = boxW;
+        dh = boxW / imgAspect;
+        dx = boxX;
+        dy = boxY + (boxH - dh) / 2;
       }
       ctx.drawImage(img, dx, dy, dw, dh);
       ctx.restore();
@@ -5322,7 +5332,7 @@
     const shareUrl = getShareUrlForItem(item);
     const imgSrc = item.thumb || item.heroImage || (item.dzi && item.dzi.Image && item.dzi.Image.Url) || '';
 
-    // 1. 全局底色与边框
+    // 1. 全局底色与外框
     ctx.fillStyle = bgPrimary;
     ctx.fillRect(0, 0, W, H);
 
@@ -5332,7 +5342,7 @@
     ctx.strokeRect(framePad, framePad, W - framePad * 2, H - framePad * 2);
 
     if (!isHorizontal) {
-      // ── 竖版海报布局引擎 (3:4, 9:16, 9:21) ──
+      // ── 竖版海报布局引擎 (3:4, 9:16) ──
 
       // 顶部页眉
       ctx.font = '700 20px "JetBrains Mono", Consolas, monospace';
@@ -5358,13 +5368,11 @@
       ctx.lineTo(W - 64, 140);
       ctx.stroke();
 
-      // 画卷主展台
+      // 画卷主展台 (采用 cover 撑满无大白边)
       const imgX = 64;
       const imgY = 165;
       const imgW = W - 128;
-      let imgH = 730;
-      if (ratio === '9:16') imgH = 1080;
-      else if (ratio === '9:21') imgH = 1480;
+      let imgH = (ratio === '9:16') ? 1160 : 740;
 
       await drawContainedImage(ctx, imgSrc, imgX, imgY, imgW, imgH, 16, bgCard, borderColor);
 
@@ -5378,9 +5386,9 @@
       ctx.lineTo(W - 64, footerLineY);
       ctx.stroke();
 
-      ctx.font = '400 15px "JetBrains Mono", Consolas, monospace';
+      ctx.font = '400 14px "JetBrains Mono", Consolas, monospace';
       ctx.fillStyle = textSecondary;
-      ctx.fillText(i18nTexts.copyright, 64, footerTextY);
+      ctx.fillText(i18nTexts.copyright, 64, footerTextY, W - 128);
 
       // 右下角专属二维码卡片
       const qrSize = 136;
@@ -5393,14 +5401,14 @@
 
       drawQrCodeMatrix(ctx, qrX, qrY, qrSize, shareUrl);
 
-      // 二维码左侧导引文案 (设置右对齐，确保多语言从二维码边框向左伸展，杜绝重叠)
+      // 二维码左侧导引文案
       ctx.save();
       ctx.textAlign = 'right';
-      ctx.font = '600 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = '600 18px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textPrimary;
       ctx.fillText(i18nTexts.qrTitle, qrX - 24, qrY + 46);
 
-      ctx.font = '400 15px "JetBrains Mono", Consolas, monospace';
+      ctx.font = '500 15px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textSecondary;
       ctx.fillText(i18nTexts.qrDomain, qrX - 24, qrY + 74);
       ctx.restore();
@@ -5411,22 +5419,23 @@
 
       ctx.font = '700 38px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textPrimary;
-      wrapText(ctx, titleText, 64, metaY + 36, maxInfoWidth, 46, 2);
+      const afterTitleY = wrapText(ctx, titleText, 64, metaY + 36, maxInfoWidth, 46, 2);
 
-      ctx.font = '500 20px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      const catY = Math.max(metaY + 88, afterTitleY + 10);
+      ctx.font = '500 19px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textSecondary;
-      ctx.fillText(categoryText, 64, metaY + 88);
+      const afterCatY = wrapText(ctx, categoryText, 64, catY, maxInfoWidth, 24, 2);
 
       if (descText) {
-        ctx.font = '400 18px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.font = '400 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
         ctx.fillStyle = textSecondary;
-        const maxDescLines = (ratio === '3:4') ? 2 : (ratio === '9:16' ? 3 : 4);
-        wrapText(ctx, descText, 64, metaY + 126, maxInfoWidth, 26, maxDescLines);
+        const maxDescLines = (ratio === '3:4') ? 3 : 5;
+        wrapText(ctx, descText, 64, afterCatY + 12, maxInfoWidth, 26, maxDescLines);
       }
 
       // 艺术色板圆角色块
       if (Array.isArray(posterPalette) && posterPalette.length > 0) {
-        const swY = (ratio === '3:4') ? (metaY + 185) : (metaY + 225);
+        const swY = (ratio === '3:4') ? (footerLineY - 45) : (metaY + 280);
         ctx.font = '600 14px "JetBrains Mono", Consolas, monospace';
         ctx.fillStyle = textSecondary;
         ctx.fillText(i18nTexts.paletteTitle, 64, swY);
@@ -5442,71 +5451,85 @@
         });
       }
     } else {
-      // ── 横版画廊与宽屏双栏布局引擎 (4:3, 16:9) ──
+      // ── 横版画廊与宽屏双栏布局引擎 (4:3, 16:9, 21:9) ──
+      const is21x9 = (ratio === '21:9' || ratio === '9:21');
       const is16x9 = (ratio === '16:9');
-      const imgX = is16x9 ? 48 : 40;
-      const imgY = is16x9 ? 48 : 40;
-      const imgW = is16x9 ? 1200 : 860;
-      const imgH = H - imgY * 2;
-      const rx = is16x9 ? 1284 : 932;
-      const rw = W - rx - (is16x9 ? 48 : 40);
+      const is4x3 = !is21x9 && !is16x9;
 
-      // 左侧主展台
+      const imgX = is21x9 ? 52 : (is16x9 ? 48 : 40);
+      const imgY = is21x9 ? 52 : (is16x9 ? 48 : 40);
+      const imgW = is21x9 ? 1760 : (is16x9 ? 1260 : 900);
+      const imgH = H - imgY * 2;
+      const rx = imgX + imgW + (is21x9 ? 48 : (is16x9 ? 42 : 36));
+      const rightMargin = is21x9 ? 52 : (is16x9 ? 48 : 40);
+      const rw = W - rx - rightMargin;
+
+      // 左侧主展台 (cover 撑满无大白边)
       await drawContainedImage(ctx, imgSrc, imgX, imgY, imgW, imgH, 16, bgCard, borderColor);
 
       // 右侧栏：页眉
-      ctx.font = is16x9 ? '700 20px "JetBrains Mono", Consolas, monospace' : '700 19px "JetBrains Mono", Consolas, monospace';
+      ctx.font = is21x9 ? '700 22px "JetBrains Mono", Consolas, monospace'
+                        : (is16x9 ? '700 20px "JetBrains Mono", Consolas, monospace' : '700 18px "JetBrains Mono", Consolas, monospace');
       ctx.fillStyle = accent;
       ctx.fillText(i18nTexts.brand, rx, 84);
 
-      ctx.font = is16x9 ? '500 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                        : '500 16px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = is21x9 ? '500 18px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : (is16x9 ? '500 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                                  : '500 15px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif');
       ctx.fillStyle = textSecondary;
       ctx.fillText(i18nTexts.slogan, rx, 114);
 
       ctx.save();
       ctx.textAlign = 'right';
-      ctx.font = is16x9 ? '600 16px "JetBrains Mono", Consolas, monospace' : '600 15px "JetBrains Mono", Consolas, monospace';
+      ctx.font = is21x9 ? '600 17px "JetBrains Mono", Consolas, monospace'
+                        : (is16x9 ? '600 16px "JetBrains Mono", Consolas, monospace' : '600 14px "JetBrains Mono", Consolas, monospace');
       ctx.fillStyle = textSecondary;
-      ctx.fillText(i18nTexts.edition, W - (is16x9 ? 48 : 40), 84);
+      ctx.fillText(i18nTexts.edition, rx + rw, 84);
       ctx.restore();
 
       ctx.strokeStyle = borderColor;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(rx, 136);
-      ctx.lineTo(W - (is16x9 ? 48 : 40), 136);
+      ctx.lineTo(rx + rw, 136);
       ctx.stroke();
 
       // 右侧栏：作品题名与分类
-      ctx.font = is16x9 ? '700 36px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                        : '700 32px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = is21x9 ? '700 38px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : (is16x9 ? '700 35px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                                  : '700 30px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif');
       ctx.fillStyle = textPrimary;
-      const titleLineHeight = is16x9 ? 44 : 38;
+      const titleLineHeight = is21x9 ? 48 : (is16x9 ? 44 : 38);
       const afterTitleY = wrapText(ctx, titleText, rx, 188, rw, titleLineHeight, 2);
 
-      const catY = Math.max(is16x9 ? 275 : 260, afterTitleY + 8);
-      ctx.font = is16x9 ? '500 19px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                        : '500 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      const catY = Math.max(is21x9 ? 280 : (is16x9 ? 275 : 252), afterTitleY + 12);
+      ctx.font = is21x9 ? '500 19px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : (is16x9 ? '500 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                                  : '500 15px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif');
       ctx.fillStyle = textSecondary;
-      ctx.fillText(categoryText, rx, catY);
+      const afterCatY = wrapText(ctx, categoryText, rx, catY, rw, 24, 2);
 
       // 右侧栏：说明题记
+      let afterDescY = afterCatY;
       if (descText) {
-        ctx.font = is16x9 ? '400 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                          : '400 16px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.font = is21x9 ? '400 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                          : (is16x9 ? '400 16px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                                    : '400 14px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif');
         ctx.fillStyle = textSecondary;
-        wrapText(ctx, descText, rx, catY + 36, rw, 26, is16x9 ? 5 : 4);
+        const descLineHeight = is21x9 ? 27 : (is16x9 ? 25 : 22);
+        const maxDescLines = is21x9 ? 5 : (is16x9 ? 5 : 4);
+        afterDescY = wrapText(ctx, descText, rx, afterCatY + 14, rw, descLineHeight, maxDescLines);
       }
 
       // 右侧栏：调色板
       if (Array.isArray(posterPalette) && posterPalette.length > 0) {
-        const swY = is16x9 ? 500 : 475;
+        const swY = Math.max(is21x9 ? 560 : (is16x9 ? 530 : 470), afterDescY + 16);
         ctx.font = '600 14px "JetBrains Mono", Consolas, monospace';
         ctx.fillStyle = textSecondary;
         ctx.fillText(i18nTexts.paletteTitle, rx, swY);
 
-        const swW = is16x9 ? 44 : 40, swH = 18, swGap = 8;
+        const swW = is21x9 ? 48 : (is16x9 ? 44 : 38);
+        const swH = 18, swGap = 8;
         posterPalette.slice(0, 6).forEach((col, idx) => {
           ctx.fillStyle = col;
           roundRect(ctx, rx + idx * (swW + swGap), swY + 8, swW, swH, 4);
@@ -5518,9 +5541,10 @@
       }
 
       // 右侧栏：专属二维码
-      const qrSize = is16x9 ? 136 : 124;
+      const rightFootY = 1000;
+      const qrSize = is21x9 ? 136 : (is16x9 ? 128 : 116);
       const qx = rx;
-      const qy = is16x9 ? 705 : 710;
+      const qy = rightFootY - qrSize - 40;
 
       ctx.fillStyle = '#ffffff';
       roundRect(ctx, qx - 8, qy - 8, qrSize + 16, qrSize + 16, 12);
@@ -5529,31 +5553,36 @@
       drawQrCodeMatrix(ctx, qx, qy, qrSize, shareUrl);
 
       // 二维码右侧导引文案
-      const guideX = qx + qrSize + 26;
+      const guideX = qx + qrSize + 22;
+      const maxGuideW = rw - qrSize - 28;
       ctx.save();
       ctx.textAlign = 'left';
-      ctx.font = is16x9 ? '600 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                        : '600 16px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = is21x9 ? '600 18px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : (is16x9 ? '600 16.5px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                                  : '600 15px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif');
       ctx.fillStyle = textPrimary;
-      ctx.fillText(i18nTexts.qrTitle, guideX, qy + 46);
+      ctx.fillText(i18nTexts.qrTitle, guideX, qy + 44, maxGuideW);
 
-      ctx.font = '400 15px "JetBrains Mono", Consolas, monospace';
+      ctx.font = is21x9 ? '500 15.5px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : (is16x9 ? '500 14.5px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                                  : '500 13px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif');
       ctx.fillStyle = textSecondary;
-      ctx.fillText(i18nTexts.qrDomain, guideX, qy + 74);
+      ctx.fillText(i18nTexts.qrDomain, guideX, qy + 72, maxGuideW);
       ctx.restore();
 
       // 右侧栏：页脚与版权
-      const rightFootY = 1000;
       ctx.strokeStyle = borderColor;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(rx, rightFootY);
-      ctx.lineTo(W - (is16x9 ? 48 : 40), rightFootY);
+      ctx.lineTo(rx + rw, rightFootY);
       ctx.stroke();
 
-      ctx.font = is16x9 ? '400 14px "JetBrains Mono", Consolas, monospace' : '400 12.5px "JetBrains Mono", Consolas, monospace';
+      ctx.font = is21x9 ? '400 13.5px "JetBrains Mono", Consolas, monospace'
+                        : (is16x9 ? '400 13px "JetBrains Mono", Consolas, monospace'
+                                  : '400 11.5px "JetBrains Mono", Consolas, monospace');
       ctx.fillStyle = textSecondary;
-      ctx.fillText(i18nTexts.copyright, rx, rightFootY + 28);
+      ctx.fillText(i18nTexts.copyright, rx, rightFootY + 28, rw);
     }
 
     return canvas;
@@ -5581,19 +5610,57 @@
   }
 
   function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
-    if (!text) return y;
-    const tokens = text.match(/\S+\s*|[\u4e00-\u9fa5]|[\u3040-\u30ff]|[\uac00-\ud7af]|\s+/g) || [text];
+    if (!text || maxWidth <= 0) return y;
+    // 分词器：逐字拆分中日韩字符及标点，保留英文单词完整性及换行符
+    const tokens = text.match(/[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef\u3040-\u30ff\uac00-\ud7af]|[^\s\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef\u3040-\u30ff\uac00-\ud7af]+|\s+/g) || [text];
     let line = '';
-    let lineCount = 0;
+    let lineCount = 1;
     let currentY = y;
+
     for (let i = 0; i < tokens.length; i++) {
       const token = tokens[i];
+      if (token === '\n') {
+        ctx.fillText(line.trimEnd(), x, currentY);
+        line = '';
+        currentY += lineHeight;
+        lineCount++;
+        if (lineCount > maxLines) return currentY;
+        continue;
+      }
+
+      // 若单个长单词超过最大宽度，强制逐字符拆分
+      if (ctx.measureText(token).width > maxWidth && !/[\u4e00-\u9fa5]/.test(token)) {
+        for (const char of token) {
+          if (ctx.measureText(line + char).width > maxWidth && line !== '') {
+            lineCount++;
+            if (lineCount > maxLines) {
+              let trLine = line.trimEnd();
+              while (trLine.length > 0 && ctx.measureText(trLine + '...').width > maxWidth) {
+                trLine = trLine.slice(0, -1);
+              }
+              ctx.fillText(trLine + '...', x, currentY);
+              return currentY + lineHeight;
+            }
+            ctx.fillText(line.trimEnd(), x, currentY);
+            line = char;
+            currentY += lineHeight;
+          } else {
+            line += char;
+          }
+        }
+        continue;
+      }
+
       const testLine = line + token;
       const metrics = ctx.measureText(testLine);
       if (metrics.width > maxWidth && line !== '') {
         lineCount++;
-        if (lineCount >= maxLines) {
-          ctx.fillText(line.trimEnd() + '...', x, currentY);
+        if (lineCount > maxLines) {
+          let trLine = line.trimEnd();
+          while (trLine.length > 0 && ctx.measureText(trLine + '...').width > maxWidth) {
+            trLine = trLine.slice(0, -1);
+          }
+          ctx.fillText(trLine + '...', x, currentY);
           return currentY + lineHeight;
         }
         ctx.fillText(line.trimEnd(), x, currentY);
@@ -5603,7 +5670,8 @@
         line = testLine;
       }
     }
-    if (line) {
+
+    if (line && lineCount <= maxLines) {
       ctx.fillText(line.trimEnd(), x, currentY);
       currentY += lineHeight;
     }

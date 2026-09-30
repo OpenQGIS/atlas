@@ -1504,33 +1504,50 @@
         rowCount = 1;
       }
 
-      // 拼满剩余行至 2 整行即止，绝不在末行遗留落单孤图
-      while (rowCount < 2) {
-        let sumAr = 0;
-        let countInRow = 0;
-        const remaining = available.filter(it => !selected.some(s => s.id === it.id) && !usedGlobally.has(it.id));
-        if (remaining.length === 0) break;
-
-        // 若当前为最后一行（rowCount === 1），且该分类作品数较多需要装配 MoreCard 时，
-        // 预先为 MoreCard 留出容积配额（MoreCard 宽高比约 0.92）
-        const isFinalRow = (rowCount === 1);
-        const willHaveMore = isFinalRow && (totalCount > (selected.length + 3));
-        const targetAr = willHaveMore ? 2.3 : 3.2;
-        const minCards = willHaveMore ? 3 : 3;
-
-        for (const it of remaining) {
+      // 拼满剩余行至严格 2 整行即止，绝不在末行遗留落单孤图或挤入第 3 行
+      if (rowCount === 0) {
+        let sumAr1 = 0;
+        let count1 = 0;
+        const rem1 = available.filter(it => !usedGlobally.has(it.id));
+        for (const it of rem1) {
           const ar = getCardAspect(it);
-          selected.push(it);
-          usedGlobally.add(it.id);
-          sumAr += ar;
-          countInRow++;
-
-          // 容积阈值：根据是否留空给 MoreCard 动态判定
-          if (sumAr >= targetAr && countInRow >= minCards) {
+          // 预判：若加入当前卡片导致第 1 行总宽高比溢出（> 3.65）或已满 4 张，即刻成行封顶
+          if (count1 >= 2 && (sumAr1 + ar > 3.65 || count1 >= 4)) {
             break;
           }
+          selected.push(it);
+          usedGlobally.add(it.id);
+          sumAr1 += ar;
+          count1++;
         }
-        rowCount++;
+        rowCount = 1;
+      }
+
+      if (rowCount === 1) {
+        let sumAr2 = 0;
+        let count2 = 0;
+        const rem2 = available.filter(it => !selected.some(s => s.id === it.id) && !usedGlobally.has(it.id));
+        // 判断第 2 行末尾是否需要压入 MoreCard 终点卡片（MoreCard 宽高比约 0.92）
+        const willHaveMore = totalCount > (selected.length + 3);
+
+        for (const it of rem2) {
+          const ar = getCardAspect(it);
+          const effectiveAr = ar >= 2.5 ? ar * 0.72 : ar;
+          const moreAr = willHaveMore ? 0.92 : 0;
+          const maxLimit = 3.65;
+          const maxCards = willHaveMore ? 3 : 4;
+
+          // 预判：若加入当前卡片会导致第 2 行加上 MoreCard 后溢出折行，则不予加入，把末席稳稳留给 MoreCard
+          if (count2 >= 1 && (sumAr2 + effectiveAr + moreAr > maxLimit || count2 >= maxCards)) {
+            break;
+          }
+
+          selected.push(it);
+          usedGlobally.add(it.id);
+          sumAr2 += effectiveAr;
+          count2++;
+        }
+        rowCount = 2;
       }
 
       groups.push({

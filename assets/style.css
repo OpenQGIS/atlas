@@ -1783,9 +1783,9 @@ body[data-page="portal"] {
   }
 }
 
-/* 首页瀑布流各分类默认展示饱满的两整行拼贴效果 */
+/* 首页瀑布流各分类默认展示饱满的两整行拼贴效果，严丝合缝截断，杜绝第3行露出 */
 .gallery-overview-section .masonry-grid {
-  max-height: calc(2 * var(--target-row-height, 320px) + 1 * var(--grid-gap, 16px) + 24px);
+  max-height: calc(2 * var(--target-row-height, 320px) + 1 * var(--grid-gap, 16px));
   overflow: hidden;
   position: relative;
 }

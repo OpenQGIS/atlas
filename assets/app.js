@@ -287,11 +287,27 @@
   async function init() {
     bindAntiTheft();
 
-    // 预先检测是否有子页面参数，若有立即施加 in-subview 类，避免首屏 Hero 闪烁
+    // 关闭浏览器默认滚动恢复机制，确保在瀑布流中刷新时始终从首屏全景图（Hero View）重新开始，杜绝跳过封面
+    if ('scrollRestoration' in history) {
+      try {
+        history.scrollRestoration = 'manual';
+      } catch (e) {}
+    }
+
+    // 预先检测是否有子页面或展品深链参数，若有立即施加 in-subview 类，避免首屏 Hero 闪烁
     try {
       const urlParams = new URLSearchParams(window.location.search);
-      if (getSubFromUrl(urlParams)) {
+      const isSub = getSubFromUrl(urlParams);
+      const isArt = urlParams.has('id') || urlParams.has('art');
+      if (isSub) {
         document.body.classList.add('in-subview');
+      } else if (!isArt) {
+        // 常规访问或在瀑布流中刷新时，清除残留的 #gallery hash 并确保视口重置在首屏全景
+        if (window.location.hash === '#gallery') {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        document.body.classList.remove('in-gallery');
+        window.scrollTo(0, 0);
       }
     } catch (e) {}
 
@@ -627,9 +643,9 @@
         const heroThreshold = Math.max(260, window.innerHeight * 0.45);
         if (scrollY >= heroThreshold && currentHistoryLevel === 0) {
           currentHistoryLevel = 1;
-          const url = new URL(window.location.href);
-          url.hash = 'gallery';
-          window.history.pushState({ level: 1, view: 'gallery' }, '', url.toString());
+          try {
+            window.history.pushState({ level: 1, view: 'gallery' }, '', window.location.pathname + window.location.search);
+          } catch (e) {}
         }
       }
     }, { passive: true });
@@ -685,9 +701,9 @@
 
       if (currentHistoryLevel === 0) {
         currentHistoryLevel = 1;
-        const url = new URL(window.location.href);
-        url.hash = 'gallery';
-        window.history.pushState({ level: 1, view: 'gallery' }, '', url.toString());
+        try {
+          window.history.pushState({ level: 1, view: 'gallery' }, '', window.location.pathname + window.location.search);
+        } catch (e) {}
       }
     }
 
@@ -733,11 +749,6 @@
       }
       touchStartY = 0;
     }, { passive: true });
-
-    // 若初始打开时已携带 #gallery 锚点，直接以展厅模式呈现
-    if (window.location.hash === '#gallery') {
-      enterGalleryView(false);
-    }
   }
 
   /* -------------------------------------------------------------

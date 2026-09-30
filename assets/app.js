@@ -464,6 +464,20 @@
     const heroScrollBtn = document.getElementById('heroScrollBtn');
     if (!heroScreen || !galleryItems || galleryItems.length === 0) return;
 
+    // 跨端精准视口高度测量 (彻底解决 iOS Safari 底部展开工具栏导致高度溢出漏边的问题)
+    function syncHeroViewportHeight() {
+      const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.documentElement.style.setProperty('--hero-real-vh', `${vh}px`);
+    }
+    syncHeroViewportHeight();
+    window.addEventListener('resize', syncHeroViewportHeight);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(syncHeroViewportHeight, 150);
+    });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', syncHeroViewportHeight);
+    }
+
     const HERO_DWELL_MS = 8000; // 画面完全就绪后的专属驻留欣赏时间：8 秒
     let preloadedNextItem = null;
     let preloadImageObj = null;
@@ -587,6 +601,17 @@
         if (!heroTimer) scheduleNextTransition();
       }
 
+      // 瀑布流吸顶状态标记 (为固定在顶部的 siteHeader 提供层次微阴影与毛玻璃增强)
+      const siteHeaderEl = document.getElementById('siteHeader');
+      if (siteHeaderEl) {
+        const heroHeight = heroScreen.offsetHeight || window.innerHeight;
+        if (scrollY >= heroHeight - 8) {
+          siteHeaderEl.classList.add('is-sticky');
+        } else {
+          siteHeaderEl.classList.remove('is-sticky');
+        }
+      }
+
       // 同步 Level 0 / Level 1 历史状态
       const modalEl = document.getElementById('viewerModal');
       if (!modalEl || !modalEl.classList.contains('open')) {
@@ -655,18 +680,13 @@
 
       const heroHeight = hero.offsetHeight || window.innerHeight;
 
-      // 处于开屏视图顶部且向下滚轮滑动时
+      // 处于开屏视图顶部且向下滚轮滑动时，平滑精准定位到下一屏
       if (window.scrollY < 40 && e.deltaY > 15) {
         isSnapping = true;
         scrollToNextScreen();
         setTimeout(() => { isSnapping = false; }, 850);
       }
-      // 处于次屏交界处且向上滚轮滑动时，回卷至开屏
-      else if (window.scrollY > 0 && window.scrollY < heroHeight * 0.7 && e.deltaY < -15) {
-        isSnapping = true;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setTimeout(() => { isSnapping = false; }, 850);
-      }
+      // 取消向上滚动的强制吸附回卷逻辑，赋予读者完全自由的物理滚动控制感
     }, { passive: true });
 
     // 移动端触屏向上滑动时平滑过渡至下一屏
@@ -1297,6 +1317,20 @@
     updatePageAnchorSpine([]);
   }
 
+  function shuffleList(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function getCardAspect(item) {
+    if (item.width && item.height) return item.width / item.height;
+    return item.aspectRatio || 1;
+  }
+
   function renderOverviewSections(grid, items) {
     // 1. 统计当前池中各子分类的全量收录作品数
     const subCatTotalCounts = {};
@@ -1304,33 +1338,89 @@
       subCatTotalCounts[cat] = items.filter(it => itemMatchesSubCategory(it, cat)).length;
     });
 
-    // 2. 主屏瀑布流去重：每张画卷仅出现在其主归属分类下，避免跨分类重复渲染
-    const groupedMap = new Map();
-    SUBCATEGORY_ORDER.forEach(cat => groupedMap.set(cat, []));
-
-    items.forEach(item => {
-      const primaryCat = getPrimarySubCategory(item);
-      if (groupedMap.has(primaryCat)) {
-        groupedMap.get(primaryCat).push(item);
-      } else {
-        const firstCat = getItemSubCategories(item)[0] || SUBCATEGORY_ORDER[0];
-        if (groupedMap.has(firstCat)) {
-          groupedMap.get(firstCat).push(item);
-        }
-      }
-    });
-
+    // 2. 动态两行自适应装箱引擎（含全景长卷拼版、随机打乱探索与全局去重）
+    const containerW = grid.clientWidth || window.innerWidth || 1400;
+    const isDesktop = containerW >= 900;
+    const usedGlobally = new Set();
     const groups = [];
-    groupedMap.forEach((list, cat) => {
-      const totalCount = subCatTotalCounts[cat] || 0;
-      if (list.length > 0 || totalCount > 0) {
+
+    // 针对作品较少或特色的专用作品保留优先级（如阿坝骑行、平陆运河等）
+    const reservedItems = new Set([
+      'aba_cycling_route', 'pinglu_canal', 'yangtze_river_bridge_chongqing',
+      'shanghai', 'china_top12_airports_2024', 'lake_poyang', 'longquanshan_slope_b'
+    ]);
+
+    SUBCATEGORY_ORDER.forEach(cat => {
+      const allInCat = items.filter(it => itemMatchesSubCategory(it, cat));
+      const totalCount = allInCat.length;
+      if (totalCount === 0) return;
+
+      // 如果属于单品或极少品类（如“图面排版”仅 1 件），直接呈现
+      if (totalCount <= 2) {
+        allInCat.forEach(it => usedGlobally.add(it.id));
         groups.push({
           name: cat,
           slug: getSubCategorySlug(cat),
-          items: list,
+          items: allInCat,
           totalCount: totalCount
         });
+        return;
       }
+
+      // 每次加载打乱候选池
+      const pool = shuffleList(allInCat);
+      let available = pool.filter(it => !usedGlobally.has(it.id));
+      if (cat === '艺术制图') {
+        available = available.filter(it => !reservedItems.has(it.id));
+      }
+      if (available.length < 4 && allInCat.length >= 4) {
+        available = pool;
+      }
+
+      const selected = [];
+      const wideItem = available.find(it => getCardAspect(it) >= 2.5);
+      let rowCount = 0;
+
+      // 若有全景长图且为桌面宽屏：长图占 ~75% + 搭配 1 张方/竖图占 ~25%，严丝合缝拼满第 1 行
+      if (wideItem && isDesktop) {
+        selected.push(wideItem);
+        usedGlobally.add(wideItem.id);
+        const comp = available.find(it => it.id !== wideItem.id && !usedGlobally.has(it.id) && getCardAspect(it) <= 1.05);
+        if (comp) {
+          selected.push(comp);
+          usedGlobally.add(comp.id);
+        }
+        rowCount = 1;
+      }
+
+      // 拼满剩余行至 2 整行即止，绝不在末行遗留落单孤图
+      while (rowCount < 2) {
+        let sumAr = 0;
+        let countInRow = 0;
+        const remaining = available.filter(it => !selected.some(s => s.id === it.id) && !usedGlobally.has(it.id));
+        if (remaining.length === 0) break;
+
+        for (const it of remaining) {
+          const ar = getCardAspect(it);
+          selected.push(it);
+          usedGlobally.add(it.id);
+          sumAr += ar;
+          countInRow++;
+
+          // 容积阈值：宽高比累加至 3.2+ 且至少 3 张卡片，填满该行
+          if (sumAr >= 3.2 && countInRow >= 3) {
+            break;
+          }
+        }
+        rowCount++;
+      }
+
+      groups.push({
+        name: cat,
+        slug: getSubCategorySlug(cat),
+        items: selected,
+        totalCount: totalCount
+      });
     });
 
     const isComfort = grid.classList.contains('comfort-mode');
@@ -1412,8 +1502,8 @@
         sectionGrid.appendChild(createCard(item, globalIdx++));
       });
 
-      // 如果属于作品较多、被截断为 3 行的分类，在底部追加高质感“进入该分类查看全部”操作按钮
-      const isMoreNeeded = (totalInCat > displayedCount) || (group.items.length > 5);
+      // 如果属于作品较多、收紧为 2 行的分类，在底部追加高质感“进入该分类查看全部”操作按钮
+      const isMoreNeeded = (totalInCat > displayedCount);
       if (isMoreNeeded) {
         const moreWrap = document.createElement('div');
         moreWrap.className = 'category-section-bottom-action';
@@ -1595,22 +1685,29 @@
       '</span>' : '';
 
     const clickHintText = window.AtlasI18n ? (window.AtlasI18n.t('cardClickHint') || '点击查看详图') : '点击查看详图';
-    const hintHtml = 
-      '<div class="card-action-hint" aria-hidden="true">' +
-        '<span class="card-action-hint-text" data-i18n="cardClickHint">' + escapeHtml(clickHintText) + '</span>' +
-        '<svg class="card-action-hint-icon" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>' +
+    const centerHintHtml = 
+      '<div class="card-center-action" aria-hidden="true">' +
+        '<span class="card-center-btn">' +
+          '<svg class="card-center-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<circle cx="11" cy="11" r="7"></circle>' +
+            '<line x1="21" y1="21" x2="16.65" y2="16.65"></line>' +
+            '<line x1="11" y1="8" x2="11" y2="14"></line>' +
+            '<line x1="8" y1="11" x2="14" y2="11"></line>' +
+          '</svg>' +
+          '<span class="card-center-text" data-i18n="cardClickHint">' + escapeHtml(clickHintText) + '</span>' +
+        '</span>' +
       '</div>';
 
     card.innerHTML = 
       '<div class="card-media">' +
         newBadgeHtml +
         '<img class="card-img" src="' + item.thumb + '" alt="' + escapeHtml(locItem.title) + '" loading="lazy" />' +
+        centerHintHtml +
         '<div class="card-scrim-mask">' +
           '<div class="card-scrim-content">' +
             '<h3 class="card-title">' + escapeHtml(locItem.title) + '</h3>' +
             '<div class="card-meta-row">' +
               '<div class="card-tags">' + tagsHtml + '</div>' +
-              hintHtml +
             '</div>' +
           '</div>' +
         '</div>' +

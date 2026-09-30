@@ -4,6 +4,23 @@
 
 ---
 
+## [1.2.9] - 2026-09-30
+
+### 修复 (Fixed)
+- **卡片边界悬停频闪与微动效重塑 (Eradicate Card Boundary Hover Flicker)**：
+  - 彻底剔除 `.gallery-card:hover` 的 `transform: translateY(-5px)` 物理上浮，从根源消除底边 5px 真空带导致的 `:hover` 几何失活死循环与高频频闪；
+  - 采用顶级工匠级原地响应：卡片边框高亮（`border-color: var(--accent)`）结合柔和景深微光环扩散，触控按下由垂直位移升级为对称微缩放（`scale(0.992)`），稳重沉静；
+  - 同步消除 `.taxonomy-card-chip:hover` 与 `.category-section-more-btn:hover` 的 `translateY(-2px)` 隐患。
+
+### 优化 (Optimized)
+- **瀑布大厅卡片【点击查看详图】居中微晶胶囊重构 (Center Action Capsule)**：
+  - 卡片悬停引导由底栏右侧滑出升级为正中央微晶毛玻璃居中胶囊，仅在精准指针与悬停支持设备（`@media (hover: hover) and (pointer: fine)`）平滑缩放浮现，规避移动端触控冲突；
+- **移动端全屏安全区与视口单位合规 (Safe Area & Viewport-Fit Compliance)**：
+  - 在 HTML 视口中补充 `viewport-fit=cover` 声明，确保 iPhone 全面屏与底部指示条避让体验；
+  - 全局静态资源缓存版本递增至 `v=20260930_v43`。
+
+---
+
 ## [1.2.8] - 2026-09-29
 
 ### 优化 (Optimized)

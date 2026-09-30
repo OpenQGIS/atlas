@@ -113,13 +113,20 @@ body {
 .site-header {
   border-bottom: 1px solid var(--border-subtle);
   background: var(--header-bg);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   position: sticky;
   top: 0;
-  z-index: 40;
-  transition: var(--theme-transition);
+  z-index: 50;
+  transition: var(--theme-transition), box-shadow 0.25s ease;
   width: 100%;
   max-width: 100%;
+}
+.site-header.is-sticky {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.24);
+}
+:root[data-theme="light"] .site-header.is-sticky {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
 }
 .header-inner {
   max-width: 1600px;
@@ -686,7 +693,7 @@ body[data-page="portal"] {
 .taxonomy-card-chip:hover {
   border-color: rgba(var(--accent-rgb), 0.55);
   background: var(--bg-surface);
-  transform: translateY(-2px);
+  transform: none;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
@@ -1708,10 +1715,10 @@ body[data-page="portal"] {
     grid-column: span 2 !important;
     height: 230px !important;
   }
-  /* 首页总览各分类在移动端高度自适应，支持完整露出 3 行整齐作品 */
+  /* 首页总览各分类在移动端高度自适应，流式自然展示 */
   .gallery-overview-section .masonry-grid {
-    max-height: calc(3 * 235px + 2 * 12px) !important;
-    overflow: hidden !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
   /* 移动端分类锚点防遮挡边距 */
   .gallery-category-section {
@@ -1719,9 +1726,9 @@ body[data-page="portal"] {
   }
 }
 
-/* 首页瀑布流各分类默认至多展示 3 行拼贴效果 */
+/* 首页瀑布流各分类默认展示饱满的两整行拼贴效果 */
 .gallery-overview-section .masonry-grid {
-  max-height: calc(3 * var(--target-row-height, 320px) + 2 * var(--grid-gap, 16px));
+  max-height: calc(2 * var(--target-row-height, 320px) + 1 * var(--grid-gap, 16px) + 24px);
   overflow: hidden;
   position: relative;
 }
@@ -1758,7 +1765,7 @@ body[data-page="portal"] {
   background: var(--accent);
   color: #0b0e14;
   border-color: var(--accent);
-  transform: translateY(-2px);
+  transform: none;
   box-shadow: 0 8px 24px rgba(128, 204, 40, 0.25);
 }
 
@@ -1791,33 +1798,53 @@ body[data-page="portal"] {
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
 }
 
-/* 保护非超长图（宽高比 < 2.5）在最后一行或单独成行时不被过度拉伸撑满整屏 */
+/* 保护非超长图在成行时不被过度拉伸撑满整屏 */
 .gallery-card:not(.is-ultrawide) {
-  max-width: min(calc(var(--target-row-height, 320px) * var(--aspect-ratio) * 1.38), 100%);
+  max-width: min(calc(var(--target-row-height, 320px) * var(--aspect-ratio) * 1.45), 100%);
 }
 
-/* 超长图（如平陆运河等全景长卷，宽高比 >= 2.5）支持横跨整屏展示 */
+/* 超长图（如平陆运河等全景长卷，宽高比 >= 2.5）默认规则 */
 .gallery-card.is-ultrawide {
   flex-basis: min(calc(var(--target-row-height, 320px) * var(--aspect-ratio)), 100%);
   max-width: 100%;
 }
 
-/* 在多图网格尾部放置 flex 占位伪元素，吸收末行剩余空白，彻底杜绝孤立卡片拉扯变形 */
-.masonry-grid::after {
+/* 首页总览宽屏模式下：超长全景图与伴随方图同排并列（约 75% + 25%），左右拉满不留白 */
+@media (min-width: 900px) {
+  .gallery-overview-section .gallery-card.is-ultrawide {
+    flex-basis: min(calc(var(--target-row-height, 320px) * var(--aspect-ratio) * 0.72), calc(100% - 280px));
+    max-width: calc(100% - 220px);
+    flex-grow: 360;
+  }
+}
+
+/* 首页总览在两行装箱完毕后，移除多余 flex 占位伪元素，杜绝右侧死白 */
+.gallery-overview-section .masonry-grid::after {
+  display: none !important;
+}
+
+/* 分类全景页或单视图网格尾部兜底伪元素 */
+.subview-unified-section .masonry-grid::after {
   content: '';
   flex-grow: 999999;
   min-width: 60px;
   height: 0;
   pointer-events: none;
 }
+/* 彻底清除 translateY(-5px) 物理位移，100% 根绝边界 Hover 抖动与频闪死循环 */
 .gallery-card:hover,
 .gallery-card:focus-visible {
   border-color: var(--accent);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
-  transform: translateY(-5px);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(var(--accent-rgb, 128, 204, 40), 0.16);
+  transform: none;
+}
+:root[data-theme="light"] .gallery-card:hover,
+:root[data-theme="light"] .gallery-card:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(106, 168, 32, 0.22);
 }
 .gallery-card:active {
-  transform: translateY(-2px);
+  transform: scale(0.992);
 }
 .card-media {
   width: 100%;
@@ -2090,74 +2117,87 @@ body[data-page="portal"] {
   transition: -webkit-mask-image 0.28s ease, mask-image 0.28s ease;
 }
 
-/* 悬停时右侧滑出查看详图胶囊，长标签末尾柔和消隐，防止重叠碰撞 */
-.gallery-card:hover .card-tags {
-  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 105px), transparent calc(100% - 12px));
-  mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 105px), transparent calc(100% - 12px));
-}
-
-/* 悬停微动效：底栏右侧柔和滑出【点击查看详图】高质感微胶囊 */
-.card-action-hint {
+/* 卡片正中央【点击查看详图】高质感微晶毛玻璃胶囊（去 AI 廉价感，居中醒目呈现） */
+.card-center-action {
   position: absolute;
-  right: 0;
   top: 50%;
-  transform: translateY(-50%) translateX(8px);
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 2.5px 8px 2.5px 9px;
-  border-radius: 999px;
-  font-size: 0.68rem;
-  font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: 0.02em;
-  color: var(--accent);
-  background: rgba(14, 18, 25, 0.90);
-  border: 1px solid rgba(var(--accent-rgb), 0.42);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45), 0 0 10px rgba(var(--accent-rgb), 0.16);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  justify-content: center;
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  white-space: nowrap;
-  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              visibility 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 3;
+  z-index: 5;
+  transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.gallery-card:hover .card-action-hint,
-.gallery-card:focus-visible .card-action-hint {
+.card-center-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px 8px 16px;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  background: rgba(14, 18, 25, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 16px rgba(var(--accent-rgb, 198, 160, 82), 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  white-space: nowrap;
+}
+
+.card-center-icon {
+  width: 14px;
+  height: 14px;
+  stroke: var(--accent, #e5c07b);
+  flex-shrink: 0;
+  transition: transform 0.22s ease;
+}
+
+:root[data-theme="light"] .card-center-btn {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  color: #111827;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 0 14px rgba(80, 140, 20, 0.18);
+}
+
+:root[data-theme="light"] .card-center-icon {
+  stroke: var(--accent, #3b6b13);
+}
+
+/* 仅在具备精准指针与悬停支持的设备触发，规避移动端触屏双击 Bug */
+@media (hover: hover) and (pointer: fine) {
+  .gallery-card:hover .card-center-action,
+  .gallery-card:focus-visible .card-center-action {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .gallery-card:hover .card-center-icon {
+    transform: scale(1.1);
+  }
+}
+
+/* 键盘 Tab 聚焦 */
+.gallery-card:focus-visible .card-center-action {
   opacity: 1;
   visibility: visible;
-  transform: translateY(-50%) translateX(0);
+  transform: translate(-50%, -50%) scale(1);
 }
 
-.card-action-hint-text {
-  font-family: var(--font-sans);
-  font-size: 0.68rem;
-  font-weight: 500;
-  color: inherit;
-}
-
-.card-action-hint-icon {
-  width: 11px;
-  height: 11px;
-  flex-shrink: 0;
-  stroke: currentColor;
-  transition: transform 0.25s ease;
-}
-
-.gallery-card:hover .card-action-hint-icon {
-  transform: translateX(1.5px);
-}
-
-:root[data-theme="light"] .card-action-hint {
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(67, 118, 22, 0.42);
-  color: #3b6b13;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 0 10px rgba(80, 140, 20, 0.15);
+/* 触控与点击反馈：纯中心微缩放，杜绝边缘跳位 */
+.gallery-card:active {
+  transform: scale(0.992);
 }
 
 .tag-pill {
@@ -5552,7 +5592,8 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   position: relative;
   width: 100%;
   height: 100vh;
-  height: 100dvh;
+  height: 100svh;
+  height: var(--hero-real-vh, 100svh);
   min-height: 380px;
   overflow: hidden;
   display: flex;
@@ -6081,7 +6122,9 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 /* 横版 / 短屏视口适配 (高度 <= 600px，如手机横屏 667x375, 800x400, 538x540 等) */
 @media (max-height: 600px) {
   .hero-screen {
-    min-height: 100dvh;
+    height: 100svh;
+    height: var(--hero-real-vh, 100svh);
+    min-height: 100svh;
     min-height: -webkit-fill-available;
   }
   .hero-content {
@@ -7829,7 +7872,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   width: 100%;
   display: flex;
   flex-direction: column;
-  scroll-margin-top: 96px;
+  scroll-margin-top: 84px;
   position: relative;
 }
 

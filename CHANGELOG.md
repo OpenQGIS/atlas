@@ -4,6 +4,18 @@
 
 ---
 
+## [1.3.2] - 2026-09-30
+
+### 优化 (Optimized)
+- **无界画境与首屏零滚动条 (Borderless Hero View Immersion)**：
+  - 彻底抹去 `Hero View`（首屏全景视口）右侧操作系统原生灰白滚动条，2K 名画全屏 100% 满铺物理边缘，终结破窗效应与第四面墙割裂感；
+- **空气悬浮微晶滚动条重构 (Ghost Floating Capsule Rail)**：
+  - 彻底终结 Windows 16px 粗白灰原厂滚动条的廉价感，重塑为 5px 超薄空气悬浮微晶条（`Ghost Floating Capsule Scrollbar`）；
+  - 平时不占物理宽度悬浮于画卷上方，悬停时点亮品牌翡翠微光高亮（`var(--accent)`），实现与 macOS 媲美的高级流体质感；
+  - 资源版本号升级至 `v=20260930_v45`。
+
+---
+
 ## [1.3.1] - 2026-09-30
 
 ### 优化 (Optimized)

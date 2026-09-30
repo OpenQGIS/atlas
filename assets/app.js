@@ -306,6 +306,7 @@
         if (window.location.hash === '#gallery') {
           history.replaceState(null, '', window.location.pathname + window.location.search);
         }
+        document.documentElement.classList.remove('has-entered-gallery');
         document.body.classList.remove('in-gallery');
         window.scrollTo(0, 0);
       }
@@ -684,6 +685,7 @@
         // 平滑滚动到位后无缝切换为 in-gallery，将首屏全景收起，使 siteHeader 确立为页面最顶端
         setTimeout(() => {
           document.documentElement.style.scrollBehavior = 'auto';
+          document.documentElement.classList.add('has-entered-gallery');
           document.body.classList.add('in-gallery');
           window.scrollTo(0, 0);
           requestAnimationFrame(() => {
@@ -692,6 +694,7 @@
         }, 650);
       } else {
         document.documentElement.style.scrollBehavior = 'auto';
+        document.documentElement.classList.add('has-entered-gallery');
         document.body.classList.add('in-gallery');
         window.scrollTo(0, 0);
         requestAnimationFrame(() => {
@@ -2510,6 +2513,7 @@
         // 判断是否退回到了首屏 Level 0
         if ((state.level === 0 || (!window.location.hash && !state.level)) && !sub) {
           currentHistoryLevel = 0;
+          document.documentElement.classList.remove('has-entered-gallery');
           document.body.classList.remove('in-gallery');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {

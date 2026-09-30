@@ -143,7 +143,10 @@
       footerLinkOrgHint: '探索更多开源制图与空间算法项目',
       footerCopyrightNotice: '所有作品为原创空间制图实践，受国际版权及开源许可保护。未经许可严禁商用、翻印、洗稿或二次打包再分发。',
       footerEdition: '2026 EDITION',
-      footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.'
+      footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.',
+      viewerHdLoading: '正在加载 4K 超清切片...',
+      viewerHdSlowHint: '网络传输稍慢，已保持当前清晰度，后台持续连接中',
+      viewerHdReady: '4K 超清已就绪'
     },
     en: {
       siteTitle: 'AtlasLog · OpenQGIS Cartography Portfolio',
@@ -280,7 +283,10 @@
       footerLinkOrgHint: 'Explore open-source cartography & spatial tools',
       footerCopyrightNotice: 'All works are original spatial cartography protected under international copyright. Unauthorized commercial reuse, reprinting, or repackaged redistribution is strictly prohibited.',
       footerEdition: '2026 EDITION',
-      footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.'
+      footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.',
+      viewerHdLoading: 'Loading 4K Ultra-HD tiles...',
+      viewerHdSlowHint: 'Slow network; preview held, continuing connection...',
+      viewerHdReady: '4K Ultra-HD Ready'
     },
     ja: {
       siteTitle: '地図録 OpenQGIS地図作品集',
@@ -417,7 +423,10 @@
       footerLinkOrgHint: 'オープンソース地図と空間アルゴリズムを探求',
       footerCopyrightNotice: 'すべての作品はオリジナルの空間作図実践であり、著作権法およびオープンソースライセンスにより保護されています。',
       footerEdition: '2026 EDITION',
-      footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.'
+      footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.',
+      viewerHdLoading: '4K超高精細タイルを読み込み中...',
+      viewerHdSlowHint: '低速回線のため現在の解像度を維持し、接続を継続中...',
+      viewerHdReady: '4K超高精細準備完了'
     },
     ko: {
       siteTitle: '지도록 OpenQGIS 지도 작품집',
@@ -554,7 +563,10 @@
       footerLinkOrgHint: '오픈소스 지도 및 공간 알고리즘 탐색',
       footerCopyrightNotice: '모든 작품은 독창적인 공간 지도 제작 실천물이며 국제 저작권 및 라이선스의 보호를 받습니다.',
       footerEdition: '2026 EDITION',
-      footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.'
+      footerCopyrightLine: '© 2026 OpenQGIS / AtlasLog. All Rights Reserved.',
+      viewerHdLoading: '4K 초고화질 타일 로딩 중...',
+      viewerHdSlowHint: '네트워크 지연; 현재 해상도를 유지하며 연결 지속 중...',
+      viewerHdReady: '4K 초고화질 준비 완료'
     }
   };
 

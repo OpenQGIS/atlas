@@ -2697,9 +2697,10 @@
     navEl.style.setProperty('--nav-bg', dominantColor);
     navEl.style.setProperty('--nav-gradient', gradientCss);
     if (item && item.thumb) {
-      navEl.style.setProperty('--nav-thumb', 'url("' + item.thumb + '")');
+      const fullThumbUrl = new URL(item.thumb, window.location.href).href;
+      navEl.style.setProperty('--nav-thumb', 'url("' + fullThumbUrl + '")');
       navEl.style.setProperty('--nav-thumb-opacity', '1');
-      navEl.style.setProperty('background-image', 'url("' + item.thumb + '")', 'important');
+      navEl.style.setProperty('background-image', 'url("' + fullThumbUrl + '")', 'important');
       navEl.style.setProperty('background-size', 'contain', 'important');
       navEl.style.setProperty('background-repeat', 'no-repeat', 'important');
       navEl.style.setProperty('background-position', 'center', 'important');
@@ -3310,6 +3311,81 @@
     const tileMaxLevel = item.maxLevel !== undefined ? item.maxLevel : Math.ceil(Math.log2(Math.max(tileWidth, tileHeight)));
     const calculatedMinLevel = 0;
 
+    // 4K Ultra-HD Tile Loading Capsule HUD (Lottie Animation)
+    const hdLoaderEl = document.getElementById('viewerHdLoader');
+    const hdLoaderAnimEl = document.getElementById('viewerHdLoaderAnim');
+    const hdLoaderTitleEl = document.getElementById('viewerHdLoaderTitle');
+    const hdLoaderSubEl = document.getElementById('viewerHdLoaderSub');
+
+    let lottieInstance = null;
+    if (window.lottie && window.LOADING_LOTTIE_DATA && hdLoaderAnimEl) {
+      if (window._hdLottieAnim) {
+        try { window._hdLottieAnim.destroy(); } catch (e) {}
+      }
+      hdLoaderAnimEl.innerHTML = '';
+      try {
+        window._hdLottieAnim = window.lottie.loadAnimation({
+          container: hdLoaderAnimEl,
+          renderer: 'svg',
+          loop: true,
+          autoplay: false,
+          animationData: window.LOADING_LOTTIE_DATA
+        });
+        lottieInstance = window._hdLottieAnim;
+      } catch (err) {
+        console.warn('Lottie initialization failed:', err);
+      }
+    }
+
+    const pendingCdnTiles = new Set();
+    let hdLoaderTimer = null;
+    let hdSlowTimer = null;
+    let isHdLoaderVisible = false;
+
+    function showHdLoader() {
+      if (!hdLoaderEl) return;
+      isHdLoaderVisible = true;
+      hdLoaderEl.classList.remove('ready');
+      hdLoaderEl.classList.add('active');
+      if (hdLoaderSubEl) hdLoaderSubEl.style.display = 'none';
+      if (hdLoaderTitleEl) {
+        hdLoaderTitleEl.textContent = (window.AtlasI18n && window.AtlasI18n.t('viewerHdLoading')) || '正在加载 4K 超清切片...';
+      }
+      if (lottieInstance) lottieInstance.play();
+
+      clearTimeout(hdSlowTimer);
+      hdSlowTimer = setTimeout(() => {
+        if (isHdLoaderVisible && pendingCdnTiles.size > 0 && hdLoaderSubEl) {
+          hdLoaderSubEl.textContent = (window.AtlasI18n && window.AtlasI18n.t('viewerHdSlowHint')) || '网络传输稍慢，已保持当前清晰度，后台持续连接中';
+          hdLoaderSubEl.style.display = 'block';
+        }
+      }, 4000);
+    }
+
+    function hideHdLoader(isSuccess) {
+      if (!hdLoaderEl || !isHdLoaderVisible) return;
+      clearTimeout(hdLoaderTimer);
+      hdLoaderTimer = null;
+      clearTimeout(hdSlowTimer);
+
+      if (isSuccess) {
+        if (hdLoaderTitleEl) {
+          hdLoaderTitleEl.textContent = (window.AtlasI18n && window.AtlasI18n.t('viewerHdReady')) || '4K 超清已就绪';
+        }
+        if (hdLoaderSubEl) hdLoaderSubEl.style.display = 'none';
+        hdLoaderEl.classList.add('ready');
+        setTimeout(() => {
+          isHdLoaderVisible = false;
+          if (hdLoaderEl) hdLoaderEl.classList.remove('active', 'ready');
+          if (lottieInstance) lottieInstance.pause();
+        }, 700);
+      } else {
+        isHdLoaderVisible = false;
+        hdLoaderEl.classList.remove('active', 'ready');
+        if (lottieInstance) lottieInstance.pause();
+      }
+    }
+
     const tileSource = {
       width: tileWidth,
       height: tileHeight,
@@ -3321,8 +3397,20 @@
         // 混合切片加载架构：
         // 0~9 级骨架切片走 GitHub Pages 同源 (0ms 本地瞬开，完全不可逆向原图)
         // 10 级及以上高保真切片走 Cloudflare Workers CDN (按需深度放大拉取，源图隔离保护)
-        const base = (level >= 10 && assetBase) ? remoteTileBase : localTileBase;
-        return base + level + '/' + x + '_' + y + '.' + (item.format || 'webp');
+        const isRemote = (level >= 10 && assetBase);
+        const base = isRemote ? remoteTileBase : localTileBase;
+        const url = base + level + '/' + x + '_' + y + '.' + (item.format || 'webp');
+        if (isRemote) {
+          pendingCdnTiles.add(url);
+          if (!isHdLoaderVisible && !hdLoaderTimer) {
+            hdLoaderTimer = setTimeout(() => {
+              if (pendingCdnTiles.size > 0) {
+                showHdLoader();
+              }
+            }, 300);
+          }
+        }
+        return url;
       }
     };
 
@@ -3418,20 +3506,61 @@
             tiledImg.addHandler('fully-loaded-change', function (e) {
               if (e && e.fullyLoaded) {
                 triggerTileProgressDone();
+                pendingCdnTiles.clear();
+                if (isHdLoaderVisible) {
+                  hideHdLoader(true);
+                }
               }
             });
           }
         }
       });
-      osdViewer.addHandler('tile-loaded', function () {
+
+      function getSafeTileUrl(tile) {
+        if (!tile) return '';
+        if (typeof tile.getUrl === 'function') return tile.getUrl();
+        return tile.url || '';
+      }
+
+      osdViewer.addHandler('tile-loaded', function (e) {
         tilesLoadedCount++;
+        const u = getSafeTileUrl(e && e.tile);
+        if (u) pendingCdnTiles.delete(u);
+        if (pendingCdnTiles.size === 0) {
+          clearTimeout(hdLoaderTimer);
+          hdLoaderTimer = null;
+          if (isHdLoaderVisible) {
+            hideHdLoader(true);
+          }
+        }
         // 移动端若加载超过首屏基础瓦片数（通常10-16块），亦可视为首屏基本就绪
         if (isPhone && tilesLoadedCount >= 12) {
           triggerTileProgressDone();
         }
       });
-      osdViewer.addHandler('tile-load-failed', function () {
+      osdViewer.addHandler('tile-load-failed', function (e) {
+        const u = getSafeTileUrl(e && e.tile);
+        console.warn('OpenSeadragon tile-load-failed:', u || e);
+        if (u) pendingCdnTiles.delete(u);
+        if (pendingCdnTiles.size === 0) {
+          clearTimeout(hdLoaderTimer);
+          hdLoaderTimer = null;
+          if (isHdLoaderVisible) {
+            hideHdLoader(false);
+          }
+        }
         triggerTileProgressDone();
+      });
+      osdViewer.addHandler('tile-load-cancelled', function (e) {
+        const u = getSafeTileUrl(e && e.tile);
+        if (u) pendingCdnTiles.delete(u);
+        if (pendingCdnTiles.size === 0) {
+          clearTimeout(hdLoaderTimer);
+          hdLoaderTimer = null;
+          if (isHdLoaderVisible) {
+            hideHdLoader(false);
+          }
+        }
       });
 
       osdViewer.addHandler('update-viewport', function () {
@@ -3500,9 +3629,10 @@
         navEl.style.setProperty('--nav-bg', dominantColor);
         navEl.style.setProperty('--nav-gradient', gradientCss);
         if (item && item.thumb) {
-          navEl.style.setProperty('--nav-thumb', 'url("' + item.thumb + '")');
+          const fullThumbUrl = new URL(item.thumb, window.location.href).href;
+          navEl.style.setProperty('--nav-thumb', 'url("' + fullThumbUrl + '")');
           navEl.style.setProperty('--nav-thumb-opacity', '1');
-          navEl.style.setProperty('background-image', 'url("' + item.thumb + '")', 'important');
+          navEl.style.setProperty('background-image', 'url("' + fullThumbUrl + '")', 'important');
           navEl.style.setProperty('background-size', 'contain', 'important');
           navEl.style.setProperty('background-repeat', 'no-repeat', 'important');
           navEl.style.setProperty('background-position', 'center', 'important');
@@ -3833,6 +3963,11 @@
 
   function closeViewer(updateHistory = true) {
     StealthWatermark.destroy();
+    const hdLoaderEl = document.getElementById('viewerHdLoader');
+    if (hdLoaderEl) hdLoaderEl.classList.remove('active', 'ready');
+    if (window._hdLottieAnim) {
+      try { window._hdLottieAnim.stop(); } catch (e) {}
+    }
     const modalEl = document.getElementById('viewerModal');
     if (!modalEl) return;
     modalEl.classList.remove('open');

@@ -991,7 +991,7 @@
       try {
         const url = new URL(window.location.href);
         url.search = 's' + getSubCategoryParam(subCategoryName);
-        url.hash = 'gallery';
+        url.hash = '';
         window.history.pushState({ level: 1, view: 'gallery', subCategory: subCategoryName }, '', url.toString());
       } catch (e) {}
     }
@@ -1022,7 +1022,7 @@
       try {
         const url = new URL(window.location.href);
         url.search = '';
-        url.hash = 'gallery';
+        url.hash = '';
         window.history.pushState({ level: 1, view: 'gallery' }, '', url.toString());
       } catch (e) {}
     }
@@ -5388,10 +5388,10 @@
       if (url.searchParams.has('id') || url.searchParams.has('art') || window.location.hash) {
         if (currentSubCategory) {
           url.search = 's' + getSubCategoryParam(currentSubCategory);
-          url.hash = 'gallery';
+          url.hash = '';
         } else {
           url.search = '';
-          url.hash = 'gallery';
+          url.hash = '';
         }
         window.history.replaceState({ level: 1, view: 'gallery', subCategory: currentSubCategory }, '', url.toString());
         currentHistoryLevel = 1;
@@ -5447,16 +5447,16 @@
       if (subTarget) {
         const canonical = subTarget;
         try {
-          // 将历史基底设为画廊全景概览 (#gallery)，如此用户点击浏览器“后退”时会返回上一层画廊全景，绝不会直接关掉网页
+          // 将历史基底设为画廊全景概览，如此用户点击浏览器“后退”时会返回上一层画廊全景，绝不会直接关掉网页
           const overviewUrl = new URL(window.location.href);
           overviewUrl.search = '';
-          overviewUrl.hash = 'gallery';
+          overviewUrl.hash = '';
           window.history.replaceState({ level: 1, view: 'gallery' }, '', overviewUrl.toString());
 
           // 将当前状态推入子分类视图，使浏览器后退键生效 (URL 强制保持纯净数字无中文 ?s1)
           const subUrl = new URL(window.location.href);
           subUrl.search = 's' + getSubCategoryParam(canonical);
-          subUrl.hash = 'gallery';
+          subUrl.hash = '';
           window.history.pushState({ level: 1, view: 'gallery', subCategory: canonical }, '', subUrl.toString());
         } catch (e) {}
 

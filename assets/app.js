@@ -16,6 +16,17 @@
   let preViewerScrollY = 0;
   let currentHistoryLevel = 0; // 0: hero, 1: gallery, 2: viewer
 
+  // 智能解析当前站点的根目录绝对基准路径 (自动兼容 GitHub Pages 项目子目录 /atlas/ 与根域名部署)
+  function getAppBaseUrl() {
+    let path = window.location.pathname.split('?')[0].split('#')[0];
+    if (path.endsWith('.html') || path.endsWith('.htm')) {
+      path = path.substring(0, path.lastIndexOf('/') + 1);
+    } else if (!path.endsWith('/')) {
+      path += '/';
+    }
+    return window.location.origin + path;
+  }
+
   // 物理尺寸引擎基准 (300 DPI 印刷制图在 96 CSS DPI 显示器上的 100% 物理真实尺寸系数)
   const PHYSICAL_100_RATIO = 96 / 300; // 0.32
 
@@ -314,8 +325,12 @@
   }
 
   function setupData(rawItems) {
+    const appBase = getAppBaseUrl();
     galleryItems = rawItems.map((item, idx) => {
       item.globalIndex = idx;
+      if (item.thumb && !item.thumb.startsWith('http')) {
+        item.thumb = new URL(item.thumb.replace(/^\/+/, ''), appBase).href;
+      }
       return item;
     });
   }
@@ -3277,9 +3292,11 @@
     if (ambientBackdrop) {
       ambientBackdrop.style.setProperty('--viewer-ambient-gradient', gradientCss);
     }
+    const appBase = getAppBaseUrl();
+    const fullThumbUrl = (item && item.thumb) ? (item.thumb.startsWith('http') ? item.thumb : new URL(item.thumb, appBase).href) : '';
+
     // 2. 视口 0ms 瞬时缩略底图占位（在切片到达前，Retina 级 640px 缩略图铺满居中，消灭黑屏真空期）
-    if (stage && item && item.thumb) {
-      const fullThumbUrl = new URL(item.thumb, window.location.href).href;
+    if (stage && fullThumbUrl) {
       stage.style.setProperty('--stage-thumb', 'url("' + fullThumbUrl + '")');
       stage.style.setProperty('--stage-thumb-opacity', '1');
     }
@@ -3287,7 +3304,7 @@
     const config = window.ATLAS_CONFIG || window.CANGFENG_CONFIG || {};
     const assetBase = (config.assetBaseUrl || '').replace(/\/+$/, '');
 
-    const localTileBase = 'tiles/' + item.id + '_files/';
+    const localTileBase = appBase + 'tiles/' + item.id + '_files/';
     const remoteTileBase = assetBase ? (assetBase + '/tiles/' + item.id + '_files/') : localTileBase;
 
     const dpr = window.devicePixelRatio || 1;
@@ -3349,7 +3366,7 @@
       hdLoaderEl.classList.add('active');
       if (hdLoaderSubEl) hdLoaderSubEl.style.display = 'none';
       if (hdLoaderTitleEl) {
-        hdLoaderTitleEl.textContent = (window.AtlasI18n && window.AtlasI18n.t('viewerHdLoading')) || '正在加载 4K 超清切片...';
+        hdLoaderTitleEl.textContent = (window.AtlasI18n && window.AtlasI18n.t('viewerHdLoading')) || '底图加载中……';
       }
       if (lottieInstance) lottieInstance.play();
 
@@ -5056,6 +5073,9 @@
     if (!item) return;
     try {
       const url = new URL(window.location.href);
+      if (!url.pathname.endsWith('/') && !url.pathname.endsWith('.html') && !url.pathname.endsWith('.htm')) {
+        url.pathname += '/';
+      }
       let sNum = '1';
       if (currentSubCategory) {
         sNum = getSubCategoryParam(currentSubCategory);

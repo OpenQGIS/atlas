@@ -1238,7 +1238,7 @@
     heroEl.innerHTML =
       '<div class="subview-nav-bar">' +
         '<button class="subview-back-btn" id="btnBackToOverview" type="button" aria-label="' + escapeHtml(backText) + '">' +
-          '<svg class="subview-back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
+          '<svg class="subview-back-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">' +
             '<polyline points="15 18 9 12 15 6"></polyline>' +
           '</svg>' +
           '<span>' + escapeHtml(backText) + '</span>' +

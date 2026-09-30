@@ -1731,7 +1731,7 @@ body[data-page="portal"] {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px 0 12px 0;
+  padding: 16px 0 0 0;
   width: 100%;
 }
 
@@ -7822,7 +7822,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 52px;
+  gap: 72px;
 }
 
 .gallery-category-section {
@@ -7830,6 +7830,29 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   display: flex;
   flex-direction: column;
   scroll-margin-top: 96px;
+  position: relative;
+}
+
+/* 章节顶部优雅工程界标分隔线（第2个分类起） */
+.gallery-category-section + .gallery-category-section {
+  padding-top: 52px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="light"] .gallery-category-section + .gallery-category-section {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* 章节顶部左侧技术测绘刻度块（响应左侧导览轴并划定章节起始） */
+.gallery-category-section + .gallery-category-section::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 48px;
+  height: 2px;
+  background: var(--accent, #80cc28);
+  border-radius: 2px;
 }
 
 .category-section-header {
@@ -7855,10 +7878,19 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   font-weight: 700;
   color: #80cc28;
   letter-spacing: 0.06em;
+  background: rgba(128, 204, 40, 0.09);
+  border: 1px solid rgba(128, 204, 40, 0.25);
+  padding: 1px 7px;
+  border-radius: 4px;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
 }
 
 :root[data-theme="light"] .category-section-idx {
-  color: #6bb31e;
+  color: #61a319;
+  background: rgba(107, 179, 30, 0.08);
+  border-color: rgba(107, 179, 30, 0.22);
 }
 
 .category-section-divider {
@@ -8020,6 +8052,80 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.04);
 }
 
+/* Subview Navigation Breadcrumb Bar (桌面端面包屑导航条) */
+.subview-nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 0.82rem;
+  font-family: var(--font-mono, "JetBrains Mono", Consolas, monospace);
+  color: var(--text-muted);
+}
+
+.subview-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 13px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  line-height: 1;
+}
+
+:root[data-theme="light"] .subview-back-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: var(--text-primary);
+}
+
+.subview-back-btn:hover {
+  background: rgba(128, 204, 40, 0.12);
+  border-color: rgba(128, 204, 40, 0.4);
+  color: #80cc28;
+}
+
+:root[data-theme="light"] .subview-back-btn:hover {
+  background: rgba(107, 179, 30, 0.1);
+  border-color: rgba(107, 179, 30, 0.35);
+  color: #6bb31e;
+}
+
+.subview-back-icon {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  stroke-width: 2.2;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.subview-back-btn:hover .subview-back-icon {
+  transform: translateX(-2px);
+}
+
+.subview-nav-divider {
+  color: var(--text-muted);
+  opacity: 0.35;
+  font-size: 0.8rem;
+}
+
+.subview-nav-current {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+}
+
 /* Subview Content Row (左侧标题与收录指标，右侧导言题记) */
 .subview-content-row {
   display: flex;
@@ -8142,6 +8248,20 @@ body.in-subview .gallery-main {
 }
 
 @media (max-width: 768px) {
+  .gallery-sections-wrap {
+    gap: 48px;
+  }
+  .gallery-category-section + .gallery-category-section {
+    padding-top: 36px;
+  }
+  .gallery-category-section + .gallery-category-section::before {
+    width: 32px;
+  }
+  .category-section-more-btn {
+    min-height: 44px;
+    padding: 10px 20px;
+    font-size: 0.84rem;
+  }
   .subcategory-view-hero {
     margin-bottom: 14px;
     padding: 14px 16px 12px 16px;
@@ -8153,6 +8273,7 @@ body.in-subview .gallery-main {
     gap: 6px;
   }
   .subview-back-btn {
+    min-height: 36px;
     font-size: 0.72rem;
     padding: 4px 10px;
     gap: 5px;
@@ -8160,6 +8281,8 @@ body.in-subview .gallery-main {
   .subview-back-icon {
     width: 12px;
     height: 12px;
+    min-width: 12px;
+    min-height: 12px;
   }
   .subview-nav-current {
     font-size: 0.72rem;

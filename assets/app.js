@@ -3370,7 +3370,7 @@
       hdLoaderEl.classList.add('active');
       if (hdLoaderSubEl) hdLoaderSubEl.style.display = 'none';
       if (hdLoaderTitleEl) {
-        hdLoaderTitleEl.textContent = (window.AtlasI18n && window.AtlasI18n.t('viewerHdLoading')) || '底图加载中……';
+        hdLoaderTitleEl.textContent = (window.AtlasI18n && window.AtlasI18n.t('viewerHdLoading')) || '加载中…';
       }
       if (lottieInstance) lottieInstance.play();
     }

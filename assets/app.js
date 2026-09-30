@@ -3356,8 +3356,12 @@
 
     const pendingCdnTiles = new Set();
     let hdLoaderTimer = null;
-    let hdSlowTimer = null;
     let isHdLoaderVisible = false;
+    let isInitialOpening = true;
+    let openingSafetyTimer = null;
+    let lastStableZoom = 1.0;
+    let isDrasticZoomPending = false;
+    let hasRequestedCdnForZoom = false;
 
     function showHdLoader() {
       if (!hdLoaderEl) return;
@@ -3369,39 +3373,39 @@
         hdLoaderTitleEl.textContent = (window.AtlasI18n && window.AtlasI18n.t('viewerHdLoading')) || '底图加载中……';
       }
       if (lottieInstance) lottieInstance.play();
-
-      clearTimeout(hdSlowTimer);
-      hdSlowTimer = setTimeout(() => {
-        if (isHdLoaderVisible && pendingCdnTiles.size > 0 && hdLoaderSubEl) {
-          hdLoaderSubEl.textContent = (window.AtlasI18n && window.AtlasI18n.t('viewerHdSlowHint')) || '网络传输稍慢，已保持当前清晰度，后台持续连接中';
-          hdLoaderSubEl.style.display = 'block';
-        }
-      }, 4000);
     }
 
-    function hideHdLoader(isSuccess) {
-      if (!hdLoaderEl || !isHdLoaderVisible) return;
+    function hideHdLoader() {
+      if (!hdLoaderEl) return;
       clearTimeout(hdLoaderTimer);
       hdLoaderTimer = null;
-      clearTimeout(hdSlowTimer);
-
-      if (isSuccess) {
-        if (hdLoaderTitleEl) {
-          hdLoaderTitleEl.textContent = (window.AtlasI18n && window.AtlasI18n.t('viewerHdReady')) || '4K 超清已就绪';
-        }
-        if (hdLoaderSubEl) hdLoaderSubEl.style.display = 'none';
-        hdLoaderEl.classList.add('ready');
-        setTimeout(() => {
-          isHdLoaderVisible = false;
-          if (hdLoaderEl) hdLoaderEl.classList.remove('active', 'ready');
-          if (lottieInstance) lottieInstance.pause();
-        }, 700);
-      } else {
-        isHdLoaderVisible = false;
-        hdLoaderEl.classList.remove('active', 'ready');
-        if (lottieInstance) lottieInstance.pause();
-      }
+      clearTimeout(openingSafetyTimer);
+      openingSafetyTimer = null;
+      isHdLoaderVisible = false;
+      hdLoaderEl.classList.remove('active', 'ready');
+      if (lottieInstance) lottieInstance.pause();
+      if (hdLoaderSubEl) hdLoaderSubEl.style.display = 'none';
     }
+
+    function checkAndTriggerDrasticLoader() {
+      if (!isDrasticZoomPending || isHdLoaderVisible) return;
+      if (hdLoaderTimer) return;
+      hdLoaderTimer = setTimeout(() => {
+        hdLoaderTimer = null;
+        if (isDrasticZoomPending && pendingCdnTiles.size > 0 && !isHdLoaderVisible) {
+          showHdLoader();
+        }
+      }, 100);
+    }
+
+    // 阶段一：打开大图，底图切片尚未绘制前，显示居中加载动画提醒
+    showHdLoader();
+    openingSafetyTimer = setTimeout(() => {
+      if (isInitialOpening) {
+        isInitialOpening = false;
+        hideHdLoader();
+      }
+    }, 5000);
 
     const tileSource = {
       width: tileWidth,
@@ -3418,14 +3422,11 @@
         const base = isRemote ? remoteTileBase : localTileBase;
         const url = base + level + '/' + x + '_' + y + '.' + (item.format || 'webp');
         if (isRemote) {
+          hasRequestedCdnForZoom = true;
           pendingCdnTiles.add(url);
-          if (!isHdLoaderVisible && !hdLoaderTimer) {
-            hdLoaderTimer = setTimeout(() => {
-              if (pendingCdnTiles.size > 0) {
-                showHdLoader();
-              }
-            }, 300);
-          }
+          // 阶段二与阶段三：普通平滑放大与局部清晰度升级后台偷偷加载，不弹动画提醒，保持视界沉浸
+          // 仅当地图变化差异很大（缩放跳变 >= 2.5 倍），且高保真切片加载持续超 100ms 时才唤起提示
+          checkAndTriggerDrasticLoader();
         }
         return url;
       }
@@ -3510,10 +3511,53 @@
 
       triggerTileProgressStart();
 
-      // 当 Canvas 真正开始绘制瓦片，或者用户开始手势缩放/拖动时，静态 CSS 底图立即淡出，交由 Canvas 矩阵动态渲染！
-      osdViewer.addHandler('tile-drawn', fadeOutStageThumb);
-      osdViewer.addHandler('zoom', fadeOutStageThumb);
+      // 当 Canvas 真正开始绘制瓦片时：
+      // 1. 静态 CSS 底图淡出；
+      // 2. 阶段一（无图加载中）结束，静默关闭加载动画（不提示加载成果）
+      osdViewer.addHandler('tile-drawn', function () {
+        fadeOutStageThumb();
+        if (isInitialOpening) {
+          isInitialOpening = false;
+          hideHdLoader();
+          if (osdViewer && osdViewer.viewport) {
+            lastStableZoom = osdViewer.viewport.getZoom();
+          }
+        }
+      });
+
+      // 缩放监听：仅当地图发生剧烈跨越（差异很大如跳变 >= 2.5 倍），且高保真切片加载持续超 600ms 时才唤起提示
+      // 简单的平滑放大、清晰度差异不明显时偷偷加载，不弹任何加载动画
+      osdViewer.addHandler('zoom', function () {
+        fadeOutStageThumb();
+        if (isInitialOpening) return;
+        if (!osdViewer || !osdViewer.viewport) return;
+
+        const currentZoom = osdViewer.viewport.getZoom();
+        const baseZ = lastStableZoom || currentZoom || 1;
+        const zoomDelta = Math.max(currentZoom / baseZ, baseZ / currentZoom);
+
+        if (zoomDelta >= 2.5) {
+          isDrasticZoomPending = true;
+          checkAndTriggerDrasticLoader();
+        }
+      });
+
       osdViewer.addHandler('pan', fadeOutStageThumb);
+
+      function handleTileCompletionCleanup() {
+        if (hasRequestedCdnForZoom && pendingCdnTiles.size === 0) {
+          clearTimeout(hdLoaderTimer);
+          hdLoaderTimer = null;
+          isDrasticZoomPending = false;
+          hasRequestedCdnForZoom = false;
+          if (isHdLoaderVisible) {
+            hideHdLoader();
+          }
+          if (osdViewer && osdViewer.viewport) {
+            lastStableZoom = osdViewer.viewport.getZoom();
+          }
+        }
+      }
 
       osdViewer.addHandler('open', function () {
         triggerTileProgressStart();
@@ -3524,9 +3568,7 @@
               if (e && e.fullyLoaded) {
                 triggerTileProgressDone();
                 pendingCdnTiles.clear();
-                if (isHdLoaderVisible) {
-                  hideHdLoader(true);
-                }
+                handleTileCompletionCleanup();
               }
             });
           }
@@ -3543,13 +3585,7 @@
         tilesLoadedCount++;
         const u = getSafeTileUrl(e && e.tile);
         if (u) pendingCdnTiles.delete(u);
-        if (pendingCdnTiles.size === 0) {
-          clearTimeout(hdLoaderTimer);
-          hdLoaderTimer = null;
-          if (isHdLoaderVisible) {
-            hideHdLoader(true);
-          }
-        }
+        handleTileCompletionCleanup();
         // 移动端若加载超过首屏基础瓦片数（通常10-16块），亦可视为首屏基本就绪
         if (isPhone && tilesLoadedCount >= 12) {
           triggerTileProgressDone();
@@ -3559,25 +3595,13 @@
         const u = getSafeTileUrl(e && e.tile);
         console.warn('OpenSeadragon tile-load-failed:', u || e);
         if (u) pendingCdnTiles.delete(u);
-        if (pendingCdnTiles.size === 0) {
-          clearTimeout(hdLoaderTimer);
-          hdLoaderTimer = null;
-          if (isHdLoaderVisible) {
-            hideHdLoader(false);
-          }
-        }
+        handleTileCompletionCleanup();
         triggerTileProgressDone();
       });
       osdViewer.addHandler('tile-load-cancelled', function (e) {
         const u = getSafeTileUrl(e && e.tile);
         if (u) pendingCdnTiles.delete(u);
-        if (pendingCdnTiles.size === 0) {
-          clearTimeout(hdLoaderTimer);
-          hdLoaderTimer = null;
-          if (isHdLoaderVisible) {
-            hideHdLoader(false);
-          }
-        }
+        handleTileCompletionCleanup();
       });
 
       osdViewer.addHandler('update-viewport', function () {

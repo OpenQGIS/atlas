@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <style>
+      .bg { fill: #0a0d14; }
+      .frame { stroke: rgba(255, 255, 255, 0.12); stroke-width: 2; fill: none; }
+      .divider { stroke: rgba(255, 255, 255, 0.10); stroke-width: 1; fill: none; }
+      .brand { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 20px; font-weight: 700; fill: #d4a373; letter-spacing: 2px; }
+      .slogan { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 17px; font-weight: 500; fill: #8fa0ba; }
+      .edition { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 16px; font-weight: 600; fill: #8fa0ba; text-anchor: end; }
+      .stage-box { fill: #141824; stroke: rgba(255, 255, 255, 0.15); stroke-width: 1.5; rx: 16px; }
+      .stage-text { font-family: 'JetBrains Mono', monospace; font-size: 24px; fill: #8fa0ba; text-anchor: middle; }
+      .title { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 35px; font-weight: 700; fill: #f0f3f8; }
+      .category { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 17px; font-weight: 500; fill: #8fa0ba; }
+      .desc { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 16px; font-weight: 400; fill: #8fa0ba; line-height: 25px; }
+      .swatch-title { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; fill: #8fa0ba; }
+      .qr-card { fill: #ffffff; rx: 12px; }
+      .qr-placeholder { fill: #0a0d14; rx: 6px; }
+      .qr-title { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 16.5px; font-weight: 600; fill: #f0f3f8; }
+      .qr-domain { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 14.5px; font-weight: 500; fill: #8fa0ba; }
+      .footer-text { font-family: 'JetBrains Mono', Consolas, monospace; font-size: 13px; font-weight: 400; fill: #8fa0ba; }
+    </style>
+  </defs>
+
+  <!-- 1. 背景底色与外装饰框 -->
+  <rect id="background" width="1920" height="1080" class="bg" />
+  <rect id="frame" x="28" y="28" width="1864" height="1024" class="frame" />
+
+  <!-- 2. 左侧主展台 (1260 x 984, 约 1.28 宽幅比例, cover 撑满) -->
+  <g id="artwork-stage">
+    <rect x="48" y="48" width="1260" height="984" class="stage-box" />
+    <text x="678" y="525" class="stage-text">【左侧地图画卷主展台 · 1260 × 984px】</text>
+    <text x="678" y="565" class="stage-text" style="font-size: 16px; opacity: 0.7;">(object-fit: cover 裁切填满 · 无白边)</text>
+  </g>
+
+  <!-- 3. 右侧专栏 (rx = 1350, rw = 522) -->
+  <!-- 3.1 页眉 -->
+  <g id="right-header">
+    <text x="1350" y="84" class="brand">OPENQGIS · ATLASLOG</text>
+    <text x="1350" y="114" class="slogan">「一图一境 · 静观其详」</text>
+    <text x="1872" y="84" class="edition">2026 EDITION</text>
+    <line x1="1350" y1="136" x2="1872" y2="136" class="divider" />
+  </g>
+
+  <!-- 3.2 题名与分类 -->
+  <g id="right-title-meta">
+    <text x="1350" y="196" class="title">地图作品题名示例 / MAP TITLE</text>
+    <text x="1350" y="260" class="category">原创图 · 艺术制图 · 空间形态</text>
+    <text x="1350" y="284" class="category">古城古韵   |   匠师：OpenQGIS</text>
+  </g>
+
+  <!-- 3.3 说明题记 -->
+  <g id="right-description">
+    <text x="1350" y="330" class="desc">深蓝的两江把渝中半岛夹成一条船，十七座城门顺着半岛脊线绕</text>
+    <text x="1350" y="360" class="desc">出满满一圈。城墙不走直线，跟着山势起伏。</text>
+    <text x="1350" y="390" class="desc">两江交汇的半岛骨架：长江与嘉陵江在朝天门下交汇，波纹状的深</text>
+    <text x="1350" y="420" class="desc">蓝江面铺满画面，只给半岛留出一条陆地。城市被水托着，格局天成。</text>
+  </g>
+
+  <!-- 3.4 艺术色彩色板 -->
+  <g id="right-palette">
+    <text x="1350" y="525" class="swatch-title">COLOR PALETTE</text>
+    <g transform="translate(1350, 535)">
+      <rect x="0" y="0" width="44" height="18" rx="4" fill="#00a896" />
+      <rect x="52" y="0" width="44" height="18" rx="4" fill="#028090" />
+      <rect x="104" y="0" width="44" height="18" rx="4" fill="#05668d" />
+      <rect x="156" y="0" width="44" height="18" rx="4" fill="#f0f3f8" />
+      <rect x="208" y="0" width="44" height="18" rx="4" fill="#3a506b" />
+      <rect x="260" y="0" width="44" height="18" rx="4" fill="#1c2541" />
+    </g>
+  </g>
+
+  <!-- 3.5 二维码卡片与文案 -->
+  <g id="right-qr">
+    <rect x="1350" y="832" width="144" height="144" class="qr-card" />
+    <rect x="1358" y="840" width="128" height="128" class="qr-placeholder" />
+    <text x="1422" y="910" fill="#ffffff" font-family="monospace" font-size="13px" text-anchor="middle">QR CODE</text>
+
+    <!-- 二维码右侧导引文案 -->
+    <text x="1516" y="884" class="qr-title">Atlas 地图录</text>
+    <text x="1516" y="912" class="qr-domain">探索QGIS能力边界</text>
+  </g>
+
+  <!-- 3.6 页脚与版权声明 -->
+  <g id="right-footer">
+    <line x1="1350" y1="1000" x2="1872" y2="1000" class="divider" />
+    <text x="1350" y="1028" class="footer-text">© 2026 OpenQGIS / AtlasLog · 个人空间工造与视觉成果典藏</text>
+  </g>
+</svg>

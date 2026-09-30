@@ -1175,21 +1175,25 @@
     spine.style.display = 'flex';
     nodesContainer.innerHTML = '';
 
+    const curLang = window.AtlasI18n ? window.AtlasI18n.getLang() : 'zh';
     groups.forEach((group, idx) => {
       const node = document.createElement('button');
       node.className = 'page-spine-node' + (idx === 0 ? ' active' : '');
       node.setAttribute('data-target', 'sec_' + group.slug);
-      node.setAttribute('aria-label', group.name);
+
+      const meta = SUBCATEGORY_META[group.name] || {};
+      const localizedName = (curLang !== 'zh' && meta[curLang]) ? meta[curLang] : (curLang === 'en' && meta.en ? meta.en : group.name);
+      node.setAttribute('aria-label', localizedName);
       node.tabIndex = 0;
 
       const idxStr = String(idx + 1).padStart(2, '0');
-      const countSuffix = (window.AtlasI18n && window.AtlasI18n.getLang() === 'en') ? ' works' : '件';
+      const countSuffix = curLang === 'en' ? ' works' : (curLang === 'ja' ? ' 作品' : (curLang === 'ko' ? ' 작품' : ' 件'));
       const displayCount = group.totalCount !== undefined ? group.totalCount : group.items.length;
       node.innerHTML =
-        '<span class="page-spine-dot"></span>' +
+        '<span class="page-spine-dot">' + idxStr + '</span>' +
         '<div class="page-spine-tooltip">' +
           '<span class="page-spine-idx">' + idxStr + '</span>' +
-          '<span>' + escapeHtml(group.name) + '</span>' +
+          '<span class="page-spine-name">' + escapeHtml(localizedName) + '</span>' +
           '<span class="page-spine-count">(' + displayCount + countSuffix + ')</span>' +
         '</div>';
 

@@ -8342,12 +8342,12 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 }
 
 /* ==========================================================================
-   Page Anchor Spine (左侧极简测绘标尺导览轴 · 纯圆点与悬停标签)
+   Page Anchor Spine (左侧极简测绘标尺导览轴 · 测绘数字原点与悬停高质感提示)
    ========================================================================== */
 .page-anchor-spine {
   position: fixed;
   left: 20px;
-  top: 52%;
+  top: 50%;
   transform: translateY(-50%) translateX(-24px);
   z-index: 85;
   display: flex;
@@ -8355,8 +8355,8 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   align-items: center;
   pointer-events: none;
   user-select: none;
-  padding: 14px 4px;
-  width: 24px;
+  padding: 14px 0;
+  width: 28px;
   opacity: 0;
   transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -8376,17 +8376,17 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 
 .page-spine-track {
   position: absolute;
-  left: 11px;
+  left: 13px;
   top: 14px;
   bottom: 14px;
   width: 2px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
   border-radius: 999px;
   overflow: hidden;
 }
 
 :root[data-theme="light"] .page-spine-track {
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.09);
 }
 
 .page-spine-progress {
@@ -8404,7 +8404,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 .page-spine-nodes {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 46px; /* 间距由 20px 显著拉开至 46px，舒展大气 */
   position: relative;
   z-index: 2;
   align-items: center;
@@ -8415,8 +8415,8 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   background: transparent;
   border: none;
   padding: 0;
@@ -8430,68 +8430,94 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   box-shadow: 0 0 0 2px var(--accent);
 }
 
+/* 数字测绘原点 */
 .page-spine-dot {
-  width: 9px;
-  height: 9px;
-  min-width: 9px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
   border-radius: 50%;
-  background: var(--bg-primary, #0B0E14);
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  background: var(--bg-surface, #141a24);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  color: var(--text-secondary, rgba(255, 255, 255, 0.72));
+  font-family: var(--font-mono, "JetBrains Mono", Consolas, monospace);
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.02em;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  user-select: none;
 }
 
 :root[data-theme="light"] .page-spine-dot {
-  background: #fff;
-  border: 1.5px solid rgba(0, 0, 0, 0.28);
+  background: #ffffff;
+  border: 1.5px solid rgba(0, 0, 0, 0.2);
+  color: #4b5563;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* Hover State */
 .page-spine-node:hover .page-spine-dot {
-  border-color: #80cc28;
-  transform: scale(1.3);
+  border-color: var(--accent, #80cc28);
+  color: var(--accent, #80cc28);
+  transform: scale(1.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 12px rgba(var(--accent-rgb, 128, 204, 40), 0.4);
 }
 
-/* Active State */
+/* Active State (激活原点高亮翡翠实心或强高对比度胶囊) */
 .page-spine-node.active .page-spine-dot {
-  background: #80cc28;
-  border-color: #80cc28;
-  box-shadow: 0 0 12px rgba(128, 204, 40, 0.85);
-  transform: scale(1.35);
+  background: var(--accent, #80cc28);
+  border-color: var(--accent, #80cc28);
+  color: #0b0e14;
+  font-weight: 800;
+  box-shadow: 0 0 18px rgba(128, 204, 40, 0.75), 0 2px 8px rgba(0, 0, 0, 0.35);
+  transform: scale(1.15);
 }
 
-/* Floating Tooltip with Category Name */
+:root[data-theme="light"] .page-spine-node.active .page-spine-dot {
+  background: var(--accent, #61a319);
+  border-color: var(--accent, #61a319);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(97, 163, 25, 0.5), 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Floating Tooltip with Category Name (尺寸加大、字体更清晰的大气悬停提示框) */
 .page-spine-tooltip {
   position: absolute;
-  left: calc(100% + 10px);
-  padding: 5px 12px;
-  font-size: 0.74rem;
+  left: calc(100% + 14px);
+  padding: 8px 16px;
+  font-size: 0.88rem;
   letter-spacing: 0.02em;
   white-space: nowrap;
-  border-radius: var(--radius-sm, 6px);
-  background: rgba(14, 18, 24, 0.94);
-  color: var(--text-primary);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.14));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-md, 8px);
+  background: rgba(14, 18, 25, 0.94);
+  color: var(--text-primary, #f0f6fc);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   opacity: 0;
   pointer-events: none;
-  transform: translateX(-6px);
-  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  transform: translateX(-8px);
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(var(--accent-rgb, 128, 204, 40), 0.12);
   font-family: var(--font-sans);
   font-weight: 500;
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 :root[data-theme="light"] .page-spine-tooltip {
   background: rgba(255, 255, 255, 0.96);
-  color: var(--text-primary);
+  color: var(--text-primary, #0f141c);
   border-color: rgba(0, 0, 0, 0.12);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12), 0 0 16px rgba(106, 168, 32, 0.12);
 }
 
 .page-spine-node:hover .page-spine-tooltip {
@@ -8500,23 +8526,66 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   pointer-events: auto;
 }
 
+.page-spine-tooltip::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-right-color: rgba(255, 255, 255, 0.16);
+}
+
+.page-spine-tooltip::after {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: rgba(14, 18, 25, 0.94);
+}
+
+:root[data-theme="light"] .page-spine-tooltip::before {
+  border-right-color: rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="light"] .page-spine-tooltip::after {
+  border-right-color: rgba(255, 255, 255, 0.96);
+}
+
 .page-spine-tooltip .page-spine-idx {
-  color: #80cc28;
+  color: var(--accent, #80cc28);
   font-family: var(--font-mono, "JetBrains Mono", Consolas, monospace);
   font-weight: 700;
-  font-size: 0.72rem;
+  font-size: 0.84rem;
+  background: rgba(var(--accent-rgb, 128, 204, 40), 0.14);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+:root[data-theme="light"] .page-spine-tooltip .page-spine-idx {
+  color: var(--accent, #559314);
+  background: rgba(97, 163, 25, 0.12);
+}
+
+.page-spine-tooltip .page-spine-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text-primary);
 }
 
 .page-spine-tooltip .page-spine-count {
   opacity: 0.65;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
+  font-family: var(--font-mono, "JetBrains Mono", Consolas, monospace);
   margin-left: 2px;
 }
 
 /* Responsive adjustment for main container with left spine */
 @media (min-width: 1200px) {
   .gallery-main {
-    padding-left: 56px !important;
+    padding-left: 64px !important;
   }
 }
 

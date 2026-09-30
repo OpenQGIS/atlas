@@ -559,6 +559,1109 @@
   };
 
   const ARTWORK_TRANSLATIONS = {
+    aba_cycling_route: {
+      en: {
+            title: "Aba Cycling Route · Texture Overlay",
+            categoryName: "Original Cartography",
+            subCategory: "Map Layout & Engineering",
+            topic: "Multi-element Layout & Cycling",
+            description: "A composition featuring one primary elevation terrain map and four inset cycling route sections across the Aba Tibetan and Qiang Autonomous Prefecture. Surrounding insets detail Lianbaoyeze, Barkam, Zoige, and Hongyuan alongside elevation profile curves generated in QGIS.",
+            author: "OpenQGIS",
+            physicalSize: "60.0cm x 30.0cm, Standard Banner Ratio",
+            tags: [
+                  "Texture Overlay",
+                  "Aba",
+                  "Plateau",
+                  "Elevation Profile",
+                  "Cycling Route",
+                  "Hillshade"
+            ]
+      },
+      ja: {
+            title: "阿壩サイクリングルート · テクスチャ重畳",
+            categoryName: "オリジナル地図",
+            subCategory: "組版と土木工学",
+            topic: "複合要素レイアウト · サイクリング",
+            description: "阿壩チベット族チャン族自治州の広大な高原地形図を中心に、蓮宝葉則、マルカム、ゾルゲ、紅原の4つのサイクリングルート詳細図とQGIS生成標高断面図を左右に配置した学術的組版設計。",
+            author: "OpenQGIS",
+            physicalSize: "60.0cm x 30.0cm、標準パノラマ横幅",
+            tags: [
+                  "テクスチャ重畳",
+                  "阿壩",
+                  "高原",
+                  "標高断面",
+                  "サイクリングルート",
+                  "陰影起伏"
+            ]
+      },
+      ko: {
+            title: "아바 사이클링 노선 · 질감 오버레이",
+            categoryName: "오리지널 지도",
+            subCategory: "도면 조판 & 엔지니어링",
+            topic: "다요소 조판 · 사이클링 지도",
+            description: "아바 장족 칭족 자치주의 고원 지형도를 중심으로 롄바오예쩌, 바얼캉, 뤄얼가이, 훙위안 4개 라이딩 구간의 상세도와 QGIS 표고 단면 곡선을 결합한 전문 지도 디자인.",
+            author: "OpenQGIS",
+            physicalSize: "60.0cm x 30.0cm, 표준 파노라마 가로형",
+            tags: [
+                  "질감 오버레이",
+                  "아바",
+                  "고원",
+                  "표고 단면",
+                  "라이딩 코스",
+                  "산체 음영"
+            ]
+      }
+},
+    china_top12_airports_2024: {
+      en: {
+            title: "China Top 12 Airports (2024) · Geometric Deconstruction",
+            categoryName: "Original Cartography",
+            subCategory: "Spatial Morphology",
+            topic: "Airport Morphology & Runway Topology",
+            description: "Deconstructing runway layouts and terminal geometries of China's top 12 passenger airports in 2024. Runway alignments, terminal aprons, and taxiway networks are rendered in a sleek minimalist style.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Airports",
+                  "Runway Layout",
+                  "Transportation Infrastructure",
+                  "Vector Morphology"
+            ]
+      },
+      ja: {
+            title: "中国トップ12空港（2024年）· 幾何学的解体",
+            categoryName: "オリジナル地図",
+            subCategory: "空間形態論",
+            topic: "空港形態と滑走路トポロジー",
+            description: "2024年の中国旅客数上位12空港の滑走路構成とターミナル幾何学を解体・可視化。滑走路の方位角、エプロン、誘導路ネットワークを精緻なミニマルスタイルで提示する。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "空港",
+                  "滑走路レイアウト",
+                  "交通インフラ",
+                  "ベクター形態論"
+            ]
+      },
+      ko: {
+            title: "2024 중국 12대 공항 형상 해체",
+            categoryName: "오리지널 지도",
+            subCategory: "공간 형태학",
+            topic: "공항 형태학 & 활주로 토폴로지",
+            description: "2024년 중국 여객량 상위 12개 공항의 활주로 배치 및 터미널 기하학 구조를 시각적으로 해체. 활주로 방위각과 유도로 네트워크를 미니멀한 벡터 양식으로 정밀 묘사.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "공항",
+                  "활주로 배치",
+                  "교통 인프라",
+                  "벡터 형태학"
+            ]
+      }
+},
+    lake_poyang: {
+      en: {
+            title: "Lake Poyang · Hydrological Morphology",
+            categoryName: "Original Cartography",
+            subCategory: "Spatial Morphology",
+            topic: "Hydrological Rhythm & Wetland Geography",
+            description: "Mapping the seasonal wetland ecology and dynamic flood plains of China's largest freshwater lake, Lake Poyang, using gradient depth and water body contours.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Lake Poyang",
+                  "Hydrology",
+                  "Wetland",
+                  "Freshwater Lake",
+                  "Spatial Form"
+            ]
+      },
+      ja: {
+            title: "鄱陽湖 · 水文形態論",
+            categoryName: "オリジナル地図",
+            subCategory: "空間形態論",
+            topic: "水文リズムと湿地地理",
+            description: "中国最大の淡水湖である鄱陽湖の季節的水位変動と氾濫原の生態系を、繊細な深度グラデーションと水系等高線で表現した水文空間作品。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "鄱陽湖",
+                  "水文学",
+                  "湿地",
+                  "淡水湖",
+                  "空間形態"
+            ]
+      },
+      ko: {
+            title: "포양호 · 수문 형태학",
+            categoryName: "오리지널 지도",
+            subCategory: "공간 형태학",
+            topic: "수문 리듬 & 습지 지리학",
+            description: "중국 최대 담수호인 포양호의 계절별 수위 변동과 범람원 생태계를 깊이감 있는 수역 등고선과 그러데이션으로 표현한 수문 지리학적 작품.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "포양호",
+                  "수문학",
+                  "습지",
+                  "담수호",
+                  "공간 형태"
+            ]
+      }
+},
+    yangtze_river_bridge_chongqing: {
+      en: {
+            title: "Chongqing Yangtze River Bridges Catalog",
+            categoryName: "Original Cartography",
+            subCategory: "Engineering Cartography",
+            topic: "Bridge Engineering & Mountain City River Crossings",
+            description: "A comprehensive cartographic inventory of major bridges crossing the Yangtze River in Chongqing, illustrating structural spans, river navigation corridors, and topography.",
+            author: "OpenQGIS",
+            physicalSize: "60.0cm x 40.0cm, Engineering Panoramic Sheet",
+            tags: [
+                  "Chongqing",
+                  "Yangtze River",
+                  "Bridge Engineering",
+                  "River Crossing"
+            ]
+      },
+      ja: {
+            title: "重慶長江大橋名録全図",
+            categoryName: "オリジナル地図",
+            subCategory: "エンジニアリング作図",
+            topic: "橋梁工学と山岳都市渡河網",
+            description: "「橋の都」重慶における長江横断橋梁群の包括的目録。橋梁構造のスパン、航路限界、峡谷地形の工学的関係を網羅的に作図。",
+            author: "OpenQGIS",
+            physicalSize: "60.0cm x 40.0cm、エンジニアリング大判図面",
+            tags: [
+                  "重慶",
+                  "長江",
+                  "橋梁工学",
+                  "渡河交通"
+            ]
+      },
+      ko: {
+            title: "충칭 장강대교 명록 전도",
+            categoryName: "오리지널 지도",
+            subCategory: "엔지니어링 지도 제작",
+            topic: "교량 공학 & 산악 도시 횡단망",
+            description: "교량의 수도 충칭의 장강 횡단 교량군을 체계적으로 정리한 도면. 교량 구조 경간, 항로 한계 및 협곡 지형의 공학적 상호작용을 정밀 기록.",
+            author: "OpenQGIS",
+            physicalSize: "60.0cm x 40.0cm, 엔지니어링 대형 도면",
+            tags: [
+                  "충칭",
+                  "장강",
+                  "교량 공학",
+                  "도하 교통"
+            ]
+      }
+},
+    chengdu_citywall_gates: {
+      en: {
+            title: "Chengdu Ancient City Wall & Gates",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Historical Gates & City Wall Reconstruction",
+            description: "Reconstructing the historic walls and iconic defense gates of ancient Chengdu, contrasting historical moats against modern urban street grids.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Chengdu",
+                  "City Wall",
+                  "Historical Geography",
+                  "Ancient Gates"
+            ]
+      },
+      ja: {
+            title: "成都古城壁と城門",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "歴史的城門と城壁復元",
+            description: "古代成都の城壁輪郭と歴史的な城門群を復元。外濠水系と現代の都市グリッドの重層的な歴史的痕跡を視覚化。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "成都",
+                  "城壁",
+                  "歴史地理",
+                  "城門"
+            ]
+      },
+      ko: {
+            title: "청두 고성벽과 성문",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "역사적 성문 & 성벽 복원",
+            description: "고대 청두의 성벽 윤곽과 유서 깊은 성문들을 복원. 해자 수계와 현대 도시 격자망의 역사적 층위를 우아하게 대비 표현.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "청두",
+                  "성벽",
+                  "역사 지리학",
+                  "성문"
+            ]
+      }
+},
+    chongqing_ancient_city: {
+      en: {
+            title: "Chongqing Ancient City",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Yuzhong Peninsula & Ancient Fortifications",
+            description: "Spatial cartography of historic Chongqing within the Yuzhong Peninsula, depicting the natural defensive fortress sculpted by the Yangtze and Jialing rivers.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Chongqing",
+                  "Ancient City",
+                  "Yuzhong Peninsula",
+                  "Mountain Fortress"
+            ]
+      },
+      ja: {
+            title: "重慶古城",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "渝中半島と古代防衛空間",
+            description: "渝中半島に築かれた重慶古城の歴史的空間形態。長江と嘉陵江に囲まれた天然の要塞都市としての地形特性を描き出す。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "重慶",
+                  "古城",
+                  "渝中半島",
+                  "山岳要塞"
+            ]
+      },
+      ko: {
+            title: "충칭 고성",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "위중 반도 & 고대 방어 요새",
+            description: "위중 반도에 자리 잡은 충칭 고성의 역사적 공간 형태. 장강과 자링강이 빚어낸 천연 요새 도시의 험준한 지형 미학을 포착.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "충칭",
+                  "고성",
+                  "위중 반도",
+                  "산악 요새"
+            ]
+      }
+},
+    changsha_citywall: {
+      en: {
+            title: "Changsha Ancient City Wall",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Historical Changsha & Xiang River Defense",
+            description: "Historical spatial footprint of the ancient city wall of Changsha, detailing gate bastions and historical morphology facing the Xiang River.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Changsha",
+                  "City Wall",
+                  "Xiang River",
+                  "Historical Cartography"
+            ]
+      },
+      ja: {
+            title: "長沙古城壁",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "歴史的長沙と湘江防衛",
+            description: "湘江東岸に広がる長沙古城壁の歴史的フットプリント。防衛城門の配置と水陸交通の結束点を端正な線画で再現。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "長沙",
+                  "城壁",
+                  "湘江",
+                  "歴史地図"
+            ]
+      },
+      ko: {
+            title: "창사 고성벽",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "역사적 창사 & 샹강 방어선",
+            description: "샹강 동쪽 기슭에 위치한 창사 고성벽의 역사적 공간 궤적. 성문 배치와 수륙 교통 요충지로서의 성곽 형태학을 섬세하게 표현.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "창사",
+                  "성벽",
+                  "샹강",
+                  "역사 지도"
+            ]
+      }
+},
+    nanjing_silver_black: {
+      en: {
+            title: "Nanjing · Silver & Black",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Monochrome Aesthetic & Ancient Capital",
+            description: "A sophisticated silver-and-black contrast illustrating Nanjing's historic capital layout, framing Xuanwu Lake, Purple Mountain, and the Ming Dynasty city wall.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Nanjing",
+                  "Monochrome",
+                  "Purple Mountain",
+                  "Ming City Wall"
+            ]
+      },
+      ja: {
+            title: "南京 · 銀黒の美学",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "モノクローム美学と古都空間",
+            description: "シルバーとブラックの静謐なコントラストで描く南京の古都景観。玄武湖、紫金山、明代城壁の有機的な山水都市関係を強調。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "南京",
+                  "モノクローム",
+                  "紫金山",
+                  "明代城壁"
+            ]
+      },
+      ko: {
+            title: "난징 · 실버 & 블랙",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "모노크롬 미학 & 고도 공간",
+            description: "실버와 블랙의 정제된 대비로 표현한 난징의 고도 경관. 셴우호, 자금산, 명나라 성벽이 이루는 유기적 배산임수 구조를 부각.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "난징",
+                  "모노크롬",
+                  "자금산",
+                  "명나라 성벽"
+            ]
+      }
+},
+    datong_papercut: {
+      en: {
+            title: "Datong · Papercut Aesthetic",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Papercut Craft & Northern Frontier Grid",
+            description: "Rendering Datong's northern frontier city structure through tactile papercut relief aesthetic, emphasizing the rectangular garrison wall and urban grid.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Datong",
+                  "Papercut",
+                  "Northern Frontier",
+                  "Garrison Wall"
+            ]
+      },
+      ja: {
+            title: "大同 · 切り絵アート",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "切り絵工芸と北方要衝グリッド",
+            description: "切り絵の陰影表現を通じて北方防衛の要衝・大同の都市構造を描出。四角い城壁と規則正しい街区グリッドの立体感を表現。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "大同",
+                  "切り絵",
+                  "北方要衝",
+                  "城壁グリッド"
+            ]
+      },
+      ko: {
+            title: "다퉁 · 페이퍼컷 아트",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "종이 공예 & 북방 요충지 그리드",
+            description: "종이 공예의 입체적 음영 기법으로 표현한 북방 방어 요충지 다퉁의 도시 골격. 방형 성곽과 규칙적인 바둑판 격자의 정연한 조화.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "다퉁",
+                  "페이퍼컷",
+                  "북방 요충지",
+                  "성곽 그리드"
+            ]
+      }
+},
+    chengdu_blueprint: {
+      en: {
+            title: "Chengdu · Cyan Blueprint",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Architectural Blueprint & Radial Ring Roads",
+            description: "Chengdu presented in classic architectural blueprint aesthetics: deep Prussian blue backdrop with crisp cyan-white drafting lines showcasing radial ring roads.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Chengdu",
+                  "Blueprint",
+                  "Ring Roads",
+                  "Radial Grid"
+            ]
+      },
+      ja: {
+            title: "成都 · シアン青写真",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "建築青写真と放射環状道路網",
+            description: "伝統的な建築青写真（ブループリント）の美学で描く成都。深いプルシアンブルーに映える白くシャープな製図線が同心円状の環状道路網を浮き彫りにする。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "成都",
+                  "青写真",
+                  "環状道路",
+                  "放射グリッド"
+            ]
+      },
+      ko: {
+            title: "청두 · 청사진 블루프린트",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "건축 청사진 & 방사 환상 도로망",
+            description: "정통 건축 청사진 미학으로 구현한 청두의 도로망. 깊은 프러시안 블루 배경 위 명쾌한 시안 백색 제도선이 동심원 환상 도로의 질서를 표현.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "청두",
+                  "블루프린트",
+                  "환상 도로",
+                  "방사 격자"
+            ]
+      }
+},
+    chengdu_macaron: {
+      en: {
+            title: "Chengdu · Macaron Pastel Palette",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Pastel Aesthetics & Urban Land Use Hierarchy",
+            description: "Soft macaron pastel tones mapping Chengdu's vast metropolitan area, transforming functional zoning and road hierarchies into a gentle, inviting visual tapestry.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Chengdu",
+                  "Macaron",
+                  "Pastel Tones",
+                  "Urban Tapestry"
+            ]
+      },
+      ja: {
+            title: "成都 · マカロンパステル",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "マカロンカラーと都市土地利用",
+            description: "柔らかなマカロンパステル調の色彩で成都広域都市圏を描画。機能的ゾーニングと道路階層を親しみやすく洗練されたタペストリーに昇華。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "成都",
+                  "マカロン",
+                  "パステルトーン",
+                  "都市タペストリー"
+            ]
+      },
+      ko: {
+            title: "청두 · 마카롱 파스텔",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "마카롱 컬러 & 도시 토지 이용 계층",
+            description: "부드러운 마카롱 파스텔 색조로 시각화한 청두 대도시권. 도시 기능 구역과 도로 위계를 따뜻하고 세련된 시각적 태피스트리로 변환.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "청두",
+                  "마카롱",
+                  "파스텔 톤",
+                  "도시 태피스트리"
+            ]
+      }
+},
+    hangzhou_low_saturation: {
+      en: {
+            title: "Hangzhou · Muted Palette",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography",
+            topic: "Muted Tones & West Lake Geography",
+            description: "Low-saturation earthy tones framing Hangzhou, balancing West Lake, Qiantang River, and the canal network with subtle Eastern landscape sensibility.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Hangzhou",
+                  "Muted Colors",
+                  "West Lake",
+                  "Qiantang River"
+            ]
+      },
+      ja: {
+            title: "杭州 · 低彩度トーン",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図",
+            topic: "低彩度美学と西湖山水",
+            description: "低彩度の落ち着いたアーストーンで杭州を描画。西湖、銭塘江、京杭大運河が織りなす東洋的な山水都市の調和を静かに表現。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "杭州",
+                  "低彩度",
+                  "西湖",
+                  "銭塘江"
+            ]
+      },
+      ko: {
+            title: "항저우 · 저채도 뮤트 톤",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작",
+            topic: "저채도 미학 & 서호 산수",
+            description: "차분한 저채도 어스 톤으로 표현한 항저우의 도시 공간. 서호, 첸탕강, 대운하가 빚어내는 동양적 배산임수 조화를 정갈하게 묘사.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "항저우",
+                  "저채도",
+                  "서호",
+                  "첸탕강"
+            ]
+      }
+},
+    wuhan_low_saturation: {
+      en: {
+            title: "Wuhan · Muted Palette",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Rivers Convergence & Urban Tri-towns",
+            description: "Muted warm paper base and vintage brick-red roads depicting Wuhan: where the Yangtze and Han rivers intersect and divide Hankou, Hanyang, and Wuchang.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Wuhan",
+                  "Muted Colors",
+                  "Three Towns",
+                  "Yangtze River",
+                  "Han River"
+            ]
+      },
+      ja: {
+            title: "武漢 · 低彩度トーン",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "二大河川の合流と武漢三鎮",
+            description: "ヴィンテージ感のある低彩度パレットで江城武漢を描画。長江と漢江の合流点が漢口・漢陽・武昌の三鎮を分かち、橋梁群がそれらを再び結びつける。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "武漢",
+                  "低彩度",
+                  "武漢三鎮",
+                  "長江",
+                  "漢江"
+            ]
+      },
+      ko: {
+            title: "우한 · 저채도 뮤트 톤",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "양대 강 합류 & 우한 삼진",
+            description: "빈티지한 저채도 톤으로 묘사한 강의 도시 우한. 장강과 한강이 만나 한커우, 한양, 우창 삼진을 나누고 교량들이 하나로 잇는 역동적 지형.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "우한",
+                  "저채도",
+                  "우한 삼진",
+                  "장강",
+                  "한강"
+            ]
+      }
+},
+    pearl_river_delta_dot_art: {
+      en: {
+            title: "Pearl River Delta · Halftone Dot Art",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Halftone Aesthetics & Megalopolis Bay Area",
+            description: "Halftone dot matrix art deconstructing the Pearl River Delta megalopolis: Guangzhou, Shenzhen, Hong Kong, Macao, and Zhuhai encircling the Lingdingyang bay.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Pearl River Delta",
+                  "Halftone Dots",
+                  "Greater Bay Area",
+                  "Urban Cluster"
+            ]
+      },
+      ja: {
+            title: "珠江デルタ · ハーフトーンドットアート",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "ドットアートとベイエリア都市群",
+            description: "伝統的な印刷ドット（網点）技法で珠江デルタ大都市圏を解体・再構築。伶仃洋を取り囲む広州、深圳、香港、マカオの緊密な湾岸ネットワークを表現。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "珠江デルタ",
+                  "ドットアート",
+                  "大湾区",
+                  "メガロポリス"
+            ]
+      },
+      ko: {
+            title: "주강 삼각주 · 도트 하프트 아트",
+            categoryName: "오리지널 지도",
+            subCategory: "공간 형태학",
+            topic: "하프톤 도트 & 베이 에어리어 메갈로폴리스",
+            description: "인쇄 하프톤 도트 기법으로 시각화한 주강 삼각주 대도시군. 링딩양 만을 둘러싼 광저우, 선전, 홍콩, 마카오, 주하이의 초연결 네트워크를 묘사.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "주강 삼각주",
+                  "도트 아트",
+                  "웨강아오 대만구",
+                  "메갈로폴리스"
+            ]
+      }
+},
+    suzhou_dot_art: {
+      en: {
+            title: "Suzhou · Lake Taihu Halftone Dot Art",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Halftone Water Aesthetics & Lake Taihu Urban Fabric",
+            description: "Cyan halftone dots simulating the vast waters of Lake Taihu, bordered by red-brown capillary street networks with ancient Suzhou tucked into the northeast corner.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Suzhou",
+                  "Lake Taihu",
+                  "Halftone Dots",
+                  "Water Town"
+            ]
+      },
+      ja: {
+            title: "蘇州 · 太湖ドットアート",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "ドット水文美学と太湖都市網",
+            description: "シアンのドットマトリクスで太湖の雄大な水面を表現。赤褐色の毛細血管のような道路網が湖畔を縁取り、北東に佇む古都蘇州との山水関係を際立たせる。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "蘇州",
+                  "太湖",
+                  "ドットアート",
+                  "水郷都市"
+            ]
+      },
+      ko: {
+            title: "쑤저우 · 타이후 도트 아트",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "도트 수문 미학 & 타이후 수변 도시망",
+            description: "시안 하프톤 도트로 광활한 타이후 호수의 수면을 표현. 적갈색 모세혈관 도로망이 호숫가를 감싸고 북동쪽 고도 쑤저우와의 조화를 정밀 구성.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "쑤저우",
+                  "타이후",
+                  "도트 아트",
+                  "수향 도시"
+            ]
+      }
+},
+    xian_papercut: {
+      en: {
+            title: "Xi'an · Papercut Aesthetic",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Papercut Relief & Ancient Gridiron",
+            description: "Layered papercut relief centering on Xi'an's Ming Dynasty rectangular city wall, radiating outwards through concentric ring expressways in pristine planar symmetry.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Xi'an",
+                  "Papercut",
+                  "Ancient Capital",
+                  "Gridiron Street Network"
+            ]
+      },
+      ja: {
+            title: "西安 · 切り絵アート",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "切り絵工芸と長安の碁盤目",
+            description: "明代の長方形城壁を中心に据えたペーパーカット表現。同心円状に広がる環状高速道路と無限に連なる碁盤目街区が、平原古都の威厳ある秩序を示す。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "西安",
+                  "切り絵",
+                  "長安",
+                  "碁盤目道路網"
+            ]
+      },
+      ko: {
+            title: "시안 · 페이퍼컷 아트",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "페이퍼컷 부조 & 격자형 가구 구조",
+            description: "명나라 장방형 성벽을 중심으로 한 다층 페이퍼컷 부조. 동심원 환상 고속도로와 끝없이 뻗은 바둑판 격자가 평원 고도의 장엄한 질서를 완성.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "시안",
+                  "페이퍼컷",
+                  "고도 장안",
+                  "바둑판 격자망"
+            ]
+      }
+},
+    chongqing_cyan: {
+      en: {
+            title: "Chongqing · Cyan River Tone",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Cyan Monotone & Mountain Peninsula",
+            description: "A cool cyan interpretation of Chongqing's dramatic mountain-and-river terrain: deep cyan for the Yangtze and Jialing rivers, contrasting with crisp white road networks.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Chongqing",
+                  "Cyan Aesthetic",
+                  "Mountain City",
+                  "Peninsula Fabric"
+            ]
+      },
+      ja: {
+            title: "重慶 · シアン水都トーン",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "シアン単色美学と山城半島",
+            description: "澄んだ青緑のトーンで再解釈した重慶の山水地形。深青の長江・嘉陵江回廊と軽やかに浮かび上がる白色道路網が、瑞々しい都市の息吹を伝える。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "重慶",
+                  "シアン美学",
+                  "山城",
+                  "半島テクスチャ"
+            ]
+      },
+      ko: {
+            title: "충칭 · 시안 리버 톤",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "시안 모노톤 & 산악 반도 형태학",
+            description: "청량한 시안 블루 톤으로 재해석한 충칭의 산수 지형. 깊은 청록색 장강·자링강 회랑과 백색 도로망이 어우러져 청량하고 유기적인 호흡을 선사.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "충칭",
+                  "시안 미학",
+                  "산악 도시",
+                  "반도 텍스처"
+            ]
+      }
+},
+    chongqing_black_gold: {
+      en: {
+            title: "Chongqing · Black & Gold",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Minimalist Black & Gold · Dark Aesthetic",
+            description: "Chongqing under midnight skies: glowing gold road networks tracing high-density urban cliffs, while the Yangtze and Jialing rivers emerge as dramatic negative spaces.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Chongqing",
+                  "Black & Gold",
+                  "Dark Mode",
+                  "Mountain Peninsula"
+            ]
+      },
+      ja: {
+            title: "重慶 · 黒金美学",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "極簡黒金美学 · ダークモード",
+            description: "漆黒の夜空に浮かび上がる重慶。黄金色に発光する道路網が険しい山腹を駆け巡り、長江と嘉陵江がネガティブスペースとして立体的に浮かび上がる。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "重慶",
+                  "黒金",
+                  "ダークモード",
+                  "山城半島"
+            ]
+      },
+      ko: {
+            title: "충칭 · 블랙 & 골드",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "미니멀 블랙 & 골드 · 다크 미학",
+            description: "칠흑 같은 밤하늘에 빛나는 충칭의 골드 로드 네트워크. 험준한 산악 지형을 타고 흐르는 금빛 선과 음각으로 드러난 장강·자링강의 강렬한 대비.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "충칭",
+                  "블랙&골드",
+                  "다크 미학",
+                  "산악 반도"
+            ]
+      }
+},
+    changsha_emboss: {
+      en: {
+            title: "Changsha · Tactile Neumorphic Relief",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Spatial Morphology",
+            topic: "Neumorphism & Tactile River Topology",
+            description: "Neumorphic soft-shadow relief styling Changsha's riverfront: gentle paper embossment lifting the urban fabric along the Xiang River and Juzizhou islet.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Changsha",
+                  "Neumorphism",
+                  "Emboss Relief",
+                  "Xiang River",
+                  "Juzizhou"
+            ]
+      },
+      ja: {
+            title: "長沙 · ニューモーフィズム浮彫",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · 空間形態論",
+            topic: "ニューモーフィズムと触覚的河川地形",
+            description: "柔らかな陰影を伴うニューモーフィズム手法で長沙を描出。湘江両岸の市街地、川中島の橘子洲、岳麓山がまるで触れられるような立体浮彫として広がる。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "長沙",
+                  "ニューモーフィズム",
+                  "浮彫",
+                  "湘江",
+                  "橘子洲"
+            ]
+      },
+      ko: {
+            title: "창사 · 뉴모피즘 음영 부조",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 공간 형태학",
+            topic: "뉴모피즘 & 촉각적 하천 지형",
+            description: "부드러운 음영의 뉴모피즘 기법으로 표현한 창사의 수변 공간. 샹강 양안의 도로망과 강 한가운데 쥐쯔저우 섬이 손에 만져질 듯한 입체 부조로 구현.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "창사",
+                  "뉴모피즘",
+                  "음영 부조",
+                  "샹강",
+                  "쥐쯔저우"
+            ]
+      }
+},
+    tianfu_luxihe_xinglong_lake: {
+      en: {
+            title: "Tianfu Park & Luxihe River (Xinglong Lake)",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Engineering",
+            topic: "Park City Greenway & WonderRide Route",
+            description: "Soft green ground overlaid with bright magenta loops showcasing the WonderRide cycling circuit in Tianfu New Area, linking Tianfu Park, Luxihe wetlands, and Xinglong Lake.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Tianfu New Area",
+                  "Xinglong Lake",
+                  "Greenway Engineering",
+                  "Cycling Circuit"
+            ]
+      },
+      ja: {
+            title: "天府公園 · 鹿渓河（興隆湖）",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · エンジニアリング作図",
+            topic: "公園都市緑道とサイクリングルート",
+            description: "淡い緑の背景に鮮やかなマゼンタのループを描き、天府新区のWonderRideサイクリングコースを可視化。天府公園、鹿渓河湿地、興隆湖を結ぶ水緑ネットワーク。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "天府新区",
+                  "興隆湖",
+                  "緑道工学",
+                  "サイクリングルート"
+            ]
+      },
+      ko: {
+            title: "톈푸 공원 루시허 (싱룽호)",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 엔지니어링 지도 제작",
+            topic: "공원 도시 녹도 & 원더라이드 코스",
+            description: "연녹색 배경 위 경쾌한 핑크색 루프로 구현한 톈푸 신구 WonderRide 라이딩 노선. 톈푸 공원, 루시허 습지 및 싱룽호를 잇는 생태 회랑을 표현.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "톈푸 신구",
+                  "싱룽호",
+                  "녹도 공학",
+                  "라이딩 코스"
+            ]
+      }
+},
+    chengdu_greenway_ring: {
+      en: {
+            title: "Chengdu Greenway Ring (100km)",
+            categoryName: "Original Cartography",
+            subCategory: "Artistic Cartography & Engineering",
+            topic: "Ecological Greenway Loop & Milestone Mapping",
+            description: "A 100-kilometer closed-loop ecological greenway encircling Chengdu: featuring 20 dual-directional milestone stations mapped in crisp magenta along ring parks.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Chengdu",
+                  "Greenway Ring",
+                  "100km Loop",
+                  "Milestones",
+                  "Cycling"
+            ]
+      },
+      ja: {
+            title: "成都環城緑道（100km環状ルート）",
+            categoryName: "オリジナル地図",
+            subCategory: "芸術的地図作図 · エンジニアリング作図",
+            topic: "環状生態緑道とマイルストーン測量",
+            description: "成都市街地を完全に一周する100kmの生態緑道ループ。20箇所の双方向マイルストーンを配し、都市を取り囲む巨大な緑の環状インフラを明快に描く。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "成都",
+                  "環城緑道",
+                  "100kmループ",
+                  "マイルストーン",
+                  "サイクリング"
+            ]
+      },
+      ko: {
+            title: "청두 환청 녹도 (100km 순환선)",
+            categoryName: "오리지널 지도",
+            subCategory: "예술적 지도 제작 · 엔지니어링 지도 제작",
+            topic: "환상 생태 녹도 & 이정표 매핑",
+            description: "청두 도심을 완벽하게 일주하는 100km 폐곡선 생태 녹도. 20개 양방향 이정표 스테이션을 명쾌한 핑크 라인으로 시각화한 녹도 공학의 정수.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "청두",
+                  "환청 녹도",
+                  "100km 순환",
+                  "이정표",
+                  "사이클링"
+            ]
+      }
+},
+    longquanshan_slope_a: {
+      en: {
+            title: "Longquanshan Mountain · Slope A",
+            categoryName: "Original Cartography",
+            subCategory: "Spatial Morphology & Engineering",
+            topic: "Hill Climb Profile & Elevation Contours",
+            description: "The western climbing route of Longquanshan mountain: 7.7 km climb ascending from 497m to 804m, rendered with precise contour lines, hillshading, and hairpin curves.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Longquanshan",
+                  "Hill Climb",
+                  "Contour Lines",
+                  "Hillshade",
+                  "Elevation"
+            ]
+      },
+      ja: {
+            title: "龍泉山 · スロープA（西斜面登攀）",
+            categoryName: "オリジナル地図",
+            subCategory: "空間形態論 · エンジニアリング作図",
+            topic: "ヒルクライム標高と等高線地形",
+            description: "龍泉山西面の7.7kmヒルクライムルート。標高497mから804mへの登攀路を、高精度等高線と山体陰影暈渲、8箇所のヘアピンカーブ測点で記録。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "龍泉山",
+                  "ヒルクライム",
+                  "等高線",
+                  "陰影起伏",
+                  "標高"
+            ]
+      },
+      ko: {
+            title: "룽취안산 · 슬로프 A (서측 업힐)",
+            categoryName: "오리지널 지도",
+            subCategory: "공간 형태학 · 엔지니어링 지도 제작",
+            topic: "힐클라임 표고 & 등고선 지형",
+            description: "룽취안산 서측 7.7km 업힐 라이딩 코스. 표고 497m에서 804m 정상까지 이어지는 급경사 구간을 정밀 등고선과 헤어핀 커브 측점으로 기록.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "룽취안산",
+                  "힐클라임",
+                  "등고선",
+                  "산체 음영",
+                  "표고"
+            ]
+      }
+},
+    longquanshan_slope_b: {
+      en: {
+            title: "Longquanshan Mountain · Slope B",
+            categoryName: "Original Cartography",
+            subCategory: "Spatial Morphology",
+            topic: "Mountain Descent & Topographic Relief",
+            description: "The eastern descent of Longquanshan mountain: continuing from 804m summit down 9.7 km to Shijing Temple at 466m, completing the mountain pass profile.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, Poster Ratio",
+            tags: [
+                  "Longquanshan",
+                  "Mountain Descent",
+                  "Contour Lines",
+                  "Topography"
+            ]
+      },
+      ja: {
+            title: "龍泉山 · スロープB（東斜面降下）",
+            categoryName: "オリジナル地図",
+            subCategory: "空間形態論",
+            topic: "ダウンヒルルートと地形起伏",
+            description: "スロープAの終点（標高804m）から東斜面を9.7km下り、標高466mの石経寺に至るダウンヒルコース。東西2枚の地図で龍泉山越えの全容が完成する。",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm、ポスター比率",
+            tags: [
+                  "龍泉山",
+                  "ダウンヒル",
+                  "等高線",
+                  "地形起伏"
+            ]
+      },
+      ko: {
+            title: "룽취안산 · 슬로프 B (동측 다운힐)",
+            categoryName: "오리지널 지도",
+            subCategory: "공간 형태학",
+            topic: "다운힐 루트 & 지형 기복",
+            description: "슬로프 A의 종점(804m)에서 출발해 동쪽으로 9.7km 내려가 스징사에 이르는 다운힐 코스. A면과 B면이 결합되어 완전한 산악 횡단로를 완성.",
+            author: "OpenQGIS",
+            physicalSize: "15.0cm x 20.0cm, 포스터 비율",
+            tags: [
+                  "룽취안산",
+                  "다운힐",
+                  "등고선",
+                  "지형 기복"
+            ]
+      }
+},
+
     shanghai: {
       en: {
         title: 'Shanghai · Dark Fabric',
@@ -804,6 +1907,7 @@
       subCategory: translation.subCategory || item.subCategory,
       topic: translation.topic || item.topic,
       description: translation.description || item.description,
+      descriptionHtml: null,
       physicalSize: translation.physicalSize || item.physicalSize,
       tags: translation.tags || item.tags
     });

@@ -8,7 +8,7 @@
  */
 window.ATLAS_CONFIG = window.CANGFENG_CONFIG = {
   // 外部挂载 CDN 节点 (默认为空 ''，直接使用同源/本地 tiles/ 瓦片目录；亦可配置自定义加速域名)
-  assetBaseUrl: 'https://cangfengcore.lidmwork.workers.dev',
+  assetBaseUrl: '',
 
   // 核心生产工具与数据底座仓库
   coreRepoUrl: 'https://github.com/OpenQGIS/atlas-core',

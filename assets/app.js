@@ -313,14 +313,37 @@
     }
   }
 
-  // 本地内置切片白名单（直接同源相对路径直达，彻底绕过海外 Workers 2.3s 跨国延迟）
+  // 本地内置切片全量白名单（全量 28 卷画作切片已 100% 同源分发，彻底实现零延迟秒开）
   const LOCAL_TILE_SLUGS = new Set([
     'shanghai',
     'city_papercut_14pro',
     'chengdu_papercut_ipad',
     'jinjiang_greenway_section',
     'layout_pattern_02',
-    'pinglu_canal'
+    'pinglu_canal',
+    'aba_cycling_route',
+    'china_top12_airports_2024',
+    'lake_poyang',
+    'yangtze_river_bridge_chongqing',
+    'chengdu_citywall_gates',
+    'chongqing_ancient_city',
+    'changsha_citywall',
+    'nanjing_silver_black',
+    'datong_papercut',
+    'chengdu_blueprint',
+    'chengdu_macaron',
+    'hangzhou_low_saturation',
+    'wuhan_low_saturation',
+    'pearl_river_delta_dot_art',
+    'suzhou_dot_art',
+    'xian_papercut',
+    'chongqing_cyan',
+    'chongqing_black_gold',
+    'changsha_emboss',
+    'tianfu_luxihe_xinglong_lake',
+    'chengdu_greenway_ring',
+    'longquanshan_slope_a',
+    'longquanshan_slope_b'
   ]);
 
   function setupData(rawItems) {
@@ -997,19 +1020,39 @@
   const SUBCATEGORY_META = {
     '艺术制图': {
       en: 'Artistic Cartography',
-      desc: '艺术风格化与抽象视觉探索，弱化复杂标注，强化设计质感与情绪表达。'
+      ja: '芸術的地図作図',
+      ko: '예술적 지도 제작',
+      desc: '艺术风格化与抽象视觉探索，弱化复杂标注，强化设计质感与情绪表达。',
+      desc_en: 'Stylistic and abstract visual exploration, prioritizing tactile design and emotional resonance.',
+      desc_ja: '芸術的スタイライズと抽象的視覚探求。複雑な注記を抑え、デザインの質感と感情表現を際立たせる。',
+      desc_ko: '예술적 스타일화와 추상적 시각 탐구. 복잡한 주기를 줄이고 디자인의 질감과 감성적 표현을 강화함.'
     },
     '工程制图': {
       en: 'Engineering Cartography',
-      desc: '工程示意制图与施工走向，展示通道骨架、纵坡标高与实际工造生产。'
+      ja: 'エンジニアリング作図',
+      ko: '엔지니어링 지도 제작',
+      desc: '工程示意制图与施工走向，展示通道骨架、纵坡标高与实际工造生产。',
+      desc_en: 'Engineering schematics and alignment mapping, illustrating transit spines and elevations.',
+      desc_ja: '土木工学の概念図とルート計画。回廊の骨格、縦断勾配の標高、実工造プロセスを提示する。',
+      desc_ko: '엔지니어링 개념도 및 시공 경로. 회랑 골격, 종단 경사 표고 및 실제 시공 프로세스를 제시함.'
     },
     '空间形态': {
       en: 'Spatial Morphology',
-      desc: '聚焦空间形态学，解构宏观路网肌理、水系拓扑演进与枢纽几何构型。'
+      ja: '空間形態論',
+      ko: '공간 형태학',
+      desc: '聚焦空间形态学，解构宏观路网肌理、水系拓扑演进与枢纽几何构型。',
+      desc_en: 'Decoupling spatial morphology, macroscopic road networks, and hydrological topologies.',
+      desc_ja: '空間形態学に焦点を当て、マクロ道路網のテクスチャ、水系トポロジーの変遷、ハブの幾何構造を解体・分析する。',
+      desc_ko: '공간 형태학에 초점을 맞춰 거시적 도로망 텍스처, 수계 토폴로지 발전 및 허브 기하 구성을 해체·분석함.'
     },
     '图面排版': {
-      en: 'Map Layout',
-      desc: '侧重版面组织、图文配比与版式范式。'
+      en: 'Map Layout & Composition',
+      ja: '地図レイアウトと組版',
+      ko: '지도 레이아웃 및 조판',
+      desc: '侧重版面组织、图文配比与版式范式。',
+      desc_en: 'Focusing on layout hierarchy, text-to-graphics ratio, and structural standards.',
+      desc_ja: 'レイアウト構成、図版とテキストの調和、組版パラダイムを追求する。',
+      desc_ko: '레이아웃 구성, 도면과 텍스트의 조화, 조판 패러다임을 추구함.'
     }
   };
 
@@ -1208,9 +1251,12 @@
     const catIdx = SUBCATEGORY_ORDER.indexOf(currentSubCategory);
     const idxStr = String(catIdx >= 0 ? catIdx + 1 : 1).padStart(2, '0');
     const meta = SUBCATEGORY_META[currentSubCategory] || {};
-    const desc = meta.desc || '';
     const i18n = window.AtlasI18n || null;
-    const countSuffix = (i18n && i18n.t('subviewCountSuffix')) || ' 件画卷收录';
+    const curLang = (i18n && typeof i18n.getLang === 'function') ? i18n.getLang() : 'zh';
+    const localizedTitle = (curLang !== 'zh' && meta[curLang]) ? meta[curLang] : (curLang === 'en' && meta.en ? meta.en : currentSubCategory);
+    const descKey = 'desc_' + curLang;
+    const desc = (curLang !== 'zh' && meta[descKey]) ? meta[descKey] : (meta.desc || '');
+    const countSuffix = (i18n && i18n.t('subviewCountSuffix')) || (curLang === 'en' ? ' Works' : (curLang === 'ja' ? ' 作品' : (curLang === 'ko' ? ' 작품' : ' 件画卷收录')));
     const backText = (i18n && i18n.t('subviewBack')) || '返回全部成果';
 
     currentFilteredItems = subItems;
@@ -1227,13 +1273,13 @@
           '<span>' + escapeHtml(backText) + '</span>' +
         '</button>' +
         '<span class="subview-nav-divider">/</span>' +
-        '<span class="subview-nav-current">' + escapeHtml(currentSubCategory) + '</span>' +
+        '<span class="subview-nav-current">' + escapeHtml(localizedTitle) + '</span>' +
       '</div>' +
       '<div class="subview-content-row">' +
         '<div class="subview-lead-title-row">' +
           '<span class="subview-idx">' + idxStr + '</span>' +
           '<span class="subview-divider">/</span>' +
-          '<h1 class="subview-title">' + escapeHtml(currentSubCategory) + '</h1>' +
+          '<h1 class="subview-title">' + escapeHtml(localizedTitle) + '</h1>' +
           '<span class="subview-badge">' + subItems.length + countSuffix + '</span>' +
         '</div>' +
         (desc ? ('<div class="subview-desc-col"><p class="subview-desc">' + escapeHtml(desc) + '</p></div>') : '') +
@@ -1318,28 +1364,39 @@
 
     const isComfort = grid.classList.contains('comfort-mode');
     let globalIdx = 0;
-    const isEn = window.AtlasI18n && window.AtlasI18n.getLang() === 'en';
+    const curLang = window.AtlasI18n ? window.AtlasI18n.getLang() : 'zh';
+    const isEn = curLang === 'en';
 
     groups.forEach((group, gIdx) => {
       const meta = SUBCATEGORY_META[group.name] || {};
       const idxStr = String(gIdx + 1).padStart(2, '0');
-      const desc = meta.desc || '';
-      const countSuffix = isEn ? ' Works' : ' 件画卷';
+      const localizedName = (curLang !== 'zh' && meta[curLang]) ? meta[curLang] : (curLang === 'en' && meta.en ? meta.en : group.name);
+      const descKey = 'desc_' + curLang;
+      const desc = (curLang !== 'zh' && meta[descKey]) ? meta[descKey] : (meta.desc || '');
+      const countSuffix = curLang === 'en' ? ' Works' : (curLang === 'ja' ? ' 作品' : (curLang === 'ko' ? ' 작품' : ' 件画卷'));
 
       const totalInCat = group.totalCount;
       const displayedCount = group.items.length;
       let badgeText = '';
       if (totalInCat > displayedCount && displayedCount > 0) {
-        badgeText = isEn 
+        badgeText = curLang === 'en' 
           ? `${totalInCat} Works (${displayedCount} shown)`
-          : `共 ${totalInCat} 件 · 本屏 ${displayedCount} 件`;
+          : (curLang === 'ja'
+            ? `全 ${totalInCat} 作品 · 本画面 ${displayedCount} 作品`
+            : (curLang === 'ko'
+              ? `총 ${totalInCat} 작품 · 화면 ${displayedCount} 작품`
+              : `共 ${totalInCat} 件 · 本屏 ${displayedCount} 件`));
       } else {
         badgeText = `${totalInCat}${countSuffix}`;
       }
 
-      const enterText = isEn
+      const enterText = curLang === 'en'
         ? (totalInCat > displayedCount ? `View All (${totalInCat})` : 'Enter')
-        : (totalInCat > displayedCount ? `进入分类全景 (${totalInCat} 件)` : (window.AtlasI18n ? window.AtlasI18n.t('subviewEnter') || '进入专题' : '进入专题'));
+        : (curLang === 'ja'
+          ? (totalInCat > displayedCount ? `全作品を見る (${totalInCat})` : '詳細を見る')
+          : (curLang === 'ko'
+            ? (totalInCat > displayedCount ? `전체 보기 (${totalInCat})` : '입장')
+            : (totalInCat > displayedCount ? `进入分类全景 (${totalInCat} 件)` : (window.AtlasI18n ? window.AtlasI18n.t('subviewEnter') || '进入专题' : '进入专题'))));
 
       const section = document.createElement('section');
       section.className = 'gallery-category-section gallery-overview-section';
@@ -1347,12 +1404,12 @@
       section.dataset.subcategory = group.name;
 
       section.innerHTML = 
-        '<header class="category-section-header clickable" role="button" tabindex="0" title="' + (isEn ? `Enter ${escapeHtml(group.name)} Category View` : `进入「${escapeHtml(group.name)}」分类瀑布流（全 ${totalInCat} 件）`) + '">' +
+        '<header class="category-section-header clickable" role="button" tabindex="0" title="' + (curLang === 'en' ? `Enter ${escapeHtml(localizedName)} Category View` : `进入「${escapeHtml(localizedName)}」分类瀑布流（全 ${totalInCat} 件）`) + '">' +
           '<div class="category-header-main-row">' +
             '<div class="category-header-lead">' +
               '<span class="category-section-idx">' + idxStr + '</span>' +
               '<span class="category-section-divider">/</span>' +
-              '<h2 class="category-section-title">' + escapeHtml(group.name) + '</h2>' +
+              '<h2 class="category-section-title">' + escapeHtml(localizedName) + '</h2>' +
               '<span class="category-section-badge">' + escapeHtml(badgeText) + '</span>' +
             '</div>' +
             '<div class="category-header-action" aria-label="' + escapeHtml(enterText) + '">' +
@@ -3105,7 +3162,8 @@
       }
     }
     if (mDesc) {
-      if (locItem.descriptionHtml) {
+      const curLang = window.AtlasI18n ? window.AtlasI18n.getLang() : 'zh';
+      if (curLang === 'zh' && locItem.descriptionHtml) {
         mDesc.innerHTML = locItem.descriptionHtml;
       } else {
         mDesc.textContent = locItem.description || '';
@@ -3272,14 +3330,37 @@
     const config = window.ATLAS_CONFIG || window.CANGFENG_CONFIG || {};
     const assetBase = (config.assetBaseUrl || '').replace(/\/+$/, '');
 
-    // 本地内置切片白名单（直接同源相对路径直达，彻底绕过海外 Workers 2.3s 跨国延迟）
+    // 本地内置切片全量白名单（全量 28 卷画作切片已 100% 同源分发，彻底实现零延迟秒开）
     const LOCAL_TILE_SLUGS = new Set([
       'shanghai',
       'city_papercut_14pro',
       'chengdu_papercut_ipad',
       'jinjiang_greenway_section',
       'layout_pattern_02',
-      'pinglu_canal'
+      'pinglu_canal',
+      'aba_cycling_route',
+      'china_top12_airports_2024',
+      'lake_poyang',
+      'yangtze_river_bridge_chongqing',
+      'chengdu_citywall_gates',
+      'chongqing_ancient_city',
+      'changsha_citywall',
+      'nanjing_silver_black',
+      'datong_papercut',
+      'chengdu_blueprint',
+      'chengdu_macaron',
+      'hangzhou_low_saturation',
+      'wuhan_low_saturation',
+      'pearl_river_delta_dot_art',
+      'suzhou_dot_art',
+      'xian_papercut',
+      'chongqing_cyan',
+      'chongqing_black_gold',
+      'changsha_emboss',
+      'tianfu_luxihe_xinglong_lake',
+      'chengdu_greenway_ring',
+      'longquanshan_slope_a',
+      'longquanshan_slope_b'
     ]);
 
     // Resolve tileBase URL (support local same-origin bypass or remote Cloudflare CDN)
@@ -3598,6 +3679,9 @@
               type: 'image',
               url: fullThumb
             });
+            if (osdViewer.viewport) {
+              osdViewer.viewport.maxZoomPixelRatio = 5.0;
+            }
           } catch (err2) {
             console.error('CangFeng: 占位预览图降级失败:', err2);
           }

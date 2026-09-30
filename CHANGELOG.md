@@ -4,6 +4,17 @@
 
 ---
 
+## [1.3.12] - 2026-09-30
+
+### 缺陷修复 (Bug Fixes)
+- **修复典藏画卷海报生成失败缺陷 (Fix Artwork Poster Generation ReferenceError)**：
+  - **根本原因排查与修复**：此前提交在重构作品多级分类标签拼接逻辑时，意外误删了海报生成引擎中的 `titleText` 局部变量声明，导致调用 `generateArtworkPoster` 绘制横竖各画幅比例海报（3:4、4:3、16:9、9:16、9:21）时触发 `ReferenceError: titleText is not defined`，进而抛出 `[海报生成失败，请重试]` 弹窗拦截；
+  - **补全题名与国际化回退取值**：重新声明 `const titleText = (locItem && locItem.title) || item.title || i18nTexts.fallbackTitle;`，确保中英日韩多语境下主副标题完整解析；
+  - **增强 Canvas 跨域安全与导出鲁棒性**：重构 `loadImageAsync` 错误处理流程，剔除加载失败时 fallback 降级到非 CORS 图片从而污染 Canvas（Tainted Canvas）导致导出报 `SecurityError` 的隐患，保证无论在任何环境下海报都能稳定生成与导出下载；
+  - 资源版本号升级至 `v=20260930_v55`。
+
+---
+
 ## [1.3.11] - 2026-09-30
 
 ### 界面重构与品牌视觉优化 (Refactoring & Brand Capsule Design)

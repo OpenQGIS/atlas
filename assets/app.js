@@ -5265,6 +5265,8 @@
                           (Array.isArray(item.color) && item.color.length > 0) ? item.color :
                           (MASTER_PALETTES[item.id] || []);
 
+    const titleText = (locItem && locItem.title) || item.title || i18nTexts.fallbackTitle;
+
     let catMain = ((locItem && (locItem.categoryName || locItem.category)) || item.category || i18nTexts.fallbackCategory);
     if (locItem && locItem.subCategory) catMain += ' · ' + locItem.subCategory;
     if (locItem && locItem.topic) catMain += ' · ' + locItem.topic;
@@ -5567,16 +5569,7 @@
         img.crossOrigin = 'anonymous';
       }
       img.onload = () => resolve(img);
-      img.onerror = () => {
-        if (img.crossOrigin) {
-          const retryImg = new Image();
-          retryImg.onload = () => resolve(retryImg);
-          retryImg.onerror = () => reject(new Error('Image failed to load: ' + src));
-          retryImg.src = src;
-        } else {
-          reject(new Error('Image failed to load: ' + src));
-        }
-      };
+      img.onerror = () => reject(new Error('Image failed to load: ' + src));
       img.src = src;
     });
   }

@@ -1375,7 +1375,7 @@
     return item.aspectRatio || 1;
   }
 
-  function createMoreCard(group, totalInCat, remainingCount, curLang) {
+  function createMoreCard(group, totalInCat, remainingCount, curLang, unshownItems, allInCat) {
     const isEn = curLang === 'en';
     const meta = SUBCATEGORY_META[group.name] || {};
     const localizedName = (curLang !== 'zh' && meta[curLang]) ? meta[curLang] : (curLang === 'en' && meta.en ? meta.en : group.name);
@@ -1398,8 +1398,43 @@
 
     card.setAttribute('aria-label', `${titleText}, ${subText}`);
 
+    // 构建九宫格背景缩略图池（优先使用未在此屏展出的作品，不足 9 张则由分类全量作品循环铺展）
+    const mosaicPool = [];
+    if (Array.isArray(unshownItems)) {
+      unshownItems.forEach(it => {
+        if (it && it.thumb) mosaicPool.push(it.thumb);
+      });
+    }
+    if (Array.isArray(allInCat) && mosaicPool.length < 9) {
+      allInCat.forEach(it => {
+        if (it && it.thumb && !mosaicPool.includes(it.thumb)) {
+          mosaicPool.push(it.thumb);
+        }
+      });
+    }
+    const mosaicThumbs = [];
+    if (mosaicPool.length > 0) {
+      let mIdx = 0;
+      while (mosaicThumbs.length < 9) {
+        mosaicThumbs.push(mosaicPool[mIdx % mosaicPool.length]);
+        mIdx++;
+      }
+    }
+
+    const mosaicCellsHtml = mosaicThumbs.map(thumb => 
+      '<div class="more-mosaic-cell"><img src="' + escapeHtml(thumb) + '" alt="" loading="lazy"></div>'
+    ).join('');
+
+    const mosaicLayerHtml = mosaicThumbs.length > 0
+      ? '<div class="more-card-mosaic-layer" aria-hidden="true">' +
+          '<div class="more-card-mosaic-grid">' + mosaicCellsHtml + '</div>' +
+          '<div class="more-card-mosaic-scrim"></div>' +
+        '</div>'
+      : '';
+
     card.innerHTML = 
       '<div class="more-card-inner">' +
+        mosaicLayerHtml +
         '<div class="more-card-grid-bg" aria-hidden="true"></div>' +
         '<div class="more-card-content">' +
           '<div class="more-card-badge-row">' +
@@ -1642,7 +1677,9 @@
       if (isMoreNeeded) {
         // 1. 桌面端网格内嵌“合集终点卡片”（More Card），完美填补末行留空
         const remainingCount = totalInCat - displayedCount;
-        sectionGrid.appendChild(createMoreCard(group, totalInCat, remainingCount, curLang));
+        const unshownItems = (items || []).filter(it => itemMatchesSubCategory(it, group.name) && !group.items.some(s => s.id === it.id));
+        const allCatItems = (items || []).filter(it => itemMatchesSubCategory(it, group.name));
+        sectionGrid.appendChild(createMoreCard(group, totalInCat, remainingCount, curLang, unshownItems, allCatItems));
 
         // 2. 移动端独立底部胶囊操作栏（大拇指舒适触控区）
         const moreWrap = document.createElement('div');

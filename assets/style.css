@@ -1895,6 +1895,70 @@ body[data-page="portal"] {
   z-index: 1;
 }
 
+/* 合集终点卡片底层九宫格拼图微缩画卷层 */
+.more-card-mosaic-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.more-card-mosaic-grid {
+  position: absolute;
+  inset: -6px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 3px;
+  opacity: 0.35;
+  filter: saturate(1.2) contrast(1.06);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+}
+
+:root[data-theme="light"] .more-card-mosaic-grid {
+  opacity: 0.28;
+  filter: saturate(1.1) contrast(1.02);
+}
+
+.more-mosaic-cell {
+  position: relative;
+  overflow: hidden;
+  background: var(--card-media-bg, #0b0e14);
+}
+
+.more-mosaic-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 优质磨砂毛玻璃遮罩，确保前景文字、罗盘徽标 100% 清晰可读，同时朦胧透出底图色彩与纹理 */
+.more-card-mosaic-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 18, 25, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+:root[data-theme="light"] .more-card-mosaic-scrim {
+  background: rgba(248, 250, 252, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.gallery-card.gallery-more-card:hover .more-card-mosaic-grid {
+  transform: scale(1.04);
+  opacity: 0.52;
+}
+
+:root[data-theme="light"] .gallery-card.gallery-more-card:hover .more-card-mosaic-grid {
+  opacity: 0.42;
+}
+
 .more-card-grid-bg {
   position: absolute;
   inset: 0;

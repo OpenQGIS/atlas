@@ -5064,7 +5064,7 @@
       ctx.fillStyle = accent;
       ctx.fillText(i18nTexts.brand, 64, 86);
 
-      ctx.font = '500 18px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = '500 18px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textSecondary;
       ctx.fillText(i18nTexts.slogan, 64, 118);
 
@@ -5121,7 +5121,7 @@
       // 二维码左侧导引文案 (设置右对齐，确保多语言从二维码边框向左伸展，杜绝重叠)
       ctx.save();
       ctx.textAlign = 'right';
-      ctx.font = '600 17px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = '600 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textPrimary;
       ctx.fillText(i18nTexts.qrTitle, qrX - 24, qrY + 46);
 
@@ -5134,16 +5134,16 @@
       const metaY = imgY + imgH + 34;
       const maxInfoWidth = qrX - 220 - 64;
 
-      ctx.font = '700 38px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = '700 38px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textPrimary;
       wrapText(ctx, titleText, 64, metaY + 36, maxInfoWidth, 46, 2);
 
-      ctx.font = '500 20px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = '500 20px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textSecondary;
       ctx.fillText(categoryText, 64, metaY + 88);
 
       if (descText) {
-        ctx.font = '400 18px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.font = '400 18px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
         ctx.fillStyle = textSecondary;
         const maxDescLines = (ratio === '3:4') ? 2 : (ratio === '9:16' ? 3 : 4);
         wrapText(ctx, descText, 64, metaY + 126, maxInfoWidth, 26, maxDescLines);
@@ -5184,8 +5184,8 @@
       ctx.fillStyle = accent;
       ctx.fillText(i18nTexts.brand, rx, 84);
 
-      ctx.font = is16x9 ? '500 17px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                        : '500 16px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = is16x9 ? '500 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : '500 16px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textSecondary;
       ctx.fillText(i18nTexts.slogan, rx, 114);
 
@@ -5204,22 +5204,22 @@
       ctx.stroke();
 
       // 右侧栏：作品题名与分类
-      ctx.font = is16x9 ? '700 36px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                        : '700 32px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = is16x9 ? '700 36px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : '700 32px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textPrimary;
       const titleLineHeight = is16x9 ? 44 : 38;
       const afterTitleY = wrapText(ctx, titleText, rx, 188, rw, titleLineHeight, 2);
 
       const catY = Math.max(is16x9 ? 275 : 260, afterTitleY + 8);
-      ctx.font = is16x9 ? '500 19px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                        : '500 17px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = is16x9 ? '500 19px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : '500 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textSecondary;
       ctx.fillText(categoryText, rx, catY);
 
       // 右侧栏：说明题记
       if (descText) {
-        ctx.font = is16x9 ? '400 17px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                          : '400 16px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        ctx.font = is16x9 ? '400 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                          : '400 16px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
         ctx.fillStyle = textSecondary;
         wrapText(ctx, descText, rx, catY + 36, rw, 26, is16x9 ? 5 : 4);
       }
@@ -5257,8 +5257,8 @@
       const guideX = qx + qrSize + 26;
       ctx.save();
       ctx.textAlign = 'left';
-      ctx.font = is16x9 ? '600 17px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                        : '600 16px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.font = is16x9 ? '600 17px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                        : '600 16px "MiSans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.fillStyle = textPrimary;
       ctx.fillText(i18nTexts.qrTitle, guideX, qy + 46);
 

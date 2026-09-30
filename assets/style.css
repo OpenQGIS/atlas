@@ -2070,7 +2070,7 @@ body[data-page="portal"] {
   z-index: 1;
 }
 
-/* 合集终点卡片底层九宫格拼图微缩画卷层 */
+/* 合集终点卡片底层阶梯式微缩画卷预览层 (1宫格 / 4宫格 / 9宫格) */
 .more-card-mosaic-layer {
   position: absolute;
   inset: 0;
@@ -2082,19 +2082,54 @@ body[data-page="portal"] {
 
 .more-card-mosaic-grid {
   position: absolute;
-  inset: -6px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 3px;
-  opacity: 0.35;
-  filter: saturate(1.2) contrast(1.06);
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+  inset: 0;
+  opacity: 0.65;
+  filter: saturate(1.16) contrast(1.05);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease, filter 0.35s ease;
+  will-change: transform;
 }
 
 :root[data-theme="light"] .more-card-mosaic-grid {
-  opacity: 0.28;
-  filter: saturate(1.1) contrast(1.02);
+  opacity: 0.54;
+  filter: saturate(1.12) contrast(1.04);
+}
+
+/* 1宫格：单图全景画卷特写模式 (1幅未展出时铺满整卡，清晰透亮) */
+.more-card-mosaic-grid.mosaic-mode-1 {
+  display: block;
+}
+
+.more-card-mosaic-grid.mosaic-mode-1 .more-mosaic-cell {
+  width: 100%;
+  height: 100%;
+}
+
+/* 4宫格：田字格 2x2 矩阵模式 (2~4幅未展出时，大视窗辨识度高) */
+.more-card-mosaic-grid.mosaic-mode-4 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 3.5px;
+  padding: 3.5px;
+  box-sizing: border-box;
+}
+
+.more-card-mosaic-grid.mosaic-mode-4 .more-mosaic-cell {
+  border-radius: 4px;
+}
+
+/* 9宫格：3x3 馆藏矩阵拼贴模式 (5+幅海量藏品，琳琅满目) */
+.more-card-mosaic-grid.mosaic-mode-9 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2.5px;
+  padding: 2.5px;
+  box-sizing: border-box;
+}
+
+.more-card-mosaic-grid.mosaic-mode-9 .more-mosaic-cell {
+  border-radius: 3px;
 }
 
 .more-mosaic-cell {
@@ -2107,51 +2142,82 @@ body[data-page="portal"] {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
-/* 优质磨砂毛玻璃遮罩，确保前景文字、罗盘徽标 100% 清晰可读，同时朦胧透出底图色彩与纹理 */
+/* 高级透光不透乱遮罩：中心聚光保护文字可读性，四角透光露出色彩与地图纹理，彻底去除12px暴力模糊 */
 .more-card-mosaic-scrim {
   position: absolute;
   inset: 0;
-  background: rgba(14, 18, 25, 0.72);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: radial-gradient(
+    ellipse 85% 78% at 50% 50%,
+    rgba(14, 18, 25, 0.82) 0%,
+    rgba(14, 18, 25, 0.72) 48%,
+    rgba(14, 18, 25, 0.38) 100%
+  );
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  transition: background 0.35s ease;
 }
 
 :root[data-theme="light"] .more-card-mosaic-scrim {
-  background: rgba(248, 250, 252, 0.78);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: radial-gradient(
+    ellipse 85% 78% at 50% 50%,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(248, 250, 252, 0.76) 48%,
+    rgba(248, 250, 252, 0.36) 100%
+  );
 }
 
+/* 悬停互动动效：微幅放大，透光度增加，色彩更加饱满醒目 */
 .gallery-card.gallery-more-card:hover .more-card-mosaic-grid {
-  transform: scale(1.04);
-  opacity: 0.52;
+  transform: scale(1.045);
+  opacity: 0.82;
+  filter: saturate(1.28) contrast(1.10);
 }
 
 :root[data-theme="light"] .gallery-card.gallery-more-card:hover .more-card-mosaic-grid {
-  opacity: 0.42;
+  opacity: 0.72;
+  filter: saturate(1.22) contrast(1.08);
+}
+
+.gallery-card.gallery-more-card:hover .more-card-mosaic-scrim {
+  background: radial-gradient(
+    ellipse 85% 78% at 50% 50%,
+    rgba(14, 18, 25, 0.72) 0%,
+    rgba(14, 18, 25, 0.60) 48%,
+    rgba(14, 18, 25, 0.26) 100%
+  );
+}
+
+:root[data-theme="light"] .gallery-card.gallery-more-card:hover .more-card-mosaic-scrim {
+  background: radial-gradient(
+    ellipse 85% 78% at 50% 50%,
+    rgba(255, 255, 255, 0.80) 0%,
+    rgba(248, 250, 252, 0.64) 48%,
+    rgba(248, 250, 252, 0.22) 100%
+  );
 }
 
 .more-card-grid-bg {
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 18px 18px;
   pointer-events: none;
-  opacity: 0.75;
+  opacity: 0.7;
   mask-image: radial-gradient(circle at center, black 35%, transparent 95%);
   -webkit-mask-image: radial-gradient(circle at center, black 35%, transparent 95%);
-  z-index: 0;
+  z-index: 1;
 }
 
 :root[data-theme="light"] .more-card-grid-bg {
   background-image: 
-    linear-gradient(to right, rgba(0, 0, 0, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.045) 1px, transparent 1px);
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
 }
 
 .more-card-content {
@@ -2176,16 +2242,20 @@ body[data-page="portal"] {
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--accent, #80cc28);
-  background: rgba(var(--accent-rgb, 128, 204, 40), 0.1);
-  border: 1px solid rgba(var(--accent-rgb, 128, 204, 40), 0.25);
+  background: rgba(14, 18, 25, 0.68);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(var(--accent-rgb, 128, 204, 40), 0.35);
   padding: 2px 8px;
   border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 :root[data-theme="light"] .more-card-pill {
-  color: #559613;
-  background: rgba(85, 150, 19, 0.08);
-  border-color: rgba(85, 150, 19, 0.22);
+  color: #437a0e;
+  background: rgba(255, 255, 255, 0.84);
+  border-color: rgba(85, 150, 19, 0.35);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .more-card-count-badge {
@@ -2193,6 +2263,18 @@ body[data-page="portal"] {
   font-size: 0.72rem;
   color: var(--text-muted, #8b949e);
   letter-spacing: 0.02em;
+  background: rgba(14, 18, 25, 0.60);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="light"] .more-card-count-badge {
+  color: #4b5563;
+  background: rgba(255, 255, 255, 0.84);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 .more-card-center-lead {
@@ -2205,47 +2287,68 @@ body[data-page="portal"] {
 }
 
 .more-card-compass-icon {
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--accent, #80cc28);
-  background: rgba(var(--accent-rgb, 128, 204, 40), 0.08);
-  border: 1px solid rgba(var(--accent-rgb, 128, 204, 40), 0.22);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease;
+  background: rgba(14, 18, 25, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(var(--accent-rgb, 128, 204, 40), 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 12px rgba(var(--accent-rgb, 128, 204, 40), 0.15);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 :root[data-theme="light"] .more-card-compass-icon {
-  color: #559613;
-  background: rgba(85, 150, 19, 0.08);
-  border-color: rgba(85, 150, 19, 0.2);
+  color: #437a0e;
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(85, 150, 19, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08), 0 0 10px rgba(107, 179, 30, 0.15);
 }
 
 .gallery-card.gallery-more-card:hover .more-card-compass-icon {
   transform: rotate(45deg) scale(1.08);
-  background: rgba(var(--accent-rgb, 128, 204, 40), 0.18);
+  background: rgba(var(--accent-rgb, 128, 204, 40), 0.22);
+  border-color: rgba(var(--accent-rgb, 128, 204, 40), 0.6);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), 0 0 18px rgba(var(--accent-rgb, 128, 204, 40), 0.3);
+}
+
+:root[data-theme="light"] .gallery-card.gallery-more-card:hover .more-card-compass-icon {
+  background: rgba(107, 179, 30, 0.18);
+  border-color: rgba(85, 150, 19, 0.6);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12), 0 0 16px rgba(107, 179, 30, 0.25);
 }
 
 .more-card-heading {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-weight: 600;
-  color: var(--text-primary, #f0f6fc);
+  color: #ffffff;
   letter-spacing: -0.01em;
   line-height: 1.35;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8), 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
 :root[data-theme="light"] .more-card-heading {
-  color: #111827;
+  color: #0f141c;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.95), 0 0 10px rgba(255, 255, 255, 0.85);
 }
 
 .more-card-desc {
   margin: 0;
   font-size: 0.78rem;
-  color: var(--text-muted, #8b949e);
+  color: rgba(240, 246, 252, 0.85);
   line-height: 1.4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+}
+
+:root[data-theme="light"] .more-card-desc {
+  color: #374151;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
 }
 
 .more-card-action-bar {
@@ -2258,33 +2361,39 @@ body[data-page="portal"] {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 15px;
+  padding: 6px 16px;
   border-radius: 999px;
   font-family: inherit;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary, #f0f6fc);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(14, 18, 25, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root[data-theme="light"] .more-card-action-btn {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.1);
-  color: #1f2937;
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #111827;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .gallery-card.gallery-more-card:hover .more-card-action-btn {
   background: var(--accent, #80cc28);
   color: #0b0e14;
   border-color: var(--accent, #80cc28);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), 0 0 12px rgba(var(--accent-rgb, 128, 204, 40), 0.35);
 }
 
 :root[data-theme="light"] .gallery-card.gallery-more-card:hover .more-card-action-btn {
   background: var(--accent, #61a319);
   color: #ffffff;
   border-color: var(--accent, #61a319);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 0 12px rgba(97, 163, 25, 0.3);
 }
 
 .gallery-card.gallery-more-card:hover .more-card-action-btn svg {

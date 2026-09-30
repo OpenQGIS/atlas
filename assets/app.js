@@ -1461,24 +1461,38 @@
 
     card.setAttribute('aria-label', `${titleText}, ${subText}`);
 
-    // 构建九宫格背景缩略图池（优先使用未在此屏展出的作品，不足 9 张则由分类全量作品循环铺展）
+    // 智能自适应阶梯式背景预览（1-Grid 单图全景 / 4-Grid 四宫格 / 9-Grid 九宫格）
+    // 优先采用本分类下未在此屏展出的作品，让用户直观预览未见画卷
+    const unshownCount = Array.isArray(unshownItems) ? unshownItems.length : remainingCount;
+    let targetThumbCount = 9;
+
+    if (unshownCount <= 1) {
+      targetThumbCount = 1;
+    } else if (unshownCount <= 4) {
+      targetThumbCount = 4;
+    } else {
+      targetThumbCount = 9;
+    }
+
     const mosaicPool = [];
     if (Array.isArray(unshownItems)) {
       unshownItems.forEach(it => {
-        if (it && it.thumb) mosaicPool.push(it.thumb);
+        if (it && it.thumb && !mosaicPool.includes(it.thumb)) mosaicPool.push(it.thumb);
       });
     }
-    if (Array.isArray(allInCat) && mosaicPool.length < 9) {
+    // 若未展出作品不足目标格数，则由分类全量代表作补充（按顺序补充且去重）
+    if (Array.isArray(allInCat) && mosaicPool.length < targetThumbCount) {
       allInCat.forEach(it => {
         if (it && it.thumb && !mosaicPool.includes(it.thumb)) {
           mosaicPool.push(it.thumb);
         }
       });
     }
+    // 兜底循环补充直到填满目标格数
     const mosaicThumbs = [];
     if (mosaicPool.length > 0) {
       let mIdx = 0;
-      while (mosaicThumbs.length < 9) {
+      while (mosaicThumbs.length < targetThumbCount) {
         mosaicThumbs.push(mosaicPool[mIdx % mosaicPool.length]);
         mIdx++;
       }
@@ -1490,7 +1504,7 @@
 
     const mosaicLayerHtml = mosaicThumbs.length > 0
       ? '<div class="more-card-mosaic-layer" aria-hidden="true">' +
-          '<div class="more-card-mosaic-grid">' + mosaicCellsHtml + '</div>' +
+          '<div class="more-card-mosaic-grid mosaic-mode-' + targetThumbCount + '">' + mosaicCellsHtml + '</div>' +
           '<div class="more-card-mosaic-scrim"></div>' +
         '</div>'
       : '';

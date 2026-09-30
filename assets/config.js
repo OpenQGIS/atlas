@@ -7,7 +7,7 @@
  * 2. 外部生态关联：支持一键导航至 Gallery 聚合大厅与 Cabinet 共享精选库。
  */
 window.ATLAS_CONFIG = window.CANGFENG_CONFIG = {
-  // 外部挂载 CDN 节点 (Cloudflare Workers CDN，用于按需高速加载 Level 10+ 高清切片；0~9 级骨架同源分发)
+  // 外部挂载 CDN 节点 (Cloudflare Workers CDN，用于按需高速加载 Level 11+ 高清切片；0~10 级骨架同源分发)
   assetBaseUrl: 'https://cangfengcore.lidmwork.workers.dev',
 
   // 核心生产工具与数据底座仓库

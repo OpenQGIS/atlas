@@ -3395,9 +3395,9 @@
       maxLevel: tileMaxLevel,
       getTileUrl: function (level, x, y) {
         // 混合切片加载架构：
-        // 0~9 级骨架切片走 GitHub Pages 同源 (0ms 本地瞬开，完全不可逆向原图)
-        // 10 级及以上高保真切片走 Cloudflare Workers CDN (按需深度放大拉取，源图隔离保护)
-        const isRemote = (level >= 10 && assetBase);
+        // 0~10 级骨架切片走 GitHub Pages 同源 (0ms 本地瞬开，全屏超越缩略图清晰度，完全不可逆向原图)
+        // 11 级及以上高保真切片走 Cloudflare Workers CDN (按需深度放大拉取，源图隔离保护)
+        const isRemote = (level >= 11 && assetBase);
         const base = isRemote ? remoteTileBase : localTileBase;
         const url = base + level + '/' + x + '_' + y + '.' + (item.format || 'webp');
         if (isRemote) {

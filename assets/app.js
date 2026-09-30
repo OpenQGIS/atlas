@@ -1361,6 +1361,73 @@
     return item.aspectRatio || 1;
   }
 
+  function createMoreCard(group, totalInCat, remainingCount, curLang) {
+    const isEn = curLang === 'en';
+    const meta = SUBCATEGORY_META[group.name] || {};
+    const localizedName = (curLang !== 'zh' && meta[curLang]) ? meta[curLang] : (curLang === 'en' && meta.en ? meta.en : group.name);
+    
+    const card = document.createElement('div');
+    card.className = 'gallery-card gallery-more-card';
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('style', '--aspect-ratio: 0.92;');
+
+    const titleText = isEn 
+      ? `Explore All ${totalInCat} Works`
+      : `探索全部 ${totalInCat} 件画卷`;
+
+    const subText = remainingCount > 0
+      ? (isEn ? `+${remainingCount} more in archives` : `另有 ${remainingCount} 件作品未在此屏展出`)
+      : (isEn ? `All curated works` : `查看完整制图专题`);
+
+    const btnText = isEn ? 'View Category' : '进入专栏全景';
+
+    card.setAttribute('aria-label', `${titleText}, ${subText}`);
+
+    card.innerHTML = 
+      '<div class="more-card-inner">' +
+        '<div class="more-card-grid-bg" aria-hidden="true"></div>' +
+        '<div class="more-card-content">' +
+          '<div class="more-card-badge-row">' +
+            '<span class="more-card-pill">' + escapeHtml(localizedName) + '</span>' +
+            '<span class="more-card-count-badge">' + totalInCat + (isEn ? ' Works' : ' 件') + '</span>' +
+          '</div>' +
+          '<div class="more-card-center-lead">' +
+            '<div class="more-card-compass-icon" aria-hidden="true">' +
+              '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+                '<circle cx="12" cy="12" r="9.5"></circle>' +
+                '<polygon points="12 6 14.5 12 12 10.5 9.5 12 12 6" fill="currentColor" fill-opacity="0.3"></polygon>' +
+                '<polygon points="12 18 14.5 12 12 13.5 9.5 12 12 18" fill="currentColor"></polygon>' +
+              '</svg>' +
+            '</div>' +
+            '<h3 class="more-card-heading">' + escapeHtml(titleText) + '</h3>' +
+            '<p class="more-card-desc">' + escapeHtml(subText) + '</p>' +
+          '</div>' +
+          '<div class="more-card-action-bar">' +
+            '<span class="more-card-action-btn">' +
+              '<span>' + escapeHtml(btnText) + '</span>' +
+              '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+                '<polyline points="9 18 15 12 9 6"></polyline>' +
+              '</svg>' +
+            '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      enterSubcategoryView(group.name);
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        enterSubcategoryView(group.name);
+      }
+    });
+
+    return card;
+  }
+
   function renderOverviewSections(grid, items) {
     // 1. 统计当前池中各子分类的全量收录作品数
     const subCatTotalCounts = {};
@@ -1430,6 +1497,13 @@
         const remaining = available.filter(it => !selected.some(s => s.id === it.id) && !usedGlobally.has(it.id));
         if (remaining.length === 0) break;
 
+        // 若当前为最后一行（rowCount === 1），且该分类作品数较多需要装配 MoreCard 时，
+        // 预先为 MoreCard 留出容积配额（MoreCard 宽高比约 0.92）
+        const isFinalRow = (rowCount === 1);
+        const willHaveMore = isFinalRow && (totalCount > (selected.length + 3));
+        const targetAr = willHaveMore ? 2.3 : 3.2;
+        const minCards = willHaveMore ? 3 : 3;
+
         for (const it of remaining) {
           const ar = getCardAspect(it);
           selected.push(it);
@@ -1437,8 +1511,8 @@
           sumAr += ar;
           countInRow++;
 
-          // 容积阈值：宽高比累加至 3.2+ 且至少 3 张卡片，填满该行
-          if (sumAr >= 3.2 && countInRow >= 3) {
+          // 容积阈值：根据是否留空给 MoreCard 动态判定
+          if (sumAr >= targetAr && countInRow >= minCards) {
             break;
           }
         }

@@ -1606,9 +1606,14 @@
         sectionGrid.appendChild(createCard(item, globalIdx++));
       });
 
-      // 如果属于作品较多、收紧为 2 行的分类，在底部追加高质感“进入该分类查看全部”操作按钮
+      // 如果属于作品较多、收紧为 2 行的分类，在桌面端网格末尾内嵌专席终点卡片，并在移动端追加高质感底部操作按钮
       const isMoreNeeded = (totalInCat > displayedCount);
       if (isMoreNeeded) {
+        // 1. 桌面端网格内嵌“合集终点卡片”（More Card），完美填补末行留空
+        const remainingCount = totalInCat - displayedCount;
+        sectionGrid.appendChild(createMoreCard(group, totalInCat, remainingCount, curLang));
+
+        // 2. 移动端独立底部胶囊操作栏（大拇指舒适触控区）
         const moreWrap = document.createElement('div');
         moreWrap.className = 'category-section-bottom-action';
         const moreBtnText = isEn

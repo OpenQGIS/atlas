@@ -2016,6 +2016,32 @@ body[data-page="portal"] {
   box-shadow: 0 8px 24px rgba(106, 168, 32, 0.25);
 }
 
+.category-section-more-btn:hover .category-enter-arrow {
+  transform: translateX(3px);
+}
+
+.category-section-more-text {
+  display: inline-block;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.more-btn-lead {
+  font-weight: 400;
+  opacity: 0.88;
+}
+
+.more-btn-sub {
+  display: inline-block;
+  font-weight: 600;
+  color: inherit;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+
 /* 首页瀑布流末尾合集终点卡片（More Card / 专席探索卡片） */
 .gallery-card.gallery-more-card {
   --aspect-ratio: 0.92;
@@ -9178,8 +9204,8 @@ body.in-subview .gallery-main {
   }
   .category-section-more-btn {
     min-height: 44px;
-    padding: 10px 20px;
-    font-size: 0.84rem;
+    padding: 8px 18px;
+    font-size: 0.82rem;
   }
   .subcategory-view-hero {
     margin-bottom: 14px;

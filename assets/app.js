@@ -1860,16 +1860,31 @@
         // 2. 移动端独立底部胶囊操作栏（大拇指舒适触控区）
         const moreWrap = document.createElement('div');
         moreWrap.className = 'category-section-bottom-action';
-        const moreBtnText = curLang === 'en'
-          ? `View All ${totalInCat} Works in ${localizedName}`
-          : (curLang === 'ja'
-            ? `「${localizedName}」の全 ${totalInCat} 作品を見る`
-            : (curLang === 'ko'
-              ? `「${localizedName}」 전체 ${totalInCat}개 작품 보기`
-              : `进入「${localizedName}」查看全部 ${totalInCat} 件画卷`));
+
+        let btnInnerHtml = '';
+        let ariaText = '';
+        if (curLang === 'en') {
+          btnInnerHtml = '<span class="more-btn-lead">View All ' + totalInCat + ' Works in </span>' +
+            '<strong class="more-btn-sub">' + escapeHtml(localizedName) + '</strong>';
+          ariaText = `View All ${totalInCat} Works in ${localizedName}`;
+        } else if (curLang === 'ja') {
+          btnInnerHtml = '<strong class="more-btn-sub">「' + escapeHtml(localizedName) + '」</strong>' +
+            '<span class="more-btn-lead">の全 ' + totalInCat + ' 作品を見る</span>';
+          ariaText = `「${localizedName}」の全 ${totalInCat} 作品を見る`;
+        } else if (curLang === 'ko') {
+          btnInnerHtml = '<strong class="more-btn-sub">「' + escapeHtml(localizedName) + '」</strong>' +
+            '<span class="more-btn-lead"> 전체 ' + totalInCat + '개 작품 보기</span>';
+          ariaText = `「${localizedName}」 전체 ${totalInCat}개 작품 보기`;
+        } else {
+          btnInnerHtml = '<span class="more-btn-lead">进入</span>' +
+            '<strong class="more-btn-sub">「' + escapeHtml(localizedName) + '」</strong>' +
+            '<span class="more-btn-lead">查看全部 ' + totalInCat + ' 件画卷</span>';
+          ariaText = `进入「${localizedName}」查看全部 ${totalInCat} 件画卷`;
+        }
+
         moreWrap.innerHTML =
-          '<button type="button" class="category-section-more-btn" aria-label="' + escapeHtml(moreBtnText) + '">' +
-            '<span>' + escapeHtml(moreBtnText) + '</span>' +
+          '<button type="button" class="category-section-more-btn" aria-label="' + escapeHtml(ariaText) + '">' +
+            '<span class="category-section-more-text">' + btnInnerHtml + '</span>' +
             '<svg class="category-enter-arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"></polyline></svg>' +
           '</button>';
         const btnMore = moreWrap.querySelector('.category-section-more-btn');

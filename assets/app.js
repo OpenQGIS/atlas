@@ -1860,9 +1860,13 @@
         // 2. 移动端独立底部胶囊操作栏（大拇指舒适触控区）
         const moreWrap = document.createElement('div');
         moreWrap.className = 'category-section-bottom-action';
-        const moreBtnText = isEn
-          ? `View All ${totalInCat} Works in ${group.name} →`
-          : `进入「${group.name}」查看全部 ${totalInCat} 件画卷 →`;
+        const moreBtnText = curLang === 'en'
+          ? `View All ${totalInCat} Works in ${localizedName}`
+          : (curLang === 'ja'
+            ? `「${localizedName}」の全 ${totalInCat} 作品を見る`
+            : (curLang === 'ko'
+              ? `「${localizedName}」 전체 ${totalInCat}개 작품 보기`
+              : `进入「${localizedName}」查看全部 ${totalInCat} 件画卷`));
         moreWrap.innerHTML =
           '<button type="button" class="category-section-more-btn" aria-label="' + escapeHtml(moreBtnText) + '">' +
             '<span>' + escapeHtml(moreBtnText) + '</span>' +

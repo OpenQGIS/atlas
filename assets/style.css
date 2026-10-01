@@ -75,6 +75,7 @@ html {
   text-size-adjust: 100% !important;
   scroll-behavior: smooth;
   overflow-x: hidden;
+  overflow-x: clip;
   width: 100%;
 }
 
@@ -151,6 +152,7 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  overflow-x: clip;
   position: relative;
 }
 
@@ -172,6 +174,7 @@ body {
   background: var(--header-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -9132,6 +9135,7 @@ body.in-subview .page-anchor-spine {
 }
 
 body.in-subview .site-header {
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 50;

@@ -7266,8 +7266,9 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 .footer-nav-columns {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 48px;
+  max-width: 680px;
   min-width: 0;
 }
 

@@ -6430,6 +6430,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 /* 首屏主标上方居中品牌胶囊 (方案2：典藏黄铜 / 青铜蚀刻 Aged Brass Plaque) */
 .hero-brand-capsule {
   position: relative;
+  z-index: 50;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -6453,7 +6454,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
     0 1px 4px rgba(20, 15, 5, 0.5);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: #dec288;
+  color: #1a1308; /* 深黑古铜凹槽底色：实现物理内陷阴刻蚀刻 */
   user-select: none;
   cursor: pointer;
   outline: none;
@@ -6464,7 +6465,11 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   height: clamp(10px, 0.9vw, 12px);
   width: auto;
   display: block;
-  filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.95)) drop-shadow(0 1px 0.5px rgba(255, 240, 190, 0.35));
+  /* 物理激光深槽阴刻：底切面 1px 暖金锐利反光切线 + 顶切面下沉暗影 */
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 235, 175, 0.65))
+    drop-shadow(0 -0.8px 0.5px rgba(0, 0, 0, 0.95))
+    drop-shadow(0 0 1px rgba(0, 0, 0, 0.9));
   transition: filter 0.25s ease, color 0.25s ease;
 }
 
@@ -6472,7 +6477,6 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 .hero-brand-capsule:focus-visible {
   transform: translateY(-2px);
   border-color: rgba(255, 220, 140, 0.7);
-  color: #f7e0a8;
   box-shadow:
     inset 0 1px 2px rgba(255, 245, 200, 0.8),
     inset 0 -1px 2px rgba(0, 0, 0, 0.9),
@@ -6482,14 +6486,18 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 
 .hero-brand-capsule:hover .hero-brand-svg,
 .hero-brand-capsule:focus-visible .hero-brand-svg {
-  filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.95)) drop-shadow(0 1px 2px rgba(255, 220, 130, 0.6));
+  color: #2b1f0d;
+  filter:
+    drop-shadow(0 1px 1px rgba(255, 245, 200, 0.85))
+    drop-shadow(0 -0.8px 0.5px rgba(0, 0, 0, 0.95))
+    drop-shadow(0 0 1px rgba(0, 0, 0, 0.9));
 }
 
 .hero-brand-capsule:active {
   transform: translateY(0) scale(0.98);
 }
 
-/* 浅色模式典藏黄铜 (温润拉丝纯铜质感) */
+/* 浅色模式典藏黄铜 (温润拉丝纯铜质感 + 阴刻深墨铜字标) */
 :root[data-theme="light"] .hero-brand-capsule {
   background: linear-gradient(
     135deg,
@@ -6505,17 +6513,18 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
     inset 0 1px 1px rgba(255, 255, 255, 0.9),
     inset 0 -1px 1.5px rgba(100, 75, 30, 0.3),
     0 4px 14px rgba(60, 45, 20, 0.12);
-  color: #4a3818;
+  color: #2b1f0c;
 }
 
 :root[data-theme="light"] .hero-brand-capsule .hero-brand-svg {
-  filter: drop-shadow(0 1px 0.5px rgba(255, 255, 255, 0.8)) drop-shadow(0 -1px 0 rgba(80, 60, 20, 0.4));
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.85))
+    drop-shadow(0 -0.8px 0.5px rgba(60, 45, 20, 0.5));
 }
 
 :root[data-theme="light"] .hero-brand-capsule:hover,
 :root[data-theme="light"] .hero-brand-capsule:focus-visible {
   border-color: rgba(160, 125, 60, 0.75);
-  color: #2e210a;
   box-shadow:
     inset 0 1px 1.5px rgba(255, 255, 255, 0.95),
     inset 0 -1px 2px rgba(100, 75, 30, 0.35),
@@ -6523,16 +6532,25 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
     0 0 14px rgba(210, 175, 110, 0.3);
 }
 
-/* 方案 A：暗黑毛玻璃悬停提示气泡 (全站统一高阶 Tooltip) */
+:root[data-theme="light"] .hero-brand-capsule:hover .hero-brand-svg,
+:root[data-theme="light"] .hero-brand-capsule:focus-visible .hero-brand-svg {
+  color: #1a1205;
+  filter:
+    drop-shadow(0 1px 1px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 -0.8px 0.5px rgba(60, 45, 20, 0.6));
+}
+
+/* 方案 A：暗黑毛玻璃悬停提示气泡 (置于胶囊上方，高图层避免遮挡下方标题) */
 .hero-brand-tooltip {
   position: absolute;
-  top: calc(100% + 10px);
+  bottom: calc(100% + 9px);
+  top: auto;
   left: 50%;
-  transform: translateX(-50%) translateY(4px);
+  transform: translateX(-50%) translateY(-4px);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  background: rgba(14, 18, 25, 0.92);
+  background: rgba(14, 18, 25, 0.94);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(230, 195, 125, 0.35);
@@ -6545,18 +6563,20 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   color: #dec288;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 12px rgba(230, 195, 125, 0.15);
   transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s;
-  z-index: 10;
+  z-index: 100;
 }
 
+/* 向下指向铭牌胶囊的微晶倒三角箭头 */
 .hero-brand-tooltip::before {
   content: '';
   position: absolute;
-  bottom: 100%;
+  top: 100%;
+  bottom: auto;
   left: 50%;
   transform: translateX(-50%);
   border-width: 5px;
   border-style: solid;
-  border-color: transparent transparent rgba(14, 18, 25, 0.92) transparent;
+  border-color: rgba(14, 18, 25, 0.94) transparent transparent transparent;
 }
 
 .hero-brand-capsule:hover .hero-brand-tooltip,
@@ -6567,14 +6587,14 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 }
 
 :root[data-theme="light"] .hero-brand-tooltip {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.96);
   border-color: rgba(180, 145, 80, 0.4);
   color: #5a441e;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1), 0 0 10px rgba(200, 165, 100, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 0 10px rgba(200, 165, 100, 0.2);
 }
 
 :root[data-theme="light"] .hero-brand-tooltip::before {
-  border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent;
+  border-color: rgba(255, 255, 255, 0.96) transparent transparent transparent;
 }
 
 .hero-title {

@@ -302,6 +302,7 @@
     }
 
     // 预先检测是否有子页面或展品深链参数，若有立即施加 in-subview 类，避免首屏 Hero 闪烁
+    const isTestLang = window.location.href.includes('test_lang');
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const isSub = getSubFromUrl(urlParams);
@@ -328,6 +329,23 @@
       setupData(manifestData);
       initGallery();
       checkUrlDeepLink();
+      if (isTestLang) {
+        if (!isSub && !isArt) {
+          enterGalleryView(false);
+        }
+        const btn = document.getElementById('btnLangDropdown');
+        const menu = document.getElementById('langDropdownMenu');
+        if (btn && menu) {
+          menu.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+          const wrapper = document.getElementById('langDropdownWrapper');
+          if (wrapper) wrapper.classList.add('has-open');
+          const capsule = document.getElementById('headerActionsCapsule');
+          if (capsule) capsule.classList.add('has-open');
+          const siteHeader = document.getElementById('siteHeader');
+          if (siteHeader) siteHeader.classList.add('has-dropdown-open');
+        }
+      }
       return;
     }
 
@@ -338,6 +356,23 @@
       setupData(data);
       initGallery();
       checkUrlDeepLink();
+      if (isTestLang) {
+        if (!isSub && !isArt) {
+          enterGalleryView(false);
+        }
+        const btn = document.getElementById('btnLangDropdown');
+        const menu = document.getElementById('langDropdownMenu');
+        if (btn && menu) {
+          menu.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+          const wrapper = document.getElementById('langDropdownWrapper');
+          if (wrapper) wrapper.classList.add('has-open');
+          const capsule = document.getElementById('headerActionsCapsule');
+          if (capsule) capsule.classList.add('has-open');
+          const siteHeader = document.getElementById('siteHeader');
+          if (siteHeader) siteHeader.classList.add('has-dropdown-open');
+        }
+      }
     } catch (err) {
       console.error('Failed to load Atlas manifest:', err);
       const grid = document.getElementById('galleryGrid');
@@ -658,92 +693,9 @@
       if (siteHeaderEl) {
         siteHeaderEl.classList.toggle('is-sticky', newScrollY > 8);
       }
-      triggerHeaderRefraction();
-    }
-
-    let refractTicking = false;
-    function triggerHeaderRefraction() {
-      if (!refractTicking) {
-        requestAnimationFrame(() => {
-          updateDynamicHeaderRefraction();
-          refractTicking = false;
-        });
-        refractTicking = true;
-      }
-    }
-
-    // 苹果级置顶工具条动态内容感应折射算法
-    function updateDynamicHeaderRefraction() {
-      const header = document.getElementById('siteHeader');
-      if (!header) return;
-
-      const headerRect = header.getBoundingClientRect();
-      const headerBottom = headerRect.bottom;
-      const windowW = window.innerWidth;
-
-      const cards = document.querySelectorAll('.gallery-card');
-      if (cards.length === 0) return;
-
-      const activeColorStops = [];
-
-      cards.forEach(card => {
-        const rect = card.getBoundingClientRect();
-        if (rect.top <= headerBottom + 70 && rect.bottom >= headerBottom - 60) {
-          let factor = 1;
-          if (rect.top > headerBottom) {
-            factor = (headerBottom + 70 - rect.top) / 70;
-          } else if (rect.bottom < headerBottom + 60) {
-            factor = Math.max(0.1, (rect.bottom - (headerBottom - 60)) / 120);
-          }
-          factor = Math.max(0.2, Math.min(1, factor));
-
-          const rgb = card.getAttribute('data-refract-color') || '140, 220, 35';
-          const leftP = Math.max(0, Math.min(100, (rect.left / windowW) * 100));
-          const rightP = Math.max(0, Math.min(100, (rect.right / windowW) * 100));
-
-          activeColorStops.push({ left: leftP, right: rightP, rgb: rgb, factor: factor });
-        }
-      });
-
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-
-      if (activeColorStops.length > 0) {
-        activeColorStops.sort((a, b) => a.left - b.left);
-        const neutralRgba = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.35)';
-        const stops = [];
-        let cursor = 0;
-
-        activeColorStops.forEach(item => {
-          if (item.left > cursor) {
-            stops.push(`${neutralRgba} ${cursor.toFixed(1)}%`);
-            stops.push(`${neutralRgba} ${Math.max(cursor, item.left - 1.2).toFixed(1)}%`);
-          }
-          const alphaCenter = (((isDark ? 0.95 : 0.90) * item.factor)).toFixed(2);
-          const alphaEdge = (((isDark ? 0.50 : 0.45) * item.factor)).toFixed(2);
-
-          stops.push(`rgba(${item.rgb}, ${alphaEdge}) ${item.left.toFixed(1)}%`);
-          stops.push(`rgba(${item.rgb}, ${alphaCenter}) ${((item.left + item.right) / 2).toFixed(1)}%`);
-          stops.push(`rgba(${item.rgb}, ${alphaEdge}) ${item.right.toFixed(1)}%`);
-
-          cursor = item.right;
-        });
-
-        if (cursor < 100) {
-          stops.push(`${neutralRgba} ${Math.min(100, cursor + 1.2).toFixed(1)}%`);
-          stops.push(`${neutralRgba} 100%`);
-        }
-
-        header.style.setProperty('--refract-gradient', `linear-gradient(90deg, ${stops.join(', ')})`);
-      } else {
-        const defGradient = isDark 
-          ? 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(160,205,255,0.30) 50%, rgba(255,255,255,0.03) 100%)'
-          : 'linear-gradient(90deg, rgba(255,255,255,0.20) 0%, rgba(200,225,255,0.65) 50%, rgba(255,255,255,0.20) 100%)';
-        header.style.setProperty('--refract-gradient', defGradient);
-      }
     }
 
     window.addEventListener('scroll', () => {
-      triggerHeaderRefraction();
       const scrollY = window.scrollY || window.pageYOffset;
       if (document.body.classList.contains('in-gallery')) {
         stopHeroTimer();
@@ -904,8 +856,16 @@
         if (exceptMenuId && menuId === exceptMenuId) return;
         const menu = document.getElementById(menuId);
         const btn = document.getElementById(btnId);
+        const wrapper = document.getElementById(wrapperId);
         if (menu) menu.classList.remove('open');
         if (btn) btn.setAttribute('aria-expanded', 'false');
+        if (wrapper) {
+          wrapper.classList.remove('has-open');
+          const capsule = wrapper.closest('.header-actions-capsule');
+          if (capsule) capsule.classList.remove('has-open');
+          const siteHeader = wrapper.closest('.site-header');
+          if (siteHeader) siteHeader.classList.remove('has-dropdown-open');
+        }
         if (wrapperId === 'viewerLangDropdownWrapper') {
           const topActions = document.getElementById('viewerTopActions');
           if (topActions) {
@@ -931,6 +891,12 @@
         closeAllLangDropdowns(menuId);
         const isOpen = menu.classList.toggle('open');
         btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        wrapper.classList.toggle('has-open', isOpen);
+        const capsule = wrapper.closest('.header-actions-capsule');
+        if (capsule) capsule.classList.toggle('has-open', isOpen);
+        const siteHeader = wrapper.closest('.site-header');
+        if (siteHeader) siteHeader.classList.toggle('has-dropdown-open', isOpen);
+
         if (wrapperId === 'viewerLangDropdownWrapper') {
           const topActions = document.getElementById('viewerTopActions');
           if (topActions) {
@@ -963,6 +929,12 @@
         if (wrapper && menu && !wrapper.contains(e.target)) {
           menu.classList.remove('open');
           if (btn) btn.setAttribute('aria-expanded', 'false');
+          wrapper.classList.remove('has-open');
+          const capsule = wrapper.closest('.header-actions-capsule');
+          if (capsule) capsule.classList.remove('has-open');
+          const siteHeader = wrapper.closest('.site-header');
+          if (siteHeader) siteHeader.classList.remove('has-dropdown-open');
+
           if (wrapperId === 'viewerLangDropdownWrapper') {
             const topActions = document.getElementById('viewerTopActions');
             if (topActions) {
@@ -982,6 +954,15 @@
         closeAllLangDropdowns();
       }
     });
+
+    // 测试与深链钩子：若包含 test_lang 参数则自动展示下拉菜单方便自动化校验
+    if (window.location.hash.includes('test_lang') || window.location.search.includes('test_lang')) {
+      setTimeout(() => {
+        enterGalleryView(false);
+        const btn = document.getElementById('btnLangDropdown');
+        if (btn) btn.click();
+      }, 350);
+    }
 
     window.closeAtlasLangDropdowns = closeAllLangDropdowns;
   }
@@ -2155,19 +2136,6 @@
     return str;
   }
 
-  function getItemRefractColor(item) {
-    const text = (item.title || '') + ' ' + (item.tags ? item.tags.join(' ') : '') + ' ' + (item.subCategory || '');
-    if (/绿|自然|林|生态|青|竹/i.test(text)) return '140, 220, 35';
-    if (/银黑|暗黑|夜|黑|水墨|冷灰/i.test(text)) return '80, 95, 115';
-    if (/剪纸|金|黄|暖|大同/i.test(text)) return '245, 195, 30';
-    if (/冰|蓝|水|雪|海/i.test(text)) return '45, 205, 220';
-    if (/马卡龙|粉|紫|梦幻/i.test(text)) return '220, 130, 245';
-    if (/红|朱|珊瑚|暖/i.test(text)) return '245, 65, 65';
-    if (/城|古|砖/i.test(text)) return '50, 155, 250';
-    if (/橙|秋|落日/i.test(text)) return '245, 120, 20';
-    return '160, 205, 245';
-  }
-
   function createCard(item, localIdx) {
     const locItem = window.AtlasI18n ? window.AtlasI18n.getItem(item) : item;
     const curLang = window.AtlasI18n ? window.AtlasI18n.getLang() : 'zh';
@@ -2183,7 +2151,6 @@
     card.setAttribute('role', 'button');
     card.tabIndex = 0;
     card.style.setProperty('--aspect-ratio', item.aspectRatio);
-    card.setAttribute('data-refract-color', getItemRefractColor(locItem));
 
     const FORMAT_TAGS = new Set([
       'no', 'no_hero', 'hero:no', 'hero=no',

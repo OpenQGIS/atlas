@@ -15,8 +15,11 @@
   const SVG_MOON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
 
   // Determine initial theme before paint
+  const urlTheme = (new URLSearchParams(window.location.search).get('theme')) || (window.location.hash.includes('dark') ? 'dark' : (window.location.hash.includes('light') ? 'light' : null));
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved === 'light' || saved === 'dark') {
+  if (urlTheme === 'light' || urlTheme === 'dark') {
+    currentTheme = urlTheme;
+  } else if (saved === 'light' || saved === 'dark') {
     currentTheme = saved;
   } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
     currentTheme = 'light';
@@ -85,8 +88,34 @@
     window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: currentTheme } }));
   }
 
-  function toggleTheme() {
-    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  function toggleTheme(event) {
+    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    // 检查是否支持原生 View Transition API（扩散光晕波纹过渡）
+    if (document.startViewTransition) {
+      let x = window.innerWidth * 0.95;
+      let y = 32;
+      if (event && typeof event.clientX === 'number' && event.clientX > 0) {
+        x = event.clientX;
+        y = event.clientY;
+      } else if (event && event.currentTarget && event.currentTarget.getBoundingClientRect) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        x = rect.left + rect.width / 2;
+        y = rect.top + rect.height / 2;
+      }
+      document.documentElement.style.setProperty('--ripple-x', `${x}px`);
+      document.documentElement.style.setProperty('--ripple-y', `${y}px`);
+      document.documentElement.classList.add('ripple-active');
+
+      const transition = document.startViewTransition(() => {
+        setTheme(nextTheme);
+      });
+      transition.finished.finally(() => {
+        document.documentElement.classList.remove('ripple-active');
+      });
+    } else {
+      setTheme(nextTheme);
+    }
   }
 
   function updateUI() {
@@ -120,7 +149,7 @@
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          toggleTheme();
+          toggleTheme(e);
         });
       }
     });

@@ -20,6 +20,7 @@ ehthumbs_vista.db
 # Editor & IDE
 .idea/
 .vscode/
+.codegraph/
 
 # Raw Large Photo Assets (Asset Protection)
 pic/

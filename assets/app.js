@@ -910,6 +910,10 @@
     if (window.AtlasI18n) {
       window.AtlasI18n.updateDOM();
     }
+    updateHeroSloganSeparators();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(updateHeroSloganSeparators).catch(() => {});
+    }
 
     window.addEventListener('languageChanged', () => {
       // Re-render gallery grid with localized data
@@ -935,6 +939,42 @@
       if (posterModal && posterModal.classList.contains('open') && currentPosterItem) {
         updatePosterRatioUI();
         renderCurrentPoster();
+      }
+
+      // 切换语言后自动重新检测首屏主标/副标断行并消除行末悬挂分隔点
+      updateHeroSloganSeparators();
+    });
+
+    let sloganResizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(sloganResizeTimer);
+      sloganResizeTimer = setTimeout(updateHeroSloganSeparators, 80);
+    });
+  }
+
+  /**
+   * 智能检测首屏标语是否折行：
+   * 如果发生物理折行，自动施加 is-wrapped 类消除行尾多余分隔点；
+   * 若在单行容纳，则保留分隔点。
+   */
+  function updateHeroSloganSeparators() {
+    const elements = [
+      { container: document.getElementById('heroTitle'), chunks: '.hero-title-chunk, .hero-slogan-chunk' },
+      { container: document.getElementById('heroSubtitle'), chunks: '.hero-sub-chunk' }
+    ];
+
+    elements.forEach(({ container, chunks }) => {
+      if (!container) return;
+      const chunkEls = container.querySelectorAll(chunks);
+      if (chunkEls.length < 2) return;
+
+      container.classList.remove('is-wrapped');
+
+      const firstTop = chunkEls[0].getBoundingClientRect().top;
+      const lastTop = chunkEls[chunkEls.length - 1].getBoundingClientRect().top;
+
+      if (Math.abs(firstTop - lastTop) > 6) {
+        container.classList.add('is-wrapped');
       }
     });
   }

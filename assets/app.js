@@ -149,6 +149,15 @@
   }
 
   function updateZoomUI() {
+    if (window.AtlasMorphicons && window.AtlasMorphicons.reset && osdViewer && osdViewer.viewport) {
+      const curZ = osdViewer.viewport.getZoom();
+      const homeZ = osdViewer.viewport.getHomeZoom();
+      if (Math.abs(curZ - homeZ) / homeZ < 0.04) {
+        window.AtlasMorphicons.reset.toFit();
+      } else {
+        window.AtlasMorphicons.reset.toZoomed();
+      }
+    }
     if (!osdViewer || !osdViewer.viewport) return;
     const currentZoom = osdViewer.viewport.getZoom();
     const currentPercent = getPhysicalPercentFromZoom(osdViewer, currentZoom);
@@ -858,6 +867,10 @@
         const btn = document.getElementById(btnId);
         const wrapper = document.getElementById(wrapperId);
         if (menu) menu.classList.remove('open');
+        if (window.AtlasMorphicons) {
+          if (btnId === 'btnLangDropdown' && window.AtlasMorphicons.headerLang) window.AtlasMorphicons.headerLang.set(false);
+          if (btnId === 'viewerBtnLangDropdown' && window.AtlasMorphicons.viewerLang) window.AtlasMorphicons.viewerLang.set(false);
+        }
         if (btn) btn.setAttribute('aria-expanded', 'false');
         if (wrapper) {
           wrapper.classList.remove('has-open');
@@ -890,6 +903,10 @@
         e.stopPropagation();
         closeAllLangDropdowns(menuId);
         const isOpen = menu.classList.toggle('open');
+        if (window.AtlasMorphicons) {
+          if (btnId === 'btnLangDropdown' && window.AtlasMorphicons.headerLang) window.AtlasMorphicons.headerLang.set(isOpen);
+          if (btnId === 'viewerBtnLangDropdown' && window.AtlasMorphicons.viewerLang) window.AtlasMorphicons.viewerLang.set(isOpen);
+        }
         btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         wrapper.classList.toggle('has-open', isOpen);
         const capsule = wrapper.closest('.header-actions-capsule');
@@ -2586,7 +2603,7 @@
       if (!drawerEl) return;
       if (isOpen) {
         drawerEl.classList.add('open');
-        if (toggleInfoBtn) toggleInfoBtn.classList.add('active');
+        if (toggleInfoBtn) toggleInfoBtn.classList.add('active'); if (window.AtlasMorphicons && window.AtlasMorphicons.info) window.AtlasMorphicons.info.set(true);
         if (modalEl) modalEl.classList.add('drawer-open');
         updateEdgeNextOffset();
         setTimeout(updateEdgeNextOffset, 300);
@@ -2595,7 +2612,7 @@
         }
       } else {
         drawerEl.classList.remove('open');
-        if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
+        if (toggleInfoBtn) toggleInfoBtn.classList.remove('active'); if (window.AtlasMorphicons && window.AtlasMorphicons.info) window.AtlasMorphicons.info.set(false);
         if (modalEl) modalEl.classList.remove('drawer-open');
         updateEdgeNextOffset();
         setTimeout(updateEdgeNextOffset, 300);
@@ -2635,8 +2652,14 @@
     if (toolRotate) {
       toolRotate.addEventListener('click', () => {
         if (osdViewer) {
-          const curr = osdViewer.viewport.getRotation();
-          osdViewer.viewport.setRotation((curr + 90) % 360);
+          if (window.AtlasMorphicons && window.AtlasMorphicons.rotate) {
+            window.AtlasMorphicons.rotate.rotateNext((nextAngle) => {
+              osdViewer.viewport.setRotation(nextAngle);
+            });
+          } else {
+            const curr = osdViewer.viewport.getRotation();
+            osdViewer.viewport.setRotation((curr + 90) % 360);
+          }
         }
       });
     }
@@ -2699,8 +2722,12 @@
       const isFs = !!document.fullscreenElement;
       modalEl.classList.toggle('fullscreen-mode', isFs);
       if (toolFullscreen) {
-        toolFullscreen.innerHTML = isFs ? SVG_EXIT_FULLSCREEN : SVG_FULLSCREEN;
-        toolFullscreen.dataset.customTip = isFs ? '退出全屏 (F / Esc)' : '全屏阅览 (F)';
+        if (window.AtlasMorphicons && window.AtlasMorphicons.fullscreen) {
+          window.AtlasMorphicons.fullscreen.set(isFs);
+        } else {
+          toolFullscreen.innerHTML = isFs ? SVG_EXIT_FULLSCREEN : SVG_FULLSCREEN;
+        }
+        toolFullscreen.dataset.customTip = isFs ? '退出全屏 (F / Esc)' : '视口全屏 (F)';
         toolFullscreen.removeAttribute('title');
       }
       if (isFs && drawerEl) {
@@ -3777,6 +3804,9 @@
     }
 
     modalEl.classList.add('open');
+    if (window.AtlasMorphicons && window.AtlasMorphicons.rotate) {
+      window.AtlasMorphicons.rotate.reset();
+    }
     modalEl.setAttribute('aria-hidden', 'false');
     document.documentElement.classList.add('viewer-open');
     document.body.classList.add('viewer-open');
@@ -4353,7 +4383,7 @@
             const toggleInfoBtn = document.getElementById('btnToggleInfo');
             const modalEl = document.getElementById('viewerModal');
             drawerEl.classList.remove('open');
-            if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
+            if (toggleInfoBtn) toggleInfoBtn.classList.remove('active'); if (window.AtlasMorphicons && window.AtlasMorphicons.info) window.AtlasMorphicons.info.set(false);
             if (modalEl) modalEl.classList.remove('drawer-open');
           }
         }
@@ -4669,7 +4699,7 @@
       drawerEl.style.removeProperty('bottom');
     }
     const toggleInfoBtn = document.getElementById('btnToggleInfo');
-    if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
+    if (toggleInfoBtn) toggleInfoBtn.classList.remove('active'); if (window.AtlasMorphicons && window.AtlasMorphicons.info) window.AtlasMorphicons.info.set(false);
     modalEl.classList.remove('drawer-open');
     modalEl.style.removeProperty('--drawer-offset');
     closeSharePopover();
@@ -4837,6 +4867,9 @@
     if (!item) return;
     const url = getShareUrlForItem(item);
     copyToClipboard(url);
+    if (window.AtlasMorphicons && window.AtlasMorphicons.shareLink) {
+      window.AtlasMorphicons.shareLink.triggerSuccess();
+    }
 
     showCursorTip(e);
 
@@ -5986,6 +6019,13 @@
           return true;
         }
       }
+      const scrollMatch = (urlParams.get('scroll')) || (window.location.hash.match(/scroll=(\d+)/) ? window.location.hash.match(/scroll=(\d+)/)[1] : null);
+      if (scrollMatch) {
+        const targetY = parseInt(scrollMatch, 10);
+        setTimeout(() => {
+          window.scrollTo(0, targetY);
+        }, 100);
+      }
     } catch (e) {
       console.warn('Error checking URL deep link:', e);
     }
@@ -6444,5 +6484,207 @@
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
+  }
+})();
+
+
+/* =============================================================
+   Morphicons Integration Controller for OpenQGIS Atlas
+   Manages morphing for:
+     Scene A: #toolReset (ResetFit <-> ResetZoomed)
+     Scene B: #toolRotate (RotateCw step rotation with spring dynamics)
+     Scene C: #toolFullscreen (Maximize <-> Minimize)
+     Scene D: #btnToggleInfo (Info <-> X)
+     Scene E: #btnLangDropdown & #viewerBtnLangDropdown (Languages <-> Globe)
+     Scene F: #btnShareOptLink (Link <-> Check)
+   ============================================================= */
+
+(function () {
+  'use strict';
+
+  let morphReset = null;
+  let morphRotate = null;
+  let morphFullscreen = null;
+  let morphInfo = null;
+  let morphHeaderLang = null;
+  let morphViewerLang = null;
+  let morphShareLink = null;
+
+  let rotateAngle = 0;
+  let isRotateBusy = false;
+
+  function initAtlasMorphicons() {
+    if (!window.Morphicons || !window.LucideIcons) {
+      console.warn('Morphicons or LucideIcons bundle not found');
+      return;
+    }
+
+    const { createMorph } = window.Morphicons;
+    const {
+      ResetFit, ResetZoomed,
+      RotateCw,
+      Maximize, Minimize,
+      CircleHelp, X,
+      Languages, Globe,
+      Link, Check
+    } = window.LucideIcons;
+
+    // A: toolReset
+    const pReset = document.getElementById('pathResetMorph');
+    if (pReset) {
+      const m = createMorph(pReset, ResetFit);
+      let isZoomed = false;
+      morphReset = {
+        toFit() {
+          if (!isZoomed) return;
+          isZoomed = false;
+          m.morphTo(ResetFit, 'snappy');
+        },
+        toZoomed() {
+          if (isZoomed) return;
+          isZoomed = true;
+          m.morphTo(ResetZoomed, 'snappy');
+        },
+        toggle() {
+          isZoomed = !isZoomed;
+          m.morphTo(isZoomed ? ResetZoomed : ResetFit, 'snappy');
+        }
+      };
+    }
+
+    // B: toolRotate (Scheme 3: Pure-torque spring dynamics, scale strictly 1.0)
+    const pRotate = document.getElementById('pathRotateMorph');
+    const svgRotate = document.getElementById('toolRotateSvg');
+    if (pRotate && svgRotate) {
+      const m = createMorph(pRotate, RotateCw);
+      morphRotate = {
+        rotateNext(onComplete) {
+          if (isRotateBusy) return;
+          isRotateBusy = true;
+          const targetAngle = rotateAngle + 90;
+
+          // Stage 1 (0ms): Reverse recoil -22 deg (scale strictly 1.0)
+          svgRotate.style.transition = 'transform 0.14s cubic-bezier(0.4, 0, 0.2, 1)';
+          svgRotate.style.transform = `rotate(${rotateAngle - 22}deg)`;
+
+          // Stage 2 (140ms): Forward torque sprint, overshoot +14 deg
+          setTimeout(() => {
+            svgRotate.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)';
+            svgRotate.style.transform = `rotate(${targetAngle + 14}deg)`;
+          }, 140);
+
+          // Stage 3 (420ms): Spring damping settling at targetAngle
+          setTimeout(() => {
+            svgRotate.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            svgRotate.style.transform = `rotate(${targetAngle}deg)`;
+          }, 420);
+
+          // Lock final angle (580ms)
+          setTimeout(() => {
+            rotateAngle = targetAngle;
+            isRotateBusy = false;
+            if (typeof onComplete === 'function') onComplete(rotateAngle % 360);
+          }, 580);
+        },
+        reset() {
+          rotateAngle = 0;
+          isRotateBusy = false;
+          if (svgRotate) {
+            svgRotate.style.transition = 'none';
+            svgRotate.style.transform = 'rotate(0deg)';
+          }
+        }
+      };
+    }
+
+    // C: toolFullscreen
+    const pFullscreen = document.getElementById('pathFullscreenMorph');
+    if (pFullscreen) {
+      const m = createMorph(pFullscreen, Maximize);
+      let isFs = false;
+      morphFullscreen = {
+        set(fsState) {
+          if (isFs === fsState) return;
+          isFs = fsState;
+          m.morphTo(isFs ? Minimize : Maximize, 'snappy');
+        }
+      };
+    }
+
+    // D: btnToggleInfo
+    // Info icon path: circle with line/dot -> morphs to X
+    const pInfo = document.getElementById('pathInfoMorph');
+    if (pInfo) {
+      const InfoIcon = {
+        d: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 16v-4M12 8h.01'
+      };
+      const m = createMorph(pInfo, InfoIcon);
+      let isOpen = false;
+      morphInfo = {
+        set(openState) {
+          if (isOpen === openState) return;
+          isOpen = openState;
+          m.morphTo(isOpen ? X : InfoIcon, 'snappy');
+        }
+      };
+    }
+
+    // E: Language Dropdowns (Languages <-> Globe)
+    const pHeaderLang = document.getElementById('pathHeaderLangMorph');
+    if (pHeaderLang) {
+      const m = createMorph(pHeaderLang, Languages);
+      let isOpen = false;
+      morphHeaderLang = {
+        set(openState) {
+          if (isOpen === openState) return;
+          isOpen = openState;
+          m.morphTo(isOpen ? Globe : Languages, 'snappy');
+        }
+      };
+    }
+
+    const pViewerLang = document.getElementById('pathViewerLangMorph');
+    if (pViewerLang) {
+      const m = createMorph(pViewerLang, Languages);
+      let isOpen = false;
+      morphViewerLang = {
+        set(openState) {
+          if (isOpen === openState) return;
+          isOpen = openState;
+          m.morphTo(isOpen ? Globe : Languages, 'snappy');
+        }
+      };
+    }
+
+    // F: btnShareOptLink (Link <-> Check)
+    const pShareLink = document.getElementById('pathShareLinkMorph');
+    if (pShareLink) {
+      const m = createMorph(pShareLink, Link);
+      morphShareLink = {
+        triggerSuccess(duration = 1800) {
+          m.morphTo(Check, 'snappy');
+          setTimeout(() => {
+            m.morphTo(Link, 'snappy');
+          }, duration);
+        }
+      };
+    }
+
+    window.AtlasMorphicons = {
+      reset: morphReset,
+      rotate: morphRotate,
+      fullscreen: morphFullscreen,
+      info: morphInfo,
+      headerLang: morphHeaderLang,
+      viewerLang: morphViewerLang,
+      shareLink: morphShareLink
+    };
+  }
+
+  // Hook into DOM lifecycle
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAtlasMorphicons);
+  } else {
+    initAtlasMorphicons();
   }
 })();

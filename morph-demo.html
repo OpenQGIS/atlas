@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Morphicons 按钮交互动效实验室 (V2 精炼版) · OpenQGIS / Atlas</title>
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --surface: rgba(18, 23, 34, 0.75);
+      --surface-border: rgba(255, 255, 255, 0.08);
+      --surface-hover: rgba(255, 255, 255, 0.06);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent: #80cc28;
+      --accent-rgb: 128, 204, 40;
+      --accent-glow: rgba(128, 204, 40, 0.25);
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-pill: 9999px;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --surface: rgba(255, 255, 255, 0.85);
+      --surface-border: rgba(0, 0, 0, 0.08);
+      --surface-hover: rgba(0, 0, 0, 0.04);
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --accent: #5c9e17;
+      --accent-rgb: 92, 158, 23;
+      --accent-glow: rgba(92, 158, 23, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 36px 20px 140px;
+      transition: background 0.3s ease, color 0.3s ease;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb), 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.04) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    .header {
+      max-width: 960px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(var(--accent-rgb), 0.12);
+      border: 1px solid rgba(var(--accent-rgb), 0.3);
+      border-radius: var(--radius-pill);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+    }
+
+    .brand-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 20px;
+      line-height: 1.6;
+    }
+
+    .controls-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 10px 20px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      margin-bottom: 32px;
+    }
+
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .seg-group {
+      display: inline-flex;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-pill);
+      padding: 3px;
+      gap: 2px;
+    }
+
+    [data-theme="light"] .seg-group {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .seg-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .seg-btn.active {
+      background: var(--surface);
+      color: var(--accent);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .scrubber-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .scrubber-slider {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 100px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    [data-theme="light"] .scrubber-slider {
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .scrubber-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    /* 分类标签提示 */
+    .section-divider {
+      width: 100%;
+      max-width: 1100px;
+      margin: 10px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-dim);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--surface-border);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(var(--accent-rgb), 0.3);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.15), 0 0 20px var(--accent-glow);
+    }
+
+    .card.approved {
+      border-color: rgba(var(--accent-rgb), 0.25);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-scene {
+      font-size: 12px;
+      color: var(--accent);
+      margin-top: 2px;
+      font-family: monospace;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid transparent;
+    }
+
+    .badge-approved {
+      background: rgba(var(--accent-rgb), 0.15);
+      color: var(--accent);
+      border-color: rgba(var(--accent-rgb), 0.3);
+    }
+
+    .badge-refined {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .card-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 22px 0 16px;
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--surface-border);
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    [data-theme="light"] .card-stage {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .morph-btn {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      outline: none;
+    }
+
+    .morph-btn:hover {
+      border-color: var(--accent);
+      background: var(--surface-hover);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18), 0 0 12px var(--accent-glow);
+    }
+
+    .morph-btn:active {
+      transform: scale(0.92);
+    }
+
+    .morph-btn svg {
+      width: 26px;
+      height: 26px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      overflow: visible;
+    }
+
+    .btn-state-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 10px;
+      font-family: monospace;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .state-pill {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .card-footer {
+      border-top: 1px dashed var(--surface-border);
+      padding-top: 10px;
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-footer-tip {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* 拟真 AtlasLog 悬浮底栏 */
+    .mock-toolbar-panel {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      background: rgba(14, 18, 26, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      padding: 8px 18px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), 0 0 24px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    [data-theme="light"] .mock-toolbar-panel {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(0, 0, 0, 0.12);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .toolbar-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding-right: 8px;
+      border-right: 1px solid var(--surface-border);
+    }
+
+    .tb-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 9999px;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: color 0.2s ease, filter 0.2s ease;
+    }
+
+    .tb-btn:hover {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      color: var(--accent);
+    }
+
+    [data-theme="light"] .tb-btn {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      color: #3d4654;
+    }
+
+    [data-theme="light"] .tb-btn:hover {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      color: #0f141c;
+    }
+
+    .tb-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .tb-divider {
+      width: 1px;
+      height: 22px;
+      background: var(--surface-border);
+    }
+
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      opacity: 0;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 8px 18px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 600;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  
+    /* ========================================================
+       High-End Apple / Framer Dock Tooltip (跟随提示气泡)
+       ======================================================== */
+    .dock-tooltip {
+      position: absolute;
+      bottom: calc(100% + 14px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      padding: 5px 12px;
+      background: rgba(14, 18, 25, 0.94);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 9999px;
+      color: #f8fafc;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+                  left 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                  visibility 0.18s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.2);
+      z-index: 120;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .dock-tooltip.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dock-tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      width: 6px;
+      height: 6px;
+      background: rgba(14, 18, 25, 0.94);
+      border-right: 1px solid rgba(255, 255, 255, 0.16);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+      transform: translateX(-50%) rotate(45deg);
+      border-bottom-right-radius: 1px;
+      pointer-events: none;
+    }
+
+    [data-theme="light"] .dock-tooltip {
+      background: rgba(255, 255, 255, 0.96);
+      color: #0f172a;
+      border-color: rgba(0, 0, 0, 0.14);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    [data-theme="light"] .dock-tooltip::after {
+      background: rgba(255, 255, 255, 0.96);
+      border-color: rgba(0, 0, 0, 0.14);
+    }
+
+    .dock-tooltip-kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px 5px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      line-height: 1.2;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+
+    [data-theme="light"] .dock-tooltip-kbd {
+      color: #64748b;
+      background: rgba(0, 0, 0, 0.06);
+      border-color: rgba(0, 0, 0, 0.12);
+    }
+
+    /* 3D 磁吸视差支撑样式 */
+    .mock-toolbar-panel {
+      perspective: 800px;
+    }
+
+    .tb-btn {
+      position: relative;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .tb-btn .tb-icon-layer {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .tb-btn svg {
+      pointer-events: none;
+      transform-style: preserve-3d;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="toast" id="toast">已触发复制直链！</div>
+
+  <header class="header">
+    <div class="brand-pill">
+      <span class="brand-dot"></span>
+      OpenQGIS / Atlas 交互动效实验室 (V2 精炼版)
+    </div>
+    <h1 class="title">地图录 真实功能对齐动效 Showcase</h1>
+    <p class="subtitle">
+      针对你的反馈，剔除无实际业务映射的冗余功能，重构 4 & 7 控件。<br>
+      上方为<b>已认可的 1、2、3、8 黄金四件套</b>，下方为<b>精细调整后直接对应 Atlas 真实功能的新候选项</b>。
+    </p>
+
+    <!-- Controls Strip -->
+    <div class="controls-strip">
+      <div class="control-item">
+        <span>弹簧物理预设:</span>
+        <div class="seg-group" id="presetGroup">
+          <button class="seg-btn active" data-preset="snappy">Snappy (爽脆推荐)</button>
+          <button class="seg-btn" data-preset="bouncy">Bouncy (饱满回弹)</button>
+          <button class="seg-btn" data-preset="gentle">Gentle (优雅缓释)</button>
+        </div>
+      </div>
+
+      <div class="control-item">
+        <span>底色模式:</span>
+        <div class="seg-group" id="themeGroup">
+          <button class="seg-btn active" data-mode="dark">Dark</button>
+          <button class="seg-btn" data-mode="light">Light</button>
+        </div>
+      </div>
+
+      <div class="control-item">
+        <span>逐帧慢放:</span>
+        <div class="scrubber-wrap">
+          <input type="range" min="0" max="100" value="0" class="scrubber-slider" id="scrubber">
+          <span id="scrubberVal" style="font-family: monospace; width: 34px;">0%</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 阶段一：你已认可的黄金四件套 -->
+  <div class="section-divider">已认可的黄金四件套 (1、2、3、8 完美对应现有高频功能)</div>
+  <div class="grid">
+
+    <!-- 场景 A: 整图展卷全貌 -->
+    <div class="card" id="cardReset">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-name">场景 A: 整图展卷全貌</span>
+          <span class="card-scene">ResetFit ⇄ ResetZoomed</span>
+        </div>
+        <span class="badge badge-refined">契合 #toolReset</span>
+      </div>
+      <div class="card-stage">
+        <button class="morph-btn" id="btnResetMorph" aria-label="整图展卷全貌">
+          <svg viewBox="0 0 24 24"><path id="pathResetMorph" /></svg>
+        </button>
+        <div class="btn-state-label">
+          当前状态: <span class="state-pill" id="lblReset">全貌展卷 (Fit)</span>
+        </div>
+      </div>
+      <p class="card-desc">
+        <strong>视口比例联动：</strong>全屏全貌时外层四个折角朝外张开、中间为常规空心矩形（ResetFit）；缩放改变比例时，四个折角旋转 180° 朝内聚拢，同时中间矩形收敛缩小并变为纯实心焦点（ResetZoomed），生动指示当前非全貌状态。
+      </p>
+      <div class="card-footer">
+        <span>现有元素: 底栏 #toolReset</span>
+        <span class="card-footer-tip">点击复位 / 联动滑块 ↗</span>
+      </div>
+    </div>
+
+        <!-- 场景 B: 步进旋转与刷新动效 (3 大方案并排对比) -->
+    <div class="card" id="cardRotate" style="grid-column: 1 / -1;">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-name">场景 B: 步进旋转动效 · 3 种节奏方案并排实测</span>
+          <span class="card-scene">RotateCw ➔ RefreshCw ➔ RotateCw (+90°)</span>
+        </div>
+        <span class="badge badge-refined">点击下方各按钮对比</span>
+      </div>
+
+      <!-- 3 大方案对比网格 -->
+      <div class="variant-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0;">
+        
+        <!-- 方案 1: 错峰三幕式 -->
+        <div class="variant-box" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #3b82f6; margin-bottom: 4px;">方案 1: 错峰三幕式</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 14px;">变身 ➔ 旋转 ➔ 落锁 · 0.85s</div>
+          <button class="morph-btn" id="btnRotateV1" aria-label="方案1: 错峰三幕式" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathRotateV1" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前朝向: <span class="state-pill" id="lblRotateV1" style="font-size: 10px;">0° (开口朝右)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0;">
+            <strong>极佳松弛感：</strong>点击先原地舒展为双箭头 Refresh（180ms 看清刷新指令），随后优雅旋转 90°，减速到位时轻盈弹回单箭头。节奏从容不抢戏。
+          </p>
+        </div>
+
+        <!-- 方案 2: 同步呼吸式 -->
+        <div class="variant-box" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #10b981; margin-bottom: 4px;">方案 2: 同步呼吸式</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 14px;">同速匀变 · 0.70s</div>
+          <button class="morph-btn" id="btnRotateV2" aria-label="方案2: 同步呼吸式" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathRotateV2" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前朝向: <span class="state-pill" id="lblRotateV2" style="font-size: 10px;">0° (开口朝右)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0;">
+            <strong>稳重连贯：</strong>前半程 45° 匀速展开为 Refresh，后半程 45° 匀速合拢为 Rotate。采用平滑缓出曲线，无剧烈急停急转，像精密仪器旋钮。
+          </p>
+        </div>
+
+        <!-- 方案 3: 动力强化回弹式 -->
+        <div class="variant-box" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #f59e0b; margin-bottom: 4px;">方案 3: 动力强化回弹式</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 14px;">纯转角蓄力 + 弹性过冲 · 0.55s</div>
+          <button class="morph-btn" id="btnRotateV3" aria-label="方案3: 动力强化回弹式" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathRotateV3" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前朝向: <span class="state-pill" id="lblRotateV3" style="font-size: 10px;">0° (开口朝右)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0;">
+            <strong>纯角度张力（零形体缩放）：</strong>完全锁定 1:1 图标尺寸（无缩放突兀感）。点击时逆向后撤 -22° 蓄力，随后大角度爆发顺转并过冲 +14°，最后弹簧减震精准回弹落锁。
+          </p>
+        </div>
+
+      </div>
+
+      <div class="card-footer" style="margin-top: 10px;">
+        <span>实测提示: 分别点击上方 3 个按钮体验不同物理节奏</span>
+        <span class="card-footer-tip">底栏按钮默认绑定方案 1 ↗</span>
+      </div>
+    </div>
+
+    <!-- 场景 C: 瀑布流更多图片卡片 -->
+    <div class="card" id="cardFolder">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-name">场景 C: 瀑布流画卷卡片</span>
+          <span class="card-scene">Folder ⇄ Image (Hover 驱动)</span>
+        </div>
+        <span class="badge badge-refined">画卷探索体验</span>
+      </div>
+      <div class="card-stage">
+        <button class="morph-btn hover-sensitive" id="btnFolderMorph" aria-label="画卷文件夹卡片">
+          <svg viewBox="0 0 24 24"><path id="pathFolderMorph" /></svg>
+        </button>
+        <div class="btn-state-label">
+          当前状态: <span class="state-pill" id="lblFolder">日常图册 (Folder)</span>
+        </div>
+      </div>
+      <p class="card-desc">
+        <strong>Hover 悬停触发形变：</strong>日常静止时为典雅的书册/文件夹（Folder）；鼠标悬停移入时，平滑展开为晶透单幅艺术画卷（Image），移出自动还原。
+      </p>
+      <div class="card-footer">
+        <span>交互方式: 鼠标 Hover / 点击</span>
+        <span class="card-footer-tip">悬停卡片查看动效 ↗</span>
+      </div>
+    </div>
+
+    <!-- 场景 D: 帮助与档案详情卡片 -->
+    <div class="card" id="cardHelp">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-name">场景 D: 帮助与信息卡片</span>
+          <span class="card-scene">CircleHelp ⇄ CircleAlert</span>
+        </div>
+        <span class="badge badge-refined">4A 方案落地</span>
+      </div>
+      <div class="card-stage">
+        <button class="morph-btn" id="btnHelpMorph" aria-label="帮助详情开关">
+          <svg viewBox="0 0 24 24"><path id="pathHelpMorph" /></svg>
+        </button>
+        <div class="btn-state-label">
+          当前状态: <span class="state-pill" id="lblHelp">帮助指南 (CircleHelp)</span>
+        </div>
+      </div>
+      <p class="card-desc">
+        <strong>日常问号变状态感叹：</strong>日常显示为圆环问号（Help 指南）；点击展开信息卡片或激活重要提醒时，问号核心路径平滑挺直为感叹号（Alert），层次分明。
+      </p>
+      <div class="card-footer">
+        <span>现有元素: 信息档案 #btnToggleInfo</span>
+        <span class="card-footer-tip">点击切换状态 ↗</span>
+      </div>
+    </div>
+
+    <!-- 场景 E: 语言切换弹窗 (常态 Languages ⇄ 展开 Globe) -->
+    <div class="card" id="cardGlobe">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-name">场景 E: 语言切换弹窗</span>
+          <span class="card-scene">Languages ⇄ Globe (互换优化)</span>
+        </div>
+        <span class="badge badge-refined">首屏多语言</span>
+      </div>
+      <div class="card-stage">
+        <button class="morph-btn" id="btnGlobeMorph" aria-label="多语言切换">
+          <svg viewBox="0 0 24 24"><path id="pathGlobeMorph" /></svg>
+        </button>
+        <div class="btn-state-label">
+          当前状态: <span class="state-pill" id="lblGlobe">多语言字符 (Languages)</span>
+        </div>
+      </div>
+      <p class="card-desc">
+        <strong>日常文字直觉 ⇄ 展开全球视野：</strong>日常常态显示为最直观的国际化字符（Languages，文/A 符号），用户一眼即知是语言入口；点击呼出全球语种选择菜单时，平滑展开演变为宏观经纬网地球仪（Globe）。
+      </p>
+      <div class="card-footer">
+        <span>现有元素: 首屏多语言入口</span>
+        <span class="card-footer-tip">点击展开全球语言窗 ↗</span>
+      </div>
+    </div>
+
+    <!-- 场景 F: 底栏返回主页 (Hover 纸飞机) -->
+    <div class="card" id="cardHome">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-name">场景 F: 返回主页发射</span>
+          <span class="card-scene">Home ⇄ Send (Hover 驱动)</span>
+        </div>
+        <span class="badge badge-refined">趣味交互隐喻</span>
+      </div>
+      <div class="card-stage">
+        <button class="morph-btn hover-sensitive" id="btnHomeMorph" aria-label="返回主页">
+          <svg viewBox="0 0 24 24"><path id="pathHomeMorph" /></svg>
+        </button>
+        <div class="btn-state-label">
+          当前状态: <span class="state-pill" id="lblHome">温馨小屋 (Home)</span>
+        </div>
+      </div>
+      <p class="card-desc">
+        <strong>悬停折叠为纸飞机：</strong>常态为底栏温馨的小屋（Home）；鼠标悬浮（Hover）时，屋顶与墙体平滑折叠演变为向右上发射的轻盈纸飞机（Send），隐喻一键传送回主页。
+      </p>
+      <div class="card-footer">
+        <span>现有元素: 底栏 #toolHome</span>
+        <span class="card-footer-tip">悬停按钮查看形变 ↗</span>
+      </div>
+    </div>
+
+    <!-- 场景 G: 跨站外跳外链 -->
+    <div class="card" id="cardLink">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-name">场景 G: 跨站外跳外链</span>
+          <span class="card-scene">Paperclip ⇄ ExternalLink</span>
+        </div>
+        <span class="badge badge-refined">珍奇柜/总馆外跳</span>
+      </div>
+      <div class="card-stage">
+        <button class="morph-btn hover-sensitive" id="btnLinkMorph" aria-label="跨站外跳外链">
+          <svg viewBox="0 0 24 24"><path id="pathLinkMorph" /></svg>
+        </button>
+        <div class="btn-state-label">
+          当前状态: <span class="state-pill" id="lblLink">内联附件 (Paperclip)</span>
+        </div>
+      </div>
+      <p class="card-desc">
+        <strong>回形针变斜向外跳箭头：</strong>日常作为资源附件或条目连接符（Paperclip）；鼠标悬停移入时，曲形金属平滑折开为右上斜射箭头（ExternalLink），清晰预示即将跨站跳转。
+      </p>
+      <div class="card-footer">
+        <span>现有元素: 菜单外部跳转直链</span>
+        <span class="card-footer-tip">悬停卡片触发 ↗</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 拟真 AtlasLog 悬浮底栏 (集成 3D 磁吸视差跟随 + Tooltip 坐标跟随) -->
+  <aside class="mock-toolbar-panel" id="mockToolbar">
+    <div class="toolbar-label">
+      <span>AtlasLog 悬浮 Dock</span>
+    </div>
+
+    <!-- 昼夜模式 -->
+    <button class="tb-btn" id="tbTheme" data-custom-tip="昼夜模式切换 (T)">
+      <span class="tb-icon-layer">
+        <svg viewBox="0 0 24 24"><path id="tbPathTheme" /></svg>
+      </span>
+    </button>
+
+    <!-- 场景 A: 整图展卷全貌复位 -->
+    <button class="tb-btn" id="tbReset" data-custom-tip="整图展卷全貌 (0)">
+      <span class="tb-icon-layer">
+        <svg viewBox="0 0 24 24"><path id="tbPathReset" /></svg>
+      </span>
+    </button>
+
+    <!-- 视口全屏 -->
+    <button class="tb-btn" id="tbFullscreen" data-custom-tip="视口全屏展卷 (F)">
+      <span class="tb-icon-layer">
+        <svg viewBox="0 0 24 24"><path id="tbPathFullscreen" /></svg>
+      </span>
+    </button>
+
+    <!-- 场景 B: 顺时针旋转 (三层分层: 外层磁吸 + 内层 90° 转角) -->
+    <button class="tb-btn" id="tbRotate" data-custom-tip="顺时针步进旋转 (R)">
+      <span class="tb-icon-layer" id="tbRotatorLayer">
+        <svg id="tbRotSvg" viewBox="0 0 24 24"><path id="tbPathRotate" /></svg>
+      </span>
+    </button>
+
+    <div class="tb-divider"></div>
+
+    <!-- 场景 D: 帮助信息 -->
+    <button class="tb-btn" id="tbHelp" data-custom-tip="作品档案与帮助 (I)">
+      <span class="tb-icon-layer">
+        <svg viewBox="0 0 24 24"><path id="tbPathHelp" /></svg>
+      </span>
+    </button>
+
+    <!-- 场景 F: 返回主页 (Hover 纸飞机) -->
+    <button class="tb-btn hover-sensitive" id="tbHome" data-custom-tip="传送返回主页 (H)">
+      <span class="tb-icon-layer">
+        <svg viewBox="0 0 24 24"><path id="tbPathHome" /></svg>
+      </span>
+    </button>
+
+    <!-- 分享直链 -->
+    <button class="tb-btn" id="tbCopy" data-custom-tip="复制画卷专属直链 (S)">
+      <span class="tb-icon-layer">
+        <svg viewBox="0 0 24 24"><path id="tbPathCopy" /></svg>
+      </span>
+    </button>
+
+    <!-- Apple Dock 滑动跟随气泡 -->
+    <div class="dock-tooltip" id="dockTooltip" aria-hidden="true">
+      <span class="dock-tooltip-text" id="dockTooltipText"></span>
+      <kbd class="dock-tooltip-kbd" id="dockTooltipKbd"></kbd>
+    </div>
+  </aside>
+
+    <!-- 离线 Bundle 引擎与 7 大定制场景驱动 -->
+  <script src="./vendor/morph-bundle.js"></script>
+  <script>
+    const { createMorph } = window.Morphicons;
+    const { 
+      Sun, Moon, 
+      Maximize, Minimize, 
+      Link, Check, 
+      Menu, X,
+      ChevronDown, ChevronUp,
+      ResetFit, ResetZoomed,
+      RotateCw, RefreshCw,
+      Folder, Image,
+      CircleHelp, CircleAlert,
+      Globe, Languages,
+      Home, Send,
+      Paperclip, ExternalLink
+    } = window.LucideIcons;
+
+    let currentPreset = 'snappy';
+
+    // 基础交互状态字典 (场景 A, C, D, E, F, G 及底栏独有)
+    const states = {
+      reset: { active: false, a: ResetFit, b: ResetZoomed, morphs: [], label: document.getElementById('lblReset'), textA: '全貌展卷 (Fit)', textB: '聚焦缩放 (Zoomed)' },
+      folder: { active: false, a: Folder, b: Image, morphs: [], label: document.getElementById('lblFolder'), textA: '日常图册 (Folder)', textB: '晶透画卷 (Image)' },
+      help: { active: false, a: CircleHelp, b: CircleAlert, morphs: [], label: document.getElementById('lblHelp'), textA: '帮助指南 (CircleHelp)', textB: '提醒告警 (CircleAlert)' },
+      globe: { active: false, a: Languages, b: Globe, morphs: [], label: document.getElementById('lblGlobe'), textA: '多语言字符 (Languages)', textB: '全球经纬网 (Globe)' },
+      home: { active: false, a: Home, b: Send, morphs: [], label: document.getElementById('lblHome'), textA: '温馨小屋 (Home)', textB: '传送飞机 (Send)' },
+      link: { active: false, a: Paperclip, b: ExternalLink, morphs: [], label: document.getElementById('lblLink'), textA: '内联附件 (Paperclip)', textB: '斜向外跳 (ExternalLink)' },
+      theme: { active: false, a: Sun, b: Moon, morphs: [], label: null, textA: '太阳', textB: '月牙' },
+      fullscreen: { active: false, a: Maximize, b: Minimize, morphs: [], label: null, textA: '全屏', textB: '还原' },
+      copy: { active: false, a: Link, b: Check, morphs: [], label: null, textA: '直链', textB: '已复制' }
+    };
+
+    function initMorphPair(key, pathElCard, pathElToolbar) {
+      const item = states[key];
+      if (!item) return;
+      if (pathElCard) {
+        const mCard = createMorph(pathElCard, item.a);
+        item.morphs.push(mCard);
+      }
+      if (pathElToolbar) {
+        const mToolbar = createMorph(pathElToolbar, item.a);
+        item.morphs.push(mToolbar);
+      }
+    }
+
+    // 初始化通用卡片
+    initMorphPair('reset', document.getElementById('pathResetMorph'), document.getElementById('tbPathReset'));
+    initMorphPair('folder', document.getElementById('pathFolderMorph'), null);
+    initMorphPair('help', document.getElementById('pathHelpMorph'), document.getElementById('tbPathHelp'));
+    initMorphPair('globe', document.getElementById('pathGlobeMorph'), null);
+    initMorphPair('home', document.getElementById('pathHomeMorph'), document.getElementById('tbPathHome'));
+    initMorphPair('link', document.getElementById('pathLinkMorph'), null);
+    initMorphPair('theme', null, document.getElementById('tbPathTheme'));
+    initMorphPair('fullscreen', null, document.getElementById('tbPathFullscreen'));
+    initMorphPair('copy', null, document.getElementById('tbPathCopy'));
+
+    function toggleState(key, forceActive = null) {
+      const item = states[key];
+      if (!item) return;
+      const nextActive = (forceActive !== null) ? forceActive : !item.active;
+      if (item.active === nextActive) return;
+      item.active = nextActive;
+      const target = item.active ? item.b : item.a;
+
+      item.morphs.forEach(m => m.morphTo(target, currentPreset));
+      if (item.label) {
+        item.label.textContent = item.active ? item.textB : item.textA;
+      }
+
+      if (key === 'theme') {
+        const nextTheme = item.active ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        document.querySelectorAll('#themeGroup .seg-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.mode === nextTheme);
+        });
+      }
+
+      if (key === 'copy' && item.active) {
+        showToast('画卷专属直链已复制到剪贴板！');
+        setTimeout(() => {
+          if (item.active) {
+            item.active = false;
+            item.morphs.forEach(m => m.morphTo(item.a, currentPreset));
+          }
+        }, 1400);
+      }
+
+      if (key === 'reset') {
+        showToast(item.active ? '视口已聚焦缩放！' : '视口已恢复 1:1 整图展卷全貌！');
+      }
+    }
+
+    // ==========================================
+    // 场景 B: 3 种不同节奏与编排方案实现
+    // ==========================================
+    const morphV1 = createMorph(document.getElementById('pathRotateV1'), RotateCw);
+    const morphV2 = createMorph(document.getElementById('pathRotateV2'), RotateCw);
+    const morphV3 = createMorph(document.getElementById('pathRotateV3'), RotateCw);
+    const morphTb = createMorph(document.getElementById('tbPathRotate'), RotateCw);
+
+    const orientations = {
+      0: '0° 初始 (开口朝右)',
+      90: '90° 顺转 (开口朝下)',
+      180: '180° 倒转 (开口朝左)',
+      270: '270° 逆置 (开口朝上)'
+    };
+
+    // --- 方案 1: 错峰三幕式 (变身 ➔ 旋转 ➔ 落锁 · 0.85s) ---
+    let angleV1 = 0;
+    let busyV1 = false;
+    function runScheme1() {
+      if (busyV1) return;
+      busyV1 = true;
+      const targetAngle = angleV1 + 90;
+      const btn = document.getElementById('btnRotateV1');
+      const tbRotSvg = document.getElementById('tbRotSvg');
+      const lbl = document.getElementById('lblRotateV1');
+
+      // 第 1 幕 (0ms): 原地轻盈展开为双箭头 RefreshCw
+      morphV1.morphTo(RefreshCw, 'snappy');
+      morphTb.morphTo(RefreshCw, 'snappy');
+      if (lbl) lbl.textContent = '刷新中... ↻';
+
+      // 第 2 幕 (180ms): 给大脑 180ms 观察后，启动优雅顺时针 90° 旋转
+      setTimeout(() => {
+        [btn, tb].forEach(el => {
+          if (!el) return;
+          el.style.transition = 'transform 0.52s cubic-bezier(0.25, 1, 0.5, 1)';
+          el.style.transform = `rotate(${targetAngle}deg)`;
+        });
+      }, 180);
+
+      // 第 3 幕 (580ms): 在旋转即将到位、惯性减速时，合拢弹回单箭头 RotateCw
+      setTimeout(() => {
+        morphV1.morphTo(RotateCw, 'snappy');
+        morphTb.morphTo(RotateCw, 'snappy');
+      }, 580);
+
+      // 落锁结项 (720ms)
+      setTimeout(() => {
+        angleV1 = targetAngle;
+        const norm = angleV1 % 360;
+        if (lbl) lbl.textContent = orientations[norm];
+        showToast(`[方案1·错峰三幕式] 旋转至 ${norm}° (松弛自然)`);
+        busyV1 = false;
+      }, 720);
+    }
+
+    // --- 方案 2: 同步呼吸式 (同速匀变 · 0.70s) ---
+    let angleV2 = 0;
+    let busyV2 = false;
+    function runScheme2() {
+      if (busyV2) return;
+      busyV2 = true;
+      const targetAngle = angleV2 + 90;
+      const btn = document.getElementById('btnRotateV2');
+      const lbl = document.getElementById('lblRotateV2');
+
+      // 0ms: 匀速大弧度旋转启动
+      btn.style.transition = 'transform 0.70s cubic-bezier(0.2, 0, 0, 1)';
+      btn.style.transform = `rotate(${targetAngle}deg)`;
+
+      // 前半程变身 Refresh
+      morphV2.morphTo(RefreshCw, 'smooth');
+      if (lbl) lbl.textContent = '匀速过渡中...';
+
+      // 中半程 (350ms): 匀速还原 Rotate
+      setTimeout(() => {
+        morphV2.morphTo(RotateCw, 'smooth');
+      }, 350);
+
+      setTimeout(() => {
+        angleV2 = targetAngle;
+        const norm = angleV2 % 360;
+        if (lbl) lbl.textContent = orientations[norm];
+        showToast(`[方案2·同步呼吸式] 旋转至 ${norm}° (平滑连贯)`);
+        busyV2 = false;
+      }, 700);
+    }
+
+    // --- 方案 3: 纯转角强化回弹式 (尺寸 1:1 绝对恒定 · 0.55s) ---
+    let angleV3 = 0;
+    let busyV3 = false;
+    function runScheme3() {
+      if (busyV3) return;
+      busyV3 = true;
+      const targetAngle = angleV3 + 90;
+      const btn = document.getElementById('btnRotateV3');
+      const lbl = document.getElementById('lblRotateV3');
+
+      // 阶段 1 (0ms): 纯逆向后撤蓄力 -22° (尺寸 scale 保持恒定 1.0)
+      btn.style.transition = 'transform 0.14s cubic-bezier(0.4, 0, 0.2, 1)';
+      btn.style.transform = `rotate(${angleV3 - 22}deg)`;
+      if (lbl) lbl.textContent = '后撤蓄力 -22°...';
+
+      // 阶段 2 (140ms): 强爆发顺时针冲刺，过冲 +14° (纯旋转，无尺寸缩放)
+      setTimeout(() => {
+        btn.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)';
+        btn.style.transform = `rotate(${targetAngle + 14}deg)`;
+      }, 140);
+
+      // 阶段 3 (420ms): 弹簧减震平稳落锁在目标角度 90°
+      setTimeout(() => {
+        btn.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        btn.style.transform = `rotate(${targetAngle}deg)`;
+      }, 420);
+
+      // 580ms 落定
+      setTimeout(() => {
+        angleV3 = targetAngle;
+        const norm = angleV3 % 360;
+        if (lbl) lbl.textContent = orientations[norm];
+        showToast(`[方案3·纯角度版] 顺转至 ${norm}° (尺寸完全一致)`);
+        busyV3 = false;
+      }, 580);
+    }
+
+    // 绑定旋转测试按钮
+    document.getElementById('btnRotateV1').onclick = () => runScheme1();
+    document.getElementById('tbRotate').onclick = () => runScheme1();
+    document.getElementById('btnRotateV2').onclick = runScheme2;
+    document.getElementById('btnRotateV3').onclick = runScheme3;
+
+    // 通用按钮绑定
+    document.getElementById('btnResetMorph').onclick = () => toggleState('reset');
+    document.getElementById('tbReset').onclick = () => toggleState('reset');
+    document.getElementById('btnHelpMorph').onclick = () => toggleState('help');
+    document.getElementById('tbHelp').onclick = () => toggleState('help');
+    document.getElementById('btnGlobeMorph').onclick = () => toggleState('globe');
+    document.getElementById('btnFolderMorph').onclick = () => toggleState('folder');
+    document.getElementById('btnHomeMorph').onclick = () => toggleState('home');
+    document.getElementById('btnLinkMorph').onclick = () => toggleState('link');
+
+    // Hover 悬停敏感卡片驱动 (场景 C, F, G 及底栏主页)
+    function bindHoverMorph(triggerEl, stateKey) {
+      if (!triggerEl) return;
+      triggerEl.addEventListener('mouseenter', () => toggleState(stateKey, true));
+      triggerEl.addEventListener('mouseleave', () => toggleState(stateKey, false));
+    }
+
+    bindHoverMorph(document.getElementById('cardFolder'), 'folder');
+    bindHoverMorph(document.getElementById('cardHome'), 'home');
+    bindHoverMorph(document.getElementById('tbHome'), 'home');
+    bindHoverMorph(document.getElementById('cardLink'), 'link');
+
+    // 底栏其他控制
+    document.getElementById('tbTheme').onclick = () => toggleState('theme');
+    document.getElementById('tbFullscreen').onclick = () => toggleState('fullscreen');
+    document.getElementById('tbCopy').onclick = () => toggleState('copy');
+
+    // 预设阻尼切换
+    document.querySelectorAll('#presetGroup .seg-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('#presetGroup .seg-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentPreset = btn.dataset.preset;
+        showToast(`已切换动画阻尼预设: ${currentPreset}`);
+      };
+    });
+
+    // 昼夜模式单选
+    document.querySelectorAll('#themeGroup .seg-btn').forEach(btn => {
+      btn.onclick = () => {
+        const mode = btn.dataset.mode;
+        toggleState('theme', mode === 'light');
+      };
+    });
+
+    // 动画进度拖拽调试器 (Scrubber)
+    const scrubber = document.getElementById('scrubber');
+    const scrubberVal = document.getElementById('scrubberVal');
+    scrubber.addEventListener('input', (e) => {
+      const progress = e.target.value / 100;
+      scrubberVal.textContent = `${e.target.value}%`;
+      
+      // 场景 B 随滑块联动
+      const currentDeg = progress * 90;
+      [document.getElementById('btnRotateV1'), document.getElementById('btnRotateV2'), document.getElementById('tbRotate')].forEach(el => {
+        if (el) {
+          el.style.transition = 'none';
+          el.style.transform = `rotate(${currentDeg}deg)`;
+        }
+      });
+      if (progress <= 0.5) {
+        morphV1.seek(RefreshCw, progress * 2);
+        morphV2.seek(RefreshCw, progress * 2);
+        morphTb.seek(RefreshCw, progress * 2);
+      } else {
+        morphV1.seek(RotateCw, (progress - 0.5) * 2);
+        morphV2.seek(RotateCw, (progress - 0.5) * 2);
+        morphTb.seek(RotateCw, (progress - 0.5) * 2);
+      }
+
+      // 其他卡片常规 seek
+      Object.keys(states).forEach(key => {
+        const item = states[key];
+        item.morphs.forEach(m => m.seek(item.b, progress));
+      });
+    });
+
+    
+    // ========================================================
+    // 1. Apple / Framer 3D 磁吸视差跟随动效 (initMagneticDock)
+    // ========================================================
+    function initMagneticDock() {
+      const dock = document.getElementById('mockToolbar');
+      if (!dock || dock.dataset.magneticBound) return;
+      dock.dataset.magneticBound = 'true';
+
+      const buttons = dock.querySelectorAll('.tb-btn');
+      buttons.forEach(btn => {
+        let rafId = null;
+        let targetX = 0, targetY = 0, targetRotX = 0, targetRotY = 0, targetScale = 1.0;
+        let currentX = 0, currentY = 0, currentRotX = 0, currentRotY = 0, currentScale = 1.0;
+        let isHovered = false;
+        const innerLayer = btn.querySelector('.tb-icon-layer');
+
+        function resetBtn() {
+          isHovered = false;
+          targetX = 0; targetY = 0; targetRotX = 0; targetRotY = 0; targetScale = 1.0;
+          currentX = 0; currentY = 0; currentRotX = 0; currentRotY = 0; currentScale = 1.0;
+          btn.style.transform = '';
+          if (innerLayer) innerLayer.style.transform = '';
+          if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
+        }
+
+        function renderFrame() {
+          const springK = 0.22;
+          currentX += (targetX - currentX) * springK;
+          currentY += (targetY - currentY) * springK;
+          currentRotX += (targetRotX - currentRotX) * springK;
+          currentRotY += (targetRotY - currentRotY) * springK;
+          currentScale += (targetScale - currentScale) * springK;
+
+          if (!isHovered && 
+              Math.abs(currentX) < 0.05 && Math.abs(currentY) < 0.05 && 
+              Math.abs(currentRotX) < 0.05 && Math.abs(currentRotY) < 0.05 && 
+              Math.abs(currentScale - 1) < 0.005) {
+            resetBtn();
+            return;
+          }
+
+          // 外层 3D 倾角 + 磁吸位移 (尺寸严控在 1.12 以内)
+          btn.style.transform = 'perspective(360px) translate3d(' + currentX.toFixed(2) + 'px, ' + currentY.toFixed(2) + 'px, 0) ' +
+                                'rotateX(' + currentRotX.toFixed(2) + 'deg) rotateY(' + currentRotY.toFixed(2) + 'deg) ' +
+                                'scale(' + currentScale.toFixed(3) + ')';
+
+          // 内层图标 6px 景深视差漂移
+          if (innerLayer) {
+            innerLayer.style.transform = 'translate3d(' + (currentX * 0.35).toFixed(2) + 'px, ' + (currentY * 0.35).toFixed(2) + 'px, 6px)';
+          }
+
+          rafId = requestAnimationFrame(renderFrame);
+        }
+
+        btn.addEventListener('mouseenter', () => {
+          isHovered = true;
+          targetScale = 1.12;
+          if (!rafId) rafId = requestAnimationFrame(renderFrame);
+        });
+
+        btn.addEventListener('mousemove', (e) => {
+          const rect = btn.getBoundingClientRect();
+          const halfW = rect.width / 2;
+          const halfH = rect.height / 2;
+          const dx = e.clientX - (rect.left + halfW);
+          const dy = e.clientY - (rect.top + halfH);
+          
+          const maxPull = 10;
+          const maxRot = 12;
+          const normX = Math.max(-1, Math.min(1, dx / halfW));
+          const normY = Math.max(-1, Math.min(1, dy / halfH));
+
+          targetX = normX * maxPull;
+          targetY = normY * maxPull;
+          targetRotX = -normY * maxRot;
+          targetRotY = normX * maxRot;
+          targetScale = 1.12;
+
+          if (!rafId) rafId = requestAnimationFrame(renderFrame);
+        });
+
+        btn.addEventListener('mouseleave', () => {
+          isHovered = false;
+          targetX = 0; targetY = 0; targetRotX = 0; targetRotY = 0; targetScale = 1.0;
+        });
+      });
+    }
+
+    // ========================================================
+    // 2. 毛玻璃悬浮气泡水平位移跟随 (initDockTooltips)
+    // ========================================================
+    function initDockTooltips() {
+      const container = document.getElementById('mockToolbar');
+      const tooltipEl = document.getElementById('dockTooltip');
+      const tooltipText = document.getElementById('dockTooltipText');
+      const tooltipKbd = document.getElementById('dockTooltipKbd');
+      if (!container || !tooltipEl || !tooltipText) return;
+
+      const buttons = container.querySelectorAll('.tb-btn');
+      buttons.forEach(btn => {
+        function showTip() {
+          const text = btn.dataset.customTip || '';
+          if (!text) return;
+
+          // 提取括号内的快捷键提示 (如 "(R)", "(0)", "(F)")
+          const match = text.match(/^(.*?)\s*\(([^)]+)\)$/);
+          if (match) {
+            tooltipText.textContent = match[1].trim();
+            tooltipKbd.textContent = match[2].trim();
+            tooltipKbd.style.display = 'inline-flex';
+          } else {
+            tooltipText.textContent = text.trim();
+            tooltipKbd.textContent = '';
+            tooltipKbd.style.display = 'none';
+          }
+
+          // 精准计算气泡跟随居中偏移
+          const containerRect = container.getBoundingClientRect();
+          const btnRect = btn.getBoundingClientRect();
+          const centerOffset = (btnRect.left + btnRect.width / 2) - containerRect.left;
+          tooltipEl.style.left = centerOffset.toFixed(1) + 'px';
+          tooltipEl.classList.add('visible');
+        }
+
+        function hideTip() {
+          tooltipEl.classList.remove('visible');
+        }
+
+        btn.addEventListener('mouseenter', showTip);
+        btn.addEventListener('focus', showTip);
+        btn.addEventListener('mouseleave', hideTip);
+        btn.addEventListener('blur', hideTip);
+      });
+    }
+
+    // 初始化两大跟随动效
+    initMagneticDock();
+    initDockTooltips();
+
+    const toast = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+    }
+  </script>
+</body>
+</html>

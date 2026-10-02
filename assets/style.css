@@ -168,7 +168,7 @@ body {
   height: 12px;
 }
 
-/* Header · 苹果级高透 50%-55% 原生液态微晶折射置顶工具条 (Apple Liquid Glass) */
+/* Header · 苹果级高透 原生液态微晶折射置顶工具条 (Apple Liquid Glass - 方案 A 增强折射与斜向入射光) */
 .site-header {
   position: -webkit-sticky;
   position: sticky;
@@ -176,24 +176,24 @@ body {
   z-index: 100;
   width: 100%;
   max-width: 100%;
-  background: rgba(13, 17, 24, 0.52) !important;
-  backdrop-filter: blur(32px) saturate(220%) contrast(100%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(220%) contrast(100%) !important;
+  background: rgba(13, 17, 24, 0.44) !important;
+  backdrop-filter: blur(28px) saturate(280%) brightness(1.22) contrast(105%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(280%) brightness(1.22) contrast(105%) !important;
   box-shadow: 
-    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
-    inset 0 -1px 0 0 rgba(255, 255, 255, 0.12),
-    0 14px 38px -4px rgba(0, 0, 0, 0.55);
+    inset 1.2px 1.5px 2px 0 rgba(255, 255, 255, 0.26),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.22),
+    0 4px 16px -2px rgba(0, 0, 0, 0.25);
   transition: background 0.25s ease, box-shadow 0.25s ease, backdrop-filter 0.25s ease;
 }
 
 :root[data-theme="light"] .site-header {
-  background: rgba(255, 255, 255, 0.50) !important;
-  backdrop-filter: blur(32px) saturate(220%) contrast(100%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(220%) contrast(100%) !important;
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(28px) saturate(220%) brightness(1.06) contrast(100%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(220%) brightness(1.06) contrast(100%) !important;
   box-shadow: 
-    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 0 rgba(255, 255, 255, 0.60),
-    0 10px 30px -4px rgba(0, 0, 0, 0.06);
+    inset 1.2px 1.5px 2px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.75),
+    0 4px 16px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* 苹果级原生发丝晶芒切线：完全浑然一体，绝不添加多余假带 */
@@ -203,16 +203,16 @@ body {
 
 .site-header.is-sticky {
   box-shadow: 
-    inset 0 1.5px 0 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 0 rgba(255, 255, 255, 0.15),
-    0 18px 44px -4px rgba(0, 0, 0, 0.65);
+    inset 1.2px 1.5px 2px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.25),
+    0 6px 20px -2px rgba(0, 0, 0, 0.32);
 }
 
 :root[data-theme="light"] .site-header.is-sticky {
   box-shadow: 
-    inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
-    inset 0 -1px 0 0 rgba(255, 255, 255, 0.70),
-    0 14px 36px -4px rgba(0, 0, 0, 0.09);
+    inset 1.2px 1.5px 2px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.85),
+    0 6px 18px -2px rgba(0, 0, 0, 0.08);
 }
 
 /* 当语言下拉弹窗开启时，提升顶栏与内部图层上下文至最高层级，杜绝任何穿透与遮挡 */
@@ -299,16 +299,14 @@ body {
   background: rgba(16, 22, 32, 0.52);
   backdrop-filter: blur(18px) saturate(260%) contrast(104%);
   -webkit-backdrop-filter: blur(18px) saturate(260%) contrast(104%);
-  border: 1.5px solid rgba(255, 255, 255, 0.28);
-  border-top: 2.0px solid rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 9999px;
   box-shadow: 
-    inset 0 1.8px 2.2px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -1.2px 1.5px 0 rgba(255, 255, 255, 0.12),
-    0 0 0 1px rgba(56, 189, 248, 0.15),
-    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.20),
-    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.18),
-    0px 8px 20px -3px rgba(0, 0, 0, 0.30);
+    inset 1.2px 1.5px 2px 0 rgba(255, 255, 255, 0.28),
+    inset -1px -1px 2px 0 rgba(0, 0, 0, 0.40),
+    0 0 0 1px rgba(56, 189, 248, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.25);
   user-select: none;
   transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
@@ -320,36 +318,34 @@ body {
 
 :root[data-theme="light"] .header-actions-capsule {
   background: rgba(255, 255, 255, 0.52);
-  border: 1.5px solid rgba(255, 255, 255, 0.70);
-  border-top: 2.0px solid rgba(255, 255, 255, 1);
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  border-top: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow: 
-    inset 0 1.8px 2.2px 0 rgba(255, 255, 255, 1),
-    inset 0 -1.2px 1.5px 0 rgba(255, 255, 255, 0.40),
-    0 0 0 1px rgba(56, 189, 248, 0.15),
-    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.05),
-    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.04),
-    0px 6px 16px -3px rgba(0, 0, 0, 0.08);
+    inset 1.2px 1.5px 2px 0 rgba(255, 255, 255, 0.90),
+    inset -1px -1px 1.5px 0 rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(56, 189, 248, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .header-actions-capsule:hover {
-  border-color: rgba(255, 255, 255, 0.45);
-  border-top-color: rgba(255, 255, 255, 0.88);
+  border-color: rgba(255, 255, 255, 0.24);
+  border-top-color: rgba(255, 255, 255, 0.40);
   box-shadow: 
-    inset 0 1.8px 2.5px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -1.2px 1.5px 0 rgba(255, 255, 255, 0.18),
-    0 0 0 1.5px rgba(56, 189, 248, 0.22),
-    0 10px 28px -3px rgba(0, 0, 0, 0.38);
+    inset 1.2px 1.5px 2.5px 0 rgba(255, 255, 255, 0.35),
+    inset -1px -1px 2px 0 rgba(0, 0, 0, 0.45),
+    0 0 0 1.5px rgba(56, 189, 248, 0.18),
+    0 6px 20px -2px rgba(0, 0, 0, 0.32);
 }
 
 :root[data-theme="light"] .header-actions-capsule:hover {
-  border-color: rgba(255, 255, 255, 0.90);
+  border-color: rgba(255, 255, 255, 0.85);
   border-top-color: #ffffff;
   background: rgba(255, 255, 255, 0.65);
   box-shadow: 
-    inset 0 1.8px 2.5px 0 rgba(255, 255, 255, 1),
-    inset 0 -1.2px 1.5px 0 rgba(255, 255, 255, 0.48),
-    0 0 0 1.5px rgba(56, 189, 248, 0.25),
-    0 8px 22px -3px rgba(0, 0, 0, 0.12);
+    inset 1.2px 1.5px 2.5px 0 rgba(255, 255, 255, 0.98),
+    inset -1px -1px 1.5px 0 rgba(0, 0, 0, 0.08),
+    0 0 0 1.5px rgba(56, 189, 248, 0.20),
+    0 6px 20px -2px rgba(0, 0, 0, 0.10);
 }
 
 /* 胶囊内按键基类：液态微透镜水滴按键 (Dewdrop Glass Buttons) */
@@ -3710,22 +3706,20 @@ body:has(.about-modal.open) {
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(16, 22, 32, 0.55);
-  backdrop-filter: blur(24px) saturate(215%);
-  -webkit-backdrop-filter: blur(24px) saturate(215%);
-  border: 1.5px solid rgba(255, 255, 255, 0.24);
-  border-top: 2.0px solid rgba(255, 255, 255, 0.68);
+  background: rgba(16, 22, 32, 0.50);
+  backdrop-filter: blur(28px) saturate(280%) brightness(1.22) contrast(105%);
+  -webkit-backdrop-filter: blur(28px) saturate(280%) brightness(1.22) contrast(105%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 1px solid rgba(255, 255, 255, 0.30);
   padding: 5px 8px;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   gap: 4px;
   box-shadow: 
-    inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.42),
-    inset 0 -1.2px 1.2px 0 rgba(255, 255, 255, 0.12),
-    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.20),
-    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.18),
-    0px 10px 28px -4px rgba(0, 0, 0, 0.40);
+    inset 1.2px 1.5px 2px 0 rgba(255, 255, 255, 0.28),
+    inset -1px -1px 2px 0 rgba(0, 0, 0, 0.40),
+    0 4px 18px -2px rgba(0, 0, 0, 0.30);
   z-index: 20;
   overflow: visible;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
@@ -3756,28 +3750,26 @@ body:has(.about-modal.open) {
   .viewer-float-toolbar:hover,
   .viewer-floating-toolbar:hover {
     transform: translateX(-50%);
-    border-color: rgba(255, 255, 255, 0.40);
-    border-top-color: rgba(255, 255, 255, 0.82);
+    border-color: rgba(255, 255, 255, 0.25);
+    border-top-color: rgba(255, 255, 255, 0.42);
     box-shadow: 
-      inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.50),
-      inset 0 -1px 1px 0 rgba(255, 255, 255, 0.15),
-      0 12px 36px -4px rgba(0, 0, 0, 0.50);
+      inset 1.2px 1.5px 2.5px 0 rgba(255, 255, 255, 0.35),
+      inset -1px -1px 2px 0 rgba(0, 0, 0, 0.45),
+      0 8px 24px -3px rgba(0, 0, 0, 0.36);
   }
 }
 
 :root[data-theme="light"] .viewer-float-toolbar,
 :root[data-theme="light"] .viewer-floating-toolbar {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(24px) saturate(215%);
-  -webkit-backdrop-filter: blur(24px) saturate(215%);
-  border: 1.5px solid rgba(255, 255, 255, 0.65);
-  border-top: 2.0px solid rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.50);
+  backdrop-filter: blur(28px) saturate(220%) brightness(1.06) contrast(100%);
+  -webkit-backdrop-filter: blur(28px) saturate(220%) brightness(1.06) contrast(100%);
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  border-top: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow: 
-    inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.98),
-    inset 0 -1.2px 1.2px 0 rgba(255, 255, 255, 0.45),
-    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.05),
-    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.04),
-    0px 8px 24px -3px rgba(0, 0, 0, 0.09);
+    inset 1.2px 1.5px 2px 0 rgba(255, 255, 255, 0.90),
+    inset -1px -1px 1.5px 0 rgba(0, 0, 0, 0.05),
+    0 4px 18px -2px rgba(0, 0, 0, 0.07);
 }
 
 @media (hover: hover) and (pointer: fine) and (min-width: 769px) {
@@ -3788,9 +3780,9 @@ body:has(.about-modal.open) {
     border-top-color: #ffffff;
     background: rgba(255, 255, 255, 0.65);
     box-shadow: 
-      inset 0 1.6px 2.2px 0 rgba(255, 255, 255, 1),
-      inset 0 -1.2px 1.5px 0 rgba(255, 255, 255, 0.50),
-      0 10px 30px -4px rgba(0, 0, 0, 0.12);
+      inset 1.2px 1.5px 2.5px 0 rgba(255, 255, 255, 1),
+      inset -1px -1px 1.5px 0 rgba(0, 0, 0, 0.08),
+      0 8px 22px -3px rgba(0, 0, 0, 0.10);
   }
 }
 
@@ -9672,11 +9664,17 @@ body.in-subview .site-header {
   position: sticky;
   top: 0;
   z-index: 50;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 
+    inset 1.2px 1.5px 2px 0 rgba(255, 255, 255, 0.26),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.22),
+    0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 :root[data-theme="light"] body.in-subview .site-header {
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  box-shadow: 
+    inset 1.2px 1.5px 2px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.75),
+    0 4px 18px rgba(0, 0, 0, 0.05);
 }
 
 body.in-subview .gallery-sections-wrap {
@@ -9793,3 +9791,59 @@ body.in-subview .gallery-main {
   }
 }
 
+
+
+/* =============================================================
+   Morphicons Integration & 3-Layer Toolbar Architecture
+   ============================================================= */
+
+/* 1. Ensure icon layer supports 3D preserve and full centering */
+.tb-icon-layer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* 2. Tool buttons: absolute transparent background, no circular discs */
+.viewer-floating-toolbar .tool-btn,
+.viewer-float-toolbar .tool-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.viewer-floating-toolbar .tool-btn:hover,
+.viewer-float-toolbar .tool-btn:hover {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+:root[data-theme="light"] .viewer-floating-toolbar .tool-btn,
+:root[data-theme="light"] .viewer-float-toolbar .tool-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="light"] .viewer-floating-toolbar .tool-btn:hover,
+:root[data-theme="light"] .viewer-float-toolbar .tool-btn:hover {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* 3. Smooth rotation dynamics for #toolRotate */
+#toolRotateSvg {
+  transform-origin: 50% 50%;
+  will-change: transform;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}

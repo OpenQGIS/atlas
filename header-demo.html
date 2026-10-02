@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>顶部固定工具栏 3种设计方案交互对比 Demo · AtlasLog</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* Demo 专用增强样式 */
+    body {
+      background-color: var(--bg-main, #f8f9fb);
+      color: var(--text-primary, #0f141c);
+      font-family: var(--font-sans);
+      min-height: 250vh;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* 浮动控制面板 (Apple 悬浮液态玻璃岛 Liquid Floating Island) */
+    .demo-hud {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      background: rgba(14, 20, 30, 0.52);
+      color: #fff;
+      backdrop-filter: blur(24px) saturate(210%);
+      -webkit-backdrop-filter: blur(24px) saturate(210%);
+      padding: 8px 16px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-top: 1.5px solid rgba(255, 255, 255, 0.45);
+      box-shadow: 
+        inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.10),
+        0 14px 40px -4px rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      white-space: nowrap;
+      user-select: none;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+    :root[data-theme="light"] .demo-hud {
+      background: rgba(255, 255, 255, 0.65);
+      color: #0f141c;
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      border-top: 1.5px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 
+        inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.40),
+        0 12px 36px -4px rgba(0, 0, 0, 0.12);
+    }
+
+    .demo-hud-title {
+      font-weight: 600;
+      font-size: 12px;
+      color: #80cc28;
+      letter-spacing: 0.05em;
+      padding-right: 6px;
+      border-right: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .demo-btn-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .demo-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.88);
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    .demo-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+    }
+
+    .demo-btn.active {
+      background: #80cc28;
+      color: #0b0d10;
+      font-weight: 600;
+      border-color: #80cc28;
+      box-shadow: 0 0 12px rgba(128, 204, 40, 0.45);
+    }
+
+    .demo-divider {
+      width: 1px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.15);
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
+
+    .demo-sub-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      transition: opacity 0.2s ease;
+    }
+
+    .demo-sub-label {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.65);
+      margin-right: 2px;
+      font-weight: 500;
+    }
+
+    .demo-sub-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: rgba(255, 255, 255, 0.78);
+      padding: 3px 8px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: inherit;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .demo-sub-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .demo-sub-btn.active {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+      font-weight: 600;
+      border-color: rgba(255, 255, 255, 0.28);
+    }
+
+    .demo-toggle-btn.active {
+      background: rgba(128, 204, 40, 0.22);
+      color: #bbf46d;
+      border-color: rgba(128, 204, 40, 0.45);
+      font-weight: 600;
+      box-shadow: 0 0 8px rgba(128, 204, 40, 0.25);
+    }
+
+    .demo-theme-btn {
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    /* 方案效果样式覆写类 */
+    /* 1. 当前现状 (平铺无遮掩) */
+    .site-header.scheme-baseline {
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border-subtle);
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* 2. 方案一：微晶磨砂玻璃 (高通透 + 模糊漫反射) */
+    .site-header.scheme-glass {
+      background: rgba(255, 255, 255, 0.78) !important;
+      backdrop-filter: blur(18px) saturate(190%) !important;
+      -webkit-backdrop-filter: blur(18px) saturate(190%) !important;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.07) !important;
+      box-shadow: none !important;
+    }
+    :root[data-theme="dark"] .site-header.scheme-glass {
+      background: rgba(11, 13, 16, 0.76) !important;
+      backdrop-filter: blur(18px) saturate(190%) !important;
+      -webkit-backdrop-filter: blur(18px) saturate(190%) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: none !important;
+    }
+
+    /* 3. 方案二：物理层级微悬浮阴影 (立体抬升感) */
+    .site-header.scheme-shadow {
+      background: #ffffff !important;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+      box-shadow: 
+        0 1px 0 rgba(0, 0, 0, 0.04),
+        0 8px 24px -3px rgba(0, 0, 0, 0.09) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    :root[data-theme="dark"] .site-header.scheme-shadow {
+      background: #0b0d10 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+      box-shadow: 
+        0 1px 0 rgba(255, 255, 255, 0.04),
+        0 10px 28px -3px rgba(0, 0, 0, 0.55) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* 4. 方案三：冷灰案台微对比底色 (微对比色阶) */
+    .site-header.scheme-tone {
+      background: #edf0f5 !important;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    :root[data-theme="dark"] .site-header.scheme-tone {
+      background: #141820 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    /* 5. 方案四：融合版 (苹果级内容感应折射微晶玻璃 + 柔和羽影 · 推荐) */
+    .site-header.scheme-combo {
+      --glass-alpha: 0.55;
+      --glass-alpha-dark: 0.52;
+      --glass-blur: 24px;
+      --refract-gradient: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(200,225,255,0.7) 50%, rgba(255,255,255,0.2) 100%);
+      background: rgba(255, 255, 255, var(--glass-alpha, 0.55)) !important;
+      backdrop-filter: blur(var(--glass-blur, 24px)) saturate(195%) contrast(102%) !important;
+      -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(195%) contrast(102%) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.35) !important;
+      position: sticky;
+      top: 0;
+      box-shadow: 
+        /* 1. 顶部入射天光高光 (Top Catchlight) */
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.85),
+        /* 2. 底部极细微接触暗刻线 (Hairline Contact Seam) */
+        0 1px 0 0 rgba(0, 0, 0, 0.04),
+        /* 3. 柔和扩散羽化悬浮投影 (Ambient Diffuse Drop Shadow) */
+        0 10px 28px -4px rgba(0, 0, 0, 0.07) !important;
+      transition: background 0.25s ease, box-shadow 0.25s ease, backdrop-filter 0.25s ease;
+    }
+
+    /* 苹果底缘物理微透镜切角层 (Physical Refractive Bevel) */
+    .header-refraction-lens {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 3px;
+      pointer-events: none;
+      z-index: 9;
+      backdrop-filter: blur(2px) saturate(320%) brightness(1.25);
+      -webkit-backdrop-filter: blur(2px) saturate(320%) brightness(1.25);
+      display: none;
+    }
+
+    /* 苹果动态内容感应折射切光带 (Dynamic Chroma Refraction Ribbon) */
+    .header-refraction-ribbon {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      pointer-events: none;
+      z-index: 12;
+      background: var(--refract-gradient);
+      box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+      transition: opacity 0.25s ease, background 0.08s ease;
+      display: none;
+    }
+
+    /* 苹果折射色散漫晕层 (Prismatic Dispersion Halo) */
+    .header-refraction-halo {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -3px;
+      height: 7px;
+      pointer-events: none;
+      z-index: 8;
+      background: var(--refract-gradient);
+      filter: blur(4px);
+      opacity: 0.65;
+      transition: opacity 0.25s ease, background 0.08s ease;
+      display: none;
+    }
+
+    /* 仅在融合方案 (scheme-combo) 中激活动态折射光系统 */
+    .site-header.scheme-combo .header-refraction-lens,
+    .site-header.scheme-combo .header-refraction-ribbon,
+    .site-header.scheme-combo .header-refraction-halo {
+      display: block;
+    }
+
+    /* 暗色模式下方案四 */
+    :root[data-theme="dark"] .site-header.scheme-combo {
+      background: rgba(13, 16, 21, var(--glass-alpha-dark, 0.62)) !important;
+      backdrop-filter: blur(var(--glass-blur, 24px)) saturate(200%) contrast(105%) !important;
+      -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(200%) contrast(105%) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 
+        /* 顶部入射微光 */
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
+        /* 暗部接触线 */
+        0 1px 0 0 rgba(0, 0, 0, 0.5),
+        /* 柔和暗色羽影 */
+        0 12px 32px -4px rgba(0, 0, 0, 0.55) !important;
+    }
+
+    :root[data-theme="dark"] .site-header.scheme-combo .header-refraction-ribbon {
+      mix-blend-mode: screen;
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.25);
+    }
+    :root[data-theme="dark"] .site-header.scheme-combo .header-refraction-halo {
+      opacity: 0.85;
+      filter: blur(5px);
+    }
+
+    /* 当关闭苹果折射效果时（用于对比） */
+    .site-header.scheme-combo.no-refraction .header-refraction-lens,
+    .site-header.scheme-combo.no-refraction .header-refraction-ribbon,
+    .site-header.scheme-combo.no-refraction .header-refraction-halo {
+      opacity: 0 !important;
+      display: none !important;
+    }
+    .site-header.scheme-combo.no-refraction {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+      box-shadow: 
+        0 1px 0 rgba(0, 0, 0, 0.04),
+        0 8px 24px -3px rgba(0, 0, 0, 0.07) !important;
+    }
+    :root[data-theme="dark"] .site-header.scheme-combo.no-refraction {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+      box-shadow: 
+        0 1px 0 rgba(255, 255, 255, 0.04),
+        0 10px 28px -3px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    /* Demo 顶部信息提示横幅 */
+    .demo-info-banner {
+      background: rgba(var(--accent-rgb, 128, 204, 40), 0.08);
+      border-bottom: 1px solid rgba(var(--accent-rgb, 128, 204, 40), 0.2);
+      padding: 8px 24px;
+      font-size: 13px;
+      text-align: center;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+    }
+    .demo-current-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      background: var(--accent);
+      color: #0b0d10;
+      font-size: 11px;
+    }
+
+    /* 仿真画卷卡片瀑布流布局 */
+    .mock-gallery-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 30px 28px 120px 28px;
+    }
+
+    .mock-grid-row-1 {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .mock-grid-row-2 {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 40px;
+    }
+
+    .mock-card {
+      background: var(--bg-surface, #fff);
+      border: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .mock-card-media {
+      height: 140px;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 12px;
+    }
+
+    .mock-card-large .mock-card-media {
+      height: 280px;
+    }
+
+    .mock-scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.02) 40%, rgba(0,0,0,0.65) 100%);
+      pointer-events: none;
+    }
+
+    .mock-meta {
+      position: relative;
+      z-index: 2;
+      color: #fff;
+    }
+
+    .mock-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    }
+
+    .mock-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .mock-tag {
+      font-size: 10px;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 2px 5px;
+      border-radius: 3px;
+      color: #fff;
+    }
+
+    /* 各卡片仿真底色与纹理 */
+    .bg-greenway { background: linear-gradient(135deg, #b2f2bb 0%, #d8f5a2 50%, #94d82d 100%); }
+    .bg-nanjing { background: linear-gradient(135deg, #18191c 0%, #2b303c 50%, #111317 100%); }
+    .bg-datong { background: linear-gradient(135deg, #fff3bf 0%, #ffec99 40%, #e9ecef 100%); }
+    .bg-chengdu-paper { background: linear-gradient(135deg, #e3fafc 0%, #c5f6fa 60%, #99e9f2 100%); }
+    .bg-macaron { background: linear-gradient(135deg, #eebefa 0%, #d0bfff 50%, #a5d8ff 100%); }
+    .bg-wuhan { background: linear-gradient(135deg, #ffe3e3 0%, #ffa8a8 50%, #e03131 100%); }
+    .bg-citywall { background: radial-gradient(circle at 40% 40%, #d0ebff 0%, #a5d8ff 40%, #4dabf7 100%); }
+    .bg-hangzhou { background: linear-gradient(135deg, #ffe8cc 0%, #ffd8a8 50%, #d9480f 100%); }
+    .bg-collection { background: radial-gradient(circle, #e9ecef 0%, #ced4da 100%); }
+
+    /* 滚动提示浮窗 */
+    .scroll-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--accent);
+      background: var(--accent-subtle);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-left: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Demo 说明顶部小条 -->
+  <div class="demo-info-banner">
+    <span>💡 <b>交互说明</b>：<b>请向下滚动鼠标滚轮</b>，底边缘折射切光将<b>实时根据穿过卡片的真实色彩</b>产生色散棱镜折射；默认采用<b>高透 55% + 折射开启</b>。</span>
+    <span class="demo-current-badge" id="currentSchemeBadge">方案四：苹果级内容感应折射玻璃 (推荐 · 高透 55% · 实时多彩折射开)</span>
+  </div>
+
+  <!-- 顶部固定工具栏 (核心测试对象) -->
+  <header class="site-header scheme-combo" id="siteHeader">
+    <!-- 苹果式动态内容感应折射层 (物理透镜 + 色散光晕 + 晶芒切线) -->
+    <div class="header-refraction-lens" id="headerRefractLens"></div>
+    <div class="header-refraction-halo" id="headerRefractHalo"></div>
+    <div class="header-refraction-ribbon" id="headerRefractRibbon"></div>
+
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-badge"></span>
+        <div class="brand-text">
+          <h1 class="brand-title"><span class="brand-title-main">地图录</span><span class="brand-title-sub"> · AtlasLog</span></h1>
+          <span class="brand-subtitle">个人制图实践 · QGIS 能力边界的记录</span>
+        </div>
+      </div>
+
+      <div class="header-meta">
+        <div class="header-actions-capsule" id="headerActionsCapsule">
+          <div class="lang-dropdown-wrapper">
+            <button class="capsule-btn lang-dropdown-btn">
+              <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"></path>
+              </svg>
+              <span class="lang-current-label">中</span>
+            </button>
+          </div>
+          <button class="capsule-btn icon-btn theme-toggle-btn" id="headerThemeBtn" title="切换模式">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <div class="capsule-divider"></div>
+          <button class="capsule-btn home-return-btn" title="返回顶部" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 模拟瀑布流卡片内容 -->
+  <main class="mock-gallery-container">
+    <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+      <h2 style="font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+        <span style="background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px;">01</span>
+        艺术制图作品集
+        <span class="scroll-hint">👇 向下滚动页面，底边折射光将根据穿过的卡片色彩实时演化</span>
+      </h2>
+    </div>
+
+    <!-- Row 1: 6 张小卡片 (注入精准光谱 RGB 标记) -->
+    <div class="mock-grid-row-1">
+      <div class="mock-card" data-refract-color="140, 220, 35">
+        <div class="mock-card-media bg-greenway">
+          <div class="mock-scrim"></div>
+          <div class="mock-meta">
+            <div class="mock-title">绕城绿道</div>
+            <div class="mock-tags">
+              <span class="mock-tag">低饱和</span>
+              <span class="mock-tag">绿色反差</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mock-card" data-refract-color="80, 95, 115">
+        <div class="mock-card-media bg-nanjing">
+          <div class="mock-scrim"></div>
+          <div class="mock-meta">
+            <div class="mock-title">南京-银黑</div>
+            <div class="mock-tags">
+              <span class="mock-tag">银黑</span>
+              <span class="mock-tag">暗黑系</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mock-card" data-refract-color="245, 195, 30">
+        <div class="mock-card-media bg-datong">
+          <div class="mock-scrim"></div>
+          <div class="mock-meta">
+            <div class="mock-title" style="color: #222; text-shadow: none;">大同-剪纸</div>
+            <div class="mock-tags">
+              <span class="mock-tag">剪纸金</span>
+              <span class="mock-tag">古城墙</span>
+              <span class="mock-tag">暖黄</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mock-card" data-refract-color="45, 205, 220">
+        <div class="mock-card-media bg-chengdu-paper">
+          <div class="mock-scrim"></div>
+          <div class="mock-meta">
+            <div class="mock-title" style="color: #222; text-shadow: none;">成都剪纸 · 14...</div>
+            <div class="mock-tags">
+              <span class="mock-tag">剪纸</span>
+              <span class="mock-tag">冰蓝</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mock-card" data-refract-color="220, 130, 245">
+        <div class="mock-card-media bg-macaron">
+          <div class="mock-scrim"></div>
+          <div class="mock-meta">
+            <div class="mock-title" style="color: #222; text-shadow: none;">成都市-马卡龙</div>
+            <div class="mock-tags">
+              <span class="mock-tag">马卡龙</span>
+              <span class="mock-tag">粉紫系</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mock-card" data-refract-color="245, 65, 65">
+        <div class="mock-card-media bg-wuhan">
+          <div class="mock-scrim"></div>
+          <div class="mock-meta">
+            <div class="mock-title" style="color: #222; text-shadow: none;">武汉-低饱和</div>
+            <div class="mock-tags">
+              <span class="mock-tag">低饱和</span>
+              <span class="mock-tag">珊瑚红</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: 3 张大卡片 (经典高密度版块) -->
+    <div class="mock-grid-row-2">
+      <div class="mock-card mock-card-large" data-refract-color="50, 155, 250">
+        <div class="mock-card-media bg-citywall">
+          <div class="mock-scrim"></div>
+          <div class="mock-meta">
+            <div class="mock-title" style="font-size: 18px;">成都古城墙-城门</div>
+            <div class="mock-tags">
+              <span class="mock-tag">古城古韵</span>
+              <span class="mock-tag">天蓝反差</span>
+              <span class="mock-tag">QGIS制图</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mock-card mock-card-large" data-refract-color="245, 120, 20">
+        <div class="mock-card-media bg-hangzhou">
+          <div class="mock-scrim"></div>
+          <div class="mock-meta">
+            <div class="mock-title" style="font-size: 18px;">杭州-低饱和</div>
+            <div class="mock-tags">
+              <span class="mock-tag">自然系</span>
+              <span class="mock-tag">暖橙反差</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mock-card mock-card-large" data-refract-color="160, 175, 190">
+        <div class="mock-card-media bg-collection" style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+          <div style="font-size: 32px; margin-bottom: 12px;">🧭</div>
+          <div style="font-size: 16px; font-weight: 700; color: #333; margin-bottom: 6px;">探索全部 20 件画卷</div>
+          <div style="font-size: 12px; color: #666; margin-bottom: 16px;">另有 12 件作品未在此屏展出</div>
+          <button style="padding: 8px 18px; border-radius: 999px; border: 1px solid #ccc; background: #fff; cursor: pointer; font-size: 13px;">进入专栏全景 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: 模拟后续更多内容 -->
+    <div style="margin-top: 50px; padding: 40px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px;">
+      <h3 style="margin-top: 0;">工程制图与地理信息骨架</h3>
+      <p style="color: var(--text-secondary); line-height: 1.8;">
+        这一区域模拟当页面长长向下滚动时，更多深色、浅色地图卡片从顶部工具栏下方掠过的视觉表现。观察固定工具栏在滚动过程中的清晰度与抗干扰能力。
+      </p>
+    </div>
+  </main>
+
+  <!-- 交互控制面板 (HUD Switcher) -->
+  <div class="demo-hud">
+    <span class="demo-hud-title">工具栏方案</span>
+    <div class="demo-btn-group">
+      <button class="demo-btn" onclick="applyScheme('baseline', this)">0. 现状</button>
+      <button class="demo-btn" onclick="applyScheme('glass', this)">1. 磨砂玻璃</button>
+      <button class="demo-btn" onclick="applyScheme('shadow', this)">2. 悬浮微影</button>
+      <button class="demo-btn" onclick="applyScheme('tone', this)">3. 案台色差</button>
+      <button class="demo-btn active" onclick="applyScheme('combo', this)">⭐ 4. 融合方案 (苹果折射)</button>
+    </div>
+    
+    <div class="demo-divider"></div>
+
+    <!-- 方案四专属微调控制区 -->
+    <div class="demo-sub-controls" id="comboSubControls" title="方案四高阶微调参数">
+      <span class="demo-sub-label">透明度:</span>
+      <button class="demo-sub-btn active" data-opacity="0.55" onclick="setOpacity('0.55', this)" title="高透 55% (默认)">高透 55%</button>
+      <button class="demo-sub-btn" data-opacity="0.65" onclick="setOpacity('0.65', this)" title="平衡 65%">平衡 65%</button>
+      <button class="demo-sub-btn" data-opacity="0.78" onclick="setOpacity('0.78', this)" title="厚实凝光 78%">凝实 78%</button>
+      
+      <div class="demo-divider" style="height: 12px; margin: 0 4px;"></div>
+      
+      <button class="demo-sub-btn active demo-toggle-btn" id="refractionToggleBtn" onclick="toggleRefraction()" title="切换苹果边缘折射切光效果">🍎 折射切光: 开</button>
+    </div>
+
+    <div class="demo-divider"></div>
+    
+    <button class="demo-theme-btn" id="hudThemeToggle" onclick="toggleTheme()">
+      <span id="themeIcon">🌙</span> <span id="themeLabel">暗色模式</span>
+    </button>
+  </div>
+
+  <script>
+    const schemes = {
+      baseline: {
+        className: 'scheme-baseline',
+        title: '现状：纯白平铺（与内容背景完全同色，易混淆）'
+      },
+      glass: {
+        className: 'scheme-glass',
+        title: '方案一：通透微晶磨砂玻璃（内容穿过时有优雅漫反射）'
+      },
+      shadow: {
+        className: 'scheme-shadow',
+        title: '方案二：物理微悬浮阴影（底部有清晰柔和立体投影）'
+      },
+      tone: {
+        className: 'scheme-tone',
+        title: '方案三：冷灰案台微对比底色（底色深 4% 色阶，展柜案台感）'
+      },
+      combo: {
+        className: 'scheme-combo',
+        title: '方案四：苹果级内容感应折射玻璃 + 柔和羽影（🌟 推荐：高透 55% + 随卡片内容实时演化的棱镜折射光）'
+      }
+    };
+
+    let currentScheme = 'combo';
+    let refractionEnabled = true;
+
+    // 核心算法：实时检测穿过顶栏底缘的卡片，动态生成棱镜色散折射光谱
+    function updateDynamicRefraction() {
+      const header = document.getElementById('siteHeader');
+      if (!header || !header.classList.contains('scheme-combo')) return;
+      if (header.classList.contains('no-refraction')) return;
+
+      const headerRect = header.getBoundingClientRect();
+      const headerBottom = headerRect.bottom;
+      const windowW = window.innerWidth;
+
+      const cards = document.querySelectorAll('.mock-card');
+      const activeColorStops = [];
+
+      cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        
+        // 判定卡片是否触碰或经过顶栏底缘（在 headerBottom 上方 80px 至下方 90px 范围）
+        if (rect.top <= headerBottom + 70 && rect.bottom >= headerBottom - 60) {
+          let factor = 1;
+          if (rect.top > headerBottom) {
+            // 卡片由下向上接近底缘：平滑淡入
+            factor = (headerBottom + 70 - rect.top) / 70;
+          } else if (rect.bottom < headerBottom + 60) {
+            // 卡片底部即将离开顶栏底缘：平滑淡出
+            factor = Math.max(0.1, (rect.bottom - (headerBottom - 60)) / 120);
+          }
+          factor = Math.max(0.2, Math.min(1, factor));
+
+          const rgb = card.getAttribute('data-refract-color') || '148, 216, 45';
+          const leftP = Math.max(0, Math.min(100, (rect.left / windowW) * 100));
+          const rightP = Math.max(0, Math.min(100, (rect.right / windowW) * 100));
+
+          activeColorStops.push({
+            left: leftP,
+            right: rightP,
+            rgb: rgb,
+            factor: factor
+          });
+        }
+      });
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+      if (activeColorStops.length > 0) {
+        // 按屏幕水平 X 轴从左往右排序
+        activeColorStops.sort((a, b) => a.left - b.left);
+
+        const neutralRgba = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.35)';
+        const stops = [];
+        let cursor = 0;
+
+        activeColorStops.forEach(item => {
+          // 空白过渡区
+          if (item.left > cursor) {
+            stops.push(`${neutralRgba} ${cursor.toFixed(1)}%`);
+            stops.push(`${neutralRgba} ${Math.max(cursor, item.left - 1.2).toFixed(1)}%`);
+          }
+
+          // 核心折射带：根据卡片真实色彩呈现饱满棱镜折射
+          const alphaCenter = ( (isDark ? 0.95 : 0.90) * item.factor ).toFixed(2);
+          const alphaEdge = ( (isDark ? 0.50 : 0.45) * item.factor ).toFixed(2);
+          
+          stops.push(`rgba(${item.rgb}, ${alphaEdge}) ${item.left.toFixed(1)}%`);
+          stops.push(`rgba(${item.rgb}, ${alphaCenter}) ${((item.left + item.right) / 2).toFixed(1)}%`);
+          stops.push(`rgba(${item.rgb}, ${alphaEdge}) ${item.right.toFixed(1)}%`);
+
+          cursor = item.right;
+        });
+
+        if (cursor < 100) {
+          stops.push(`${neutralRgba} ${Math.min(100, cursor + 1.2).toFixed(1)}%`);
+          stops.push(`${neutralRgba} 100%`);
+        }
+
+        const gradient = `linear-gradient(90deg, ${stops.join(', ')})`;
+        header.style.setProperty('--refract-gradient', gradient);
+      } else {
+        // 未接触任何卡片时，呈现极微晶冷白折射基准光
+        const defGradient = isDark 
+          ? 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(160,205,255,0.30) 50%, rgba(255,255,255,0.03) 100%)'
+          : 'linear-gradient(90deg, rgba(255,255,255,0.20) 0%, rgba(200,225,255,0.65) 50%, rgba(255,255,255,0.20) 100%)';
+        header.style.setProperty('--refract-gradient', defGradient);
+      }
+    }
+
+    function applyScheme(key, btnEl) {
+      currentScheme = key;
+      const header = document.getElementById('siteHeader');
+      const badge = document.getElementById('currentSchemeBadge');
+      const comboControls = document.getElementById('comboSubControls');
+      
+      // 清空现有方案类名
+      Object.values(schemes).forEach(s => header.classList.remove(s.className));
+      
+      // 应用新方案
+      const cur = schemes[key];
+      header.classList.add(cur.className);
+      badge.textContent = cur.title;
+
+      // 按钮高亮
+      document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      // 仅在方案四融合版激活高阶微调控制区
+      if (comboControls) {
+        if (key === 'combo') {
+          comboControls.style.opacity = '1';
+          comboControls.style.pointerEvents = 'auto';
+          updateDynamicRefraction();
+        } else {
+          comboControls.style.opacity = '0.35';
+          comboControls.style.pointerEvents = 'none';
+        }
+      }
+    }
+
+    function setOpacity(alpha, btnEl) {
+      if (currentScheme !== 'combo') {
+        const comboBtn = document.querySelectorAll('.demo-btn')[4];
+        applyScheme('combo', comboBtn);
+      }
+      
+      const header = document.getElementById('siteHeader');
+      const alphaDark = (parseFloat(alpha) - 0.03).toFixed(2);
+      header.style.setProperty('--glass-alpha', alpha);
+      header.style.setProperty('--glass-alpha-dark', alphaDark);
+
+      document.querySelectorAll('.demo-sub-btn[data-opacity]').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+    }
+
+    function toggleRefraction() {
+      if (currentScheme !== 'combo') {
+        const comboBtn = document.querySelectorAll('.demo-btn')[4];
+        applyScheme('combo', comboBtn);
+      }
+
+      const header = document.getElementById('siteHeader');
+      const btn = document.getElementById('refractionToggleBtn');
+      refractionEnabled = !refractionEnabled;
+      
+      if (refractionEnabled) {
+        header.classList.remove('no-refraction');
+        btn.classList.add('active');
+        btn.textContent = '🍎 折射切光: 开';
+        updateDynamicRefraction();
+      } else {
+        header.classList.add('no-refraction');
+        btn.classList.remove('active');
+        btn.textContent = '⚪ 折射切光: 关';
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      const newTheme = isDark ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      
+      const themeIcon = document.getElementById('themeIcon');
+      const themeLabel = document.getElementById('themeLabel');
+      themeIcon.textContent = isDark ? '🌙' : '☀️';
+      themeLabel.textContent = isDark ? '暗色模式' : '浅色模式';
+
+      updateDynamicRefraction();
+    }
+
+    // 绑定滚动事件，通过 requestAnimationFrame 高性能更新实时折射光
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateDynamicRefraction();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+      updateDynamicRefraction();
+    });
+
+    // 初始化运行一次
+    updateDynamicRefraction();
+
+    // 绑定顶部栏内的主题切换按钮
+    document.getElementById('headerThemeBtn').addEventListener('click', toggleTheme);
+  </script>
+</body>
+</html>

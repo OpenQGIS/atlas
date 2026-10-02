@@ -1157,9 +1157,10 @@
     const pool = getCurrentFilteredPool();
     renderGrid(pool);
 
-    // 直接无动画瞬时跳转至页面顶端，子页作为独立沉浸式专题呈现
+    // 默认瞬时跳转至页面顶端，若指定了 scroll 参数则滚动到对应像素
+    const initialScroll = (new URLSearchParams(window.location.search).get('scroll')) || (window.location.hash.match(/scroll=(\d+)/) ? window.location.hash.match(/scroll=(\d+)/)[1] : null);
     window.scrollTo({
-      top: 0,
+      top: initialScroll ? parseInt(initialScroll, 10) : 0,
       behavior: 'instant'
     });
 

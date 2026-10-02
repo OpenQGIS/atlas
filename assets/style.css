@@ -6434,7 +6434,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 24px;
+  padding: 8px 18px;
   margin-bottom: 22px;
   border-radius: 9999px;
   background: linear-gradient(
@@ -6951,12 +6951,22 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   }
 
   .hero-brand-capsule {
-    padding: 6px 18px;
-    margin-bottom: 16px;
+    padding: 4px 10px;
+    margin-bottom: 12px;
   }
 
   .hero-brand-capsule .hero-brand-svg {
-    height: 14px;
+    height: 10.5px;
+    filter:
+      drop-shadow(0 0.8px 0 rgba(255, 235, 175, 0.65))
+      drop-shadow(0 -0.6px 0.4px rgba(0, 0, 0, 0.95))
+      drop-shadow(0 0 0.8px rgba(0, 0, 0, 0.9));
+  }
+
+  :root[data-theme="light"] .hero-brand-capsule .hero-brand-svg {
+    filter:
+      drop-shadow(0 0.8px 0 rgba(255, 255, 255, 0.85))
+      drop-shadow(0 -0.6px 0.4px rgba(60, 45, 20, 0.5));
   }
 
   .hero-brand-tooltip {

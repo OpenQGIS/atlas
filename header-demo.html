@@ -699,20 +699,22 @@
       position: static !important;
     }
     .dewdrop-forced-hover {
-      background: radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 75, 75, 0.45) 45%, rgba(220, 38, 38, 0.25) 100%), rgba(239, 68, 68, 0.22) !important;
-      color: #ffffff !important;
-      border-color: rgba(248, 113, 113, 0.65) !important;
-      box-shadow: inset 0 1.5px 2px rgba(255, 255, 255, 0.90), 0 0 16px rgba(239, 68, 68, 0.45) !important;
-      transform: scale(1.10) translateY(-1px);
+      background: rgba(239, 68, 68, 0.15) !important;
+      color: #f87171 !important;
+      border: 1px solid rgba(239, 68, 68, 0.40) !important;
+      box-shadow: 0 2px 10px rgba(239, 68, 68, 0.22) !important;
+      transform: scale(1.05);
     }
     :root[data-theme="light"] .dewdrop-forced-hover {
-      background: radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 1) 0%, rgba(254, 202, 202, 0.55) 45%, rgba(239, 68, 68, 0.25) 100%), rgba(255, 255, 255, 0.75) !important;
+      background: rgba(239, 68, 68, 0.10) !important;
       color: #dc2626 !important;
-      border-color: rgba(239, 68, 68, 0.50) !important;
-      box-shadow: inset 0 1.5px 2px rgba(255, 255, 255, 1), 0 0 14px rgba(239, 68, 68, 0.25) !important;
+      border: 1px solid rgba(239, 68, 68, 0.30) !important;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.14) !important;
+      transform: scale(1.05);
     }
     .dewdrop-forced-active {
-      transform: scale(0.92) !important;
+      transform: scale(0.93) !important;
+      background: rgba(239, 68, 68, 0.25) !important;
     }
 
     /* 展台 2: 悬浮工具岛 */
@@ -946,7 +948,7 @@
     <!-- =====================================================================
          🍎 Apple 液态玻璃（Liquid Glass 2.0）微交互与组件全息实验室
          ===================================================================== -->
-    <section class="liquid-lab-section">
+    <section class="liquid-lab-section" id="liquidLab">
       <div class="liquid-lab-header">
         <div class="liquid-lab-badge">APPLE LIQUID GLASS 2.0 LAB</div>
         <h2 class="liquid-lab-title">Apple 液态透镜玻璃设计规范与组件实验室</h2>
@@ -960,26 +962,26 @@
         <div class="liquid-lab-card">
           <div class="liquid-lab-card-title">
             <span class="lab-pill">01</span>
-            水滴透镜关闭按钮 · Dewdrop Orb
+            通透微晶关闭按钮 · Frosted Glass Close Orb
           </div>
           <p class="liquid-lab-card-desc">
-            360° 球面透镜曲率，10点钟方向自然入射天光弧，悬停触发灵动红宝石漫射（Ruby Flush）与表面张力膨胀微动。
+            与全局统一维度的现代通透磨砂语言：彻底抛弃 3D 拟物假高光与油润反光点，常态轻量通透，悬停微泛柔和极简赤红，克制优雅。
           </p>
           <div class="dewdrop-interactive-stage">
             <div class="dewdrop-demo-item">
-              <span class="dewdrop-state-label">常态透镜</span>
+              <span class="dewdrop-state-label">常态通透</span>
               <button class="drawer-close-btn dewdrop-demo-orb" title="常态演示 (可点击)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:13px;height:13px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:13px;height:13px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
             <div class="dewdrop-demo-item">
-              <span class="dewdrop-state-label">悬停红宝石漫射</span>
+              <span class="dewdrop-state-label">悬停柔红微感</span>
               <button class="drawer-close-btn dewdrop-demo-orb dewdrop-forced-hover" title="悬停演示">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:13px;height:13px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:13px;height:13px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </div>
             <div class="dewdrop-demo-item">
-              <span class="dewdrop-state-label">触压微缩 (0.92x)</span>
+              <span class="dewdrop-state-label">触压反馈 (0.93x)</span>
               <button class="drawer-close-btn dewdrop-demo-orb dewdrop-forced-active" title="触压演示">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:13px;height:13px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
@@ -1444,6 +1446,10 @@
 
     if (window.location.hash.includes('dark')) {
       toggleTheme();
+    }
+    if (window.location.hash.includes('lab')) {
+      const labEl = document.getElementById('liquidLab');
+      if (labEl) labEl.scrollIntoView();
     }
     if (window.location.hash.includes('scroll=')) {
       const match = window.location.hash.match(/scroll=(\d+)/);

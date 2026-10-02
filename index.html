@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20261002_v69">
+  <link rel="stylesheet" href="assets/style.css?v=20261002_v70">
   <script src="assets/config.js?v=20260930_v57"></script>
   <script src="assets/i18n.js?v=20261002_v62"></script>
   <script src="data/themes.js?v=20260930_v57"></script>
@@ -27,41 +27,48 @@
     <div class="hero-scrim"></div>
     
 
-    <!-- Top-Right Floating Controls (首屏右上角多语言下拉与深浅主题切换) -->
+    <!-- Top-Right Floating Actions · 首屏右上角多段式微晶胶囊 (03 Actions Capsule · 135°天光倾角) -->
     <div class="hero-top-actions" id="heroTopActions">
-      <div class="lang-dropdown-wrapper hero-lang-dropdown" id="heroLangDropdownWrapper">
-        <button class="stat-pill lang-dropdown-btn" id="btnHeroLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" title="切换语言 / Switch Language">
-          <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="2" y1="12" x2="22" y2="12"></line>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-          </svg>
-          <span class="lang-current-label" id="currentHeroLangLabel">中</span>
-          <svg class="icon chevron-icon" style="width:10px; height:10px; margin-left:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
-        <div class="lang-dropdown-menu" id="heroLangDropdownMenu" role="menu">
-          <button class="lang-dropdown-item active" data-lang="zh" role="menuitem">
-            <span class="lang-item-name">简体中文</span>
-            <span class="lang-item-badge">ZH</span>
+      <div class="header-actions-capsule hero-actions-capsule" id="heroActionsCapsule">
+        <!-- Language Selector Dropdown (可扩展多语言下拉面板) -->
+        <div class="lang-dropdown-wrapper hero-lang-dropdown" id="heroLangDropdownWrapper">
+          <button class="capsule-btn lang-dropdown-btn" id="btnHeroLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" title="切换语言 / Switch Language" aria-label="切换语言">
+            <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span class="lang-current-label" id="currentHeroLangLabel">中</span>
+            <svg class="icon chevron-icon" style="width:10px; height:10px; margin-left:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
           </button>
-          <button class="lang-dropdown-item" data-lang="en" role="menuitem">
-            <span class="lang-item-name">English</span>
-            <span class="lang-item-badge">EN</span>
-          </button>
-          <button class="lang-dropdown-item" data-lang="ja" role="menuitem">
-            <span class="lang-item-name">日本語</span>
-            <span class="lang-item-badge">JA</span>
-          </button>
-          <button class="lang-dropdown-item" data-lang="ko" role="menuitem">
-            <span class="lang-item-name">한국어</span>
-            <span class="lang-item-badge">KO</span>
-          </button>
+          <div class="lang-dropdown-menu" id="heroLangDropdownMenu" role="menu">
+            <button class="lang-dropdown-item active" data-lang="zh" role="menuitem">
+              <span class="lang-item-name">简体中文</span>
+              <span class="lang-item-badge">ZH</span>
+            </button>
+            <button class="lang-dropdown-item" data-lang="en" role="menuitem">
+              <span class="lang-item-name">English</span>
+              <span class="lang-item-badge">EN</span>
+            </button>
+            <button class="lang-dropdown-item" data-lang="ja" role="menuitem">
+              <span class="lang-item-name">日本語</span>
+              <span class="lang-item-badge">JA</span>
+            </button>
+            <button class="lang-dropdown-item" data-lang="ko" role="menuitem">
+              <span class="lang-item-name">한국어</span>
+              <span class="lang-item-badge">KO</span>
+            </button>
+          </div>
         </div>
+
+        <div class="capsule-divider"></div>
+
+        <!-- 模式切换按键 -->
+        <button class="capsule-btn icon-btn theme-toggle-btn hero-theme-btn" id="btnHeroToggleTheme" data-i18n-title="navThemeToggle" title="切换主题模式" aria-label="切换主题模式">
+        </button>
       </div>
-      <button class="icon-btn theme-toggle-btn hero-theme-btn" id="btnHeroToggleTheme" data-i18n-title="navThemeToggle" title="切换主题模式" aria-label="切换主题模式">
-      </button>
     </div>
 
     <div class="hero-content">
@@ -81,8 +88,16 @@
       <div class="hero-desc" data-i18n="heroDesc">个人制图实践 · QGIS 能力边界的记录</div>
     </div>
 
-    <!-- Active Artwork Label (展示当前随机背景画卷名称) -->
+    <!-- Active Artwork Label (左下角背景画卷图名 · 微晶磨砂画签) -->
     <div class="hero-artwork-tag" id="heroArtworkTag" style="display: none;">
+      <span class="hero-artwork-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:100%;height:100%;">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+      </span>
+      <span class="hero-artwork-prefix">ARTWORK ·</span>
       <span class="hero-artwork-name" id="heroArtworkName"></span>
     </div>
 

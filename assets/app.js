@@ -3074,8 +3074,20 @@
       btn.addEventListener('click', () => {
         if (isTouchOrMobile()) resetBtn();
       });
-      btn.addEventListener('touchend', resetBtn, { passive: true });
-      btn.addEventListener('touchcancel', resetBtn, { passive: true });
+      btn.addEventListener('touchstart', () => {
+        btn.classList.add('is-touch-down');
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+          try { navigator.vibrate(10); } catch(e) {}
+        }
+      }, { passive: true });
+
+      function handleTouchRelease() {
+        btn.classList.remove('is-touch-down');
+        resetBtn();
+      }
+
+      btn.addEventListener('touchend', handleTouchRelease, { passive: true });
+      btn.addEventListener('touchcancel', handleTouchRelease, { passive: true });
       btn.addEventListener('blur', resetBtn);
     });
 
@@ -3807,6 +3819,11 @@
     modalEl.classList.add('open');
     if (window.AtlasMorphicons && window.AtlasMorphicons.rotate) {
       window.AtlasMorphicons.rotate.reset();
+      setTimeout(() => {
+        if (window.AtlasMorphicons.rotate.ambientWakeup) {
+          window.AtlasMorphicons.rotate.ambientWakeup();
+        }
+      }, 480);
     }
     modalEl.setAttribute('aria-hidden', 'false');
     document.documentElement.classList.add('viewer-open');
@@ -6594,6 +6611,15 @@
             svgRotate.style.transition = 'none';
             svgRotate.style.transform = 'rotate(0deg)';
           }
+        },
+        ambientWakeup() {
+          if (!svgRotate || isRotateBusy) return;
+          svgRotate.style.transition = 'transform 0.16s cubic-bezier(0.2, 0.8, 0.4, 1)';
+          svgRotate.style.transform = `rotate(${rotateAngle + 12}deg)`;
+          setTimeout(() => {
+            svgRotate.style.transition = 'transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            svgRotate.style.transform = `rotate(${rotateAngle}deg)`;
+          }, 160);
         }
       };
     }

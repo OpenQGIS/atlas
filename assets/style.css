@@ -9847,3 +9847,17 @@ body.in-subview .gallery-main {
   transform-style: preserve-3d;
   pointer-events: none;
 }
+
+
+/* Mobile Tactile Physics: Touch-Down Depress, Touch-Up Release */
+@media (hover: none) or (pointer: coarse) {
+  .viewer-floating-toolbar .tool-btn,
+  .viewer-float-toolbar .tool-btn {
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease !important;
+  }
+  .viewer-floating-toolbar .tool-btn.is-touch-down,
+  .viewer-float-toolbar .tool-btn.is-touch-down {
+    transform: scale(0.88) !important;
+    opacity: 0.85 !important;
+  }
+}

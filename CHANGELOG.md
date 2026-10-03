@@ -4,6 +4,32 @@
 
 ---
 
+## [1.3.17] - 2026-10-03
+
+### 全功能高精交互式鹰眼图与微晶避让体系 (Full High-Precision Navigator & 4-Tier Collision Dodge)
+- **左下角锚定与空间纯净化交互体验**：
+  - **极简工艺美学设计 (Human-Crafted Anti-AI Slop)**：将鹰眼全景挂载于视口左下角黄金阅读盲区，彻底清除原有常驻界面的机械冗余教学文案；
+  - **悬停浮窗动态指导 (Fluid Hover Tooltip)**：平时保持极致纯净，仅当鼠标在鹰眼图容器上悬停时，自适应浮现高精液态玻璃指示卡片【鹰眼图 O · 按住拖拽画框缩放 · 单击平移】，移开后丝滑淡出。
+- **全图状态智能隐藏视窗 (Auto-Hide Display Region on Full View)**：
+  - 在整张画卷完整展示（Fit）状态下，自动隐藏 `.displayregion` 范围框，还视口以纯粹无遮挡的地图底图；
+  - 仅当读者放大聚焦至局部细节时，选区框立即平滑现身，并精确跟随主画布平移与缩放。
+- **光学反色高对比度虚线画框 (Optical Difference Blend Drag-Zoom & Instant PanTo)**：
+  - **光学反色虚线画框**：采用 `mix-blend-mode: difference` 物理反色与 `2px dashed #ffffff`，结合 `isolation: isolate` 图层隔离，在深色山川、浅色水系或高饱和城区地图上均可呈现强对比高亮反差；
+  - **高精双模触控调度**：画框拖拽（> 6px）通过 `fitBounds` 精确缩放至用户划定区域；点按（<= 6px）通过 `panTo` 毫秒级对准点击中心，保留当前缩放比例。
+- **同款液态玻璃收起胶囊 (Liquid Glass Launcher Capsule)**：
+  - 收起鹰眼图后，呈现与底部居中工具栏同材质的超轻量高透液态玻璃胶囊；
+  - 仅在鼠标悬停或聚焦于胶囊时才浮现【按 O 键再次打开鹰眼图】提示框，刚收起时不发生突兀误弹。
+- **四层防碰撞与智能避让体系 (4-Tier Collision Avoidance)**：
+  - **Tier 1 宽屏大视口 (> 1080px)**：底栏居中，鹰眼图稳居左下角（`bottom: 24px; left: 24px;`），净距 > 200px 优雅并存；
+  - **Tier 2 中屏平板断点 (<= 1080px)**：CSS 媒体查询自动将鹰眼图与胶囊向上错层抬升至 `bottom: 84px`，与底栏错开 14px 物理安全间距；
+  - **Tier 3 动态碰撞守卫 (JS Dynamic Guard)**：监听视口与底栏尺寸几何变化，一旦包围盒间隙 < 20px 自动追加 `.dodge-toolbar` 类，毫秒级紧急上浮；
+  - **Tier 4 移动端窄屏规范 (<= 768px)**：移动端默认收拢为微晶胶囊，展开时避让安全区 `env(safe-area-inset-bottom)`，触控热区达标 44px。
+- **全键盘与多手势双键融合**：
+  - 键盘全面支持 `O` (Overview) 与 `M` (Minimap) 及兼容键 `N` 双向极速折叠/展开；
+  - 完整保留长期调试对比看板 `navigator-demo.html`。
+
+---
+
 ## [1.3.16] - 2026-10-03
 
 ### 移动端交互与触觉物理升级 (Mobile Tactile Physics & Ambient Wakeup)

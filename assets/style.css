@@ -5320,38 +5320,424 @@ body:has(.about-modal.open) {
 }
 
 /* =====================================================================
-   Overview Navigator Panel · 左下角全图导航窗口 (极简纯图框 + 图面反色微型关闭按钮)
+   Overview Navigator (Refined Human-Crafted) · 左下角高精微晶鹰眼图体系
    ==================================================================== */
-.viewer-navigator-panel {
+.navigator-wrapper {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  background: rgba(14, 18, 24, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: visible;
+  user-select: none;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
+              visibility 0.24s,
+              border-color 0.2s ease,
+              bottom 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: bottom left;
+}
+
+:root[data-theme="light"] .navigator-wrapper {
+  background: rgba(255, 255, 255, 0.90);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+.navigator-wrapper:hover {
+  border-color: rgba(var(--accent-rgb), 0.45);
+}
+
+/* 鹰眼图折叠隐藏状态 */
+.navigator-wrapper.is-collapsed {
+  transform: scale(0.9) translateY(14px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* 鼠标在鹰眼图上悬停时显示的提示卡片 (Tooltip: 悬停指引) */
+.nav-hover-tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  padding: 8px 14px;
+  background: rgba(14, 18, 24, 0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  z-index: 100;
+}
+
+.nav-hover-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 22px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(14, 18, 24, 0.92) transparent transparent transparent;
+}
+
+:root[data-theme="light"] .nav-hover-tooltip {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(0, 0, 0, 0.10);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="light"] .nav-hover-tooltip::after {
+  border-color: rgba(255, 255, 255, 0.94) transparent transparent transparent;
+}
+
+/* 仅在鼠标悬停或内部元素获得焦点时显示提示卡片 */
+.navigator-wrapper:hover .nav-hover-tooltip,
+.navigator-wrapper:focus-within .nav-hover-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nav-tip-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.2px;
+}
+
+.nav-tip-title svg {
+  width: 14px;
+  height: 14px;
+  color: var(--accent);
+}
+
+.nav-tip-divider {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+:root[data-theme="light"] .nav-tip-divider {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.nav-tip-action {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.nav-tip-action strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* 悬停右上角轻量关闭按钮 (悬停时显现) */
+.nav-floating-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #d1d7e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1010;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  outline: none;
+}
+
+.navigator-wrapper:hover .nav-floating-close {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.nav-floating-close:hover {
+  background: rgba(220, 38, 38, 0.85);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.nav-floating-close svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.2;
+}
+
+/* OpenSeadragon 原生容器 */
+.viewer-navigator,
+.navigator {
+  border: 2px solid var(--accent) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+  background: transparent !important;
+  overflow: hidden !important;
+  cursor: crosshair !important;
+}
+
+:root[data-theme="light"] .viewer-navigator,
+:root[data-theme="light"] .navigator {
+  border: 2px solid var(--accent) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14) !important;
+  background: transparent !important;
+}
+
+.viewer-navigator canvas,
+.navigator canvas {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+}
+
+/* 显示范围指示框：站点同款主题色 + 适度通透 */
+.displayregion {
+  border: 2px solid var(--accent) !important;
+  background: rgba(var(--accent-rgb), 0.32) !important;
+  box-sizing: border-box !important;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: move !important;
+}
+
+/* 全图显示时自动隐藏显示范围框，还鹰眼底图以纯粹视野 */
+.displayregion.is-full-view {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 鹰眼舞台容器 (isolation: isolate 确保反色框局限于容器内，不穿透污染页面) */
+.navigator-stage {
+  position: relative;
+  cursor: crosshair;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.25);
+  isolation: isolate;
+}
+
+/* 鼠标画框交互透明蒙层 */
+.nav-draw-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* 绘制过程中的虚线框：高对比度 + 针对地图底图实时光学反色 (mix-blend-mode: difference) */
+.nav-draw-box {
+  position: absolute;
+  display: none;
+  box-sizing: border-box;
+  mix-blend-mode: difference;
+  border: 2px dashed #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  filter: drop-shadow(0 0 1px #000000);
+  pointer-events: none;
+  z-index: 1001;
+}
+
+/* 关闭鹰眼图后浮现的液态玻璃胶囊 */
+.nav-launcher-wrapper {
   position: absolute;
   bottom: 24px;
   left: 24px;
   z-index: 24;
-  background: var(--nav-gradient, var(--nav-bg, #07080b));
-  padding: 0;
-  border: 1.5px solid var(--accent);
-  border-radius: 6px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
-  display: block;
-  overflow: hidden;
-  box-sizing: border-box;
-  transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
-  user-select: none;
-}
-
-:root[data-theme="light"] .viewer-navigator-panel {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-
-.viewer-navigator-panel.closed {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: scale(0.92) translateY(6px);
+  transform: scale(0.9) translateY(10px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), 
+              visibility 0.28s,
+              bottom 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 当分享菜单打开时，彻底隐藏鹰眼小地图，避免移动端与窄屏干涉重叠 */
-.viewer-modal.share-focus-active .viewer-navigator-panel {
+.nav-launcher-wrapper.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: scale(1) translateY(0);
+}
+
+/* 底部液态玻璃胶囊按钮 (高度对齐底栏液态玻璃高透工艺) */
+.nav-launcher-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 9999px;
+  background: rgba(14, 18, 24, 0.82);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  box-shadow: 
+    inset 1.2px 1.5px 2px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.12),
+    0px 0.8px 1px -1px rgba(0, 0, 0, 0.20),
+    0px 3px 4px -2px rgba(0, 0, 0, 0.18),
+    0px 12px 16px -3px rgba(0, 0, 0, 0.18),
+    0px 22px 42px -5px rgba(0, 0, 0, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+:root[data-theme="light"] .nav-launcher-btn {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  color: var(--text);
+  box-shadow: 
+    inset 1px 1px 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.06),
+    0px 0.8px 1px -1px rgba(0, 0, 0, 0.08),
+    0px 3px 4px -2px rgba(0, 0, 0, 0.06),
+    0px 12px 16px -3px rgba(0, 0, 0, 0.05),
+    0px 20px 36px -5px rgba(0, 0, 0, 0.10);
+}
+
+.nav-launcher-btn svg {
+  width: 15px;
+  height: 15px;
+  color: var(--accent);
+}
+
+.nav-launcher-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: rgba(var(--accent-rgb), 0.45);
+  color: var(--text);
+  box-shadow: 
+    0px 0.8px 1px -1px rgba(0, 0, 0, 0.10),
+    0px 3px 4px -2px rgba(0, 0, 0, 0.08),
+    0px 12px 16px -3px rgba(0, 0, 0, 0.08),
+    0px 22px 42px -5px rgba(0, 0, 0, 0.18),
+    0 0 16px rgba(var(--accent-rgb), 0.15);
+}
+
+/* 键盘按键标识徽章 */
+.kbd-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 6px;
+  min-width: 16px;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.32);
+  border-bottom: 2px solid rgba(var(--accent-rgb), 0.55);
+  border-radius: 4px;
+  user-select: none;
+  letter-spacing: 0.5px;
+}
+
+/* 悬停提示气泡 (左对齐液态玻璃风格) */
+.launcher-tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  background: rgba(14, 18, 24, 0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  box-shadow: 
+    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.28),
+    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.25),
+    0px 10px 10px -3.75px rgba(0, 0, 0, 0.2),
+    0px 16px 32px -4px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.launcher-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 22px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(14, 18, 24, 0.88) transparent transparent transparent;
+}
+
+:root[data-theme="light"] .launcher-tooltip {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.08),
+    0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.06),
+    0px 10px 10px -3.75px rgba(0, 0, 0, 0.05),
+    0px 16px 32px -4px rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="light"] .launcher-tooltip::after {
+  border-color: rgba(255, 255, 255, 0.92) transparent transparent transparent;
+}
+
+/* 仅在鼠标悬停或聚焦在胶囊上时才显示提示框 */
+.nav-launcher-wrapper:hover .launcher-tooltip,
+.nav-launcher-wrapper:focus-within .launcher-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 当分享菜单打开时，彻底隐藏鹰眼，避免移动端与窄屏干涉重叠 */
+.viewer-modal.share-focus-active .navigator-wrapper,
+.viewer-modal.share-focus-active .nav-launcher-wrapper {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
@@ -5359,162 +5745,89 @@ body:has(.about-modal.open) {
 }
 
 /* 当缩放比例弹出层打开时，鹰眼导航窗智能虚化淡出并禁用点击，防止物理与视觉重叠遮挡 */
-.viewer-modal:has(#zoomPopover.open) .viewer-navigator-panel,
-.viewer-modal:has(.zoom-popover.open) .viewer-navigator-panel,
-.viewer-modal.zoom-focus-active .viewer-navigator-panel {
+.viewer-modal:has(#zoomPopover.open) .navigator-wrapper,
+.viewer-modal:has(.zoom-popover.open) .navigator-wrapper,
+.viewer-modal.zoom-focus-active .navigator-wrapper {
   opacity: 0.12 !important;
   pointer-events: none !important;
   transform: scale(0.96);
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-.navigator-close-btn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50% !important;
-  background: rgba(16, 22, 32, 0.65);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
-  color: rgba(255, 255, 255, 0.85);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  z-index: 35;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: auto;
+/* ============================================================
+   防重叠避让核心规则 (Toolbar Collision Avoidance Strategy)
+   1. 宽屏 (> 1080px): 底栏居中，鹰眼图在左下角，水平安全间隙 > 200px，从容共存
+   2. 中屏 / 平板 (<= 1080px): 鹰眼图与启动胶囊自动上浮至底栏上方 (bottom: 84px)
+   3. 动态守卫类 (.dodge-toolbar): 当 JS 几何碰撞探测判定间隙 < 20px 时强制上浮
+   4. 移动端 (<= 768px): 底栏精简宽度，鹰眼图默认折叠为胶囊；展开时优雅浮于底栏上方
+   ============================================================ */
+@media (max-width: 1080px) {
+  .navigator-wrapper,
+  .nav-launcher-wrapper {
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 }
 
-:root[data-theme="light"] .navigator-close-btn {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(0, 0, 0, 0.10);
-  border-top: 1px solid rgba(0, 0, 0, 0.14);
-  color: #1e293b;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+.navigator-wrapper.dodge-toolbar,
+.nav-launcher-wrapper.dodge-toolbar {
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-.navigator-close-btn:hover {
-  background: rgba(239, 68, 68, 0.15) !important;
-  color: #f87171 !important;
-  border: 1px solid rgba(239, 68, 68, 0.40) !important;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.20) !important;
-  transform: scale(1.06);
+/* 全屏纯沉浸模式隐退 */
+.viewer-modal.fullscreen-mode .navigator-wrapper,
+.viewer-modal.fullscreen-mode .nav-launcher-wrapper {
+  transform: translateY(140%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease !important;
 }
 
-.navigator-close-btn:active {
-  background: rgba(239, 68, 68, 0.25) !important;
-  transform: scale(0.93) !important;
+.viewer-modal.fullscreen-mode.controls-visible .navigator-wrapper:not(.is-collapsed) {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
-:root[data-theme="light"] .navigator-close-btn:hover {
-  background: rgba(239, 68, 68, 0.10) !important;
-  color: #dc2626 !important;
-  border: 1px solid rgba(239, 68, 68, 0.30) !important;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.12) !important;
-  transform: scale(1.06);
+.viewer-modal.fullscreen-mode.controls-visible .nav-launcher-wrapper.is-visible {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
-:root[data-theme="light"] .navigator-close-btn:active {
-  background: rgba(239, 68, 68, 0.20) !important;
-  transform: scale(0.93) !important;
-}
-
-.navigator-close-btn .icon {
-  width: 10px;
-  height: 10px;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
-}
-
-.navigator-body {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: block;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-}
-
-/* OpenSeadragon Navigator inside panel */
-.viewer-navigator,
-.navigator {
-  position: relative !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: auto !important;
-  bottom: auto !important;
-  width: 100% !important;
-  height: 100% !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  background: var(--nav-gradient, linear-gradient(135deg, #1e222b 0%, #15181f 50%, #0d0e12 100%)) !important;
-  background-size: cover !important;
-  overflow: hidden !important;
-  cursor: crosshair !important;
-  box-sizing: border-box !important;
-  transition: background 0.4s ease;
-}
-
-.viewer-navigator::before,
-.navigator::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--nav-thumb, none);
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  opacity: var(--nav-thumb-opacity, 0);
-  transition: opacity 0.35s ease-out;
-  pointer-events: none;
-  z-index: 0;
-}
-
-:root[data-theme="light"] .viewer-navigator,
-:root[data-theme="light"] .navigator {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.viewer-navigator .openseadragon-container,
-.viewer-navigator .openseadragon-canvas,
-.navigator .openseadragon-container,
-.navigator .openseadragon-canvas {
-  background: transparent !important;
-}
-
-.navigator canvas,
-.viewer-navigator canvas {
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: transparent !important;
-}
-
-.displayregion {
-  border: 2px solid var(--accent) !important;
-  background: transparent !important;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.65), inset 0 0 0 1px rgba(255, 255, 255, 0.35) !important;
-  box-sizing: border-box !important;
-  cursor: move !important;
-}
-
-.displayregion:active {
-  cursor: grabbing !important;
-}
-
+/* ============================================================
+   移动端窄屏自适应规范 (UI/UX Pro Max 移动端适配)
+   针对手机等 <= 768px 窄屏进行手势、安全区、触控尺寸与视野保护优化
+   ============================================================ */
 @media (max-width: 768px) {
-  .viewer-navigator-panel {
-    bottom: calc(74px + env(safe-area-inset-bottom, 0px));
-    left: 14px;
+  /* 移动端安全区偏移与底部避让 (Safe Area Awareness) */
+  .navigator-wrapper,
+  .nav-launcher-wrapper {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    left: calc(14px + env(safe-area-inset-left, 0px));
+  }
+
+  /* 触控友好胶囊按钮 (符合 Apple 44pt / Material 48dp 规范) */
+  .nav-launcher-btn {
+    min-height: 44px;
+    padding: 8px 18px;
+    font-size: 13px;
+  }
+
+  /* 移动端无 Hover 状态：常驻显示轻量关闭按钮，尺寸扩大便于触控 */
+  .nav-floating-close {
+    opacity: 0.95 !important;
+    transform: scale(1) !important;
+    width: 30px;
+    height: 30px;
+    top: 4px;
+    right: 4px;
+  }
+
+  /* 提示框在移动端紧凑化 */
+  .nav-hover-tooltip,
+  .launcher-tooltip {
+    font-size: 11px;
+    padding: 6px 10px;
   }
 }
 

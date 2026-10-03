@@ -1,6 +1,8 @@
 # Dependencies & Build
 node_modules/
 dist/
+vendor/lucide/
+vendor/morphicons/
 __pycache__/
 *.pyc
 

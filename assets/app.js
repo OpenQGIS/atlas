@@ -157,6 +157,13 @@
       } else {
         window.AtlasMorphicons.reset.toZoomed();
       }
+
+      // 全图显示时自动隐藏鹰眼图选区框，聚焦细节时平滑显现
+      const isFull = Math.abs(curZ - homeZ) / (homeZ || 1) < 0.04;
+      const displayRegion = document.querySelector('#viewerNavigator .displayregion') || document.querySelector('.displayregion');
+      if (displayRegion) {
+        displayRegion.classList.toggle('is-full-view', isFull);
+      }
     }
     if (!osdViewer || !osdViewer.viewport) return;
     const currentZoom = osdViewer.viewport.getZoom();
@@ -2339,6 +2346,9 @@
     modalEl.dataset.bound = 'true';
 
     initViewerTopActions();
+    if (typeof window.initAtlasMorphicons === 'function') {
+      try { initAtlasMorphicons(); } catch(e) {}
+    }
 
     const backdropEl = document.getElementById('viewerBackdrop');
     const closeBtn = document.getElementById('btnCloseViewer');
@@ -2440,6 +2450,9 @@
       toolReset.addEventListener('click', () => {
         if (osdViewer && osdViewer.viewport) {
           osdViewer.viewport.goHome();
+        }
+        if (window.AtlasMorphicons && window.AtlasMorphicons.reset) {
+          window.AtlasMorphicons.reset.toFit();
         }
         blurBtn(toolReset);
       });
@@ -2644,11 +2657,7 @@
     // 初始化比例控制器浮层与输入交互
     bindZoomControllerEvents();
 
-    if (toolReset) {
-      toolReset.addEventListener('click', () => {
-        if (osdViewer) osdViewer.viewport.goHome();
-      });
-    }
+    // toolReset handled above with Morphicons
 
     if (toolRotate) {
       toolRotate.addEventListener('click', () => {
@@ -2675,49 +2684,76 @@
       });
     }
 
-    const navPanel = document.getElementById('viewerNavigatorPanel');
-    const navCloseBtn = document.getElementById('btnCloseNavigator');
+    let isNavCollapsed = window.innerWidth <= 768;
 
-    function closeNavigatorPanel(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      if (!navPanel) return;
-      navPanel.classList.add('closed');
-    }
+    function toggleNavigator(collapse) {
+      const navW = document.getElementById('navWrapper');
+      const navL = document.getElementById('navLauncher');
+      if (!navW || !navL) return;
 
-    function openNavigatorPanel() {
-      if (!navPanel) return;
-      navPanel.classList.remove('closed');
-      if (osdViewer && osdViewer.navigator) {
-        setTimeout(() => {
-          if (osdViewer && osdViewer.navigator) {
-            osdViewer.navigator.updateSize();
-          }
-        }, 50);
-      }
-    }
-
-    function toggleNavigatorPanel(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      if (!navPanel) return;
-      if (navPanel.classList.contains('closed')) {
-        openNavigatorPanel();
+      if (collapse === undefined) {
+        isNavCollapsed = !isNavCollapsed;
       } else {
-        closeNavigatorPanel();
+        isNavCollapsed = !!collapse;
+      }
+
+      if (isNavCollapsed) {
+        navW.classList.add('is-collapsed');
+        navL.classList.add('is-visible');
+      } else {
+        navW.classList.remove('is-collapsed');
+        navL.classList.remove('is-visible');
+        if (osdViewer && osdViewer.navigator) {
+          setTimeout(() => {
+            if (osdViewer && osdViewer.navigator) {
+              osdViewer.navigator.updateSize();
+            }
+          }, 50);
+        }
+      }
+      setTimeout(checkToolbarCollision, 50);
+    }
+
+    function checkToolbarCollision() {
+      const tb = document.querySelector('.viewer-floating-toolbar') || document.querySelector('.viewer-float-toolbar');
+      const navW = document.getElementById('navWrapper');
+      const navL = document.getElementById('navLauncher');
+      if (!tb || !navW || !navL) return;
+
+      const tbRect = tb.getBoundingClientRect();
+      const activeNav = !navW.classList.contains('is-collapsed') ? navW : navL;
+      const navRect = activeNav.getBoundingClientRect();
+
+      const isOverlapX = (navRect.right + 20 > tbRect.left);
+      if (isOverlapX) {
+        navW.classList.add('dodge-toolbar');
+        navL.classList.add('dodge-toolbar');
+      } else if (window.innerWidth > 1080) {
+        navW.classList.remove('dodge-toolbar');
+        navL.classList.remove('dodge-toolbar');
       }
     }
 
-    if (navCloseBtn) {
-      navCloseBtn.addEventListener('click', closeNavigatorPanel);
-      navCloseBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-      navCloseBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
-      navCloseBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+    const btnCloseNav = document.getElementById('btnCloseNav');
+    const btnOpenNav = document.getElementById('btnOpenNav');
+    if (btnCloseNav) {
+      btnCloseNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleNavigator(true);
+      });
+      btnCloseNav.addEventListener('mousedown', (e) => e.stopPropagation());
+      btnCloseNav.addEventListener('pointerdown', (e) => e.stopPropagation());
+      btnCloseNav.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
     }
+    if (btnOpenNav) {
+      btnOpenNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleNavigator(false);
+      });
+    }
+    window.addEventListener('resize', checkToolbarCollision);
 
     document.addEventListener('fullscreenchange', () => {
       const isFs = !!document.fullscreenElement;
@@ -2853,9 +2889,13 @@
         case 'I':
           if (toggleInfoBtn) toggleInfoBtn.click();
           break;
+        case 'o':
+        case 'O':
+        case 'm':
+        case 'M':
         case 'n':
         case 'N':
-          toggleNavigatorPanel();
+          toggleNavigator();
           break;
         case 'Tab':
           e.preventDefault();
@@ -3297,69 +3337,188 @@
 
   function updateNavigatorDimensions(item) {
     const navEl = document.getElementById('viewerNavigator');
-    if (!navEl || !item) return;
+    const navStage = document.getElementById('navStageContainer');
+    if (!item) return { width: 220, height: 140 };
 
     const isMobile = window.innerWidth <= 768;
-    const maxW = isMobile ? 130 : 200;
-    const maxH = isMobile ? 90 : 130;
+    const maxDim = isMobile ? 150 : 220;
 
     const imgW = item.width || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Width) || 2000;
     const imgH = item.height || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Height) || 2000;
     const aspect = (imgW > 0 && imgH > 0) ? (imgW / imgH) : 1;
 
     let targetW, targetH;
-    if (aspect >= maxW / maxH) {
-      targetW = maxW;
-      targetH = Math.max(Math.round(maxW / aspect), 24);
+    if (aspect >= 1) {
+      targetW = maxDim;
+      targetH = Math.max(isMobile ? 55 : 70, Math.round(maxDim / aspect));
     } else {
-      targetH = maxH;
-      targetW = Math.max(Math.round(maxH * aspect), 28);
+      targetH = maxDim;
+      targetW = Math.max(isMobile ? 55 : 70, Math.round(maxDim * aspect));
     }
 
-    const dominantColor = (item.navGradient && item.navGradient[1]) || (item.navGradient && item.navGradient[0]) || (item.colors && item.colors[0]) || (item.color && item.color[0]) || '#07080b';
-    const gradientCss = (function (it) {
-      if (it && it.navGradient && Array.isArray(it.navGradient) && it.navGradient.length >= 2) {
-        if (it.navGradient.length === 3) {
-          return `linear-gradient(135deg, ${it.navGradient[0]} 0%, ${it.navGradient[1]} 50%, ${it.navGradient[2]} 100%)`;
-        }
-        return `linear-gradient(135deg, ${it.navGradient[0]} 0%, ${it.navGradient[1]} 100%)`;
+    if (navStage) {
+      navStage.style.width = targetW + 'px';
+      navStage.style.height = targetH + 'px';
+    }
+
+    if (navEl) {
+      navEl.style.width = targetW + 'px';
+      navEl.style.height = targetH + 'px';
+      if (item && item.thumb) {
+        const fullThumbUrl = new URL(item.thumb, window.location.href).href;
+        navEl.style.setProperty('--nav-thumb', 'url("' + fullThumbUrl + '")');
+        navEl.style.setProperty('--nav-thumb-opacity', '1');
       }
-      return `linear-gradient(135deg, ${dominantColor} 0%, #07080b 100%)`;
-    })(item);
-
-    const borderOffset = 3; // 1.5px * 2 borders
-    const navPanel = document.getElementById('viewerNavigatorPanel');
-    if (navPanel) {
-      navPanel.style.width = (targetW + borderOffset) + 'px';
-      navPanel.style.height = (targetH + borderOffset) + 'px';
-      navPanel.style.setProperty('--nav-bg', dominantColor);
-      navPanel.style.setProperty('--nav-gradient', gradientCss);
+      const navCanvas = navEl.querySelector('canvas');
+      if (navCanvas) {
+        navCanvas.style.setProperty('background-color', 'transparent', 'important');
+      }
+      const navContainer = navEl.querySelector('.openseadragon-container');
+      if (navContainer) {
+        navContainer.style.setProperty('background-color', 'transparent', 'important');
+      }
+      const navOsdCanvas = navEl.querySelector('.openseadragon-canvas');
+      if (navOsdCanvas) {
+        navOsdCanvas.style.setProperty('background-color', 'transparent', 'important');
+      }
     }
 
-    navEl.style.width = targetW + 'px';
-    navEl.style.height = targetH + 'px';
-    navEl.style.setProperty('--nav-bg', dominantColor);
-    navEl.style.setProperty('--nav-gradient', gradientCss);
-    if (item && item.thumb) {
-      const fullThumbUrl = new URL(item.thumb, window.location.href).href;
-      navEl.style.setProperty('--nav-thumb', 'url("' + fullThumbUrl + '")');
-      navEl.style.setProperty('--nav-thumb-opacity', '1');
-    }
-    // 同步更新 navigator 内所有层级容器与 canvas 背景，画布透明以便即时透出三锚点底图
-    const navCanvas = navEl.querySelector('canvas');
-    if (navCanvas) {
-      navCanvas.style.setProperty('background-color', 'transparent', 'important');
-    }
-    const navContainer = navEl.querySelector('.openseadragon-container');
-    if (navContainer) {
-      navContainer.style.setProperty('background-color', 'transparent', 'important');
-    }
-    const navOsdCanvas = navEl.querySelector('.openseadragon-canvas');
-    if (navOsdCanvas) {
-      navOsdCanvas.style.setProperty('background-color', 'transparent', 'important');
-    }
+    return { width: targetW, height: targetH };
+  }
 
-    updateNavigatorCloseButtonColor(item);
+  function setupNavigatorInteractions(item, navWidth, navHeight) {
+    const overlay = document.getElementById('navDrawOverlay');
+    const box = document.getElementById('navDrawBox');
+    if (!overlay || !box) return;
+
+    // 清理旧事件监听（克隆节点替换）
+    const newOverlay = overlay.cloneNode(true);
+    overlay.parentNode.replaceChild(newOverlay, overlay);
+    const newBox = newOverlay.querySelector('#navDrawBox');
+
+    let isDrawing = false;
+    let startX = 0, startY = 0;
+    let currentX = 0, currentY = 0;
+
+    newOverlay.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      isDrawing = true;
+      const rect = newOverlay.getBoundingClientRect();
+      startX = e.clientX - rect.left;
+      startY = e.clientY - rect.top;
+      currentX = startX;
+      currentY = startY;
+
+      newBox.style.left = startX + 'px';
+      newBox.style.top = startY + 'px';
+      newBox.style.width = '0px';
+      newBox.style.height = '0px';
+      newBox.style.display = 'none';
+
+      try {
+        newOverlay.setPointerCapture(e.pointerId);
+      } catch (err) {}
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    newOverlay.addEventListener('pointermove', (e) => {
+      if (!isDrawing) return;
+      const rect = newOverlay.getBoundingClientRect();
+      currentX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+      currentY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+
+      const left = Math.min(startX, currentX);
+      const top = Math.min(startY, currentY);
+      const width = Math.abs(currentX - startX);
+      const height = Math.abs(currentY - startY);
+
+      if (width > 4 || height > 4) {
+        newBox.style.display = 'block';
+        newBox.style.left = left + 'px';
+        newBox.style.top = top + 'px';
+        newBox.style.width = width + 'px';
+        newBox.style.height = height + 'px';
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    newOverlay.addEventListener('pointerup', (e) => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      try {
+        newOverlay.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+
+      const left = Math.min(startX, currentX);
+      const top = Math.min(startY, currentY);
+      const width = Math.abs(currentX - startX);
+      const height = Math.abs(currentY - startY);
+
+      if (width > 6 && height > 6) {
+        newBox.style.transition = 'opacity 0.2s ease';
+        newBox.style.opacity = '0';
+        setTimeout(() => {
+          newBox.style.display = 'none';
+          newBox.style.opacity = '1';
+          newBox.style.transition = '';
+        }, 200);
+
+        if (osdViewer && osdViewer.viewport) {
+          let targetBounds = null;
+          if (osdViewer.navigator && osdViewer.navigator.viewport) {
+            try {
+              const p1 = osdViewer.navigator.viewport.pointFromPixel(new OpenSeadragon.Point(left, top));
+              const p2 = osdViewer.navigator.viewport.pointFromPixel(new OpenSeadragon.Point(left + width, top + height));
+              const minX = Math.min(p1.x, p2.x);
+              const minY = Math.min(p1.y, p2.y);
+              const w = Math.abs(p2.x - p1.x);
+              const h = Math.abs(p2.y - p1.y);
+              if (w > 0.001 && h > 0.001 && isFinite(minX) && isFinite(minY)) {
+                targetBounds = new OpenSeadragon.Rect(minX, minY, w, h);
+              }
+            } catch (err) {}
+          }
+          if (!targetBounds) {
+            const artAr = item.aspectRatio || (item.width / item.height) || 1;
+            const normX = left / navWidth;
+            const normY = (top / navHeight) * (1 / artAr);
+            const normW = width / navWidth;
+            const normH = (height / navHeight) * (1 / artAr);
+            targetBounds = new OpenSeadragon.Rect(normX, normY, normW, normH);
+          }
+          osdViewer.viewport.fitBounds(targetBounds, false);
+          osdViewer.viewport.applyConstraints();
+        }
+      } else {
+        // 单击快速平移至该点击中心点
+        newBox.style.display = 'none';
+        if (osdViewer && osdViewer.viewport) {
+          let clickPt = null;
+          if (osdViewer.navigator && osdViewer.navigator.viewport) {
+            try {
+              clickPt = osdViewer.navigator.viewport.pointFromPixel(new OpenSeadragon.Point(currentX, currentY));
+            } catch (e) {}
+          }
+          if (!clickPt || !isFinite(clickPt.x) || !isFinite(clickPt.y)) {
+            const artAr = item.aspectRatio || (item.width / item.height) || 1;
+            const normX = currentX / navWidth;
+            const normY = (currentY / navHeight) * (1 / artAr);
+            clickPt = new OpenSeadragon.Point(normX, normY);
+          }
+          osdViewer.viewport.panTo(clickPt, false);
+          osdViewer.viewport.applyConstraints();
+        }
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    newOverlay.addEventListener('pointercancel', () => {
+      isDrawing = false;
+      newBox.style.display = 'none';
+    });
   }
 
   let activeAmbientLayer = 'A';
@@ -3906,19 +4065,23 @@
 
     updateBrowserUrl(item, isNewOpen);
 
+    toggleNavigator(window.innerWidth <= 768);
     loadOpenSeadragon(item);
   }
 
   function ensureNavigatorElement(item) {
-    const navBody = document.getElementById('navigatorBody');
-    if (navBody) {
-      navBody.innerHTML = '';
-    }
-    const navEl = document.createElement('div');
-    navEl.id = 'viewerNavigator';
-    navEl.className = 'viewer-navigator';
-    if (navBody) {
-      navBody.appendChild(navEl);
+    const navStage = document.getElementById('navStageContainer');
+    let navEl = document.getElementById('viewerNavigator');
+    if (!navEl && navStage) {
+      navEl = document.createElement('div');
+      navEl.id = 'viewerNavigator';
+      navEl.className = 'viewer-navigator';
+      const overlay = document.getElementById('navDrawOverlay');
+      if (overlay) {
+        navStage.insertBefore(navEl, overlay);
+      } else {
+        navStage.appendChild(navEl);
+      }
     }
     if (navEl && item) {
       updateNavigatorDimensions(item);
@@ -3935,6 +4098,9 @@
       try { osdViewer.destroy(); } catch (e) {}
       osdViewer = null;
     }
+
+    const navDims = updateNavigatorDimensions(item) || { width: 220, height: 140 };
+    setupNavigatorInteractions(item, navDims.width, navDims.height);
 
     // 确保在 osdViewer 销毁后重建导航器 DOM 节点，杜绝 null (setting 'id')
     const navEl = ensureNavigatorElement(item);
@@ -4105,9 +4271,13 @@
         showNavigator: true,
         navigatorElement: navEl,
         navigatorId: 'viewerNavigator',
+        navigatorPosition: 'BOTTOM_LEFT',
         navigatorAutoFade: false,
         navigatorRotate: true,
         navigatorBackground: 'transparent',
+        navigatorBorderColor: '#80cc28',
+        navigatorDisplayRegionColor: 'rgba(128, 204, 40, 0.28)',
+        navigatorDisplayOnLogicalClick: true,
         autoResize: true,
         animationTime: 0.45,
         blendTime: isPhone ? 0.05 : 0.15,
@@ -4757,8 +4927,8 @@
       stage.style.setProperty('--stage-thumb-opacity', '0');
     }
     ensureNavigatorElement(null);
-    const navPanel = document.getElementById('viewerNavigatorPanel');
-    if (navPanel) navPanel.classList.remove('closed');
+    const navBox = document.getElementById('navDrawBox');
+    if (navBox) navBox.style.display = 'none';
 
     const glowA = document.getElementById('ambientGlowA');
     const glowB = document.getElementById('ambientGlowB');
@@ -6531,7 +6701,7 @@
   let rotateAngle = 0;
   let isRotateBusy = false;
 
-  function initAtlasMorphicons() {
+  window.initAtlasMorphicons = function initAtlasMorphicons() {
     if (!window.Morphicons || !window.LucideIcons) {
       console.warn('Morphicons or LucideIcons bundle not found');
       return;

@@ -7,9 +7,9 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20261003_v71">
+  <link rel="stylesheet" href="assets/style.css?v=20261003_v72">
   <script src="assets/config.js?v=20260930_v57"></script>
-  <script src="assets/i18n.js?v=20261002_v62"></script>
+  <script src="assets/i18n.js?v=20261003_v63"></script>
   <script src="data/themes.js?v=20260930_v57"></script>
   <script src="data/manifest.js?v=20260930_v57"></script>
   <script src="assets/theme.js?v=20261002_v69"></script>
@@ -289,14 +289,48 @@
           </div>
         </div>
 
-        <!-- Overview Navigator · 左下角全图导航窗口 (纯图框极简设计 + 右上角微型关闭按钮) -->
-        <div class="viewer-navigator-panel" id="viewerNavigatorPanel">
-          <button class="navigator-close-btn" id="btnCloseNavigator" aria-label="关闭全图导航" data-i18n-title="navCloseHint" data-custom-tip="关闭全图导航 (N)">
-            <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
-          <div class="navigator-body" id="navigatorBody">
-            <div class="viewer-navigator" id="viewerNavigator"></div>
+        <!-- Overview Navigator · 左下角全图导航窗口 (展开容器：高精微晶质感 + 悬停 Tooltip 提示 + 鼠标画框透明蒙层 + 光学反色选区框) -->
+        <div class="navigator-wrapper is-collapsed" id="navWrapper">
+          <!-- 鼠标在鹰眼图容器上悬停时才显示的精致提示弹窗 (平时纯净无常驻冗余文字) -->
+          <div class="nav-hover-tooltip" id="navHoverTooltip">
+            <div class="nav-tip-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+              <span data-i18n="navOverviewTitle">鹰眼图</span>
+              <kbd class="kbd-badge">O</kbd>
+            </div>
+            <div class="nav-tip-divider"></div>
+            <div class="nav-tip-action" data-i18n="navTipDragZoom">
+              按住 <strong>拖拽画框</strong> 缩放 · <strong>单击</strong> 平移
+            </div>
           </div>
+
+          <div class="navigator-stage" id="navStageContainer">
+            <!-- 悬停右上角轻量关闭按钮 (快捷键: O / M) -->
+            <button class="nav-floating-close" id="btnCloseNav" title="收起鹰眼图 (快捷键: O)" aria-label="收起鹰眼图" data-i18n-title="navCloseHint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <!-- OpenSeadragon 鹰眼原生挂载容器 -->
+            <div class="viewer-navigator" id="viewerNavigator"></div>
+            <!-- 鼠标画框交互透明蒙层 -->
+            <div class="nav-draw-overlay" id="navDrawOverlay">
+              <!-- 临时虚线反色绘制框 (mix-blend-mode: difference) -->
+              <div class="nav-draw-box" id="navDrawBox"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 关闭/收起鹰眼图后的液态玻璃胶囊唤起浮标 (左下角常驻，与底栏同款液态玻璃高透质感) -->
+        <div class="nav-launcher-wrapper" id="navLauncher">
+          <div class="launcher-tooltip" id="launcherTooltip">
+            <span data-i18n="navTipKeyOpenPrefix">按</span>
+            <kbd class="kbd-badge">O</kbd>
+            <span data-i18n="navTipKeyOpenSuffix">键再次打开鹰眼图</span>
+          </div>
+          <button class="nav-launcher-btn" id="btnOpenNav" title="点击或按 O 键打开鹰眼图" aria-label="打开鹰眼图" data-i18n-title="navOpenHint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            <span data-i18n="navOverviewTitle">鹰眼图</span>
+            <kbd class="kbd-badge">O</kbd>
+          </button>
         </div>
 
         <div class="viewer-floating-toolbar">
@@ -701,6 +735,6 @@
         </div>
       </div>
     </div>
-  <script src="assets/app.js?v=20261003_v63"></script>
+  <script src="assets/app.js?v=20261003_v64"></script>
 </body>
 </html>

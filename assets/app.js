@@ -324,12 +324,21 @@
       } catch (e) {}
     }
 
-    // 预先检测是否有子页面或展品深链参数，若有立即施加 in-subview 类，避免首屏 Hero 闪烁
+    // 预先检测是否有子页面或展品深链参数，若有立即施加 in-subview 或 viewer-preopen 类，避免首屏 Hero/瀑布流 闪烁
     const isTestLang = window.location.href.includes('test_lang');
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const isSub = getSubFromUrl(urlParams);
-      const isArt = urlParams.has('id') || urlParams.has('art');
+      const isArt = urlParams.has('id') || urlParams.has('art') || (window.location.hash && (window.location.hash.includes('id=') || window.location.hash.includes('art=')));
+      if (isArt) {
+        document.documentElement.classList.add('viewer-preopen', 'viewer-open');
+        document.body.classList.add('viewer-preopen', 'viewer-open');
+        const modalEl = document.getElementById('viewerModal');
+        if (modalEl) {
+          modalEl.classList.add('open');
+          modalEl.setAttribute('aria-hidden', 'false');
+        }
+      }
       if (isSub) {
         document.body.classList.add('in-subview');
       } else if (!isArt) {
@@ -1001,11 +1010,13 @@
           const topActions = document.getElementById('viewerTopActions');
           if (topActions) {
             topActions.classList.remove('has-open');
-            if (!topActions.matches(':hover')) {
-              topActions.classList.remove('expanded');
+            // 用户在下拉菜单切换完语言后，保持展开至少 3 秒，不立刻缩回
+            if (typeof keepTopActionsActive === 'function') {
+              keepTopActionsActive(3000);
+            } else {
+              if (typeof resetTopActionsIdleTimer === 'function') resetTopActionsIdleTimer(3000);
             }
           }
-          if (typeof resetTopActionsIdleTimer === 'function') resetTopActionsIdleTimer();
         }
       });
     }
@@ -2427,7 +2438,39 @@
   let topActionsIdleTimer = null;
   const TOP_ACTIONS_IDLE_DELAY = 2800; // 2.8秒无操作后淡化为沉浸态
 
-  function resetTopActionsIdleTimer() {
+  function keepTopActionsActive(durationMs = 3000) {
+    const topActions = document.getElementById('viewerTopActions');
+    if (!topActions) return;
+
+    // 强制保持展开与清晰态
+    topActions.classList.add('expanded');
+    topActions.classList.remove('idle-dimmed');
+
+    if (topActionsIdleTimer) {
+      clearTimeout(topActionsIdleTimer);
+      topActionsIdleTimer = null;
+    }
+
+    topActionsIdleTimer = setTimeout(() => {
+      const modalEl = document.getElementById('viewerModal');
+      if (!modalEl || !modalEl.classList.contains('open')) return;
+
+      const langMenu = document.getElementById('viewerLangMenu');
+      const stillMenuOpen = langMenu && langMenu.classList.contains('open');
+      let stillHovered = false;
+      try { stillHovered = topActions.matches(':hover'); } catch (e) {}
+
+      if (!stillMenuOpen && !stillHovered) {
+        topActions.classList.add('idle-dimmed');
+        topActions.classList.remove('expanded');
+      }
+    }, durationMs);
+  }
+
+  // 挂载到全局方便跨模块调用
+  window.keepTopActionsActive = keepTopActionsActive;
+
+  function resetTopActionsIdleTimer(delayMs = TOP_ACTIONS_IDLE_DELAY) {
     const topActions = document.getElementById('viewerTopActions');
     if (!topActions) return;
 
@@ -2459,7 +2502,7 @@
         topActions.classList.add('idle-dimmed');
         topActions.classList.remove('expanded');
       }
-    }, TOP_ACTIONS_IDLE_DELAY);
+    }, delayMs);
   }
 
   function initViewerTopActions() {
@@ -2467,25 +2510,19 @@
     const modalEl = document.getElementById('viewerModal');
     if (!topActions || !modalEl) return;
 
-    modalEl.addEventListener('mousemove', resetTopActionsIdleTimer, { passive: true });
-    modalEl.addEventListener('pointerdown', resetTopActionsIdleTimer, { passive: true });
+    modalEl.addEventListener('mousemove', () => resetTopActionsIdleTimer(), { passive: true });
+    modalEl.addEventListener('pointerdown', () => resetTopActionsIdleTimer(), { passive: true });
 
     topActions.addEventListener('mouseleave', () => {
-      resetTopActionsIdleTimer();
+      resetTopActionsIdleTimer(3000);
     });
 
     topActions.addEventListener('click', (e) => {
       const closeBtn = e.target.closest('#btnCloseViewer');
       if (closeBtn) return;
 
-      if (e.target.closest('.lang-dropdown-btn') || e.target.closest('.lang-dropdown-menu') || e.target.closest('#toolToggleTheme')) {
-        return;
-      }
-
-      if (!topActions.classList.contains('expanded')) {
-        topActions.classList.add('expanded');
-        resetTopActionsIdleTimer();
-      }
+      // 无论点击了语言按钮、语言菜单还是主题切换按钮，都保持展开 3 秒
+      keepTopActionsActive(3000);
     });
   }
 
@@ -5201,8 +5238,8 @@
     if (!modalEl) return;
     modalEl.classList.remove('open');
     modalEl.setAttribute('aria-hidden', 'true');
-    document.documentElement.classList.remove('viewer-open');
-    document.body.classList.remove('viewer-open');
+    document.documentElement.classList.remove('viewer-open', 'viewer-preopen');
+    document.body.classList.remove('viewer-open', 'viewer-preopen');
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
     document.documentElement.style.scrollbarGutter = '';
@@ -6546,9 +6583,11 @@
             galleryUrl.hash = '';
             window.history.replaceState({ level: 1, view: 'gallery', subCategory: currentSubCategory }, '', galleryUrl.toString());
           } catch (e) {}
-          setTimeout(() => {
-            openViewerByItem(match, true);
-          }, 120);
+          openViewerByItem(match, true);
+          requestAnimationFrame(() => {
+            document.documentElement.classList.remove('viewer-preopen');
+            document.body.classList.remove('viewer-preopen');
+          });
           return true;
         }
       }

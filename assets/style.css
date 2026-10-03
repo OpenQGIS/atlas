@@ -7687,7 +7687,7 @@ html.theme-transitioning .app-footer {
 /* Scroll Down Prompt Button */
 .hero-scroll-btn {
   position: absolute;
-  bottom: 28px;
+  bottom: 36px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -8061,7 +8061,7 @@ html.theme-transitioning .app-footer {
   }
 
   .hero-scroll-btn {
-    bottom: 18px;
+    bottom: 32px;
   }
 
   .header-inner {

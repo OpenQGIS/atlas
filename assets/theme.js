@@ -202,14 +202,17 @@
       if (!hasMorphPath) {
         btn.innerHTML = isDark ? SVG_SUN : SVG_MOON;
       }
+      const t = (window.AtlasI18n && typeof window.AtlasI18n.t === 'function') ? window.AtlasI18n.t : (k => null);
       if (isDark) {
-        btn.dataset.customTip = '切换至浅色模式 (Light Mode)';
+        const tipLight = t('themeToLight') || '切换至浅色模式 (Light Mode)';
+        btn.dataset.customTip = tipLight;
         btn.removeAttribute('title');
-        btn.setAttribute('aria-label', '切换至浅色模式');
+        btn.setAttribute('aria-label', tipLight);
       } else {
-        btn.dataset.customTip = '切换至深色模式 (Dark Mode)';
+        const tipDark = t('themeToDark') || '切换至深色模式 (Dark Mode)';
+        btn.dataset.customTip = tipDark;
         btn.removeAttribute('title');
-        btn.setAttribute('aria-label', '切换至深色模式');
+        btn.setAttribute('aria-label', tipDark);
       }
     });
   }
@@ -257,4 +260,5 @@
     initThemeButtons,
     loadTokens
   };
+  window.AtlasTheme = window.GalleryTheme;
 })();

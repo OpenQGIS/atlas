@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20261003_v100">
+  <link rel="stylesheet" href="assets/style.css?v=20261003_v103">
   <script>
     (function () {
       try {
@@ -21,10 +21,10 @@
     })();
   </script>
   <script src="assets/config.js?v=20260930_v57"></script>
-  <script src="assets/i18n.js?v=20261003_v84"></script>
+  <script src="assets/i18n.js?v=20261003_v87"></script>
   <script src="data/themes.js?v=20260930_v57"></script>
   <script src="data/manifest.js?v=20260930_v57"></script>
-  <script src="assets/theme.js?v=20261003_v98"></script>
+  <script src="assets/theme.js?v=20261003_v99"></script>
   <script src="vendor/morph-bundle.js?v=20261002_v1"></script>
   <script src="vendor/openseadragon.min.js"></script>
   <script src="vendor/lottie.min.js"></script>
@@ -45,13 +45,9 @@
         <!-- Language Selector Dropdown (可扩展多语言下拉面板) -->
         <div class="lang-dropdown-wrapper hero-lang-dropdown" id="heroLangDropdownWrapper">
           <button class="capsule-btn lang-dropdown-btn" id="btnHeroLangDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="langSelectTitle" title="切换语言 / Switch Language" aria-label="切换语言">
-            <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="2" y1="12" x2="22" y2="12"></line>
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-            </svg>
+            <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path id="pathHeroLangMorph" d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
             <span class="lang-current-label" id="currentHeroLangLabel">中</span>
-            <svg class="icon chevron-icon" style="width:10px; height:10px; margin-left:1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <svg class="icon chevron-icon" style="width:10px; height:10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
@@ -115,18 +111,28 @@
         </svg>
       </span>
       <span class="hero-artwork-name" id="heroArtworkName"></span>
-      <button class="hero-artwork-refresh" id="btnHeroRefreshBg" title="换一卷背景画卷" aria-label="换一卷背景画卷">
+      <button class="hero-artwork-refresh" id="btnHeroRefreshBg" data-i18n-title="heroBgRefresh" data-custom-tip="换一卷背景画卷" aria-label="换一卷背景画卷">
         <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:11px;height:11px;">
           <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
         </svg>
       </button>
     </div>
 
-    <!-- Scroll Down Prompt Button (点击或鼠标滚动直达第二屏瀑布流) -->
-    <button class="hero-scroll-btn" id="heroScrollBtn" aria-label="向下探索" data-i18n-title="heroScroll">
-      <span class="hero-scroll-text" data-i18n="heroScroll">向下探索</span>
-      <div class="scroll-mouse-anim">
+    <!-- Scroll Down Prompt Button (桌面端鼠标滚轮动效 / 触屏端上滑探索手势动画) -->
+    <button class="hero-scroll-btn" id="heroScrollBtn" aria-label="上滑探索更多" data-i18n-title="heroScroll">
+      <span class="hero-scroll-text" data-i18n="heroScroll">上滑探索更多</span>
+      <!-- 桌面端鼠标滚轮微动效 (精细化滚轮下滚) -->
+      <div class="scroll-mouse-anim" aria-hidden="true">
         <div class="scroll-mouse-dot"></div>
+      </div>
+      <!-- 手机与Pad触控端专属手势动效 (动态向上滑动触摸指示) -->
+      <div class="scroll-touch-anim" aria-hidden="true">
+        <svg class="touch-swipe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <!-- 向上滑动虚线轨迹与箭头，严格 x=12 垂直居中 -->
+          <path class="touch-swipe-arrow" d="M12 2v6M9 5l3-3 3 5"/>
+          <!-- 精美触控手势：食指笔直朝上位于中轴线 x=12 -->
+          <path class="touch-finger" d="M12 11V7a1.5 1.5 0 0 0-3 0v7.5l-1.3-1.3a1.5 1.5 0 0 0-2.1 2.1l4.2 4.2A5 5 0 0 0 13.3 22h1.4a5 5 0 0 0 5-5v-5a1.5 1.5 0 0 0-3 0v-1a1.5 1.5 0 0 0-3 0v-1a1.5 1.5 0 0 0-1.7-1"/>
+        </svg>
       </div>
       <svg class="icon scroll-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="6 9 12 15 18 9"></polyline>
@@ -371,7 +377,7 @@
           </button>
           <!-- 动态比例控制器 (底栏输入+显示二合一 · 展开窗口仅精简展示纯档位) -->
           <div class="zoom-dropdown-wrapper" id="zoomDropdownWrapper">
-            <div class="tool-zoom-pill" id="toolZoomPill" data-custom-tip="缩放比例与预设档位 (回车应用，点击展开档位)">
+            <div class="tool-zoom-pill" id="toolZoomPill" data-i18n-title="zoomPillTip" data-custom-tip="缩放比例与预设档位 (回车应用，点击展开档位)">
               <input type="number" class="zoom-inline-input" id="zoomInlineInput" min="1" max="2500" step="1" value="100" aria-label="缩放百分比" />
               <span class="zoom-unit">%</span>
               <button type="button" class="zoom-chevron-btn" id="btnZoomChevron" aria-label="展开预设比例档位" aria-haspopup="true" aria-expanded="false">
@@ -583,7 +589,7 @@
               </h3>
               <!-- Ratio Dropdown Selector · 海报画幅比例快捷切换下拉 -->
               <div class="poster-ratio-dropdown" id="posterRatioDropdown">
-                <button type="button" class="poster-ratio-btn" id="btnPosterRatioDropdown" aria-haspopup="true" aria-expanded="false" title="切换海报画幅比例" aria-label="切换海报画幅比例">
+                <button type="button" class="poster-ratio-btn" id="btnPosterRatioDropdown" aria-haspopup="true" aria-expanded="false" data-i18n-title="posterRatioSelectTitle" title="切换海报画幅比例" aria-label="切换海报画幅比例">
                   <span class="poster-ratio-current" id="posterCurrentRatioLabel">3:4</span>
                   <svg class="icon chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
@@ -772,6 +778,6 @@
     </div>
   <!-- 液态毛玻璃双层推移专用视口动效层 (方案 C: Frosted Iris Layer) -->
   <div id="glassWaveLayer"></div>
-  <script src="assets/app.js?v=20261003_v86"></script>
+  <script src="assets/app.js?v=20261003_v88"></script>
 </body>
 </html>

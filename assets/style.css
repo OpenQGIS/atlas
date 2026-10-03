@@ -7741,6 +7741,75 @@ html.theme-transitioning .app-footer {
   100% { transform: translateY(0); opacity: 1; }
 }
 
+/* 手机与平板专属触控上滑手势动画 (Touch Swipe Gesture Indicator) */
+.scroll-touch-anim {
+  display: none;
+  width: 26px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.touch-swipe-icon {
+  width: 24px;
+  height: 24px;
+  color: currentColor;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+  overflow: visible;
+}
+
+.touch-finger {
+  transform-origin: center bottom;
+  animation: heroTouchFingerMotion 2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.touch-swipe-arrow {
+  animation: heroTouchArrowMotion 2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes heroTouchFingerMotion {
+  0% {
+    transform: translateY(5px);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(2px);
+    opacity: 1;
+  }
+  65% {
+    transform: translateY(-5px);
+    opacity: 0.9;
+  }
+  85% {
+    transform: translateY(-8px);
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+}
+
+@keyframes heroTouchArrowMotion {
+  0%, 20% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  45% {
+    opacity: 0.95;
+    transform: translateY(0);
+  }
+  75% {
+    opacity: 0.7;
+    transform: translateY(-3px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
 .scroll-chevron {
   width: 14px;
   height: 14px;
@@ -7750,6 +7819,16 @@ html.theme-transitioning .app-footer {
 @keyframes heroChevronBounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(3px); }
+}
+
+/* 触控设备专属切换：在触控屏幕 (Touch Screen / Pad / Phone) 下自动启用手势上滑动效，隐藏鼠标 */
+@media (pointer: coarse), (hover: none) {
+  .scroll-mouse-anim {
+    display: none !important;
+  }
+  .scroll-touch-anim {
+    display: flex !important;
+  }
 }
 
 /* =====================================================================
@@ -8055,8 +8134,9 @@ html.theme-transitioning .app-footer {
   .hero-scroll-text {
     font-size: 0.65rem;
   }
-  .scroll-mouse-anim {
-    display: none; /* 短屏下隐藏鼠标滚轮图标，节省36px垂直空间 */
+  .scroll-mouse-anim,
+  .scroll-touch-anim {
+    display: none !important; /* 短屏下隐藏动效图标，节省垂直空间 */
   }
   .hero-artwork-tag {
     top: auto !important;

@@ -995,6 +995,7 @@
         const wrapper = document.getElementById(wrapperId);
         if (menu) menu.classList.remove('open');
         if (window.AtlasMorphicons) {
+          if (btnId === 'btnHeroLangDropdown' && window.AtlasMorphicons.heroLang) window.AtlasMorphicons.heroLang.set(false);
           if (btnId === 'btnLangDropdown' && window.AtlasMorphicons.headerLang) window.AtlasMorphicons.headerLang.set(false);
           if (btnId === 'viewerBtnLangDropdown' && window.AtlasMorphicons.viewerLang) window.AtlasMorphicons.viewerLang.set(false);
         }
@@ -1033,6 +1034,7 @@
         closeAllLangDropdowns(menuId);
         const isOpen = menu.classList.toggle('open');
         if (window.AtlasMorphicons) {
+          if (btnId === 'btnHeroLangDropdown' && window.AtlasMorphicons.heroLang) window.AtlasMorphicons.heroLang.set(isOpen);
           if (btnId === 'btnLangDropdown' && window.AtlasMorphicons.headerLang) window.AtlasMorphicons.headerLang.set(isOpen);
           if (btnId === 'viewerBtnLangDropdown' && window.AtlasMorphicons.viewerLang) window.AtlasMorphicons.viewerLang.set(isOpen);
         }
@@ -2917,7 +2919,9 @@
         } else {
           toolFullscreen.innerHTML = isFs ? SVG_EXIT_FULLSCREEN : SVG_FULLSCREEN;
         }
-        toolFullscreen.dataset.customTip = isFs ? '退出全屏 (F / Esc)' : '视口全屏 (F)';
+        const tipExit = (window.AtlasI18n && window.AtlasI18n.t('actionExitFullscreen')) || '退出全屏 (F / Esc)';
+        const tipEnter = (window.AtlasI18n && window.AtlasI18n.t('actionFullscreen')) || '全屏模式 (F)';
+        toolFullscreen.dataset.customTip = isFs ? tipExit : tipEnter;
         toolFullscreen.removeAttribute('title');
       }
       if (isFs && drawerEl) {
@@ -7078,6 +7082,7 @@
   let morphRotate = null;
   let morphFullscreen = null;
   let morphInfo = null;
+  let morphHeroLang = null;
   let morphHeaderLang = null;
   let morphViewerLang = null;
   let morphShareArtwork = null;
@@ -7231,6 +7236,23 @@
     }
 
     // E: Language Dropdowns (Languages <-> Globe)
+    const pHeroLang = document.getElementById('pathHeroLangMorph');
+    if (pHeroLang && Languages && Globe) {
+      try {
+        const m = createMorph(pHeroLang, Languages);
+        let isOpen = false;
+        morphHeroLang = {
+          set(openState) {
+            if (isOpen === openState) return;
+            isOpen = openState;
+            m.morphTo(isOpen ? Globe : Languages, 'snappy');
+          }
+        };
+      } catch (err) {
+        console.warn('Morphicons HeroLang failed to init:', err);
+      }
+    }
+
     const pHeaderLang = document.getElementById('pathHeaderLangMorph');
     if (pHeaderLang && Languages && Globe) {
       try {
@@ -7544,6 +7566,7 @@
       rotate: morphRotate,
       fullscreen: morphFullscreen,
       info: morphInfo,
+      heroLang: morphHeroLang,
       headerLang: morphHeaderLang,
       viewerLang: morphViewerLang,
       shareArtwork: morphShareArtwork,

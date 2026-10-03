@@ -40,6 +40,7 @@
       actionRotate: '顺时针旋转90° (R)',
       actionActualSize: '1:1 4K 原生像素 (1)',
       actionFullscreen: '全屏模式 (F)',
+      actionExitFullscreen: '退出全屏 (F / Esc)',
       actionShare: '分享画卷 (S)',
       zoomInputPrefix: '比例',
       zoomInputApply: '确定',
@@ -50,6 +51,7 @@
       zoomPhysical200: '200% 精细刻画',
       zoomPixel1to1: '1:1 像素点对点 (超精细)',
       zoomUltraDetail: '400% 超微细节',
+      zoomPillTip: '缩放比例与预设档位 (回车应用，点击展开档位)',
       toolFitScreen: '整图展卷全貌 (0)',
       actionShareCopied: '已复制',
       actionCopy: '复制',
@@ -73,6 +75,7 @@
       posterRatio9x16: '9:16 移动全屏',
       posterRatio21x9: '21:9 极客超宽',
       posterRatio9x21: '21:9 极客超宽',
+      posterRatioSelectTitle: '切换海报画幅比例',
       sharePosterDownloadBtn: '下载高清海报 (PNG)',
       sharePosterGenerating: '正在生成高清典藏海报...',
       aboutTag: '一图一境 · 静观其详',
@@ -122,8 +125,9 @@
       heroSubslogan: '<span class="hero-sub-chunk">地图录</span><span class="hero-sub-sep"> · </span><span class="hero-sub-chunk">OpenQGIS 制图作品集</span>',
       heroBrandTooltip: '点击步入画卷展厅 ↓',
       heroDesc: '个人制图实践 · QGIS 能力边界的记录',
-      heroScroll: '向下探索',
+      heroScroll: '上滑探索更多',
       heroBgArtwork: '背景展卷',
+      heroBgRefresh: '换一卷背景画卷',
       badgeNew: 'NEW',
       badgeNewAria: '近3个月新作',
       footerCopyright: '<p class="footer-desc">「一图一境 · 静观其详」 每一幅地图既是独立完成的空间形态与视觉表达，也是对地理信息开源制图上限的探索与验证。</p><p class="footer-copy">© 2026 OpenQGIS / AtlasLog. All Rights Reserved. 原创空间制图作品未经许可严禁盗用、商用翻印或二次打包传播。</p>',
@@ -189,6 +193,7 @@
       actionRotate: 'Rotate 90° (R)',
       actionActualSize: '1:1 4K Physical Pixels (1)',
       actionFullscreen: 'Fullscreen (F)',
+      actionExitFullscreen: 'Exit Fullscreen (F / Esc)',
       actionShare: 'Share (S)',
       zoomInputPrefix: 'Scale',
       zoomInputApply: 'Go',
@@ -199,6 +204,7 @@
       zoomPhysical200: '200% Close-up',
       zoomPixel1to1: '1:1 Pixel Native',
       zoomUltraDetail: '400% Ultra Detail',
+      zoomPillTip: 'Zoom Level & Presets (Press Enter to apply, click to expand)',
       toolFitScreen: 'Fit Full Map (0)',
       actionShareCopied: 'Copied',
       actionCopy: 'Copy',
@@ -222,6 +228,7 @@
       posterRatio9x16: '9:16 Story / Mobile',
       posterRatio21x9: '21:9 Ultrawide',
       posterRatio9x21: '21:9 Ultrawide',
+      posterRatioSelectTitle: 'Select Poster Aspect Ratio',
       sharePosterDownloadBtn: 'Download Poster (PNG)',
       sharePosterGenerating: 'Generating poster...',
       aboutTag: 'One Map, One Realm · Contemplate the Nuance',
@@ -270,8 +277,9 @@
       heroSubslogan: '<span class="hero-sub-chunk">AtlasLog</span><span class="hero-sub-sep"> · </span><span class="hero-sub-chunk">OpenQGIS Cartography Portfolio</span>',
       heroBrandTooltip: 'Click to Explore Works ↓',
       heroDesc: 'Personal Cartography · Recording the Limits of QGIS',
-      heroScroll: 'Scroll to Explore',
+      heroScroll: 'Swipe Up to Explore',
       heroBgArtwork: 'Featured Map',
+      heroBgRefresh: 'Shuffle Background Artwork',
       badgeNew: 'NEW',
       badgeNewAria: 'Recent Artwork',
       footerCopyright: '<p class="footer-desc">"One Map, One Realm · Contemplate the Nuance" — Each map stands as an independent spatial form and visual expression, exploring the upper limits of open-source GIS cartography.</p><p class="footer-copy">© 2026 OpenQGIS / AtlasLog. All Rights Reserved. Unauthorized commercial reproduction, reprinting, or repackaged redistribution is strictly prohibited.</p>',
@@ -337,6 +345,7 @@
       actionRotate: '時計回りに90°回転 (R)',
       actionActualSize: '1:1 4K 原寸ピクセル (1)',
       actionFullscreen: 'フルスクリーン (F)',
+      actionExitFullscreen: 'フルスクリーン解除 (F / Esc)',
       actionShare: '作品を共有 (S)',
       zoomInputPrefix: '倍率',
       zoomInputApply: '適用',
@@ -347,6 +356,7 @@
       zoomPhysical200: '200% 拡大精細',
       zoomPixel1to1: '1:1 ドット・バイ・ドット',
       zoomUltraDetail: '400% 超微細ディテール',
+      zoomPillTip: 'ズーム倍率とプリセット (Enterで適用、クリックで展開)',
       toolFitScreen: '地図全体を表示 (0)',
       actionShareCopied: 'コピー完了',
       actionCopy: 'コピー',
@@ -370,6 +380,7 @@
       posterRatio9x16: '9:16 モバイル',
       posterRatio21x9: '21:9 超広角',
       posterRatio9x21: '21:9 超広角',
+      posterRatioSelectTitle: 'ポスターのアスペクト比を切り替え',
       sharePosterDownloadBtn: '高解像度ポスターをダウンロード (PNG)',
       sharePosterGenerating: '高解像度ポスターを生成中...',
       aboutTag: '一図一境 · 静観其詳',
@@ -418,8 +429,9 @@
       heroSubslogan: '<span class="hero-sub-chunk">地図録</span><span class="hero-sub-sep"> · </span><span class="hero-sub-chunk">OpenQGIS 地図作品集</span>',
       heroBrandTooltip: 'クリックして作品を閲覧 ↓',
       heroDesc: '個人の作図実践 · QGISの能力の限界を記録する',
-      heroScroll: 'スクロールして探索',
+      heroScroll: '上にスワイプして探索',
       heroBgArtwork: '背景の作品',
+      heroBgRefresh: '背景作品を切り替え',
       badgeNew: 'NEW',
       badgeNewAria: '直近3か月の新作',
       footerCopyright: '<p class="footer-desc">「一図一境 · 静観其詳」 一枚一枚の地図は独立した空間形態の視覚表現であり、地理情報オープンソース作図の限界への探求でもあります。</p><p class="footer-copy">© 2026 OpenQGIS / AtlasLog. All Rights Reserved. 掲載されている地図作品の無断転載・商用利用・再配布を禁じます。</p>',
@@ -485,6 +497,7 @@
       actionRotate: '시계 방향으로 90° 회전 (R)',
       actionActualSize: '1:1 4K 원본 픽셀 (1)',
       actionFullscreen: '전체 화면 (F)',
+      actionExitFullscreen: '전체 화면 종료 (F / Esc)',
       actionShare: '작품 공유 (S)',
       zoomInputPrefix: '배율',
       zoomInputApply: '적용',
@@ -495,6 +508,7 @@
       zoomPhysical200: '200% 정밀 확대',
       zoomPixel1to1: '1:1 픽셀 원본',
       zoomUltraDetail: '400% 초미세 디테일',
+      zoomPillTip: '줌 배율 및 프리셋 (Enter 키로 적용, 클릭하여 펼치기)',
       toolFitScreen: '전체 지도 보기 (0)',
       actionShareCopied: '복사 완료',
       actionCopy: '복사',
@@ -518,6 +532,7 @@
       posterRatio9x16: '9:16 모바일',
       posterRatio21x9: '21:9 울트라와이드',
       posterRatio9x21: '21:9 울트라와이드',
+      posterRatioSelectTitle: '포스터 가로세로 비율 전환',
       sharePosterDownloadBtn: '고화질 포스터 다운로드 (PNG)',
       sharePosterGenerating: '고화질 포스터 생성 중...',
       aboutTag: '一圖一境 · 靜觀其詳',
@@ -566,8 +581,9 @@
       heroSubslogan: '<span class="hero-sub-chunk">지도록</span><span class="hero-sub-sep"> · </span><span class="hero-sub-chunk">OpenQGIS 지도 작품집</span>',
       heroBrandTooltip: '클릭하여 작품 둘러보기 ↓',
       heroDesc: '개인 지도 제작 실천 · QGIS의 한계를 기록하다',
-      heroScroll: '아래로 스크롤하여 탐색',
+      heroScroll: '위로 스와이프하여 탐색',
       heroBgArtwork: '배경 작품',
+      heroBgRefresh: '배경 작품 변경',
       badgeNew: 'NEW',
       badgeNewAria: '최근 3개월 신작',
       footerCopyright: '<p class="footer-desc">「한 장의 지도, 하나의 세계 · 고요히 그 디테일을 보다」 모든 지도는 독립된 공간 형태와 시각적 표현이자 오픈소스 지리정보 지도 제작의 한계를 탐구한 기록입니다.</p><p class="footer-copy">© 2026 OpenQGIS / AtlasLog. All Rights Reserved. 본 사이트의 작품은 무단 전재, 상업적 복제 및 재배포를 엄격히 금지합니다.</p>',
@@ -1981,7 +1997,7 @@
       const key = el.getAttribute('data-i18n-title');
       const title = t(key);
       if (title) {
-        if (el.closest('.viewer-modal') || el.closest('.viewer-container') || el.closest('.viewer-floating-toolbar') || el.closest('.viewer-top-actions') || el.closest('#dockTooltip') || el.closest('#topTooltip') || el.closest('.viewer-artwork-badge') || el.closest('.viewer-edge-nav') || el.hasAttribute('data-custom-tip')) {
+        if (el.closest('.viewer-modal') || el.closest('.viewer-container') || el.closest('.viewer-floating-toolbar') || el.closest('.viewer-top-actions') || el.closest('#dockTooltip') || el.closest('#topTooltip') || el.closest('.viewer-artwork-badge') || el.closest('.viewer-edge-nav') || el.hasAttribute('data-custom-tip') || el.classList.contains('hero-artwork-refresh') || el.classList.contains('capsule-btn')) {
           el.dataset.customTip = title;
           el.removeAttribute('title');
         } else {
@@ -1996,7 +2012,7 @@
       el.textContent = shortLabel;
     });
 
-    document.querySelectorAll('#btnLangDropdown, #viewerBtnLangDropdown, #toolToggleLang').forEach(btn => {
+    document.querySelectorAll('#btnHeroLangDropdown, #btnLangDropdown, #viewerBtnLangDropdown, #toolToggleLang').forEach(btn => {
       btn.dataset.customTip = t('langSelectTitle');
       btn.removeAttribute('title');
     });
@@ -2005,6 +2021,10 @@
       const itemLang = item.getAttribute('data-lang');
       item.classList.toggle('active', itemLang === currentLang);
     });
+
+    if (window.AtlasTheme && typeof window.AtlasTheme.updateUI === 'function') {
+      window.AtlasTheme.updateUI();
+    }
   }
 
   const SUPPORTED_LANGUAGES = [

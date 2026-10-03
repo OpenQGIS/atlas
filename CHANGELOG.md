@@ -2,6 +2,24 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 规范，版本号遵循 [语义化版本 2.0.0](https://semver.org/lang/zh-CN/)。
 
+## [1.3.24] - 2026-10-03
+
+### 鹰眼图 0ms 缩略底图瞬透与零尺寸自愈重构 (Zero-Latency Navigator Reflow & Dual-Layer Architecture)
+- **CSS 复合属性解耦与 0ms 缩略底图瞬透 (Dual-Layer Backdrop Protection)**：
+  - 修复 `.viewer-navigator` 原 `background: transparent !important` 简写属性强行扼杀所有内联背景图的缺陷，精准改为 `background-color: transparent !important` 并预置 `background-size: contain`；
+  - 在 OpenSeadragon 引擎实例化前同步注入当前画卷的高清缩略图作为真实底图垫底，实现鹰眼图 0ms 瞬开，彻底终结切片未到达前的死黑真空期；
+- **物理盒模型硬尺寸锁定 (Min-Dimensions Hard Lock)**：
+  - 在 `updateNavigatorDimensions` 计算后，同步为 `#navStageContainer` 与 `#viewerNavigator` 注入 `minWidth` 与 `minHeight`，杜绝弹窗 CSS 打开过渡期间盒模型计算为 0；
+- **四阶尺寸自愈看门狗体系 (Multi-Stage Reflow Watchdog)**：
+  - 根除初次打开画卷弹窗时由于动画时序导致 OSD 判定 Navigator 为 0、冻结切片调度、导致“必须刷新才出来”的陈年时序 Bug；
+  - 在 `open` 事件（0ms / 60ms / 180ms / 320ms）、`tile-drawn` 首批切片落定、以及 `showArtwork` 弹窗完成（280ms）时构建多阶看门狗守护，强制触发 `navigator.updateSize()`、视口范围约束与框线自适应；
+- **主线程非核心任务错峰调度**：
+  - 将未标注色板项目的像素级离屏 Canvas 颜色提取异步延后 120ms 错峰执行，将首屏主线程算力 100% 留给瓦片管道与视图渲染；
+- **缓存版本与双分支发布保障**：
+  - `index.html` 核心资源缓存版本号全量提升至 **`20261003_v83`**，确保双分支发布后 CDN 与移动端客户端即刻生效。
+
+---
+
 ## [1.3.23] - 2026-10-03
 
 ### 移动端微型空间雷达与分享卡片轻量化重塑 (Mobile Radar Navigator & Compact Share Popover)

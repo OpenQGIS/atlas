@@ -5497,7 +5497,10 @@ body:has(.about-modal.open) {
   border: 2px solid var(--accent) !important;
   border-radius: var(--radius-sm) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
-  background: transparent !important;
+  background-color: transparent !important;
+  background-size: contain !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
   overflow: hidden !important;
   cursor: crosshair !important;
 }
@@ -5506,7 +5509,12 @@ body:has(.about-modal.open) {
 :root[data-theme="light"] .navigator {
   border: 2px solid var(--accent) !important;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14) !important;
-  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.viewer-navigator .openseadragon-container,
+.viewer-navigator .openseadragon-canvas {
+  background-color: transparent !important;
 }
 
 .viewer-navigator canvas,

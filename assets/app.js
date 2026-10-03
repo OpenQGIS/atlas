@@ -3503,15 +3503,23 @@
     if (navStage) {
       navStage.style.width = targetW + 'px';
       navStage.style.height = targetH + 'px';
+      navStage.style.minWidth = targetW + 'px';
+      navStage.style.minHeight = targetH + 'px';
     }
 
     if (navEl) {
       navEl.style.width = targetW + 'px';
       navEl.style.height = targetH + 'px';
+      navEl.style.minWidth = targetW + 'px';
+      navEl.style.minHeight = targetH + 'px';
       if (item && item.thumb) {
-        const fullThumbUrl = new URL(item.thumb, window.location.href).href;
+        const fullThumbUrl = (item.thumb.startsWith('http') ? item.thumb : new URL(item.thumb, window.location.href).href);
         navEl.style.setProperty('--nav-thumb', 'url("' + fullThumbUrl + '")');
         navEl.style.setProperty('--nav-thumb-opacity', '1');
+        navEl.style.setProperty('background-image', 'url("' + fullThumbUrl + '")', 'important');
+        navEl.style.setProperty('background-size', 'contain', 'important');
+        navEl.style.setProperty('background-position', 'center', 'important');
+        navEl.style.setProperty('background-repeat', 'no-repeat', 'important');
       }
       const navCanvas = navEl.querySelector('canvas');
       if (navCanvas) {
@@ -4200,11 +4208,13 @@
         // Markdown 中已标定色板：直接秒级同步呈现，彻底杜绝“提取中...”停留
         renderSwatches(explicitColors.slice(0, 5));
       } else {
-        // 未标定时才异步提取
+        // 未标定时才异步提取（错峰 120ms，避免首帧抢占 OSD 切片管道与主线程）
         mSwatches.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">' + t('metaPaletteExtracting') + '</span>';
-        extractDominantColors(item, 5, function (colors) {
-          renderSwatches(colors);
-        });
+        setTimeout(() => {
+          extractDominantColors(item, 5, function (colors) {
+            renderSwatches(colors);
+          });
+        }, 120);
       }
     }
 
@@ -4220,6 +4230,22 @@
 
     toggleNavigator(window.innerWidth <= 768);
     loadOpenSeadragon(item);
+
+    // 守护看门狗：在模态框 CSS 过渡完成时，强制唤醒并重新校准鹰眼图尺寸
+    requestAnimationFrame(() => {
+      if (osdViewer && osdViewer.navigator) {
+        try { osdViewer.navigator.updateSize(); } catch (e) {}
+      }
+    });
+    setTimeout(() => {
+      if (osdViewer && osdViewer.navigator) {
+        try {
+          osdViewer.navigator.updateSize();
+          clampNavigatorDisplayRegion();
+          updateDisplayRegionVisibility();
+        } catch (e) {}
+      }
+    }, 280);
   }
 
   function ensureNavigatorElement(item) {
@@ -4518,6 +4544,13 @@
             lastStableZoom = osdViewer.viewport.getZoom();
           }
         }
+        if (osdViewer && osdViewer.navigator) {
+          try {
+            osdViewer.navigator.updateSize();
+            clampNavigatorDisplayRegion();
+            updateDisplayRegionVisibility();
+          } catch (e) {}
+        }
       });
 
       // 缩放监听：仅当地图发生剧烈跨越（差异很大如跳变 >= 2.5 倍），且高保真切片加载持续超 600ms 时才唤起提示
@@ -4705,13 +4738,14 @@
       }
       osdViewer.addHandler('open', function () {
         setTimeout(fixNavigatorBackground, 0);
-        setTimeout(fixNavigatorBackground, 80);
-        setTimeout(fixNavigatorBackground, 250);
+        setTimeout(fixNavigatorBackground, 60);
+        setTimeout(fixNavigatorBackground, 180);
+        setTimeout(fixNavigatorBackground, 320);
         setTimeout(() => {
           renderDynamicZoomPresets(item);
           updateDisplayRegionVisibility();
         }, 80);
-        setTimeout(updateDisplayRegionVisibility, 300);
+        setTimeout(updateDisplayRegionVisibility, 320);
       });
 
       osdViewer.addHandler('zoom', function () {

@@ -519,6 +519,17 @@ body {
   height: 15px;
 }
 
+.header-actions-capsule .home-return-btn .tb-icon-layer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.header-actions-capsule .home-return-btn.mode-scroll-top:hover .tb-icon-layer {
+  transform: translateY(-2px);
+}
+
 .stat-pill {
   display: inline-flex;
   align-items: center;
@@ -3128,11 +3139,15 @@ body:has(.about-modal.open) {
   height: 100%;
   z-index: 100;
   display: flex;
+  background-color: #07080b;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   overflow: hidden !important;
   transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.25s;
+}
+:root[data-theme="light"] .viewer-modal {
+  background-color: #f0f2f6;
 }
 .viewer-modal.open {
   opacity: 1;
@@ -3499,8 +3514,16 @@ body:has(.about-modal.open) {
   transition: background 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+:root[data-theme="light"] .viewer-ambient-backdrop {
+  background: var(--viewer-ambient-gradient-light, linear-gradient(135deg, #fafbfc 0%, #f0f2f5 50%, #e4e7eb 100%));
+}
+
 .viewer-ambient-backdrop.artwork-light {
   background: var(--viewer-ambient-gradient, linear-gradient(135deg, #fafbfc 0%, #f0f2f5 50%, #e4e7eb 100%));
+}
+
+:root[data-theme="light"] .viewer-ambient-backdrop.artwork-light {
+  background: var(--viewer-ambient-gradient-light, linear-gradient(135deg, #ffffff 0%, #f4f6f9 50%, #e9ecf2 100%));
 }
 
 .ambient-glow-layer {
@@ -3553,8 +3576,18 @@ body:has(.about-modal.open) {
   transition: background 0.6s ease;
 }
 
+:root[data-theme="light"] .ambient-scrim {
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.20) 30%, rgba(220, 228, 238, 0.65) 100%),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.30) 0%, rgba(235, 240, 248, 0.55) 100%);
+}
+
 .viewer-ambient-backdrop.artwork-light .ambient-scrim {
   background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.01) 40%, rgba(0, 0, 0, 0.12) 100%);
+}
+
+:root[data-theme="light"] .viewer-ambient-backdrop.artwork-light .ambient-scrim {
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15) 40%, rgba(230, 236, 245, 0.45) 100%);
 }
 
 .osd-stage {
@@ -5491,9 +5524,30 @@ body:has(.about-modal.open) {
   stroke-width: 2.2;
 }
 
-/* OpenSeadragon 原生容器 */
+/* 触控与平板设备 (iPad 无鼠标悬停)：常驻优雅呈现，扩大触控热区 */
+@media (hover: none), (pointer: coarse) {
+  .nav-floating-close {
+    opacity: 0.92 !important;
+    transform: scale(1) !important;
+    width: 32px !important;
+    height: 32px !important;
+    top: 4px !important;
+    right: 4px !important;
+  }
+  .nav-floating-close svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+}
+
+/* OpenSeadragon 原生容器 · 绝对定位锁 (物理杜绝被文档流挤出视口) */
 .viewer-navigator,
 .navigator {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
   border: 2px solid var(--accent) !important;
   border-radius: var(--radius-sm) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
@@ -5503,6 +5557,15 @@ body:has(.about-modal.open) {
   background-repeat: no-repeat !important;
   overflow: hidden !important;
   cursor: crosshair !important;
+}
+
+/* 无论 OSD 注入何种匿名 wrapper，强制绝对定位与满幅贴合，物理杜绝向下方换行挤压 */
+.navigator-stage > div:not(.nav-draw-overlay) {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 :root[data-theme="light"] .viewer-navigator,
@@ -5817,9 +5880,19 @@ body:has(.about-modal.open) {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* 移动端微型雷达：去掉右上角突兀且遮挡缩略图的大黑圆关闭按钮（轻触微型鹰眼图任意处即可折叠收起） */
+  /* 移动端微型关闭浮标：右上角轻巧收起 */
   .nav-floating-close {
-    display: none !important;
+    display: flex !important;
+    opacity: 0.92 !important;
+    transform: scale(1) !important;
+    width: 22px !important;
+    height: 22px !important;
+    top: 3px !important;
+    right: 3px !important;
+  }
+  .nav-floating-close svg {
+    width: 11px !important;
+    height: 11px !important;
   }
 
   /* 移动端禁用在鹰眼图上的复杂手势画框干扰 */
@@ -6360,52 +6433,50 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 .viewer-top-actions .close-btn,
 #btnCloseViewer {
   border-radius: 50% !important;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   color: var(--text-secondary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  box-shadow: none !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root[data-theme="light"] .viewer-top-actions .close-btn,
 :root[data-theme="light"] #btnCloseViewer {
-  background: rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  background: transparent !important;
+  border: none !important;
   color: var(--text-secondary);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  box-shadow: none !important;
 }
 
 .viewer-top-actions .close-btn:hover,
 #btnCloseViewer:hover {
-  background: rgba(239, 68, 68, 0.15) !important;
+  background: rgba(239, 68, 68, 0.18) !important;
   color: #f87171 !important;
-  border: 1px solid rgba(239, 68, 68, 0.40) !important;
-  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.22) !important;
+  border: none !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.30) !important;
   transform: scale(1.05);
 }
 
 .viewer-top-actions .close-btn:active,
 #btnCloseViewer:active {
-  background: rgba(239, 68, 68, 0.25) !important;
+  background: rgba(239, 68, 68, 0.28) !important;
   transform: scale(0.93) !important;
 }
 
 :root[data-theme="light"] .viewer-top-actions .close-btn:hover,
 :root[data-theme="light"] #btnCloseViewer:hover {
-  background: rgba(239, 68, 68, 0.10) !important;
+  background: rgba(239, 68, 68, 0.12) !important;
   color: #dc2626 !important;
-  border: 1px solid rgba(239, 68, 68, 0.30) !important;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.14) !important;
+  border: none !important;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.20) !important;
   transform: scale(1.05);
 }
 
 :root[data-theme="light"] .viewer-top-actions .close-btn:active,
 :root[data-theme="light"] #btnCloseViewer:active {
-  background: rgba(239, 68, 68, 0.20) !important;
+  background: rgba(239, 68, 68, 0.22) !important;
   transform: scale(0.93) !important;
 }
 

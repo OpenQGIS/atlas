@@ -23,15 +23,27 @@
   let preViewerScrollY = 0;
   let currentHistoryLevel = 0; // 0: hero, 1: gallery, 2: viewer
 
-  // 智能解析当前站点的根目录绝对基准路径 (自动兼容 GitHub Pages 项目子目录 /atlas/ 与根域名部署)
+  // 智能解析当前站点的根目录绝对基准路径 (自动兼容 GitHub Pages 项目子目录 /atlas/ 与本地 file: 协议)
   function getAppBaseUrl() {
-    let path = window.location.pathname.split('?')[0].split('#')[0];
-    if (path.endsWith('.html') || path.endsWith('.htm')) {
-      path = path.substring(0, path.lastIndexOf('/') + 1);
-    } else if (!path.endsWith('/')) {
-      path += '/';
+    try {
+      const origin = (window.location.origin && window.location.origin !== 'null') ? window.location.origin : '';
+      if (!origin) {
+        let href = (window.location.href || '').split('?')[0].split('#')[0];
+        if (href.endsWith('.html') || href.endsWith('.htm')) {
+          return href.substring(0, href.lastIndexOf('/') + 1);
+        }
+        return href.endsWith('/') ? href : (href + '/');
+      }
+      let path = (window.location.pathname || '').split('?')[0].split('#')[0];
+      if (path.endsWith('.html') || path.endsWith('.htm')) {
+        path = path.substring(0, path.lastIndexOf('/') + 1);
+      } else if (!path.endsWith('/')) {
+        path += '/';
+      }
+      return origin + path;
+    } catch (_) {
+      return './';
     }
-    return window.location.origin + path;
   }
 
   // 物理尺寸引擎基准 (300 DPI 印刷制图在 96 CSS DPI 显示器上的 100% 物理真实尺寸系数)
@@ -471,11 +483,75 @@
     } catch (_) {}
   }
 
+  let headerHomeMode = 'home'; // 'home' | 'top'
+  let lastHomeBtnClickTime = 0;
+
+  function updateHeaderHomeButtonState() {
+    const homeBtn = document.getElementById('btnReturnHero');
+    if (!homeBtn) return;
+    const scrollY = window.scrollY || window.pageYOffset;
+    const shouldBeTop = (scrollY > 180);
+    const newMode = shouldBeTop ? 'top' : 'home';
+
+    if (newMode !== headerHomeMode) {
+      headerHomeMode = newMode;
+      homeBtn.classList.toggle('mode-scroll-top', shouldBeTop);
+
+      const i18n = window.AtlasI18n;
+      const titleKey = shouldBeTop ? 'navScrollTopTitle' : 'navHomeTitle';
+      const label = (i18n && typeof i18n.t === 'function')
+        ? i18n.t(titleKey)
+        : (shouldBeTop ? '回到顶部 (Scroll to Top)' : '返回首屏画卷 (Home)');
+
+      homeBtn.setAttribute('data-i18n-title', titleKey);
+      homeBtn.setAttribute('title', label);
+      homeBtn.setAttribute('aria-label', label);
+      if (homeBtn.hasAttribute('data-custom-tip')) {
+        homeBtn.setAttribute('data-custom-tip', label);
+      }
+
+      if (window.AtlasMorphicons && window.AtlasMorphicons.home && typeof window.AtlasMorphicons.home.setMode === 'function') {
+        window.AtlasMorphicons.home.setMode(newMode);
+      }
+    }
+  }
+
   function bindPortalScrollEvents() {
     const homeBtn = document.getElementById('btnReturnHero') || document.getElementById('btnScrollToPortal');
     if (homeBtn) {
       homeBtn.addEventListener('click', (e) => {
         e.preventDefault();
+        const now = Date.now();
+        const scrollY = window.scrollY || window.pageYOffset;
+
+        // 如果用户在向下滚动较深区域 (scrollY > 180)
+        if (scrollY > 180) {
+          // 若在 650ms 内再次点击（快速连击，明确表达跳过滚动直接回首屏的强烈意图）
+          if (now - lastHomeBtnClickTime < 650) {
+            if (currentSubCategory) {
+              exitSubcategoryView(false);
+            }
+            returnToHeroCover(true);
+          } else {
+            // 单次点击：平滑回滚到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        } else {
+          // 已经在顶部附近：若在子分类瀑布流，先退出子分类并返回首屏画卷封面
+          if (currentSubCategory) {
+            exitSubcategoryView(false);
+          }
+          returnToHeroCover(true);
+        }
+        lastHomeBtnClickTime = now;
+      });
+
+      // 双击保护：无论在深处还是顶部，快速双击直接退出子视图并返回首屏
+      homeBtn.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        if (currentSubCategory) {
+          exitSubcategoryView(false);
+        }
         returnToHeroCover(true);
       });
     }
@@ -747,6 +823,7 @@
 
     window.addEventListener('scroll', () => {
       const scrollY = window.scrollY || window.pageYOffset;
+      updateHeaderHomeButtonState();
       if (document.body.classList.contains('in-gallery')) {
         stopHeroTimer();
         const siteHeaderEl = document.getElementById('siteHeader');
@@ -1220,6 +1297,7 @@
         behavior: 'instant'
       });
       document.documentElement.style.scrollBehavior = '';
+      updateHeaderHomeButtonState();
     });
   }
 
@@ -1264,6 +1342,7 @@
 
     requestAnimationFrame(() => {
       document.documentElement.style.scrollBehavior = '';
+      updateHeaderHomeButtonState();
     });
   }
 
@@ -2777,27 +2856,17 @@
       btnCloseNav.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        toggleNavigator(true);
+        toggleNavigator(true, true);
       });
       btnCloseNav.addEventListener('mousedown', (e) => e.stopPropagation());
       btnCloseNav.addEventListener('pointerdown', (e) => e.stopPropagation());
       btnCloseNav.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
     }
-    if (navStage) {
-      navStage.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768) {
-          // 移动端工业级轻触收起：点击微型鹰眼图任意处即可优雅折叠为胶囊浮标
-          e.preventDefault();
-          e.stopPropagation();
-          toggleNavigator(true);
-        }
-      });
-    }
     if (btnOpenNav) {
       btnOpenNav.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        toggleNavigator(false);
+        toggleNavigator(false, true);
       });
     }
     window.addEventListener('resize', checkToolbarCollision);
@@ -2947,7 +3016,7 @@
         case 'M':
         case 'n':
         case 'N':
-          toggleNavigator();
+          toggleNavigator(undefined, true);
           break;
         case 'Tab':
           e.preventDefault();
@@ -3387,7 +3456,20 @@
     });
   }
 
-  let isNavCollapsed = typeof window !== 'undefined' ? window.innerWidth <= 768 : false;
+  const NAV_COLLAPSED_STORAGE_KEY = 'atlas_nav_collapsed';
+  function getStoredNavCollapsed() {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const val = window.localStorage.getItem(NAV_COLLAPSED_STORAGE_KEY);
+        if (val !== null) {
+          return val === 'true';
+        }
+      }
+    } catch (_) {}
+    return false; // 全端（PC、iPad、手机）默认均展开
+  }
+
+  let isNavCollapsed = getStoredNavCollapsed();
 
   function checkToolbarCollision() {
     const tb = document.querySelector('.viewer-floating-toolbar') || document.querySelector('.viewer-float-toolbar');
@@ -3409,7 +3491,7 @@
     }
   }
 
-  function toggleNavigator(collapse) {
+  function toggleNavigator(collapse, isUserAction = false) {
     const navW = document.getElementById('navWrapper');
     const navL = document.getElementById('navLauncher');
     if (!navW || !navL) return;
@@ -3418,6 +3500,14 @@
       isNavCollapsed = !isNavCollapsed;
     } else {
       isNavCollapsed = !!collapse;
+    }
+
+    if (isUserAction) {
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem(NAV_COLLAPSED_STORAGE_KEY, String(isNavCollapsed));
+        }
+      } catch (_) {}
     }
 
     if (isNavCollapsed) {
@@ -3429,7 +3519,7 @@
       if (osdViewer && osdViewer.navigator) {
         setTimeout(() => {
           if (osdViewer && osdViewer.navigator) {
-            osdViewer.navigator.updateSize();
+            try { osdViewer.navigator.updateSize(); } catch (_) {}
           }
         }, 50);
       }
@@ -3484,7 +3574,14 @@
     const navStage = document.getElementById('navStageContainer');
     if (!item) return { width: 220, height: 140 };
 
-    const isMobile = window.innerWidth <= 768;
+    // 智能设备与横竖屏几何判定：
+    // 使用短边物理极限 Math.min(innerWidth, innerHeight)：
+    // 手机无论横竖屏，短边极限永远 < 500px（iPhone 15 Pro Max 仅 430px），进入紧凑 84px 模式；
+    // 平板/iPad（短边 >= 600px，如 iPad mini 744px, 经典 iPad 768px）和 PC 桌面端享受 220px 大图鹰眼模式
+    const minDim = (typeof window !== 'undefined') ? Math.min(window.innerWidth, window.innerHeight) : 1000;
+    const isTouch = (typeof window !== 'undefined') && (('ontouchstart' in window) || (navigator && navigator.maxTouchPoints > 0));
+    const isTablet = minDim >= 600 && isTouch;
+    const isMobile = (typeof window !== 'undefined' && window.innerWidth <= 768) && !isTablet;
     const maxDim = isMobile ? 84 : 220;
 
     const imgW = item.width || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Width) || 2000;
@@ -3513,7 +3610,15 @@
       navEl.style.minWidth = targetW + 'px';
       navEl.style.minHeight = targetH + 'px';
       if (item && item.thumb) {
-        const fullThumbUrl = (item.thumb.startsWith('http') ? item.thumb : new URL(item.thumb, window.location.href).href);
+        let fullThumbUrl = item.thumb;
+        if (!fullThumbUrl.startsWith('http')) {
+          try {
+            const base = (typeof getAppBaseUrl === 'function') ? getAppBaseUrl() : window.location.href;
+            fullThumbUrl = new URL(item.thumb.replace(/^\/+/, ''), base).href;
+          } catch (_) {
+            fullThumbUrl = item.thumb;
+          }
+        }
         navEl.style.setProperty('--nav-thumb', 'url("' + fullThumbUrl + '")');
         navEl.style.setProperty('--nav-thumb-opacity', '1');
         navEl.style.setProperty('background-image', 'url("' + fullThumbUrl + '")', 'important');
@@ -3694,6 +3799,29 @@
     };
   }
 
+  // 浅色模式专属渐变：将画作色融入明亮柔光基底，产生鲜明的昼夜明暗反差
+  function buildLightAmbientGradient(item, dominantColor) {
+    try {
+      const stops = (item && item.navGradient && Array.isArray(item.navGradient) && item.navGradient.length >= 2)
+        ? item.navGradient
+        : [dominantColor || '#64748b', '#94a3b8'];
+      const lightColors = stops.map(hex => {
+        const rgb = hexToRgb(hex);
+        // 与浅灰暖白 (#f1f5f9 ~ #ffffff) 混合 25% 画作原生色彩
+        const r = Math.round(244 * 0.76 + rgb.r * 0.24);
+        const g = Math.round(247 * 0.76 + rgb.g * 0.24);
+        const b = Math.round(250 * 0.76 + rgb.b * 0.24);
+        return `rgb(${r}, ${g}, ${b})`;
+      });
+      if (lightColors.length === 3) {
+        return `linear-gradient(135deg, ${lightColors[0]} 0%, ${lightColors[1]} 50%, ${lightColors[2]} 100%)`;
+      }
+      return `linear-gradient(135deg, ${lightColors[0]} 0%, ${lightColors[1]} 100%)`;
+    } catch (_) {
+      return 'linear-gradient(135deg, #fafbfc 0%, #f0f2f5 50%, #e4e7eb 100%)';
+    }
+  }
+
   // 动态分析画作右上角局部图面底色，并为右上角关闭按钮赋予自适应数学反色与高对比度
   function updateNavigatorCloseButtonColor(item) {
     const btn = document.getElementById('btnCloseNav') || document.getElementById('btnCloseNavigator');
@@ -3869,6 +3997,7 @@
 
     if (backdropEl) {
       backdropEl.style.setProperty('--viewer-ambient-gradient', gradientCss);
+      backdropEl.style.setProperty('--viewer-ambient-gradient-light', buildLightAmbientGradient(item, dominantColor));
       backdropEl.classList.toggle('artwork-dark', isDarkInitial);
       backdropEl.classList.toggle('artwork-light', !isDarkInitial);
     }
@@ -4228,7 +4357,8 @@
 
     updateBrowserUrl(item, isNewOpen);
 
-    toggleNavigator(window.innerWidth <= 768);
+    // 遵循用户持久化状态记忆（全端默认展开，切卷保持当前状态不变）
+    toggleNavigator(isNavCollapsed, false);
     loadOpenSeadragon(item);
 
     // 守护看门狗：在模态框 CSS 过渡完成时，强制唤醒并重新校准鹰眼图尺寸
@@ -4250,13 +4380,25 @@
 
   function ensureNavigatorElement(item) {
     const navStage = document.getElementById('navStageContainer');
+    if (navStage) {
+      // 深度清扫 OSD 4.1.1 遗留的匿名空壳 wrapper，防止切卷时将新鹰眼图顶出可视区
+      try {
+        Array.from(navStage.children).forEach(ch => {
+          if (!ch) return;
+          const id = ch.id || '';
+          if (!['btnCloseNav', 'navDrawOverlay', 'viewerNavigator'].includes(id)) {
+            ch.remove();
+          }
+        });
+      } catch (_) {}
+    }
     let navEl = document.getElementById('viewerNavigator');
     if (!navEl && navStage) {
       navEl = document.createElement('div');
       navEl.id = 'viewerNavigator';
       navEl.className = 'viewer-navigator';
       const overlay = document.getElementById('navDrawOverlay');
-      if (overlay) {
+      if (overlay && overlay.parentNode === navStage) {
         navStage.insertBefore(navEl, overlay);
       } else {
         navStage.appendChild(navEl);
@@ -4278,11 +4420,10 @@
       osdViewer = null;
     }
 
+    // 确保在 osdViewer 销毁后首先清障并重建导航器 DOM 节点，杜绝 null 引用
+    const navEl = ensureNavigatorElement(item);
     const navDims = updateNavigatorDimensions(item) || { width: 220, height: 140 };
     setupNavigatorInteractions(item, navDims.width, navDims.height);
-
-    // 确保在 osdViewer 销毁后重建导航器 DOM 节点，杜绝 null (setting 'id')
-    const navEl = ensureNavigatorElement(item);
 
     const isDark = (document.documentElement.getAttribute('data-theme') !== 'light');
     const stageBg = isDark ? '#07080b' : '#e5e8ed';
@@ -4302,6 +4443,7 @@
     const ambientBackdrop = document.getElementById('viewerAmbientBackdrop');
     if (ambientBackdrop) {
       ambientBackdrop.style.setProperty('--viewer-ambient-gradient', gradientCss);
+      ambientBackdrop.style.setProperty('--viewer-ambient-gradient-light', buildLightAmbientGradient(item, dominantColor));
     }
     const appBase = getAppBaseUrl();
     const fullThumbUrl = (item && item.thumb) ? (item.thumb.startsWith('http') ? item.thumb : new URL(item.thumb, appBase).href) : '';
@@ -4449,14 +4591,12 @@
         showNavigationControl: false,
         showNavigator: true,
         navigatorElement: navEl,
-        navigatorId: 'viewerNavigator',
         navigatorPosition: 'BOTTOM_LEFT',
         navigatorAutoFade: false,
         navigatorRotate: true,
         navigatorBackground: 'transparent',
         navigatorBorderColor: '#80cc28',
         navigatorDisplayRegionColor: 'rgba(128, 204, 40, 0.28)',
-        navigatorDisplayOnLogicalClick: true,
         autoResize: true,
         animationTime: 0.45,
         blendTime: isPhone ? 0.05 : 0.15,
@@ -6926,6 +7066,7 @@
       Link, Check,
       Paperclip, ExternalLink,
       Home, Send,
+      ChevronUp,
       Folder, Image
     } = window.LucideIcons;
 
@@ -7193,7 +7334,14 @@
       }
     }
 
-    // I: Return Home (Scene F: Home <-> Send on Hover)
+    // ArrowUpToLine (专业天花板顶线回顶图标: M5 3h14 + m18 13-6-6-6 6 + M12 7v14)
+    const ArrowUpToLine = [
+      ['path', { d: 'M5 3h14' }],
+      ['path', { d: 'm18 13-6-6-6 6' }],
+      ['path', { d: 'M12 7v14' }]
+    ];
+
+    // I: Return Home / Scroll Top (Scene F: Home <-> Send on Hover; Home <-> ArrowUpToLine on Scroll)
     const pReturnHero = document.getElementById('pathReturnHeroMorph');
     const btnReturnHero = document.getElementById('btnReturnHero');
     if (pReturnHero && btnReturnHero && Home && Send) {
@@ -7202,17 +7350,24 @@
           btnReturnHero.dataset.morphBound = 'true';
           const m = createMorph(pReturnHero, Home);
           let isHovered = false;
+          let currentMode = (typeof headerHomeMode !== 'undefined') ? headerHomeMode : 'home'; // 'home' | 'top'
 
           function onEnter() {
             if (isHovered) return;
             isHovered = true;
-            m.morphTo(Send, 'snappy');
+            if (currentMode === 'home') {
+              m.morphTo(Send, 'snappy');
+            }
           }
 
           function onLeave() {
             if (!isHovered) return;
             isHovered = false;
-            m.morphTo(Home, 'snappy');
+            if (currentMode === 'home') {
+              m.morphTo(Home, 'snappy');
+            } else {
+              m.morphTo(ArrowUpToLine, 'snappy');
+            }
           }
 
           btnReturnHero.addEventListener('mouseenter', onEnter);
@@ -7222,12 +7377,33 @@
 
           morphHome = {
             toSend() {
-              m.morphTo(Send, 'snappy');
+              if (currentMode === 'home') m.morphTo(Send, 'snappy');
             },
             toHome() {
+              currentMode = 'home';
               m.morphTo(Home, 'snappy');
+            },
+            toTop() {
+              currentMode = 'top';
+              m.morphTo(ArrowUpToLine, 'snappy');
+            },
+            setMode(mode) {
+              if (currentMode === mode) return;
+              currentMode = mode;
+              if (mode === 'top') {
+                m.morphTo(ArrowUpToLine, 'snappy');
+              } else {
+                m.morphTo(Home, 'snappy');
+              }
+            },
+            getMode() {
+              return currentMode;
             }
           };
+
+          if (currentMode === 'top') {
+            m.morphTo(ArrowUpToLine, 'snappy');
+          }
         }
       } catch (err) {
         console.warn('Morphicons Home failed to init:', err);

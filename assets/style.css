@@ -6629,7 +6629,11 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   }
 
   .viewer-modal.drawer-open .viewer-navigator-panel,
-  .viewer-modal:has(.viewer-drawer.open) .viewer-navigator-panel {
+  .viewer-modal:has(.viewer-drawer.open) .viewer-navigator-panel,
+  .viewer-modal.drawer-open .navigator-wrapper,
+  .viewer-modal:has(.viewer-drawer.open) .navigator-wrapper,
+  .viewer-modal.drawer-open .nav-launcher-wrapper,
+  .viewer-modal:has(.viewer-drawer.open) .nav-launcher-wrapper {
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;

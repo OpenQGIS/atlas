@@ -2728,56 +2728,6 @@
       });
     }
 
-    let isNavCollapsed = window.innerWidth <= 768;
-
-    function toggleNavigator(collapse) {
-      const navW = document.getElementById('navWrapper');
-      const navL = document.getElementById('navLauncher');
-      if (!navW || !navL) return;
-
-      if (collapse === undefined) {
-        isNavCollapsed = !isNavCollapsed;
-      } else {
-        isNavCollapsed = !!collapse;
-      }
-
-      if (isNavCollapsed) {
-        navW.classList.add('is-collapsed');
-        navL.classList.add('is-visible');
-      } else {
-        navW.classList.remove('is-collapsed');
-        navL.classList.remove('is-visible');
-        if (osdViewer && osdViewer.navigator) {
-          setTimeout(() => {
-            if (osdViewer && osdViewer.navigator) {
-              osdViewer.navigator.updateSize();
-            }
-          }, 50);
-        }
-      }
-      setTimeout(checkToolbarCollision, 50);
-    }
-
-    function checkToolbarCollision() {
-      const tb = document.querySelector('.viewer-floating-toolbar') || document.querySelector('.viewer-float-toolbar');
-      const navW = document.getElementById('navWrapper');
-      const navL = document.getElementById('navLauncher');
-      if (!tb || !navW || !navL) return;
-
-      const tbRect = tb.getBoundingClientRect();
-      const activeNav = !navW.classList.contains('is-collapsed') ? navW : navL;
-      const navRect = activeNav.getBoundingClientRect();
-
-      const isOverlapX = (navRect.right + 20 > tbRect.left);
-      if (isOverlapX) {
-        navW.classList.add('dodge-toolbar');
-        navL.classList.add('dodge-toolbar');
-      } else if (window.innerWidth > 1080) {
-        navW.classList.remove('dodge-toolbar');
-        navL.classList.remove('dodge-toolbar');
-      }
-    }
-
     const btnCloseNav = document.getElementById('btnCloseNav');
     const btnOpenNav = document.getElementById('btnOpenNav');
     if (btnCloseNav) {
@@ -3379,6 +3329,56 @@
     });
   }
 
+  let isNavCollapsed = typeof window !== 'undefined' ? window.innerWidth <= 768 : false;
+
+  function checkToolbarCollision() {
+    const tb = document.querySelector('.viewer-floating-toolbar') || document.querySelector('.viewer-float-toolbar');
+    const navW = document.getElementById('navWrapper');
+    const navL = document.getElementById('navLauncher');
+    if (!tb || !navW || !navL) return;
+
+    const tbRect = tb.getBoundingClientRect();
+    const activeNav = !navW.classList.contains('is-collapsed') ? navW : navL;
+    const navRect = activeNav.getBoundingClientRect();
+
+    const isOverlapX = (navRect.right + 20 > tbRect.left);
+    if (isOverlapX) {
+      navW.classList.add('dodge-toolbar');
+      navL.classList.add('dodge-toolbar');
+    } else if (window.innerWidth > 1080) {
+      navW.classList.remove('dodge-toolbar');
+      navL.classList.remove('dodge-toolbar');
+    }
+  }
+
+  function toggleNavigator(collapse) {
+    const navW = document.getElementById('navWrapper');
+    const navL = document.getElementById('navLauncher');
+    if (!navW || !navL) return;
+
+    if (collapse === undefined) {
+      isNavCollapsed = !isNavCollapsed;
+    } else {
+      isNavCollapsed = !!collapse;
+    }
+
+    if (isNavCollapsed) {
+      navW.classList.add('is-collapsed');
+      navL.classList.add('is-visible');
+    } else {
+      navW.classList.remove('is-collapsed');
+      navL.classList.remove('is-visible');
+      if (osdViewer && osdViewer.navigator) {
+        setTimeout(() => {
+          if (osdViewer && osdViewer.navigator) {
+            osdViewer.navigator.updateSize();
+          }
+        }, 50);
+      }
+    }
+    setTimeout(checkToolbarCollision, 50);
+  }
+
   function updateNavigatorDimensions(item) {
     const navEl = document.getElementById('viewerNavigator');
     const navStage = document.getElementById('navStageContainer');
@@ -3582,7 +3582,7 @@
 
   // 动态分析画作右上角局部图面底色，并为右上角关闭按钮赋予自适应数学反色与高对比度
   function updateNavigatorCloseButtonColor(item) {
-    const btn = document.getElementById('btnCloseNavigator');
+    const btn = document.getElementById('btnCloseNav') || document.getElementById('btnCloseNavigator');
     if (!btn) return;
 
     function applyColors(bgR, bgG, bgB) {

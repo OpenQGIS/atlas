@@ -2,6 +2,17 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 规范，版本号遵循 [语义化版本 2.0.0](https://semver.org/lang/zh-CN/)。
 
+## [1.3.20] - 2026-10-03
+
+### 修复全屏大图查看器作用域崩溃与 OpenSeadragon 无法加载 (Fix Deep Zoom Modal Scope Regression)
+- **物理根因定位与修复 (Root Cause Fixed)**：
+  - 修复 `assets/app.js` 中 `toggleNavigator` 与 `checkToolbarCollision` 函数原被局部封闭在 `bindViewerModalEvents` 内部，导致 `showArtwork` 在调用 `toggleNavigator(window.innerWidth <= 768)` 时触发 `Uncaught ReferenceError: toggleNavigator is not defined` 阻断异常，致使后续核心 `loadOpenSeadragon(item)` 完全无法执行的严重回归；
+  - 将 `toggleNavigator`、`checkToolbarCollision` 及导航折叠状态变量提升至顶层作用域，供画廊展品点击打开、URL 深链接定位（如 `?s1&id=...`）、键盘快捷键及视口自适应等全生命周期正常安全调用；
+  - 增强 `updateNavigatorCloseButtonColor` 对 `#btnCloseNav` 与 `#btnCloseNavigator` 双兼容选择；
+  - 同步增强信息抽屉展开时对左下角鹰眼图微晶胶囊的完全隐退避让；
+- **缓存版本同步提升**：
+  - `index.html` 资源版本号刷新至 `20261003_v75`，保障线上即时生效。
+
 ---
 
 ## [1.3.19] - 2026-10-03

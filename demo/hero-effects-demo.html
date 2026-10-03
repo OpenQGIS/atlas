@@ -77,8 +77,8 @@
        效果 3：画卷徐展·羽化揭幕 (Scroll Unfurl / Soft Edge Wipe · 0黑场)
        ------------------------------------------------------------- */
     :root {
-      --scroll-wipe-dur: 1.15s;
-      --scroll-wipe-ease: cubic-bezier(0.32, 0.72, 0.3, 1.0);
+      --scroll-wipe-dur: 1.45s;
+      --scroll-wipe-ease: cubic-bezier(0.35, 0.15, 0.25, 1.0);
     }
     html[data-wipe-rhythm="golden"] {
       --scroll-wipe-dur: 1.15s;
@@ -96,56 +96,118 @@
     html[data-effect="scroll-wipe"] .hero-bg {
       opacity: 1;
       z-index: 1;
-      transform: translateX(-1%) scale(1.025);
+      transform: scale(1.02);
       clip-path: inset(0 100% 0 0 round 0);
       filter: brightness(0.68) contrast(1.08) saturate(1.1);
-      transition: clip-path var(--scroll-wipe-dur) var(--scroll-wipe-ease),
-                  transform var(--scroll-wipe-dur) var(--scroll-wipe-ease);
-      will-change: clip-path, transform;
+      transition: clip-path var(--scroll-wipe-dur) var(--scroll-wipe-ease);
+      will-change: clip-path;
     }
     html[data-effect="scroll-wipe"] .hero-bg.active {
       opacity: 1;
       z-index: 3;
-      transform: translateX(0) scale(1.02);
+      transform: scale(1.02);
       clip-path: inset(0 0 0 0 round 0);
     }
     html[data-effect="scroll-wipe"] .hero-bg.leaving {
       opacity: 1 !important;
       z-index: 1 !important;
-      transform: scale(1.01);
+      transform: scale(1.02) !important;
       clip-path: inset(0 0 0 0) !important;
       transition: none !important;
     }
 
-    /* 卷轴边缘装裱微光线 */
+    /* 卷轴边缘装裱微光线：与 clip-path 共享完全同一条 transition 引擎，确保 100% 像素级贴合同步 */
     .scroll-seam-line {
       position: absolute;
       top: 0;
       bottom: 0;
-      width: 2px;
+      left: 0%;
+      width: 2.5px;
+      transform: translateX(-50%);
       background: linear-gradient(to bottom, 
         transparent 0%, 
-        rgba(230, 195, 125, 0.85) 25%, 
-        rgba(255, 255, 255, 0.95) 50%, 
-        rgba(230, 195, 125, 0.85) 75%, 
+        rgba(230, 195, 125, 0.85) 20%, 
+        rgba(255, 255, 255, 1) 50%, 
+        rgba(230, 195, 125, 0.85) 80%, 
         transparent 100%
       );
-      box-shadow: 0 0 18px 3px rgba(230, 195, 125, 0.55), 0 0 4px rgba(255, 255, 255, 0.9);
+      box-shadow: 
+        0 0 16px 3px rgba(230, 195, 125, 0.65), 
+        0 0 32px 8px rgba(230, 195, 125, 0.25), 
+        0 0 4px rgba(255, 255, 255, 0.95);
       pointer-events: none;
       z-index: 4;
       opacity: 0;
-      transition: opacity 0.2s ease;
+      will-change: left, opacity;
+      transition: left var(--scroll-wipe-dur) var(--scroll-wipe-ease),
+                  opacity 0.15s ease;
     }
-    html[data-effect="scroll-wipe"] .scroll-seam-line.animating {
+    html[data-effect="scroll-wipe"] .scroll-seam-line.active {
+      left: 100%;
       opacity: 1;
-      animation: seamSweep var(--scroll-wipe-dur) var(--scroll-wipe-ease) forwards;
     }
-    @keyframes seamSweep {
-      0% { left: 0%; opacity: 0; }
-      4% { opacity: 1; }
-      85% { opacity: 1; }
-      96% { opacity: 0.35; }
-      100% { left: 100%; opacity: 0; }
+
+    /* 移动端立轴挂画模式 (Portrait / Max-width 768px 或切换到立轴预览)：自上而下徐徐垂展 */
+    @media (max-width: 768px), (orientation: portrait) {
+      html[data-effect="scroll-wipe"] .hero-bg {
+        clip-path: inset(0 0 100% 0 round 0);
+      }
+      html[data-effect="scroll-wipe"] .hero-bg.active {
+        clip-path: inset(0 0 0 0 round 0);
+      }
+      html[data-effect="scroll-wipe"] .scroll-seam-line {
+        left: 0;
+        right: 0;
+        top: 0%;
+        bottom: auto;
+        width: 100%;
+        height: 2.5px;
+        transform: translateY(-50%);
+        background: linear-gradient(to right, 
+          transparent 0%, 
+          rgba(230, 195, 125, 0.85) 20%, 
+          rgba(255, 255, 255, 1) 50%, 
+          rgba(230, 195, 125, 0.85) 80%, 
+          transparent 100%
+        );
+        transition: top var(--scroll-wipe-dur) var(--scroll-wipe-ease),
+                    opacity 0.15s ease;
+      }
+      html[data-effect="scroll-wipe"] .scroll-seam-line.active {
+        top: 100%;
+        left: 0%;
+        opacity: 1;
+      }
+    }
+
+    /* 显式立轴预览强制类 */
+    html[data-wipe-dir="vertical"][data-effect="scroll-wipe"] .hero-bg {
+      clip-path: inset(0 0 100% 0 round 0) !important;
+    }
+    html[data-wipe-dir="vertical"][data-effect="scroll-wipe"] .hero-bg.active {
+      clip-path: inset(0 0 0 0 round 0) !important;
+    }
+    html[data-wipe-dir="vertical"][data-effect="scroll-wipe"] .scroll-seam-line {
+      left: 0 !important;
+      right: 0 !important;
+      top: 0% !important;
+      bottom: auto !important;
+      width: 100% !important;
+      height: 2.5px !important;
+      transform: translateY(-50%) !important;
+      background: linear-gradient(to right, 
+        transparent 0%, 
+        rgba(230, 195, 125, 0.85) 20%, 
+        rgba(255, 255, 255, 1) 50%, 
+        rgba(230, 195, 125, 0.85) 80%, 
+        transparent 100%
+      ) !important;
+      transition: top var(--scroll-wipe-dur) var(--scroll-wipe-ease), opacity 0.15s ease !important;
+    }
+    html[data-wipe-dir="vertical"][data-effect="scroll-wipe"] .scroll-seam-line.active {
+      top: 100% !important;
+      left: 0% !important;
+      opacity: 1 !important;
     }
 
     /* -------------------------------------------------------------
@@ -576,6 +638,25 @@
         </div>
       </div>
 
+      <!-- 方案 03 专属节奏占比与形态微调条 -->
+      <div class="dock-row" id="wipeRhythmRow" style="display: none; border-top: 1px dashed rgba(255,255,255,0.12); padding-top: 8px; width: 100%;">
+        <span class="dock-label" style="color: #f7e0aa;">📜 节奏占比:</span>
+        <div class="dock-pill-group">
+          <button class="dock-btn" data-wipe-rhythm="golden" title="起步20%从容，中程60%匀速展开，尾程20%沉静入定">✨ 黄金匀速 2:6:2 (1.15s)</button>
+          <button class="dock-btn" data-wipe-rhythm="brisk" title="起步15%，中程70%敏捷利落，尾程15%干脆收卷">⚡ 敏捷利落 1.5:7:1.5 (0.9s)</button>
+          <button class="dock-btn active" data-wipe-rhythm="grand" title="起步25%，中程50%沉稳长卷，尾程25%舒展入定">🏛 沉稳长卷 2.5:5:2.5 (1.45s · 推荐)</button>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <span class="dock-label" style="color: #f7e0aa;">📐 展开形态:</span>
+        <div class="dock-pill-group">
+          <button class="dock-btn active" data-wipe-dir="horizontal" title="桌面长卷：横向自左向右徐徐展卷">💻 桌面横卷 (左→右)</button>
+          <button class="dock-btn" data-wipe-dir="vertical" title="移动立轴：竖屏自上而下徐徐垂展">📱 移动立轴 (上→下)</button>
+        </div>
+        <span style="font-size:0.72rem; opacity:0.65; margin-left:4px;">竖屏默认自动切换为立轴</span>
+      </div>
+
       <!-- 快速触发与辅助调节 -->
       <div class="dock-row">
         <!-- 换一卷触发按钮 -->
@@ -714,11 +795,21 @@
           incoming.classList.add(flightClass);
         }
 
-        // 针对画卷徐展触发边缘光线
+        // 针对画卷徐展触发边缘光线（归零复位）
         if (currentEffect === 'scroll-wipe' && seamLine) {
-          seamLine.classList.remove('animating');
-          void seamLine.offsetWidth; // 触发 reflow 重置动画
-          seamLine.classList.add('animating');
+          const isVertical = document.documentElement.getAttribute('data-wipe-dir') === 'vertical' || 
+                             (window.innerWidth <= 768) || (window.innerHeight > window.innerWidth);
+          seamLine.classList.remove('active');
+          seamLine.style.transition = 'none';
+          if (isVertical) {
+            seamLine.style.top = '0%';
+            seamLine.style.left = '0%';
+          } else {
+            seamLine.style.left = '0%';
+            seamLine.style.top = '0%';
+          }
+          seamLine.style.opacity = '0';
+          void seamLine.offsetWidth; // 强制重绘复位到 0%
         }
 
         // 针对晨曦掠影触发流光
@@ -728,9 +819,13 @@
           shimmerSweep.classList.add('animating');
         }
 
-        // 触发入场
+        // 毫秒级同帧触发入场：clip-path 与 seamLine 绝对同帧启动
         requestAnimationFrame(() => {
           incoming.classList.add('active');
+          if (currentEffect === 'scroll-wipe' && seamLine) {
+            seamLine.style.transition = '';
+            seamLine.classList.add('active');
+          }
         });
 
         // 切换当前激活图层指针
@@ -746,8 +841,18 @@
         const numStr = (currentIndex + 1) < 10 ? `0${currentIndex + 1}` : `${currentIndex + 1}`;
         heroCounter.textContent = `${numStr} / ${heroPool.length < 10 ? '0' + heroPool.length : heroPool.length}`;
 
-        // 动画结束后清理旧图层的 leaving 类
-        const durSeconds = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-trans-dur')) || 1.4;
+        // 动画时长与结束清理
+        let durSeconds = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-trans-dur')) || 1.4;
+        if (currentEffect === 'scroll-wipe') {
+          durSeconds = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scroll-wipe-dur')) || 1.15;
+          setTimeout(() => {
+            if (seamLine) {
+              seamLine.style.transition = 'opacity 0.2s ease';
+              seamLine.style.opacity = '0';
+            }
+          }, durSeconds * 1000 - 80);
+        }
+
         setTimeout(() => {
           outgoing.classList.remove('active', 'leaving', 'flight-nw', 'flight-se', 'flight-zoom-in', 'flight-pan-x');
         }, durSeconds * 1000 + 100);
@@ -762,16 +867,6 @@
       if (preImg.complete) {
         triggerTransition();
       }
-      heroCounter.textContent = `${numStr} / ${heroPool.length < 10 ? '0' + heroPool.length : heroPool.length}`;
-
-      // 动画结束后清理旧图层的 leaving 类
-      const durSeconds = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-trans-dur')) || 1.4;
-      setTimeout(() => {
-        outgoing.classList.remove('active', 'leaving', 'flight-nw', 'flight-se', 'flight-zoom-in', 'flight-pan-x');
-      }, durSeconds * 1000 + 100);
-
-      // 重置轮播进度条
-      resetTimerProgress();
     }
 
     // 倒计时圆环与进度控制
@@ -823,7 +918,39 @@
           explainText.textContent = EFFECT_EXPLAINS[effect].desc;
         }
 
+        // 当切到方案 03 时，显示专属时间占比控制条
+        const wipeRow = document.getElementById('wipeRhythmRow');
+        if (wipeRow) {
+          wipeRow.style.display = (effect === 'scroll-wipe') ? 'flex' : 'none';
+        }
+
         // 立即触发一次切图让用户直观感受该模式
+        transitionToNextMap();
+      });
+    });
+
+    // 事件绑定：方案03开卷时间节奏比例调节
+    document.querySelectorAll('[data-wipe-rhythm]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-wipe-rhythm]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const rhythm = btn.getAttribute('data-wipe-rhythm');
+        document.documentElement.setAttribute('data-wipe-rhythm', rhythm);
+
+        // 立即换图触发体验
+        transitionToNextMap();
+      });
+    });
+
+    // 事件绑定：方案03开卷形态切换（横卷 / 立轴）
+    document.querySelectorAll('[data-wipe-dir]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-wipe-dir]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const dir = btn.getAttribute('data-wipe-dir');
+        document.documentElement.setAttribute('data-wipe-dir', dir);
+
+        // 立即换图触发体验
         transitionToNextMap();
       });
     });

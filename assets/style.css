@@ -7312,8 +7312,8 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   z-index: 10;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
+  gap: 6px;
+  padding: 5px 12px;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-family: var(--font-sans);
@@ -7346,12 +7346,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 }
 
 .hero-artwork-prefix {
-  font-size: 0.65rem;
-  font-family: var(--font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0.6;
-  margin-right: 2px;
+  display: none;
 }
 
 .hero-artwork-name {
@@ -9341,6 +9336,14 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   opacity: 1;
   pointer-events: auto;
   transform: translateY(-50%) translateX(0);
+}
+
+/* 首屏未进入画廊模式下，严格禁止展示导览轴 */
+body:not(.in-gallery) .page-anchor-spine {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-50%) translateX(-24px) !important;
 }
 
 .viewer-open .page-anchor-spine {

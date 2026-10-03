@@ -462,6 +462,9 @@
     document.body.classList.remove('in-gallery');
     currentHistoryLevel = 0;
 
+    const spine = document.getElementById('pageAnchorSpine');
+    if (spine) spine.classList.remove('visible');
+
     if (smooth) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -1383,6 +1386,11 @@
     });
 
     function onScrollSpine() {
+      if (!document.body.classList.contains('in-gallery')) {
+        spine.classList.remove('visible');
+        return;
+      }
+
       const galleryMain = document.getElementById('galleryMain') || document.querySelector('.gallery-main');
       if (!galleryMain) return;
 

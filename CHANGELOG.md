@@ -4,6 +4,18 @@
 
 ---
 
+## [1.3.18] - 2026-10-03
+
+### 首屏左下角图名极简精化与首屏导览轴隔离修复 (Hero Artwork Tag Streamline & Spine Leak Fix)
+- **左下角背景画卷图名标牌精简化**：
+  - 去除冗长的 `ARTWORK ·` 分类前缀，改由纯粹的【Pic 图片图标 + 展品图名】构成轻量微晶胶囊；
+  - 缩减内边距与间隙（`gap: 6px`、`padding: 5px 12px`），大幅拓宽移动端窄屏可用文本空间，彻底避免长图名在移动端被过早截断。
+- **左侧分类测绘导览轴与进度条漏出问题根治**：
+  - **CSS 严格隔离**：追加 `body:not(.in-gallery) .page-anchor-spine { display: none !important; }`，彻底阻断在首屏展示阶段的任何样式泄漏；
+  - **JS 守卫与状态清理**：在 `onScrollSpine` 与 `returnToHeroCover` 中增加非 `in-gallery` 状态前置检测，保证退回首屏时类名与滚动进度即时脱落。
+
+---
+
 ## [1.3.17] - 2026-10-03
 
 ### 全功能高精交互式鹰眼图与微晶避让体系 (Full High-Precision Navigator & 4-Tier Collision Dodge)

@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20261003_v103">
+  <link rel="stylesheet" href="assets/style.css?v=20261003_v104">
   <script>
     (function () {
       try {
@@ -125,13 +125,13 @@
       <div class="scroll-mouse-anim" aria-hidden="true">
         <div class="scroll-mouse-dot"></div>
       </div>
-      <!-- 手机与Pad触控端专属手势动效 (动态向上滑动触摸指示) -->
+      <!-- 手机与Pad触控端专属手势动效 (动态向上滑动触摸指示 · 箭头与手指垂直分层绝不重叠) -->
       <div class="scroll-touch-anim" aria-hidden="true">
-        <svg class="touch-swipe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <!-- 向上滑动虚线轨迹与箭头，严格 x=12 垂直居中 -->
-          <path class="touch-swipe-arrow" d="M12 2v6M9 5l3-3 3 5"/>
-          <!-- 精美触控手势：食指笔直朝上位于中轴线 x=12 -->
-          <path class="touch-finger" d="M12 11V7a1.5 1.5 0 0 0-3 0v7.5l-1.3-1.3a1.5 1.5 0 0 0-2.1 2.1l4.2 4.2A5 5 0 0 0 13.3 22h1.4a5 5 0 0 0 5-5v-5a1.5 1.5 0 0 0-3 0v-1a1.5 1.5 0 0 0-3 0v-1a1.5 1.5 0 0 0-1.7-1"/>
+        <svg class="touch-swipe-icon" viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <!-- 向上滑动虚线轨迹与箭头，位于顶部 y=2..8 区域 -->
+          <path class="touch-swipe-arrow" d="M12 2v7M9 5l3-3 3 5"/>
+          <!-- 精美触控手势：食指笔直朝上位于中轴线 x=12，基准从 y=14 开始，与上方箭头完全分离 -->
+          <path class="touch-finger" d="M12 18v-4a1.5 1.5 0 0 0-3 0v7.5l-1.3-1.3a1.5 1.5 0 0 0-2.1 2.1l4.2 4.2A5 5 0 0 0 13.3 29h1.4a5 5 0 0 0 5-5v-5a1.5 1.5 0 0 0-3 0v-1a1.5 1.5 0 0 0-3 0v-1a1.5 1.5 0 0 0-1.7-1"/>
         </svg>
       </div>
       <svg class="icon scroll-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

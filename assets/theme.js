@@ -91,18 +91,49 @@
   function toggleTheme(event) {
     const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
+    // 触觉轻微震动反馈 (支持移动端 Web Vibration API，约 15ms 微触感)
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      try {
+        navigator.vibrate(15);
+      } catch (err) {}
+    }
+
     // 检查是否支持原生 View Transition API（扩散光晕波纹过渡）
     if (document.startViewTransition) {
-      let x = window.innerWidth * 0.95;
-      let y = 32;
-      if (event && typeof event.clientX === 'number' && event.clientX > 0) {
-        x = event.clientX;
-        y = event.clientY;
-      } else if (event && event.currentTarget && event.currentTarget.getBoundingClientRect) {
-        const rect = event.currentTarget.getBoundingClientRect();
+      let x = window.innerWidth / 2;
+      let y = window.innerHeight / 2;
+
+      // 健壮提取圆心坐标：优先获取点击/触发按钮的物理中心，杜绝移动端触控由于合成事件坐标丢失导致漂移至右上角
+      const btnEl = event?.currentTarget || event?.target?.closest?.('button, .theme-toggle-btn');
+      if (btnEl && typeof btnEl.getBoundingClientRect === 'function') {
+        const rect = btnEl.getBoundingClientRect();
         x = rect.left + rect.width / 2;
         y = rect.top + rect.height / 2;
+      } else if (event && event.touches && event.touches[0]) {
+        x = event.touches[0].clientX;
+        y = event.touches[0].clientY;
+      } else if (event && event.changedTouches && event.changedTouches[0]) {
+        x = event.changedTouches[0].clientX;
+        y = event.changedTouches[0].clientY;
+      } else if (event && typeof event.clientX === 'number' && event.clientX > 0) {
+        x = event.clientX;
+        y = event.clientY;
+      } else {
+        // 如果未带 event 调用（如快捷键 T 或外部触发），寻找页面上当前可见的主题按钮
+        const visibleBtn = Array.from(document.querySelectorAll('.theme-toggle-btn')).find(el => {
+          const rect = el.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0 && rect.top >= 0 && rect.bottom <= window.innerHeight;
+        });
+        if (visibleBtn) {
+          const rect = visibleBtn.getBoundingClientRect();
+          x = rect.left + rect.width / 2;
+          y = rect.top + rect.height / 2;
+        } else {
+          x = window.innerWidth * 0.95;
+          y = 32;
+        }
       }
+
       document.documentElement.style.setProperty('--ripple-x', `${x}px`);
       document.documentElement.style.setProperty('--ripple-y', `${y}px`);
       document.documentElement.classList.add('ripple-active');
@@ -114,7 +145,13 @@
         document.documentElement.classList.remove('ripple-active');
       });
     } else {
+      // 优雅降级：不支持 View Transition 的移动端/浏览器（如 iOS 17 及以下 Safari、微信内置 WebView）
+      // 添加临时过渡类以启用全局平滑淡变，避免硬切
+      document.documentElement.classList.add('theme-transitioning');
       setTheme(nextTheme);
+      setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 400);
     }
   }
 

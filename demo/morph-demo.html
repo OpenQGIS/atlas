@@ -384,6 +384,20 @@
       font-weight: 500;
     }
 
+    @keyframes navPulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.7); }
+      70% { box-shadow: 0 0 0 12px rgba(var(--accent-rgb), 0); }
+      100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
+    }
+    .nav-pulse-active {
+      animation: navPulseGlow 0.45s ease-out forwards !important;
+    }
+    .variant-box.active-scheme {
+      border-color: rgba(var(--accent-rgb), 0.5) !important;
+      background: rgba(var(--accent-rgb), 0.08) !important;
+      box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.15) !important;
+    }
+
     /* 拟真 AtlasLog 悬浮底栏 */
     .mock-toolbar-panel {
       position: fixed;
@@ -961,6 +975,196 @@
       </div>
     </div>
 
+    <!-- 场景 I: 分享与直链/外链互转 · 方案并排实测 (常态 Share ➔ 点击 Link / ExternalLink) -->
+    <div class="card" id="cardShareLink" style="grid-column: 1 / -1;">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-name">场景 I: 分享与直链/外链 · 方案并排实测</span>
+          <span class="card-scene">常态 Share ➔ 点击 Morph 为 Link / ExternalLink</span>
+        </div>
+        <span class="badge badge-refined">点击下方各按钮体验形变</span>
+      </div>
+
+      <!-- 4 种方案并排对比网格 -->
+      <div class="variant-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 16px 0;">
+        
+        <!-- 方案 1: Share (Apple 托盒) ⇄ ExternalLink (外跳斜箭) -->
+        <div class="variant-box" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #10b981; margin-bottom: 4px;">方案 1: 托盒直出 ➔ 外跳斜箭 (推荐)</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 14px;">Share ⇄ ExternalLink · 0.4s</div>
+          <button class="morph-btn" id="btnShareExt1Morph" aria-label="方案1: Share 转 ExternalLink" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathShareExt1Morph" d="M4 12C4 14.6667 4 17.3333 4 20C4 21.1046 4.8954 22 6 22C10 22 14 22 18 22C19.1046 22 20 21.1046 20 20C20 17.3333 20 14.6667 20 12M16 6C14.6667 4.6667 13.3333 3.3333 12 2C10.6667 3.3333 9.3333 4.6667 8 6M12 2C12 6.3333 12 10.6667 12 15" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblShareExt1" style="font-size: 10px;">常态: 分享托盒 (Share)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0;">
+            <strong>几何平滑破框：</strong>两者均具备底部托框骨架。常态向上直箭点击后平滑转向右上方并破框射出，外跳意图极其传神。
+          </p>
+        </div>
+
+        <!-- 方案 2: Share (Apple 托盒) ⇄ Link (双环直链) -->
+        <div class="variant-box" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #3b82f6; margin-bottom: 4px;">方案 2: 托盒直出 ➔ 闭合直链</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 14px;">Share ⇄ Link · 0.4s</div>
+          <button class="morph-btn" id="btnShareExt2Morph" aria-label="方案2: Share 转 Link" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathShareExt2Morph" d="M4 12C4 14.6667 4 17.3333 4 20C4 21.1046 4.8954 22 6 22C10 22 14 22 18 22C19.1046 22 20 21.1046 20 20C20 17.3333 20 14.6667 20 12M16 6C14.6667 4.6667 13.3333 3.3333 12 2C10.6667 3.3333 9.3333 4.6667 8 6M12 2C12 6.3333 12 10.6667 12 15" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblShareExt2" style="font-size: 10px;">常态: 分享托盒 (Share)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0;">
+            <strong>生成专属直链：</strong>托盘与直箭平滑收缩旋转，咬合形成为斜向 45° 互扣双环，强化“已从分享面板获取画卷直链”的确定感。
+          </p>
+        </div>
+
+        <!-- 方案 3: Share2 (社交节点) ⇄ ExternalLink (外跳斜箭) -->
+        <div class="variant-box" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #a855f7; margin-bottom: 4px;">方案 3: 社交节点 ➔ 外跳斜箭</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 14px;">Share2 ⇄ ExternalLink · 0.4s</div>
+          <button class="morph-btn" id="btnShareExt3Morph" aria-label="方案3: Share2 转 ExternalLink" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathShareExt3Morph" d="M21 5C21 6.6569 19.6569 8 18 8C16.3431 8 15 6.6569 15 5C15 3.3431 16.3431 2 18 2C19.6569 2 21 3.3431 21 5ZM9 12C9 13.6569 7.6569 15 6 15C4.3431 15 3 13.6569 3 12C3 10.3431 4.3431 9 6 9C7.6569 9 9 10.3431 9 12ZM21 19C21 20.6569 19.6569 22 18 22C16.3431 22 15 20.6569 15 19C15 17.3431 16.3431 16 18 16C19.6569 16 21 17.3431 21 19ZM8.59 13.51C10.8667 14.8367 13.1433 16.1633 15.42 17.49M15.41 6.51C13.1367 7.8367 10.8633 9.1633 8.59 10.49" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblShareExt3" style="font-size: 10px;">常态: 社交节点 (Share2)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0;">
+            <strong>沿用现有风格：</strong>常态与当前站内 #btnShareArtwork 现存三圆节点完全一致，点击后由拓扑圆线聚散重构成外跳方框与斜箭头。
+          </p>
+        </div>
+
+        <!-- 方案 4: Share2 (社交节点) ⇄ Link (双环直链) -->
+        <div class="variant-box" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #f59e0b; margin-bottom: 4px;">方案 4: 社交节点 ➔ 闭合直链</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 14px;">Share2 ⇄ Link · 0.4s</div>
+          <button class="morph-btn" id="btnShareExt4Morph" aria-label="方案4: Share2 转 Link" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathShareExt4Morph" d="M21 5C21 6.6569 19.6569 8 18 8C16.3431 8 15 6.6569 15 5C15 3.3431 16.3431 2 18 2C19.6569 2 21 3.3431 21 5ZM9 12C9 13.6569 7.6569 15 6 15C4.3431 15 3 13.6569 3 12C3 10.3431 4.3431 9 6 9C7.6569 9 9 10.3431 9 12ZM21 19C21 20.6569 19.6569 22 18 22C16.3431 22 15 20.6569 15 19C15 17.3431 16.3431 16 18 16C19.6569 16 21 17.3431 21 19ZM8.59 13.51C10.8667 14.8367 13.1433 16.1633 15.42 17.49M15.41 6.51C13.1367 7.8367 10.8633 9.1633 8.59 10.49" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblShareExt4" style="font-size: 10px;">常态: 社交节点 (Share2)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0;">
+            <strong>节点到链条：</strong>三点连线的发散结构向中心聚拢，重组为互锁双环直链。常态是分享渠道，点击后成为专属直链。
+          </p>
+        </div>
+
+      </div>
+
+      <div class="card-footer" style="margin-top: 10px;">
+        <span>实测提示: 点击上方 4 个按钮切换状态，常态为 Share，点击后演变为 Link / ExternalLink</span>
+        <span class="card-footer-tip">推荐 方案 1 (托盒直出 ➔ 外跳斜箭) 几何契合度最高 ↗</span>
+      </div>
+    </div>
+
+    <!-- 场景 J: 画卷翻阅（上一卷/下一张）过渡动效 · 4 种节奏方案并排实测 -->
+    <div class="card" id="cardArtworkNav" style="grid-column: 1 / -1;">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-name">场景 J: 上下画卷翻卷过渡动效 · 4 种方案并排实测</span>
+          <span class="card-scene">Prev ❮ / Next ❯ Artwork · 瞬态过渡物理律动</span>
+        </div>
+        <span class="badge badge-refined">点击下方各组对比试玩</span>
+      </div>
+
+      <p class="card-desc" style="margin-bottom: 14px;">
+        <strong>过渡动画哲学：</strong>不同于常驻状态切换，画卷切换属于<strong>瞬态脉冲（A ➔ B ➔ A）</strong>。用户点击切换的一刹那，按键通过形态升阶、位移冲刺或空间翻折给予强烈速度感，随着新画卷就位瞬间优雅回弹复位，给予极高互动反馈。
+      </p>
+
+      <!-- 4 大方案对比网格 -->
+      <div class="variant-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0;">
+        
+        <!-- 方案 1: 折角双跃 · 冲刺穿梭 -->
+        <div class="variant-box active-scheme" id="boxNavV1" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #3b82f6; margin-bottom: 4px;">方案 1: 折角双跃 · 冲刺穿梭 (旋转镜像同频版)</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 12px;">单折角 ➔ 双折角 >> ➔ 弹簧收回 · 0.58s (同频 580ms · 1:1 无缩放)</div>
+          <div style="display: flex; gap: 14px; margin-bottom: 12px;">
+            <button class="morph-btn" id="btnNavV1Prev" aria-label="方案1 上一卷" title="点击测试 上一卷 ❮" style="width: 52px; height: 52px;">
+              <svg viewBox="0 0 24 24"><path id="pathNavV1Prev" d="M15 18C13 16 11 14 9 12C11 10 13 8 15 6" /></svg>
+            </button>
+            <button class="morph-btn" id="btnNavV1Next" aria-label="方案1 下一张" title="点击测试 下一张 ❯" style="width: 52px; height: 52px;">
+              <svg viewBox="0 0 24 24"><path id="pathNavV1Next" d="M9 18C11 16 13 14 15 12C13 10 11 8 9 6" /></svg>
+            </button>
+          </div>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblNavV1" style="font-size: 10px;">常态静止 (Idle)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0 0 10px;">
+            <strong>对齐旋转 580ms 动力学（1:1 无缩放）：</strong>与旋转按键完全共享动力节拍：0~140ms 后撤 -3px 蓄力裂变，140~420ms 强推过冲 +6px，420~580ms 阻尼吸合归零并合拢单折线，全流程分量感十足。
+          </p>
+          <button class="seg-btn" id="btnApplyNavV1" style="font-size: 11px; padding: 4px 12px; margin-top: auto;">设为底栏生效方案 ↘</button>
+        </div>
+
+        <!-- 方案 2: 张弓拔刃 · 破空出鞘 -->
+        <div class="variant-box" id="boxNavV2" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #10b981; margin-bottom: 4px;">方案 2: 张弓拔刃 · 破空出鞘</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 12px;">单折角 ➔ 挺拔长箭 ➔ 收鞘入刃 · 0.50s</div>
+          <div style="display: flex; gap: 14px; margin-bottom: 12px;">
+            <button class="morph-btn" id="btnNavV2Prev" aria-label="方案2 上一卷" title="点击测试 上一卷 ❮" style="width: 52px; height: 52px;">
+              <svg viewBox="0 0 24 24"><path id="pathNavV2Prev" d="M15 18C13 16 11 14 9 12C11 10 13 8 15 6" /></svg>
+            </button>
+            <button class="morph-btn" id="btnNavV2Next" aria-label="方案2 下一张" title="点击测试 下一张 ❯" style="width: 52px; height: 52px;">
+              <svg viewBox="0 0 24 24"><path id="pathNavV2Next" d="M9 18C11 16 13 14 15 12C13 10 11 8 9 6" /></svg>
+            </button>
+          </div>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblNavV2" style="font-size: 10px;">常态静止 (Idle)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0 0 10px;">
+            <strong>东方工匠锐气：</strong>常态极简克制，点击瞬间由中心抽出挺直锋利的水平长箭，伴随轻微前倾破空推出，到位后平滑回收入鞘。
+          </p>
+          <button class="seg-btn" id="btnApplyNavV2" style="font-size: 11px; padding: 4px 12px; margin-top: auto;">设为底栏生效方案 ↘</button>
+        </div>
+
+        <!-- 方案 3: 典籍翻卷 · 3D 书页推进 -->
+        <div class="variant-box" id="boxNavV3" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #a855f7; margin-bottom: 4px;">方案 3: 典籍翻卷 · 3D 书页推进</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 12px;">折角 ➔ 3D侧倾+Play三角 ➔ 展平 · 0.44s</div>
+          <div style="display: flex; gap: 14px; margin-bottom: 12px;">
+            <button class="morph-btn" id="btnNavV3Prev" aria-label="方案3 上一卷" title="点击测试 上一卷 ❮" style="width: 52px; height: 52px;">
+              <svg viewBox="0 0 24 24"><path id="pathNavV3Prev" d="M15 18C13 16 11 14 9 12C11 10 13 8 15 6" /></svg>
+            </button>
+            <button class="morph-btn" id="btnNavV3Next" aria-label="方案3 下一张" title="点击测试 下一张 ❯" style="width: 52px; height: 52px;">
+              <svg viewBox="0 0 24 24"><path id="pathNavV3Next" d="M9 18C11 16 13 14 15 12C13 10 11 8 9 6" /></svg>
+            </button>
+          </div>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblNavV3" style="font-size: 10px;">常态静止 (Idle)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0 0 10px;">
+            <strong>真实纸张翻折感：</strong>图标沿 Y 轴发生 3D 透视侧倾（rotateY），折线渐变聚拢为播放推进三角，越过中线后轻盈展平回归折角，富有人文书香气。
+          </p>
+          <button class="seg-btn" id="btnApplyNavV3" style="font-size: 11px; padding: 4px 12px; margin-top: auto;">设为底栏生效方案 ↘</button>
+        </div>
+
+        <!-- 方案 4: 机械击发 · 纯弹性冲击波 -->
+        <div class="variant-box" id="boxNavV4" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #f59e0b; margin-bottom: 4px;">方案 4: 机械击发 · 纯弹性冲击波</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 12px;">恒定折线 + 瞬态双级阻尼回弹 · 0.52s</div>
+          <div style="display: flex; gap: 14px; margin-bottom: 12px;">
+            <button class="morph-btn" id="btnNavV4Prev" aria-label="方案4 上一卷" title="点击测试 上一卷 ❮" style="width: 52px; height: 52px;">
+              <svg viewBox="0 0 24 24"><path id="pathNavV4Prev" d="M15 18C13 16 11 14 9 12C11 10 13 8 15 6" /></svg>
+            </button>
+            <button class="morph-btn" id="btnNavV4Next" aria-label="方案4 下一张" title="点击测试 下一张 ❯" style="width: 52px; height: 52px;">
+              <svg viewBox="0 0 24 24"><path id="pathNavV4Next" d="M9 18C11 16 13 14 15 12C13 10 11 8 9 6" /></svg>
+            </button>
+          </div>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblNavV4" style="font-size: 10px;">常态静止 (Idle)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0 0 10px;">
+            <strong>极简物理力学：</strong>不改变折角外形，纯以弹簧物理曲线击发：后撤蓄力 ➔ 音速向前冲击 +7px ➔ 双重高阻尼抖动回弹，并带有底盘翠绿微晶脉冲光圈。
+          </p>
+          <button class="seg-btn" id="btnApplyNavV4" style="font-size: 11px; padding: 4px 12px; margin-top: auto;">设为底栏生效方案 ↘</button>
+        </div>
+
+      </div>
+
+      <div class="card-footer" style="margin-top: 10px;">
+        <span>实测提示: 点击上方各方案中的 ❮ 与 ❯ 按钮，体验 4 种不同节奏与手感的过渡动画</span>
+        <span class="card-footer-tip" id="navActiveSchemeTip">当前底栏生效方案: 方案 1 (折角双跃 · 冲刺穿梭) ↗</span>
+      </div>
+    </div>
+
   </div>
 
   <!-- 拟真 AtlasLog 悬浮底栏 (集成 3D 磁吸视差跟随 + Tooltip 坐标跟随) -->
@@ -968,6 +1172,13 @@
     <div class="toolbar-label">
       <span>AtlasLog 悬浮 Dock</span>
     </div>
+
+    <!-- 上一卷 (场景 J: 瞬态过渡动效) -->
+    <button class="tb-btn" id="tbPrevArtwork" data-custom-tip="上一卷画卷 (❮)">
+      <span class="tb-icon-layer">
+        <svg viewBox="0 0 24 24"><path id="tbPathPrevArtwork" d="M15 18C13 16 11 14 9 12C11 10 13 8 15 6" /></svg>
+      </span>
+    </button>
 
     <!-- 昼夜模式 -->
     <button class="tb-btn" id="tbTheme" data-custom-tip="昼夜模式切换 (T)">
@@ -997,6 +1208,13 @@
       </span>
     </button>
 
+    <!-- 下一张 (场景 J: 瞬态过渡动效) -->
+    <button class="tb-btn" id="tbNextArtwork" data-custom-tip="下一张画卷 (❯)">
+      <span class="tb-icon-layer">
+        <svg viewBox="0 0 24 24"><path id="tbPathNextArtwork" d="M9 18C11 16 13 14 15 12C13 10 11 8 9 6" /></svg>
+      </span>
+    </button>
+
     <div class="tb-divider"></div>
 
     <!-- 场景 D: 帮助信息 -->
@@ -1020,8 +1238,8 @@
       </span>
     </button>
 
-    <!-- 分享直链 -->
-    <button class="tb-btn" id="tbCopy" data-custom-tip="复制画卷专属直链 (S)">
+    <!-- 分享画卷 (方案3: 社交节点 ➔ 外跳斜箭) -->
+    <button class="tb-btn" id="tbCopy" data-custom-tip="画卷分享 (S · 方案3: 社交节点 ➔ 外跳斜箭)">
       <span class="tb-icon-layer">
         <svg viewBox="0 0 24 24"><path id="tbPathCopy" /></svg>
       </span>
@@ -1056,7 +1274,51 @@
 
     let currentPreset = 'snappy';
 
-    // 基础交互状态字典 (场景 A, C, D, E, F, G, H 及底栏独有)
+    // Share 图标规范 (AST 格式定义，用于 Morphicons 计算)
+    const ShareApple = [
+      ['path', { d: 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8' }],
+      ['polyline', { points: '16 6 12 2 8 6' }],
+      ['line', { x1: '12', y1: '2', x2: '12', y2: '15' }]
+    ];
+
+    const Share2 = [
+      ['circle', { cx: '18', cy: '5', r: '3' }],
+      ['circle', { cx: '6', cy: '12', r: '3' }],
+      ['circle', { cx: '18', cy: '19', r: '3' }],
+      ['line', { x1: '8.59', y1: '13.51', x2: '15.42', y2: '17.49' }],
+      ['line', { x1: '15.41', y1: '6.51', x2: '8.59', y2: '10.49' }]
+    ];
+
+    // 上下画卷翻阅 (Chevron / Chevrons / Arrow / Play AST 图标定义)
+    const ChevronRight = [['path', { d: 'm9 18 6-6-6-6' }]];
+    const ChevronLeft = [['path', { d: 'm15 18-6-6 6-6' }]];
+
+    const ChevronsRight = [
+      ['path', { d: 'm12 18 6-6-6-6' }],
+      ['path', { d: 'm6 18 6-6-6-6' }]
+    ];
+    const ChevronsLeft = [
+      ['path', { d: 'm12 18-6-6 6-6' }],
+      ['path', { d: 'm18 18-6-6 6-6' }]
+    ];
+
+    const ArrowRight = [
+      ['path', { d: 'M5 12h14' }],
+      ['path', { d: 'm12 5 7 7-7 7' }]
+    ];
+    const ArrowLeft = [
+      ['path', { d: 'M19 12H5' }],
+      ['path', { d: 'm12 19-7-7 7-7' }]
+    ];
+
+    const PlayRight = [
+      ['path', { d: 'M6 3 20 12 6 21Z' }]
+    ];
+    const PlayLeft = [
+      ['path', { d: 'M18 3 4 12 18 21Z' }]
+    ];
+
+    // 基础交互状态字典 (场景 A, C, D, E, F, G, H, I 及底栏独有)
     const states = {
       reset: { active: false, a: ResetFit, b: ResetZoomed, morphs: [], label: document.getElementById('lblReset'), textA: '全貌展卷 (Fit)', textB: '聚焦缩放 (Zoomed)' },
       folder: { active: false, a: Folder, b: Image, morphs: [], label: document.getElementById('lblFolder'), textA: '日常图册 (Folder)', textB: '晶透画卷 (Image)' },
@@ -1102,6 +1364,42 @@
         label: document.getElementById('lblSingleRingExit'),
         textA: '单层微晶 (Exit)',
         textB: '已退出 (Check)'
+      },
+      shareExt1: {
+        active: false,
+        a: ShareApple,
+        b: ExternalLink,
+        morphs: [],
+        label: document.getElementById('lblShareExt1'),
+        textA: '常态: 分享托盒 (Share)',
+        textB: '点击后: 外跳直链 (ExternalLink)'
+      },
+      shareExt2: {
+        active: false,
+        a: ShareApple,
+        b: Link,
+        morphs: [],
+        label: document.getElementById('lblShareExt2'),
+        textA: '常态: 分享托盒 (Share)',
+        textB: '点击后: 闭合直链 (Link)'
+      },
+      shareExt3: {
+        active: false,
+        a: Share2,
+        b: ExternalLink,
+        morphs: [],
+        label: document.getElementById('lblShareExt3'),
+        textA: '常态: 社交节点 (Share2)',
+        textB: '点击后: 外跳直链 (ExternalLink)'
+      },
+      shareExt4: {
+        active: false,
+        a: Share2,
+        b: Link,
+        morphs: [],
+        label: document.getElementById('lblShareExt4'),
+        textA: '常态: 社交节点 (Share2)',
+        textB: '点击后: 闭合直链 (Link)'
       }
     };
 
@@ -1127,11 +1425,15 @@
     initMorphPair('link', document.getElementById('pathLinkMorph'), null);
     initMorphPair('theme', null, document.getElementById('tbPathTheme'));
     initMorphPair('fullscreen', null, document.getElementById('tbPathFullscreen'));
-    initMorphPair('copy', null, document.getElementById('tbPathCopy'));
+    initMorphPair('copy', null, null);
     initMorphPair('drawer', document.getElementById('pathDrawerMorph'), document.getElementById('tbPathDrawer'));
     initMorphPair('drawerMin', document.getElementById('pathDrawerMinMorph'), null);
     initMorphPair('drawerMenu', document.getElementById('pathDrawerMenuMorph'), null);
     initMorphPair('exit', document.getElementById('pathExitMorph'), null);
+    initMorphPair('shareExt1', document.getElementById('pathShareExt1Morph'), null);
+    initMorphPair('shareExt2', document.getElementById('pathShareExt2Morph'), null);
+    initMorphPair('shareExt3', document.getElementById('pathShareExt3Morph'), document.getElementById('tbPathCopy'));
+    initMorphPair('shareExt4', document.getElementById('pathShareExt4Morph'), null);
 
     function toggleState(key, forceActive = null) {
       const item = states[key];
@@ -1178,6 +1480,22 @@
 
       if (key === 'drawerMenu') {
         showToast(item.active ? '方案 3: 菜单平滑变身为 ✕ (展开态)' : '方案 3: ✕ 平滑收折为三道横线 (Menu)');
+      }
+
+      if (key === 'shareExt1') {
+        showToast(item.active ? '方案 1: 已形变为 ExternalLink (斜向外跳直链)' : '方案 1: 已还原为 Share (Apple 托盒分享)');
+      }
+
+      if (key === 'shareExt2') {
+        showToast(item.active ? '方案 2: 已形变为 Link (闭合双环直链)' : '方案 2: 已还原为 Share (Apple 托盒分享)');
+      }
+
+      if (key === 'shareExt3') {
+        showToast(item.active ? '方案 3: 已形变为 ExternalLink (斜向外跳直链)' : '方案 3: 已还原为 Share2 (社交分享节点)');
+      }
+
+      if (key === 'shareExt4') {
+        showToast(item.active ? '方案 4: 已形变为 Link (闭合双环直链)' : '方案 4: 已还原为 Share2 (社交分享节点)');
       }
 
       if (key === 'exit' && item.active) {
@@ -1345,6 +1663,16 @@
     const btnExit = document.getElementById('btnSingleRingExit');
     if (btnExit) btnExit.onclick = () => toggleState('exit');
 
+    // 场景 I: 分享与直链/外链并排实测绑定
+    const btnSE1 = document.getElementById('btnShareExt1Morph');
+    if (btnSE1) btnSE1.onclick = () => toggleState('shareExt1');
+    const btnSE2 = document.getElementById('btnShareExt2Morph');
+    if (btnSE2) btnSE2.onclick = () => toggleState('shareExt2');
+    const btnSE3 = document.getElementById('btnShareExt3Morph');
+    if (btnSE3) btnSE3.onclick = () => toggleState('shareExt3');
+    const btnSE4 = document.getElementById('btnShareExt4Morph');
+    if (btnSE4) btnSE4.onclick = () => toggleState('shareExt4');
+
     // Hover 悬停敏感卡片驱动 (场景 C, F, G 及底栏主页)
     function bindHoverMorph(triggerEl, stateKey) {
       if (!triggerEl) return;
@@ -1360,7 +1688,7 @@
     // 底栏其他控制
     document.getElementById('tbTheme').onclick = () => toggleState('theme');
     document.getElementById('tbFullscreen').onclick = () => toggleState('fullscreen');
-    document.getElementById('tbCopy').onclick = () => toggleState('copy');
+    document.getElementById('tbCopy').onclick = () => toggleState('shareExt3');
 
     // 预设阻尼切换
     document.querySelectorAll('#presetGroup .seg-btn').forEach(btn => {
@@ -1411,6 +1739,278 @@
         item.morphs.forEach(m => m.seek(item.b, progress));
       });
     });
+
+    // ==========================================
+    // 场景 J: 4 种上下画卷过渡动画方案实现
+    // ==========================================
+    const morphNavV1Prev = createMorph(document.getElementById('pathNavV1Prev'), ChevronLeft);
+    const morphNavV1Next = createMorph(document.getElementById('pathNavV1Next'), ChevronRight);
+
+    const morphNavV2Prev = createMorph(document.getElementById('pathNavV2Prev'), ChevronLeft);
+    const morphNavV2Next = createMorph(document.getElementById('pathNavV2Next'), ChevronRight);
+
+    const morphNavV3Prev = createMorph(document.getElementById('pathNavV3Prev'), ChevronLeft);
+    const morphNavV3Next = createMorph(document.getElementById('pathNavV3Next'), ChevronRight);
+
+    const morphNavV4Prev = createMorph(document.getElementById('pathNavV4Prev'), ChevronLeft);
+    const morphNavV4Next = createMorph(document.getElementById('pathNavV4Next'), ChevronRight);
+
+    // 悬浮底栏上一卷 / 下一张 morph 实例
+    const morphTbPrev = createMorph(document.getElementById('tbPathPrevArtwork'), ChevronLeft);
+    const morphTbNext = createMorph(document.getElementById('tbPathNextArtwork'), ChevronRight);
+
+    let activeNavScheme = 1; // 1, 2, 3, 4
+
+    // 方案 1: 折角双跃 · 冲刺穿梭 (0.58s · 旋转镜像同频版 · 1:1 纯位移 0% 缩放)
+    let busyNavV1 = false;
+    function runNavScheme1(dir = 'next', targetEl = null, targetMorph = null, labelEl = null) {
+      if (busyNavV1) return;
+      busyNavV1 = true;
+      const isNext = (dir === 'next');
+      const sign = isNext ? 1 : -1;
+      const btn = targetEl || (isNext ? document.getElementById('btnNavV1Next') : document.getElementById('btnNavV1Prev'));
+      const morph = targetMorph || (isNext ? morphNavV1Next : morphNavV1Prev);
+      const lbl = labelEl || document.getElementById('lblNavV1');
+      const iconEl = (btn && (btn.querySelector('svg') || btn.querySelector('.tb-icon-layer'))) || btn;
+
+      if (lbl) lbl.textContent = isNext ? '加速双跃 >> 冲刺中...' : '加速双跃 << 冲刺中...';
+
+      // 阶段 1 (0ms): 原地蓄力后撤 -3px，形态平滑裂变展开为 1:1 双折线 (纯位移，0% 缩放，对齐旋转蓄力 140ms)
+      if (morph) morph.morphTo(isNext ? ChevronsRight : ChevronsLeft, 'snappy');
+      if (iconEl) {
+        iconEl.style.transition = 'transform 0.14s cubic-bezier(0.4, 0, 0.2, 1)';
+        iconEl.style.transform = `translateX(${sign * -3}px)`;
+      }
+
+      // 阶段 2 (140ms): 破空向前爆发冲刺过冲 +6px (纯位移，无 scale，对齐旋转冲刺 280ms)
+      setTimeout(() => {
+        if (iconEl) {
+          iconEl.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)';
+          iconEl.style.transform = `translateX(${sign * 6}px)`;
+        }
+      }, 140);
+
+      // 阶段 3 (420ms): 阻尼回吸减震归零，合拢弹回单折线 Chevron (对齐旋转减震 160ms)
+      setTimeout(() => {
+        if (morph) morph.morphTo(isNext ? ChevronRight : ChevronLeft, 'snappy');
+        if (iconEl) {
+          iconEl.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          iconEl.style.transform = 'translateX(0)';
+        }
+      }, 420);
+
+      // 580ms 结项落锁 (完全对齐旋转 580ms 节奏)
+      setTimeout(() => {
+        if (iconEl) {
+          iconEl.style.transition = '';
+          iconEl.style.transform = '';
+        }
+        if (lbl) lbl.textContent = '常态静止 (Idle)';
+        showToast(`[方案1·同频 580ms] 触发${isNext ? '下一张 ❯' : '上一卷 ❮'} · 旋转动量同心`);
+        busyNavV1 = false;
+      }, 580);
+    }
+
+    // 方案 2: 张弓拔刃 · 破空出鞘 (0.50s)
+    let busyNavV2 = false;
+    function runNavScheme2(dir = 'next', targetEl = null, targetMorph = null, labelEl = null) {
+      if (busyNavV2) return;
+      busyNavV2 = true;
+      const isNext = (dir === 'next');
+      const sign = isNext ? 1 : -1;
+      const btn = targetEl || (isNext ? document.getElementById('btnNavV2Next') : document.getElementById('btnNavV2Prev'));
+      const morph = targetMorph || (isNext ? morphNavV2Next : morphNavV2Prev);
+      const lbl = labelEl || document.getElementById('lblNavV2');
+
+      if (lbl) lbl.textContent = isNext ? '拔刃出鞘 ➔ 破空中...' : '拔刃出鞘 ⬅ 破空中...';
+
+      // 阶段 1 (0ms): 微幅后仰拉弦 -2px，中心抽出挺直长箭 Arrow
+      if (morph) morph.morphTo(isNext ? ArrowRight : ArrowLeft, 'smooth');
+      if (btn) {
+        btn.style.transition = 'transform 0.12s cubic-bezier(0.3, 0, 0.2, 1)';
+        btn.style.transform = `translateX(${sign * -2}px) scaleX(0.92)`;
+      }
+
+      // 阶段 2 (120ms): 利刃破空推出 +4px
+      setTimeout(() => {
+        if (btn) {
+          btn.style.transition = 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)';
+          btn.style.transform = `translateX(${sign * 4}px) scaleX(1.05)`;
+        }
+      }, 120);
+
+      // 阶段 3 (300ms): 箭尖平滑回收折回鞘中 Chevron
+      setTimeout(() => {
+        if (morph) morph.morphTo(isNext ? ChevronRight : ChevronLeft, 'smooth');
+        if (btn) {
+          btn.style.transition = 'transform 0.20s cubic-bezier(0.25, 1, 0.5, 1)';
+          btn.style.transform = 'translateX(0) scaleX(1)';
+        }
+      }, 300);
+
+      // 500ms 结项
+      setTimeout(() => {
+        if (lbl) lbl.textContent = '常态静止 (Idle)';
+        showToast(`[方案2·破空出鞘] 触发${isNext ? '下一张 ❯' : '上一卷 ❮'} · 东方工匠锐气`);
+        busyNavV2 = false;
+      }, 500);
+    }
+
+    // 方案 3: 典籍翻卷 · 3D 书页推进 (0.44s)
+    let busyNavV3 = false;
+    function runNavScheme3(dir = 'next', targetEl = null, targetMorph = null, labelEl = null) {
+      if (busyNavV3) return;
+      busyNavV3 = true;
+      const isNext = (dir === 'next');
+      const sign = isNext ? 1 : -1;
+      const btn = targetEl || (isNext ? document.getElementById('btnNavV3Next') : document.getElementById('btnNavV3Prev'));
+      const morph = targetMorph || (isNext ? morphNavV3Next : morphNavV3Prev);
+      const lbl = labelEl || document.getElementById('lblNavV3');
+
+      if (lbl) lbl.textContent = isNext ? '书页侧翻 ▶ 推进中...' : '书页侧翻 ◀ 推进中...';
+
+      // 阶段 1 (0ms): 3D 侧翻侧倾 rotateY，折线伴随翻折聚拢为 Play 三角
+      if (morph) morph.morphTo(isNext ? PlayRight : PlayLeft, 'snappy');
+      if (btn) {
+        btn.style.transition = 'transform 0.16s cubic-bezier(0.4, 0, 0.2, 1)';
+        btn.style.transform = `perspective(280px) rotateY(${sign * 55}deg) scale(0.92)`;
+      }
+
+      // 阶段 2 (160ms): 越过中线翻平推进，还原为 Chevron
+      setTimeout(() => {
+        if (morph) morph.morphTo(isNext ? ChevronRight : ChevronLeft, 'snappy');
+        if (btn) {
+          btn.style.transition = 'transform 0.14s cubic-bezier(0.2, 0.9, 0.3, 1)';
+          btn.style.transform = `perspective(280px) rotateY(${sign * -15}deg) scale(1.05)`;
+        }
+      }, 160);
+
+      // 阶段 3 (300ms): 最终展平减震
+      setTimeout(() => {
+        if (btn) {
+          btn.style.transition = 'transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          btn.style.transform = 'perspective(280px) rotateY(0deg) scale(1)';
+        }
+      }, 300);
+
+      // 440ms 结项
+      setTimeout(() => {
+        if (lbl) lbl.textContent = '常态静止 (Idle)';
+        showToast(`[方案3·3D书页推进] 触发${isNext ? '下一张 ❯' : '上一卷 ❮'} · 典籍翻折`);
+        busyNavV3 = false;
+      }, 440);
+    }
+
+    // 方案 4: 机械击发 · 纯弹性冲击波 (0.52s)
+    let busyNavV4 = false;
+    function runNavScheme4(dir = 'next', targetEl = null, targetMorph = null, labelEl = null) {
+      if (busyNavV4) return;
+      busyNavV4 = true;
+      const isNext = (dir === 'next');
+      const sign = isNext ? 1 : -1;
+      const btn = targetEl || (isNext ? document.getElementById('btnNavV4Next') : document.getElementById('btnNavV4Prev'));
+      const lbl = labelEl || document.getElementById('lblNavV4');
+
+      if (lbl) lbl.textContent = '脉冲冲击 ⚡ 击发中...';
+
+      // 脉冲光圈与后撤蓄力
+      if (btn) {
+        btn.classList.add('nav-pulse-active');
+        btn.style.transition = 'transform 0.09s cubic-bezier(0.4, 0, 0.2, 1)';
+        btn.style.transform = `translateX(${sign * -4}px) scale(0.90)`;
+      }
+
+      // 阶段 2 (90ms): 音速冲刺过冲 +7px
+      setTimeout(() => {
+        if (btn) {
+          btn.style.transition = 'transform 0.15s cubic-bezier(0.18, 0.95, 0.32, 1.3)';
+          btn.style.transform = `translateX(${sign * 7}px) scale(1.14)`;
+        }
+      }, 90);
+
+      // 阶段 3 (240ms): 反向震荡
+      setTimeout(() => {
+        if (btn) {
+          btn.style.transition = 'transform 0.13s cubic-bezier(0.25, 1, 0.5, 1)';
+          btn.style.transform = `translateX(${sign * -2}px) scale(0.97)`;
+        }
+      }, 240);
+
+      // 阶段 4 (370ms): 稳稳吸合归零
+      setTimeout(() => {
+        if (btn) {
+          btn.style.transition = 'transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          btn.style.transform = 'translateX(0) scale(1)';
+        }
+      }, 370);
+
+      // 520ms 结项
+      setTimeout(() => {
+        if (btn) btn.classList.remove('nav-pulse-active');
+        if (lbl) lbl.textContent = '常态静止 (Idle)';
+        showToast(`[方案4·弹性冲击波] 触发${isNext ? '下一张 ❯' : '上一卷 ❮'} · 机械律动`);
+        busyNavV4 = false;
+      }, 520);
+    }
+
+    // 卡片内测试按钮绑定
+    document.getElementById('btnNavV1Prev').onclick = () => runNavScheme1('prev');
+    document.getElementById('btnNavV1Next').onclick = () => runNavScheme1('next');
+
+    document.getElementById('btnNavV2Prev').onclick = () => runNavScheme2('prev');
+    document.getElementById('btnNavV2Next').onclick = () => runNavScheme2('next');
+
+    document.getElementById('btnNavV3Prev').onclick = () => runNavScheme3('prev');
+    document.getElementById('btnNavV3Next').onclick = () => runNavScheme3('next');
+
+    document.getElementById('btnNavV4Prev').onclick = () => runNavScheme4('prev');
+    document.getElementById('btnNavV4Next').onclick = () => runNavScheme4('next');
+
+    // 设为底栏生效方案切换
+    const schemeTitles = {
+      1: '方案 1 (折角双跃 · 冲刺穿梭)',
+      2: '方案 2 (张弓拔刃 · 破空出鞘)',
+      3: '方案 3 (典籍翻卷 · 3D 书页推进)',
+      4: '方案 4 (机械击发 · 纯弹性冲击波)'
+    };
+
+    function setNavScheme(schemeNum) {
+      activeNavScheme = schemeNum;
+      [1, 2, 3, 4].forEach(n => {
+        const box = document.getElementById(`boxNavV${n}`);
+        if (box) box.classList.toggle('active-scheme', n === schemeNum);
+      });
+      const tip = document.getElementById('navActiveSchemeTip');
+      if (tip) tip.textContent = `当前底栏生效方案: ${schemeTitles[schemeNum]} ↗`;
+      showToast(`底栏「上一卷/下一张」已切换为: ${schemeTitles[schemeNum]}`);
+    }
+
+    [1, 2, 3, 4].forEach(n => {
+      const btn = document.getElementById(`btnApplyNavV${n}`);
+      if (btn) btn.onclick = () => setNavScheme(n);
+    });
+
+    // 拟真悬浮底栏上的上一卷 / 下一张按钮绑定当前生效方案
+    const tbPrev = document.getElementById('tbPrevArtwork');
+    const tbNext = document.getElementById('tbNextArtwork');
+
+    if (tbPrev) {
+      tbPrev.onclick = () => {
+        if (activeNavScheme === 1) runNavScheme1('prev', tbPrev, morphTbPrev);
+        else if (activeNavScheme === 2) runNavScheme2('prev', tbPrev, morphTbPrev);
+        else if (activeNavScheme === 3) runNavScheme3('prev', tbPrev, morphTbPrev);
+        else if (activeNavScheme === 4) runNavScheme4('prev', tbPrev, morphTbPrev);
+      };
+    }
+
+    if (tbNext) {
+      tbNext.onclick = () => {
+        if (activeNavScheme === 1) runNavScheme1('next', tbNext, morphTbNext);
+        else if (activeNavScheme === 2) runNavScheme2('next', tbNext, morphTbNext);
+        else if (activeNavScheme === 3) runNavScheme3('next', tbNext, morphTbNext);
+        else if (activeNavScheme === 4) runNavScheme4('next', tbNext, morphTbNext);
+      };
+    }
 
     
     // ========================================================

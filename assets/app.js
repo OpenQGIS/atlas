@@ -2772,6 +2772,7 @@
 
     const btnCloseNav = document.getElementById('btnCloseNav');
     const btnOpenNav = document.getElementById('btnOpenNav');
+    const navStage = document.getElementById('navStageContainer');
     if (btnCloseNav) {
       btnCloseNav.addEventListener('click', (e) => {
         e.preventDefault();
@@ -2781,6 +2782,16 @@
       btnCloseNav.addEventListener('mousedown', (e) => e.stopPropagation());
       btnCloseNav.addEventListener('pointerdown', (e) => e.stopPropagation());
       btnCloseNav.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+    }
+    if (navStage) {
+      navStage.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          // 移动端工业级轻触收起：点击微型鹰眼图任意处即可优雅折叠为胶囊浮标
+          e.preventDefault();
+          e.stopPropagation();
+          toggleNavigator(true);
+        }
+      });
     }
     if (btnOpenNav) {
       btnOpenNav.addEventListener('click', (e) => {
@@ -3474,7 +3485,7 @@
     if (!item) return { width: 220, height: 140 };
 
     const isMobile = window.innerWidth <= 768;
-    const maxDim = isMobile ? 150 : 220;
+    const maxDim = isMobile ? 84 : 220;
 
     const imgW = item.width || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Width) || 2000;
     const imgH = item.height || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Height) || 2000;
@@ -3483,10 +3494,10 @@
     let targetW, targetH;
     if (aspect >= 1) {
       targetW = maxDim;
-      targetH = Math.max(isMobile ? 55 : 70, Math.round(maxDim / aspect));
+      targetH = Math.max(isMobile ? 44 : 70, Math.round(maxDim / aspect));
     } else {
       targetH = maxDim;
-      targetW = Math.max(isMobile ? 55 : 70, Math.round(maxDim * aspect));
+      targetW = Math.max(isMobile ? 44 : 70, Math.round(maxDim * aspect));
     }
 
     if (navStage) {
@@ -3514,6 +3525,12 @@
       if (navOsdCanvas) {
         navOsdCanvas.style.setProperty('background-color', 'transparent', 'important');
       }
+    }
+
+    if (osdViewer && osdViewer.navigator) {
+      try {
+        osdViewer.navigator.updateSize();
+      } catch (err) {}
     }
 
     return { width: targetW, height: targetH };
@@ -3977,6 +3994,9 @@
           try { btn.blur(); } catch (e) {}
         }
       });
+    }
+    if (window.AtlasMorphicons && typeof window.AtlasMorphicons.navArtwork === 'function') {
+      try { window.AtlasMorphicons.navArtwork(direction); } catch (e) {}
     }
     currentViewerIndex = (currentViewerIndex + direction + currentFilteredItems.length) % currentFilteredItems.length;
     showArtwork(currentFilteredItems[currentViewerIndex], false);
@@ -5142,12 +5162,20 @@
       popover.classList.add('open');
       popover.setAttribute('aria-hidden', 'false');
       shareBtn.setAttribute('aria-expanded', 'true');
+      shareBtn.classList.add('active');
       modalEl?.classList.add('share-focus-active');
+      if (window.AtlasMorphicons && window.AtlasMorphicons.shareArtwork) {
+        window.AtlasMorphicons.shareArtwork.set(true);
+      }
     } else {
       popover.classList.remove('open');
       popover.setAttribute('aria-hidden', 'true');
       shareBtn.setAttribute('aria-expanded', 'false');
+      shareBtn.classList.remove('active');
       modalEl?.classList.remove('share-focus-active');
+      if (window.AtlasMorphicons && window.AtlasMorphicons.shareArtwork) {
+        window.AtlasMorphicons.shareArtwork.set(false);
+      }
     }
   }
 
@@ -6839,6 +6867,7 @@
   let morphInfo = null;
   let morphHeaderLang = null;
   let morphViewerLang = null;
+  let morphShareArtwork = null;
   let morphShareLink = null;
   let morphTheme = null;
   let morphHome = null;
@@ -7040,6 +7069,32 @@
       }
     }
 
+    // F2: btnShareArtwork (Scene I Option 3: Share2 <-> ExternalLink)
+    const Share2 = [
+      ['circle', { cx: '18', cy: '5', r: '3' }],
+      ['circle', { cx: '6', cy: '12', r: '3' }],
+      ['circle', { cx: '18', cy: '19', r: '3' }],
+      ['line', { x1: '8.59', y1: '13.51', x2: '15.42', y2: '17.49' }],
+      ['line', { x1: '15.41', y1: '6.51', x2: '8.59', y2: '10.49' }]
+    ];
+
+    const pShareArtwork = document.getElementById('pathShareArtworkMorph');
+    if (pShareArtwork && ExternalLink) {
+      try {
+        const m = createMorph(pShareArtwork, Share2);
+        let isOpen = false;
+        morphShareArtwork = {
+          set(openState) {
+            if (isOpen === openState) return;
+            isOpen = openState;
+            m.morphTo(isOpen ? ExternalLink : Share2, 'snappy');
+          }
+        };
+      } catch (err) {
+        console.warn('Morphicons ShareArtwork failed to init:', err);
+      }
+    }
+
     // G: Theme Toggle (Sun <-> Moon)
     const themePaths = [
       document.getElementById('pathHeroThemeMorph'),
@@ -7155,6 +7210,86 @@
       }
     }
 
+    // K: Artwork Navigation (Scene J Scheme 1: 1:1 纯位移 0% 缩放 · 折角双跃冲刺穿梭)
+    const ChevronRight = [['path', { d: 'm9 18 6-6-6-6' }]];
+    const ChevronLeft = [['path', { d: 'm15 18-6-6 6-6' }]];
+    const ChevronsRight = [
+      ['path', { d: 'm12 18 6-6-6-6' }],
+      ['path', { d: 'm6 18 6-6-6-6' }]
+    ];
+    const ChevronsLeft = [
+      ['path', { d: 'm12 18-6-6 6-6' }],
+      ['path', { d: 'm18 18-6-6 6-6' }]
+    ];
+
+    const pPrevArtwork = document.getElementById('pathPrevArtworkMorph');
+    const pNextArtwork = document.getElementById('pathNextArtworkMorph');
+    const btnPrevArtworkEl = document.getElementById('btnPrevArtwork');
+    const btnNextArtworkEl = document.getElementById('btnNextArtwork');
+
+    let morphPrevArtwork = null;
+    let morphNextArtwork = null;
+    let isNavArtworkBusy = false;
+
+    if (pPrevArtwork) {
+      try {
+        morphPrevArtwork = createMorph(pPrevArtwork, ChevronLeft);
+      } catch (e) {
+        console.warn('Morphicons PrevArtwork failed to init:', e);
+      }
+    }
+
+    if (pNextArtwork) {
+      try {
+        morphNextArtwork = createMorph(pNextArtwork, ChevronRight);
+      } catch (e) {
+        console.warn('Morphicons NextArtwork failed to init:', e);
+      }
+    }
+
+    function triggerArtworkNavMorph(direction) {
+      if (isNavArtworkBusy) return;
+      isNavArtworkBusy = true;
+      const isNext = (direction > 0);
+      const sign = isNext ? 1 : -1;
+      const btn = isNext ? btnNextArtworkEl : btnPrevArtworkEl;
+      const morph = isNext ? morphNextArtwork : morphPrevArtwork;
+      const iconEl = (btn && (btn.querySelector('.icon') || btn.querySelector('svg'))) || btn;
+
+      // 阶段 1 (0ms): 原地蓄力后撤 -3px，形态平滑裂变展开为 1:1 双折线 (纯位移，0% 缩放，对齐旋转蓄力 140ms)
+      if (morph) morph.morphTo(isNext ? ChevronsRight : ChevronsLeft, 'snappy');
+      if (iconEl) {
+        iconEl.style.transition = 'transform 0.14s cubic-bezier(0.4, 0, 0.2, 1)';
+        iconEl.style.transform = `translateX(${sign * -3}px)`;
+      }
+
+      // 阶段 2 (140ms): 破空向前爆发冲刺过冲 +6px (纯位移，无 scale，对齐旋转冲刺 280ms)
+      setTimeout(() => {
+        if (iconEl) {
+          iconEl.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)';
+          iconEl.style.transform = `translateX(${sign * 6}px)`;
+        }
+      }, 140);
+
+      // 阶段 3 (420ms): 阻尼回吸减震归零，合拢弹回单折线 Chevron (对齐旋转减震 160ms)
+      setTimeout(() => {
+        if (morph) morph.morphTo(isNext ? ChevronRight : ChevronLeft, 'snappy');
+        if (iconEl) {
+          iconEl.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          iconEl.style.transform = 'translateX(0)';
+        }
+      }, 420);
+
+      // 580ms 结项落锁 (完全对齐旋转 580ms 节奏)
+      setTimeout(() => {
+        if (iconEl) {
+          iconEl.style.transition = '';
+          iconEl.style.transform = '';
+        }
+        isNavArtworkBusy = false;
+      }, 580);
+    }
+
     window.AtlasMorphicons = {
       reset: morphReset,
       rotate: morphRotate,
@@ -7162,9 +7297,11 @@
       info: morphInfo,
       headerLang: morphHeaderLang,
       viewerLang: morphViewerLang,
+      shareArtwork: morphShareArtwork,
       shareLink: morphShareLink,
       theme: morphTheme,
-      home: morphHome
+      home: morphHome,
+      navArtwork: triggerArtworkNavMorph
     };
   }
 

@@ -5802,7 +5802,40 @@ body:has(.about-modal.open) {
   /* 移动端安全区偏移与底部避让 (Safe Area Awareness) */
   .navigator-wrapper {
     bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
-    left: calc(14px + env(safe-area-inset-left, 0px));
+    left: calc(12px + env(safe-area-inset-left, 0px)) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45) !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 移动端微型雷达：去掉右上角突兀且遮挡缩略图的大黑圆关闭按钮（轻触微型鹰眼图任意处即可折叠收起） */
+  .nav-floating-close {
+    display: none !important;
+  }
+
+  /* 移动端禁用在鹰眼图上的复杂手势画框干扰 */
+  .nav-draw-overlay {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
+  /* 移动端隐藏悬停 Tooltip */
+  .nav-hover-tooltip {
+    display: none !important;
+  }
+
+  /* 移动端原生视口框与边框微晶精致化 */
+  .viewer-navigator,
+  .navigator {
+    border: 1.5px solid var(--accent) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  #viewerNavigator .displayregion,
+  .viewer-navigator .displayregion {
+    border-width: 1.5px !important;
   }
 
   /* 移动端测试方式 1：左侧边框吸附折叠微晶耳标 (Edge-Docked Tab · 0px 贴边零遮挡) */
@@ -5854,18 +5887,7 @@ body:has(.about-modal.open) {
     display: none !important;
   }
 
-  /* 移动端无 Hover 状态：常驻显示轻量关闭按钮，尺寸扩大便于触控 */
-  .nav-floating-close {
-    opacity: 0.95 !important;
-    transform: scale(1) !important;
-    width: 30px;
-    height: 30px;
-    top: 4px;
-    right: 4px;
-  }
-
   /* 提示框在移动端紧凑化 */
-  .nav-hover-tooltip,
   .launcher-tooltip {
     font-size: 11px;
     padding: 6px 10px;
@@ -6899,11 +6921,46 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 
 @keyframes themeRippleExpand {
   from {
+    -webkit-clip-path: circle(0px at var(--ripple-x, 95%) var(--ripple-y, 30px));
     clip-path: circle(0px at var(--ripple-x, 95%) var(--ripple-y, 30px));
   }
   to {
+    -webkit-clip-path: circle(150vmax at var(--ripple-x, 95%) var(--ripple-y, 30px));
     clip-path: circle(150vmax at var(--ripple-x, 95%) var(--ripple-y, 30px));
   }
+}
+
+/* =====================================================================
+   不支持 View Transition 移动端/浏览器的全局平滑过渡 (Fallback Smooth Theme Transition)
+   ==================================================================== */
+html.theme-transitioning,
+html.theme-transitioning body,
+html.theme-transitioning .hero-screen,
+html.theme-transitioning .hero-scrim,
+html.theme-transitioning .app-header,
+html.theme-transitioning .header-capsule,
+html.theme-transitioning .gallery-stream,
+html.theme-transitioning .gallery-card,
+html.theme-transitioning .viewer-modal,
+html.theme-transitioning .viewer-bottom-bar,
+html.theme-transitioning .viewer-floating-toolbar,
+html.theme-transitioning .viewer-drawer,
+html.theme-transitioning .app-footer {
+  transition: background-color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+              background 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+              border-color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+              color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+/* 移动端与桌面端主题切换按键轻触弹性反馈 (Active Spring Feedback) */
+.theme-toggle-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.86) !important;
+  transition: transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
 
 
@@ -8689,16 +8746,46 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   z-index: 1;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .viewer-floating-toolbar .share-popover {
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) translateY(8px) scale(0.96) !important;
-    transform-origin: bottom center !important;
-    width: min(218px, calc(100vw - 32px)) !important;
+    left: auto !important;
+    right: -10px !important;
+    transform: translateY(8px) scale(0.96) !important;
+    transform-origin: bottom right !important;
+    width: 172px !important;
+    padding: 6px !important;
+    border-radius: 12px !important;
+    gap: 2px !important;
   }
   .viewer-floating-toolbar .share-popover.open {
-    transform: translateX(-50%) translateY(0) scale(1) !important;
+    transform: translateY(0) scale(1) !important;
+  }
+  .viewer-floating-toolbar .share-popover::after {
+    left: auto !important;
+    right: 22px !important;
+    transform: rotate(45deg) !important;
+  }
+  .share-popover-item {
+    gap: 8px !important;
+    padding: 6px 8px !important;
+    border-radius: 8px !important;
+  }
+  .share-item-icon {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 7px !important;
+  }
+  .share-item-icon svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+  .share-item-title {
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+  }
+  .share-item-desc {
+    font-size: 0.66rem !important;
+    margin-top: 1px !important;
   }
 }
 

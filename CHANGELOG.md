@@ -2,6 +2,49 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 规范，版本号遵循 [语义化版本 2.0.0](https://semver.org/lang/zh-CN/)。
 
+## [1.3.22] - 2026-10-03
+
+### 上下画卷翻阅矢量动效与旋转 580ms 动力学同频体系 (Artwork Nav Morph & 580ms Rotation-Sync Dynamics)
+- **画卷切换（上一卷 / 下一卷）瞬态过电动效落地 (Transient Morph & Pure Impulse Navigation)**：
+  - 将 `#btnPrevArtwork` / `#btnNextArtwork` 原静态 polyline 升级为 Morphicons 矢量动态 path，支持鼠标点击、快捷键 `[` / `]` 及两侧边缘唤出翻页时无缝激活；
+  - **方案 1：折角双跃 · 冲刺穿梭（1:1 绝对恒定尺寸，0% 缩放）**：
+    - 彻底剔除任何 `scale` 尺寸拉伸或挤压变形，按键底盘与包围盒保持绝对恒定；
+    - 重新计算并定制 `ChevronsRight` / `ChevronsLeft` 矢量 AST 坐标，将双折线高度（12px）与 45° 开角与单折线 `Chevron` 做到几何绝对一致，杜绝图标形变跳跃感；
+- **旋转按键与翻卷按键 580ms 动力学绝对镜像同频（方案 A）**：
+  - 上下画卷按键与旋转按键（`#toolRotate`）完全共享同一套动力节拍与贝塞尔曲线家族，达成同一悬浮底栏下的物理动量统一度：
+    - **阶段 1（0ms ~ 140ms，历时 140ms）**：线性蓄力后撤 `-3px`（`cubic-bezier(0.4, 0, 0.2, 1)`），单折角平滑裂变为双折角，140ms 蓄力窗口让视觉清晰感知到形态升阶；
+    - **阶段 2（140ms ~ 420ms，历时 280ms）**：四阶平滑出冲强动力段（`cubic-bezier(0.22, 1, 0.36, 1)`），穿梭向前爆发过冲 `+6px`，带来饱满推背感；
+    - **阶段 3（420ms ~ 580ms，历时 160ms）**：阻尼回吸减震归零 `0px`（`cubic-bezier(0.34, 1.56, 0.64, 1)`），到位瞬间双折角合拢弹回单折线，完成物理收束；
+    - **阶段 4（580ms · 结项）**：两类核心操作按键总周期绝对一致锁定（580ms），手感稳健扎实。
+- **全站 Morphicons 动态矢量图腾深度适配与闭环**：
+  - 工具栏昼夜模式切换（`Sun` ↔ `Moon`）、全图展卷（`ResetFit` ↔ `ResetZoomed`）、视口全屏（`Maximize` ↔ `Minimize`）、信息抽屉（`CircleHelp` ↔ `CircleAlert`）、语言切换（`Languages` ↔ `Globe`）、画卷分享（`Share2` ↔ `ExternalLink`）、外跳直链（`Paperclip` ↔ `ExternalLink`）、返回主页（`Home` ↔ `Send` 纸飞机飞翔）及更多画卷（`Folder` ↔ `Image` 晶透展卷）全量动态化响应。
+- **动效实验室（`demo/morph-demo.html`）升级**：
+  - 新增【场景 J：上下画卷翻卷过渡动效 · 4 种方案并排实测】实测看板；
+  - 完整集成 3D 磁吸视差跟随（`initMagneticDock`）与坐标浮动气泡（`initDockTooltips`），支持一键设为底栏生效方案并实时对比。
+- **资源版本与缓存防沉淀**：
+  - `index.html` 资源版本号刷新至 `20261003_v80`，保障全网各分支即时生效。
+
+---
+
+## [1.3.21] - 2026-10-03
+
+### 移动端微型空间雷达鹰眼图与触控体验重构 (Mobile Micro-Radar Navigator & Touch UX Overhaul)
+- **工业级微缩空间雷达重塑 (Micro-Minimap HUD)**：
+  - 将移动端窄屏鹰眼图尺寸从 `150px` 压缩至极简克制的 `84px` 邮票级尺寸（减负 70%），释放 95% 以上大图视野；
+  - 彻底移除移动端右上角突兀且遮挡缩略图的 30px 深色实心圆关闭按钮；
+  - 实装全图轻触折叠体验（Tap-to-Collapse）：轻碰微型鹰眼图任意处即可优雅收纳至侧边微晶胶囊；
+- **分享弹出菜单移动端瘦身与溢出修复 (Share Popover Overflow Fix)**：
+  - 宽度从 218px 精简至 172px，契合精简短文案（`复制直链到剪切板`、`扫码查看`、`生成画卷海报`）；
+  - 定位改为右偏置自适应对齐（`right: -10px`），彻底解决偏右按钮在窄屏下将卡片顶出屏幕右边缘被截断的 Bug，三角形气泡尖角精准对齐分享按钮中轴；
+- **二维码深览弹窗精简**：
+  - 移除二维码下方的尺寸参数胶囊标注（`#shareQrResChip`），聚焦主题标签与艺术图名；
+- **移动端主题切换动效升级与回退**：
+  - 增强触控坐标物理居中提取，增加 15ms 触觉微震动与按钮按压弹性微动效；为不支持 View Transition 的移动端内核添加 0.35s 平滑渐变回退过渡；
+- **缓存版本同步提升**：
+  - `index.html` 核心资源版本号刷新至 `20261003_v79`，保障线上即时生效。
+
+---
+
 ## [1.3.20] - 2026-10-03
 
 ### 修复全屏大图查看器作用域崩溃与 OpenSeadragon 无法加载 (Fix Deep Zoom Modal Scope Regression)

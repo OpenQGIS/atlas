@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20261003_v78">
+  <link rel="stylesheet" href="assets/style.css?v=20261003_v80">
   <script src="assets/config.js?v=20260930_v57"></script>
   <script src="assets/i18n.js?v=20261003_v64"></script>
   <script src="data/themes.js?v=20260930_v57"></script>
@@ -354,7 +354,7 @@
         <div class="viewer-floating-toolbar">
           <button class="tool-btn nav-artwork-btn prev-artwork-btn" id="btnPrevArtwork" aria-label="上一卷" data-i18n-title="actionPrev">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="15 18 9 12 15 6"></polyline>
+              <path id="pathPrevArtworkMorph" d="M15 18C13 16 11 14 9 12C11 10 13 8 15 6" />
             </svg>
           </button>
           <!-- 动态比例控制器 (底栏输入+显示二合一 · 展开窗口仅精简展示纯档位) -->
@@ -403,7 +403,11 @@
           </button>
           <div class="share-dropdown-wrapper" id="shareDropdownWrapper">
             <button class="tool-btn" id="btnShareArtwork" aria-label="分享画卷" data-i18n-title="actionShare" aria-haspopup="true" aria-expanded="false">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              <span class="tb-icon-layer">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path id="pathShareArtworkMorph" d="M21 5C21 6.6569 19.6569 8 18 8C16.3431 8 15 6.6569 15 5C15 3.3431 16.3431 2 18 2C19.6569 2 21 3.3431 21 5ZM9 12C9 13.6569 7.6569 15 6 15C4.3431 15 3 13.6569 3 12C3 10.3431 4.3431 9 6 9C7.6569 9 9 10.3431 9 12ZM21 19C21 20.6569 19.6569 22 18 22C16.3431 22 15 20.6569 15 19C15 17.3431 16.3431 16 18 16C19.6569 16 21 17.3431 21 19ZM8.59 13.51C10.8667 14.8367 13.1433 16.1633 15.42 17.49M15.41 6.51C13.1367 7.8367 10.8633 9.1633 8.59 10.49"/>
+                </svg>
+              </span>
             </button>
             <div class="share-popover" id="sharePopover" role="menu" aria-hidden="true">
               <button class="share-popover-item" id="btnShareOptLink" role="menuitem">
@@ -414,7 +418,7 @@
                 </span>
                 <div class="share-item-text">
                   <span class="share-item-title" data-i18n="shareOptLink">分享网址</span>
-                  <span class="share-item-desc" data-i18n="shareOptLinkDesc">复制专属直链到剪贴板</span>
+                  <span class="share-item-desc" data-i18n="shareOptLinkDesc">复制直链到剪切板</span>
                 </div>
               </button>
               <button class="share-popover-item" id="btnShareOptQr" role="menuitem">
@@ -426,7 +430,7 @@
                 </span>
                 <div class="share-item-text">
                   <span class="share-item-title" data-i18n="shareOptQr">分享二维码</span>
-                  <span class="share-item-desc" data-i18n="shareOptQrDesc">扫码即刻原图深览</span>
+                  <span class="share-item-desc" data-i18n="shareOptQrDesc">扫码查看</span>
                 </div>
               </button>
               <button class="share-popover-item" id="btnShareOptPoster" role="menuitem">
@@ -438,14 +442,14 @@
                 </span>
                 <div class="share-item-text">
                   <span class="share-item-title" data-i18n="shareOptPoster">海报分享</span>
-                  <span class="share-item-desc" data-i18n="shareOptPosterDesc">生成 3:4 典藏海报与专属码</span>
+                  <span class="share-item-desc" data-i18n="shareOptPosterDesc">生成画卷海报</span>
                 </div>
               </button>
             </div>
           </div>
           <button class="tool-btn nav-artwork-btn next-artwork-btn" id="btnNextArtwork" aria-label="下一卷" data-i18n-title="actionNext">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="9 18 15 12 9 6"></polyline>
+              <path id="pathNextArtworkMorph" d="M9 18C11 16 13 14 15 12C13 10 11 8 9 6" />
             </svg>
           </button>
 
@@ -545,7 +549,6 @@
               </div>
               <div class="share-qr-meta-chips" id="shareQrMetaChips">
                 <span class="share-qr-chip" id="shareQrCategoryChip">-</span>
-                <span class="share-qr-chip-res" id="shareQrResChip">-</span>
               </div>
               <h4 class="share-qr-artwork-title" id="shareQrArtworkTitle">-</h4>
             </div>
@@ -755,6 +758,6 @@
         </div>
       </div>
     </div>
-  <script src="assets/app.js?v=20261003_v77"></script>
+  <script src="assets/app.js?v=20261003_v80"></script>
 </body>
 </html>

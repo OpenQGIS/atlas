@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鹰眼图画框缩放演示 · OpenQGIS / Cabinet</title>
+  <script src="vendor/openseadragon.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --bg-stage: #07090d;
+      --surface: #141822;
+      --surface-border: rgba(255, 255, 255, 0.1);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #80cc28;
+      --accent-rgb: 128, 204, 40;
+      --nav-border: #80cc28;
+      --nav-bg: rgba(14, 18, 26, 0.94);
+      --nav-region-fill: rgba(128, 204, 40, 0.25);
+      --box-dash-color: #80cc28;
+      --shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    [data-theme="light"] {
+      --bg: #f3f5f8;
+      --bg-stage: #e7ebf0;
+      --surface: #ffffff;
+      --surface-border: rgba(0, 0, 0, 0.1);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --accent: #55991b;
+      --accent-rgb: 85, 153, 27;
+      --nav-border: #55991b;
+      --nav-bg: rgba(255, 255, 255, 0.96);
+      --nav-region-fill: rgba(85, 153, 27, 0.22);
+      --box-dash-color: #55991b;
+      --shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    /* 顶部精简导航条 */
+    .top-bar {
+      height: 52px;
+      flex-shrink: 0;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border-bottom: 1px solid var(--surface-border);
+      z-index: 100;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      border-left: 1px solid var(--surface-border);
+      padding-left: 12px;
+    }
+
+    .actions-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-badge {
+      font-size: 12px;
+      color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.1);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(var(--accent-rgb), 0.25);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--surface-border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .btn:hover {
+      background: rgba(var(--accent-rgb), 0.12);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn svg {
+      width: 15px;
+      height: 15px;
+      stroke-width: 2;
+    }
+
+    /* 实体键盘键帽样式 (KBD Badge) */
+    .kbd-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 2px 6px;
+      min-width: 16px;
+      color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.12);
+      border: 1px solid rgba(var(--accent-rgb), 0.32);
+      border-bottom: 2px solid rgba(var(--accent-rgb), 0.55);
+      border-radius: 4px;
+      user-select: none;
+      letter-spacing: 0.5px;
+    }
+
+    /* 放大图窗口容器 (确保持续撑满剩余高度) */
+    .viewer-window {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: calc(100vh - 52px);
+      background: var(--bg-stage);
+      overflow: hidden;
+    }
+
+    #osdStage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-stage);
+    }
+
+    /* ============================================================
+       自定义鹰眼图容器 (定位在左下角，纯净无常驻冗余文字)
+       ============================================================ */
+    .navigator-wrapper {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      background: var(--nav-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--surface-border);
+      overflow: visible; /* 允许悬停气泡浮出 */
+      user-select: none;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), 
+                  opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1), 
+                  visibility 0.24s,
+                  border-color 0.2s ease;
+      transform-origin: bottom left;
+    }
+
+    .navigator-wrapper:hover {
+      border-color: rgba(var(--accent-rgb), 0.45);
+    }
+
+    /* 鹰眼图收起状态 */
+    .navigator-wrapper.is-collapsed {
+      transform: scale(0.9) translateY(14px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* 悬停在鹰眼图上时显示的顶部提示卡片 (Tooltip: 左对齐指示) */
+    .nav-hover-tooltip {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 0;
+      padding: 8px 14px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+                  transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    .nav-hover-tooltip::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 22px;
+      border-width: 6px;
+      border-style: solid;
+      border-color: var(--surface) transparent transparent transparent;
+    }
+
+    .navigator-wrapper:hover .nav-hover-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .nav-tip-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .nav-tip-title svg {
+      width: 14px;
+      height: 14px;
+      color: var(--accent);
+    }
+
+    .nav-tip-divider {
+      width: 1px;
+      height: 12px;
+      background: var(--surface-border);
+    }
+
+    .nav-tip-action {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .nav-tip-action strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* 鹰眼视图舞台容器 */
+    .navigator-stage {
+      position: relative;
+      cursor: crosshair;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    #osdNavigator {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* 悬停时右上角优雅浮现的关闭按钮 */
+    .nav-floating-close {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.85);
+      transition: all 0.2s ease;
+      z-index: 1005;
+      outline: none;
+    }
+
+    .navigator-wrapper:hover .nav-floating-close {
+      opacity: 0.85;
+      transform: scale(1);
+    }
+
+    .nav-floating-close:hover {
+      opacity: 1 !important;
+      background: rgba(0, 0, 0, 0.85);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    .nav-floating-close svg {
+      width: 13px;
+      height: 13px;
+      stroke-width: 2.2;
+    }
+
+    /* ============================================================
+       显示范围 (当前视口范围)：网页同款样式 (绿实线框 + 半透明底色)
+       全图完整显示时自动隐藏，只有聚焦到局部才显现
+       ============================================================ */
+    .displayregion {
+      border: 2px solid var(--accent) !important;
+      background: rgba(var(--accent-rgb), 0.32) !important;
+      box-sizing: border-box !important;
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+                  visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* 全图完整显示时隐藏显示范围，还鹰眼底图以纯净视野 */
+    .displayregion.is-full-view {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    .navigator {
+      border: 2px solid var(--accent) !important;
+      border-radius: var(--radius-sm) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+      background: transparent !important;
+      overflow: hidden !important;
+    }
+
+    /* 鹰眼视图舞台容器 (设置 isolation: isolate 确保反色运算仅在舞台内部与底图生效) */
+    .navigator-stage {
+      position: relative;
+      cursor: crosshair;
+      overflow: hidden;
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.25);
+      isolation: isolate;
+    }
+
+    /* 鼠标画框交互透明蒙层 */
+    .nav-draw-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    /* ============================================================
+       鼠标绘制的临时框架：虚线 + 与底图图像实时反色 (mix-blend-mode: difference)
+       在任何深色、浅色、高彩卫星遥感底图上均能自动反色呈现极致清晰对比
+       ============================================================ */
+    .nav-draw-box {
+      position: absolute;
+      display: none;
+      box-sizing: border-box;
+      /* 与底图图像进行实时光学反色 */
+      mix-blend-mode: difference;
+      border: 2px dashed #ffffff;
+      /* 选区内部轻微反色提亮，高亮选定区域 */
+      background: rgba(255, 255, 255, 0.16);
+      /* 强化边缘高反差外描边投影，杜绝中灰度弱化 */
+      filter: drop-shadow(0 0 1px #000000);
+      pointer-events: none;
+      z-index: 1001;
+    }
+
+    /* ============================================================
+       关闭鹰眼图后出现的【液态玻璃胶囊浮标 (Liquid Glass)】
+       严格复刻主站底部悬浮工具栏 (viewer-floating-toolbar) 的高精液态玻璃质感
+       定位在左下角，对齐鹰眼图
+       ============================================================ */
+    .nav-launcher-wrapper {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      z-index: 49;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: scale(0.9) translateY(10px);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                  opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), 
+                  visibility 0.28s;
+    }
+
+    .nav-launcher-wrapper.is-visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+    }
+
+    /* 液态玻璃胶囊按钮 (同款 .viewer-floating-toolbar) */
+    .nav-launcher-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      min-height: 40px;
+      border-radius: 9999px;
+      background: rgba(14, 18, 24, 0.82);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 
+        0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.28),
+        0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.25),
+        0px 10px 10px -3.75px rgba(0, 0, 0, 0.2),
+        0px 20px 35px -5px rgba(0, 0, 0, 0.55);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      will-change: transform;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  background 0.3s ease,
+                  border-color 0.3s ease,
+                  box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      outline: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-launcher-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(var(--accent-rgb), 0.45);
+      color: #ffffff;
+      box-shadow: 
+        0px 0.8px 1px -1px rgba(0, 0, 0, 0.32),
+        0px 3px 4px -2px rgba(0, 0, 0, 0.28),
+        0px 14px 18px -4px rgba(0, 0, 0, 0.24),
+        0px 26px 48px -6px rgba(0, 0, 0, 0.65),
+        0 0 16px rgba(var(--accent-rgb), 0.2);
+    }
+
+    .nav-launcher-btn svg {
+      width: 15px;
+      height: 15px;
+      color: var(--accent);
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-launcher-btn:hover svg {
+      transform: rotate(25deg);
+    }
+
+    /* 浅色主题同款液态玻璃 */
+    :root[data-theme="light"] .nav-launcher-btn {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 
+        0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.08),
+        0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.06),
+        0px 10px 10px -3.75px rgba(0, 0, 0, 0.05),
+        0px 16px 32px -4px rgba(0, 0, 0, 0.12);
+    }
+
+    :root[data-theme="light"] .nav-launcher-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(var(--accent-rgb), 0.45);
+      color: var(--text);
+      box-shadow: 
+        0px 0.8px 1px -1px rgba(0, 0, 0, 0.10),
+        0px 3px 4px -2px rgba(0, 0, 0, 0.08),
+        0px 12px 16px -3px rgba(0, 0, 0, 0.08),
+        0px 22px 42px -5px rgba(0, 0, 0, 0.18),
+        0 0 16px rgba(var(--accent-rgb), 0.15);
+    }
+
+    /* 悬停提示气泡 (左对齐液态玻璃风格) */
+    .launcher-tooltip {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 0;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      background: rgba(14, 18, 24, 0.88);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-sm);
+      box-shadow: 
+        0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.28),
+        0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.25),
+        0px 10px 10px -3.75px rgba(0, 0, 0, 0.2),
+        0px 16px 32px -4px rgba(0, 0, 0, 0.55);
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+                  transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .launcher-tooltip::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 22px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: rgba(14, 18, 24, 0.88) transparent transparent transparent;
+    }
+
+    :root[data-theme="light"] .launcher-tooltip {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 
+        0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.08),
+        0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.06),
+        0px 10px 10px -3.75px rgba(0, 0, 0, 0.05),
+        0px 16px 32px -4px rgba(0, 0, 0, 0.12);
+    }
+
+    :root[data-theme="light"] .launcher-tooltip::after {
+      border-color: rgba(255, 255, 255, 0.92) transparent transparent transparent;
+    }
+
+    /* 仅在鼠标悬停或聚焦在鹰眼图胶囊上时才显示提示框 */
+    .nav-launcher-wrapper:hover .launcher-tooltip,
+    .nav-launcher-wrapper:focus-within .launcher-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+      /* ============================================================
+       底部悬浮工具栏 (Viewer Floating Toolbar)
+       用于与左下角鹰眼图进行实时同屏布局与防重叠演示
+       ============================================================ */
+    .viewer-floating-toolbar {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14, 18, 24, 0.82);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 6px 10px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 
+        0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.28),
+        0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.25),
+        0px 10px 10px -3.75px rgba(0, 0, 0, 0.2),
+        0px 20px 35px -5px rgba(0, 0, 0, 0.55);
+      z-index: 45;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  background 0.3s ease,
+                  border-color 0.3s ease,
+                  bottom 0.3s ease;
+      user-select: none;
+    }
+
+    :root[data-theme="light"] .viewer-floating-toolbar {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 
+        0px 0.6px 0.6px -1.25px rgba(0, 0, 0, 0.08),
+        0px 2.3px 2.3px -2.5px rgba(0, 0, 0, 0.06),
+        0px 10px 10px -3.75px rgba(0, 0, 0, 0.05),
+        0px 16px 32px -4px rgba(0, 0, 0, 0.12);
+    }
+
+    .tool-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      width: 36px;
+      height: 36px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      outline: none;
+      transition: color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tool-btn:hover {
+      color: #ffffff;
+      transform: scale(1.08);
+    }
+
+    :root[data-theme="light"] .tool-btn:hover {
+      color: var(--text);
+    }
+
+    .tool-btn svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    .tool-divider {
+      width: 1px;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.15);
+      margin: 0 2px;
+    }
+
+    :root[data-theme="light"] .tool-divider {
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    /* ============================================================
+       防重叠避让核心规则 (Toolbar Collision Avoidance Strategy)
+       1. 宽屏 (> 1080px): 底栏居中，鹰眼图在左下角，水平安全间隙 > 200px，从容共存
+       2. 中屏 / 平板 (<= 1080px): 鹰眼图与启动胶囊自动上浮至底栏上方 (bottom: 84px)
+       3. 动态守卫类 (.dodge-toolbar): 当 JS 几何碰撞探测判定间隙 < 20px 时强制上浮
+       4. 移动端 (<= 768px): 底栏精简宽度，鹰眼图默认折叠为胶囊；展开时优雅浮于底栏上方
+       ============================================================ */
+    @media (max-width: 1080px) {
+      .navigator-wrapper,
+      .nav-launcher-wrapper {
+        bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+      }
+    }
+
+    .navigator-wrapper.dodge-toolbar,
+    .nav-launcher-wrapper.dodge-toolbar {
+      bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* ============================================================
+       移动端窄屏自适应规范 (UI/UX Pro Max 移动端适配)
+       针对手机等 <= 768px 窄屏进行手势、安全区、触控尺寸与视野保护优化
+       ============================================================ */
+    @media (max-width: 768px) {
+      .top-bar {
+        padding: 0 12px;
+        height: 48px;
+      }
+
+      .brand-desc {
+        display: none; /* 移动端隐藏过长副标题，防止折行溢出 */
+      }
+
+      .brand-title {
+        font-size: 13px;
+      }
+
+      .btn {
+        padding: 5px 10px;
+        font-size: 12px;
+      }
+
+      /* 移动端底栏精简与安全区 */
+      .viewer-floating-toolbar {
+        bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+        padding: 4px 8px;
+        gap: 2px;
+      }
+
+      .tool-btn {
+        width: 34px;
+        height: 34px;
+      }
+
+      .tool-btn.hide-on-mobile {
+        display: none !important;
+      }
+
+      /* 移动端安全区偏移与底部避让 (Safe Area Awareness) */
+      .navigator-wrapper,
+      .nav-launcher-wrapper {
+        bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+        left: calc(14px + env(safe-area-inset-left, 0px));
+      }
+
+      /* 触控友好胶囊按钮 (符合 Apple 44pt / Material 48dp 规范) */
+      .nav-launcher-btn {
+        min-height: 44px;
+        padding: 8px 18px;
+        font-size: 13px;
+      }
+
+      /* 移动端无 Hover 状态：常驻显示轻量关闭按钮，尺寸扩大便于触控 */
+      .nav-floating-close {
+        opacity: 0.95 !important;
+        transform: scale(1) !important;
+        width: 30px;
+        height: 30px;
+        top: 4px;
+        right: 4px;
+      }
+
+      /* 提示框在移动端紧凑化 */
+      .nav-hover-tooltip,
+      .launcher-tooltip {
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部精简导航条：仅保留 配色切换按钮 + 全图重置 + 基础标识 -->
+  <header class="top-bar">
+    <div class="brand-group">
+      <div class="brand-dot"></div>
+      <div class="brand-title">鹰眼图画框缩放演示</div>
+      <div class="brand-desc">鼠标移至左下角鹰眼图查看操作提示 · 按 <span class="kbd-badge">O</span> 键唤出/收起</div>
+    </div>
+
+    <div class="actions-group">
+      <div class="stat-badge" id="zoomBadge">缩放: 100%</div>
+      <button class="btn" id="btnReset" title="恢复全图视野 (快捷键: Home)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+        <span>全图</span>
+      </button>
+      <button class="btn" id="btnToggleTheme" title="切换配色模式 (深色/浅色)">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <span id="themeBtnText">浅色模式</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 单张放大图的主窗口 -->
+  <main class="viewer-window">
+    <div id="osdStage"></div>
+
+    <!-- 鹰眼图展开状态容器 (无常驻冗余文字，全靠悬停弹窗) -->
+    <div class="navigator-wrapper" id="navWrapper">
+      <!-- 鼠标悬停时浮现的提示弹窗：【鹰眼图 + 快捷键按钮 + 拖拽画框缩放/单击平移】 -->
+      <div class="nav-hover-tooltip" id="navHoverTooltip">
+        <div class="nav-tip-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+          <span>鹰眼图</span>
+          <kbd class="kbd-badge">O</kbd>
+        </div>
+        <div class="nav-tip-divider"></div>
+        <div class="nav-tip-action">
+          按住 <strong>拖拽画框</strong> 缩放 · <strong>单击</strong> 平移
+        </div>
+      </div>
+
+      <div class="navigator-stage" id="navStageContainer">
+        <!-- 悬停右上角轻量关闭按钮 -->
+        <button class="nav-floating-close" id="btnCloseNav" title="收起鹰眼图 (快捷键: O)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <!-- OpenSeadragon 鹰眼挂载点 -->
+        <div id="osdNavigator"></div>
+        <!-- 鼠标画框交互透明蒙层 -->
+        <div class="nav-draw-overlay" id="navDrawOverlay">
+          <!-- 临时虚线绘制框 -->
+          <div class="nav-draw-box" id="navDrawBox"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 关闭鹰眼图后的悬停提示与快捷唤出浮标 -->
+    <div class="nav-launcher-wrapper" id="navLauncher">
+      <div class="launcher-tooltip" id="launcherTooltip">
+        <span>按</span>
+        <kbd class="kbd-badge">O</kbd>
+        <span>键再次打开鹰眼图</span>
+      </div>
+      <button class="nav-launcher-btn" id="btnOpenNav" title="点击或按 O 键打开鹰眼图">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+        <span>鹰眼图</span>
+        <kbd class="kbd-badge">O</kbd>
+      </button>
+    </div>
+
+    <!-- 底部居中悬浮工具栏 (用于同屏验证防重叠与自动上浮避让) -->
+    <div class="viewer-floating-toolbar" id="mainFloatingToolbar">
+      <div class="stat-badge" id="toolZoomBadge" style="margin: 0 4px; font-size: 11px;">100%</div>
+      <button class="tool-btn" id="toolActualSize" title="1:1 原始物理像素 (快捷键 1)">
+        <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 700;">1:1</span>
+      </button>
+      <div class="tool-divider"></div>
+      <button class="tool-btn hide-on-mobile" id="toolZoomIn" title="放大 (+)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+      </button>
+      <button class="tool-btn hide-on-mobile" id="toolZoomOut" title="缩小 (-)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+      </button>
+      <button class="tool-btn" id="toolHome" title="恢复全图视野 (Home)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+      </button>
+      <button class="tool-btn" id="toolRotate" title="顺时针旋转 (R)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8M21 3v5h-5"/></svg>
+      </button>
+      <div class="tool-divider"></div>
+      <button class="tool-btn" id="toolFullscreen" title="视口全屏 (F)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
+    </div>
+  </main>
+
+  <script>
+    // ============================================================
+    // 1. 配色切换逻辑 (Dark / Light)
+    // ============================================================
+    const btnToggleTheme = document.getElementById('btnToggleTheme');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeBtnText = document.getElementById('themeBtnText');
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'light') {
+        themeBtnText.textContent = '深色模式';
+        themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+      } else {
+        themeBtnText.textContent = '浅色模式';
+        themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+      }
+
+      if (window.viewer) {
+        const stageBg = theme === 'light' ? '#e7ebf0' : '#07090d';
+        const stageEl = document.getElementById('osdStage');
+        if (stageEl) stageEl.style.backgroundColor = stageBg;
+      }
+    }
+
+    btnToggleTheme.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+    });
+
+    // ============================================================
+    // 2. 图像瓦片及尺寸配置 (高精卫星遥感制图)
+    // ============================================================
+    const artworkInfo = {
+      width: 2200,
+      height: 1540,
+      aspectRatio: 2200 / 1540,
+      tileBase: 'tiles/heqacogw8ae_dtn_463ef9b0_files/',
+      maxLevel: 12,
+      tileSize: 256,
+      overlap: 0,
+      format: 'webp',
+      thumb: 'thumbs/heqacogw8ae_dtn_463ef9b0.webp'
+    };
+
+    // 计算鹰眼图尺寸 (移动端响应式：宽度<=768px 时等比自适应为 150px，桌面端 220px)
+    function calcNavDimensions() {
+      const isMobile = window.innerWidth <= 768;
+      const maxNavDim = isMobile ? 150 : 220;
+      let w, h;
+      if (artworkInfo.aspectRatio >= 1) {
+        w = maxNavDim;
+        h = Math.max(isMobile ? 55 : 70, Math.round(maxNavDim / artworkInfo.aspectRatio));
+      } else {
+        h = maxNavDim;
+        w = Math.max(isMobile ? 55 : 70, Math.round(maxNavDim * artworkInfo.aspectRatio));
+      }
+      return { width: w, height: h };
+    }
+
+    let { width: navWidth, height: navHeight } = calcNavDimensions();
+
+    const navStageContainer = document.getElementById('navStageContainer');
+    navStageContainer.style.width = navWidth + 'px';
+    navStageContainer.style.height = navHeight + 'px';
+
+    const tileSource = {
+      width: artworkInfo.width,
+      height: artworkInfo.height,
+      tileSize: artworkInfo.tileSize,
+      tileOverlap: artworkInfo.overlap,
+      minLevel: 0,
+      maxLevel: artworkInfo.maxLevel,
+      getTileUrl: function (level, x, y) {
+        return artworkInfo.tileBase + level + '/' + x + '_' + y + '.' + artworkInfo.format;
+      }
+    };
+
+    // ============================================================
+    // 3. 初始化 OpenSeadragon 视口与鹰眼图 (定位在左下角 BOTTOM_LEFT)
+    // ============================================================
+    const viewer = OpenSeadragon({
+      id: 'osdStage',
+      prefixUrl: '',
+      tileSources: tileSource,
+      showNavigationControl: false,
+      showNavigator: true,
+      navigatorId: 'osdNavigator',
+      navigatorPosition: 'BOTTOM_LEFT',
+      navigatorAutoResize: false,
+      navigatorMaintainSizeRatio: false,
+      navigatorWidth: navWidth,
+      navigatorHeight: navHeight,
+      navigatorBackground: 'transparent',
+      navigatorBorderColor: '#80cc28',
+      navigatorDisplayRegionColor: 'rgba(128, 204, 40, 0.28)',
+      animationTime: 0.45,
+      springStiffness: 9.0,
+      visibilityRatio: 0.9,
+      constrainDuringPan: true,
+      minZoomImageRatio: 0.8,
+      maxZoomPixelRatio: 4.0,
+      zoomPerClick: 1.6,
+      zoomPerScroll: 1.25,
+      backgroundColor: '#07090d',
+      crossOriginPolicy: false,
+      ajaxWithCredentials: false,
+      loadTilesWithAjax: false
+    });
+    window.viewer = viewer;
+
+    // 若本地文件策略异常，自动优雅降级使用高清原图
+    let hasFallback = false;
+    viewer.addHandler('open-failed', function (e) {
+      console.warn('Tile open failed, fallback to full image:', e);
+      if (!hasFallback) {
+        hasFallback = true;
+        viewer.open({ type: 'image', url: artworkInfo.thumb });
+      }
+    });
+
+    // 缩放比更新
+    function updateZoomBadge() {
+      const badge = document.getElementById('zoomBadge');
+      if (!badge || !viewer || !viewer.viewport) return;
+      try {
+        const actualZoom = viewer.viewport.imageToViewportZoom(1);
+        if (actualZoom <= 0) return;
+        const currentZoom = viewer.viewport.getZoom();
+        const percent = Math.round((currentZoom / actualZoom) * 100);
+        badge.textContent = `缩放: ${percent}%`;
+      } catch (e) {}
+    }
+
+    // 动态控制鹰眼图「显示范围框」的显隐：
+    // 若当前为全图完整显示，隐藏绿框，保持纯净；只有缩放聚焦到局部时才显现框线
+    function updateDisplayRegionVisibility() {
+      const displayRegion = document.getElementById('osdNavigator-displayregion');
+      if (!displayRegion || !viewer || !viewer.viewport) return;
+
+      const currentZoom = viewer.viewport.getZoom();
+      const homeZoom = viewer.viewport.getHomeZoom();
+
+      // 判断 1: 缩放倍率接近或小于全图自适应倍率 (允许 2% 浮点误差)
+      const isZoomAtHome = currentZoom <= (homeZoom * 1.02);
+
+      // 判断 2: 视口 bounds 完整包容全图 bounds
+      let isBoundsCoveringHome = false;
+      try {
+        const bounds = viewer.viewport.getBounds();
+        const homeBounds = viewer.viewport.getHomeBounds();
+        isBoundsCoveringHome = (
+          bounds.x <= homeBounds.x + 0.02 &&
+          bounds.y <= homeBounds.y + 0.02 &&
+          (bounds.x + bounds.width) >= (homeBounds.x + homeBounds.width - 0.02) &&
+          (bounds.y + bounds.height) >= (homeBounds.y + homeBounds.height - 0.02)
+        );
+      } catch (e) {}
+
+      // 判断 3: 鹰眼框自身的像素宽高占满整个鹰眼容器 (>= 96%)
+      let isBoxFullNavigator = false;
+      const bw = parseFloat(displayRegion.style.width) || 0;
+      const bh = parseFloat(displayRegion.style.height) || 0;
+      if (bw >= navWidth * 0.96 && bh >= navHeight * 0.96) {
+        isBoxFullNavigator = true;
+      }
+
+      const isFullView = (isZoomAtHome && isBoundsCoveringHome) || isBoxFullNavigator;
+
+      if (isFullView) {
+        displayRegion.classList.add('is-full-view');
+      } else {
+        displayRegion.classList.remove('is-full-view');
+      }
+    }
+
+    viewer.addHandler('open', () => {
+      updateZoomBadge();
+      updateDisplayRegionVisibility();
+      // 打开时自动铺满全图视野并校准
+      setTimeout(() => {
+        if (viewer && viewer.viewport) {
+          viewer.viewport.goHome(true);
+          updateDisplayRegionVisibility();
+        }
+      }, 50);
+    });
+
+    viewer.addHandler('zoom', () => {
+      updateZoomBadge();
+      updateDisplayRegionVisibility();
+    });
+
+    viewer.addHandler('pan', updateDisplayRegionVisibility);
+    viewer.addHandler('animation', () => {
+      updateZoomBadge();
+      updateDisplayRegionVisibility();
+    });
+    viewer.addHandler('resize', updateDisplayRegionVisibility);
+
+    // 重置全图
+    const goHome = () => {
+      if (viewer && viewer.viewport) {
+        viewer.viewport.goHome();
+        setTimeout(updateDisplayRegionVisibility, 50);
+      }
+    };
+    document.getElementById('btnReset').addEventListener('click', goHome);
+
+    // ============================================================
+    // 4. 鹰眼图显隐切换与快捷键管理 (业界通用快捷键: O / M)
+    // ============================================================
+    const navWrapper = document.getElementById('navWrapper');
+    const navLauncher = document.getElementById('navLauncher');
+    const btnCloseNav = document.getElementById('btnCloseNav');
+    const btnOpenNav = document.getElementById('btnOpenNav');
+
+    // 移动端体验规范：手机窄屏 (<=768px) 默认收起为左下角微型胶囊，给手机留出整屏大图视野；桌面端默认展开
+    let isNavOpen = window.innerWidth > 768;
+    if (!isNavOpen) {
+      navWrapper.classList.add('is-collapsed');
+      navLauncher.classList.add('is-visible');
+    }
+
+    // 监听屏幕尺寸改变，动态更新鹰眼图尺寸
+    window.addEventListener('resize', () => {
+      const dims = calcNavDimensions();
+      if (dims.width !== navWidth || dims.height !== navHeight) {
+        navWidth = dims.width;
+        navHeight = dims.height;
+        navStageContainer.style.width = navWidth + 'px';
+        navStageContainer.style.height = navHeight + 'px';
+        if (viewer && viewer.navigator) {
+          viewer.navigator.setWidth(navWidth);
+          viewer.navigator.setHeight(navHeight);
+          viewer.navigator.updateSize();
+        }
+      }
+    });
+
+    function setNavigatorOpen(open) {
+      isNavOpen = open;
+      if (open) {
+        navWrapper.classList.remove('is-collapsed');
+        navLauncher.classList.remove('is-visible');
+        if (viewer && viewer.navigator) {
+          viewer.navigator.updateSize();
+        }
+      } else {
+        navWrapper.classList.add('is-collapsed');
+        navLauncher.classList.add('is-visible');
+      }
+    }
+
+    function toggleNavigator() {
+      setNavigatorOpen(!isNavOpen);
+    }
+
+    btnCloseNav.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setNavigatorOpen(false);
+    });
+    btnOpenNav.addEventListener('click', () => setNavigatorOpen(true));
+
+    // 全局快捷键监听: O / M 切换鹰眼图显隐，Home 复位
+    window.addEventListener('keydown', (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      const key = e.key.toLowerCase();
+      if (key === 'o' || key === 'm') {
+        e.preventDefault();
+        toggleNavigator();
+      } else if (e.key === 'Home') {
+        goHome();
+      }
+    });
+
+    // ============================================================
+    // 5. 核心交互：在鹰眼图画框缩放到选区范围 (虚线框选同步至大图)
+    // ============================================================
+    function setupNavigatorInteractions() {
+      const overlay = document.getElementById('navDrawOverlay');
+      const box = document.getElementById('navDrawBox');
+
+      let isInteracting = false;
+      let startX = 0;
+      let startY = 0;
+      let currentX = 0;
+      let currentY = 0;
+
+      overlay.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        overlay.setPointerCapture(e.pointerId);
+
+        const rect = overlay.getBoundingClientRect();
+        startX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+        startY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+        currentX = startX;
+        currentY = startY;
+        isInteracting = true;
+
+        box.style.left = startX + 'px';
+        box.style.top = startY + 'px';
+        box.style.width = '0px';
+        box.style.height = '0px';
+        box.style.display = 'none';
+        box.style.opacity = '1';
+
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      overlay.addEventListener('pointermove', (e) => {
+        if (!isInteracting) return;
+
+        const rect = overlay.getBoundingClientRect();
+        currentX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+        currentY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+
+        const left = Math.min(startX, currentX);
+        const top = Math.min(startY, currentY);
+        const width = Math.abs(currentX - startX);
+        const height = Math.abs(currentY - startY);
+
+        // 拖拽距离 > 4px 即时渲染临时虚线框
+        if (width > 4 || height > 4) {
+          box.style.display = 'block';
+          box.style.left = left + 'px';
+          box.style.top = top + 'px';
+          box.style.width = width + 'px';
+          box.style.height = height + 'px';
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      overlay.addEventListener('pointerup', (e) => {
+        if (!isInteracting) return;
+        isInteracting = false;
+
+        const rect = overlay.getBoundingClientRect();
+        const left = Math.min(startX, currentX);
+        const top = Math.min(startY, currentY);
+        const width = Math.abs(currentX - startX);
+        const height = Math.abs(currentY - startY);
+
+        if (width >= 8 && height >= 8) {
+          // --- 框选缩放：微动效反馈并转换坐标同步至大图视口 ---
+          box.style.transition = 'opacity 0.2s ease';
+          box.style.opacity = '0';
+          setTimeout(() => {
+            box.style.display = 'none';
+            box.style.opacity = '1';
+            box.style.transition = '';
+          }, 200);
+
+          if (viewer && viewer.viewport) {
+            let targetBounds = null;
+            // 优先尝试 OSD 鹰眼视口的原生映射转换
+            if (viewer.navigator && viewer.navigator.viewport) {
+              try {
+                const p1 = viewer.navigator.viewport.pointFromPixel(new OpenSeadragon.Point(left, top));
+                const p2 = viewer.navigator.viewport.pointFromPixel(new OpenSeadragon.Point(left + width, top + height));
+                const minX = Math.min(p1.x, p2.x);
+                const minY = Math.min(p1.y, p2.y);
+                const w = Math.abs(p2.x - p1.x);
+                const h = Math.abs(p2.y - p1.y);
+                if (w > 0.001 && h > 0.001 && isFinite(minX) && isFinite(minY)) {
+                  targetBounds = new OpenSeadragon.Rect(minX, minY, w, h);
+                }
+              } catch (err) {}
+            }
+
+            // 双重保险：精准解析几何坐标投影 (确保 100% 同步大图)
+            if (!targetBounds) {
+              const normX = left / navWidth;
+              const normY = (top / navHeight) * (1 / artworkInfo.aspectRatio);
+              const normW = width / navWidth;
+              const normH = (height / navHeight) * (1 / artworkInfo.aspectRatio);
+              targetBounds = new OpenSeadragon.Rect(normX, normY, normW, normH);
+            }
+
+            // 平滑动画精准缩放到选区
+            viewer.viewport.fitBounds(targetBounds, false);
+            viewer.viewport.applyConstraints();
+          }
+        } else {
+          // --- 单击操作：快速平移中心到点击位置 ---
+          box.style.display = 'none';
+          if (viewer && viewer.viewport) {
+            let clickPt = null;
+            if (viewer.navigator && viewer.navigator.viewport) {
+              try {
+                clickPt = viewer.navigator.viewport.pointFromPixel(new OpenSeadragon.Point(currentX, currentY));
+              } catch (e) {}
+            }
+            if (!clickPt || !isFinite(clickPt.x) || !isFinite(clickPt.y)) {
+              const normX = currentX / navWidth;
+              const normY = (currentY / navHeight) * (1 / artworkInfo.aspectRatio);
+              clickPt = new OpenSeadragon.Point(normX, normY);
+            }
+            viewer.viewport.panTo(clickPt, false);
+            viewer.viewport.applyConstraints();
+          }
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      overlay.addEventListener('pointercancel', () => {
+        isInteracting = false;
+        box.style.display = 'none';
+      });
+    }
+
+    viewer.addHandler('open', () => {
+      setupNavigatorInteractions();
+    });
+
+    // ============================================================
+    // 5. 底部悬浮工具栏事件与缩放状态同步
+    // ============================================================
+    const toolZoomBadge = document.getElementById('toolZoomBadge');
+    const toolActualSize = document.getElementById('toolActualSize');
+    const toolZoomIn = document.getElementById('toolZoomIn');
+    const toolZoomOut = document.getElementById('toolZoomOut');
+    const toolHome = document.getElementById('toolHome');
+    const toolRotate = document.getElementById('toolRotate');
+    const toolFullscreen = document.getElementById('toolFullscreen');
+
+    if (toolActualSize) {
+      toolActualSize.addEventListener('click', () => {
+        if (!viewer || !viewer.viewport) return;
+        const currentZoom = viewer.viewport.getZoom(true);
+        const imageZoom = viewer.viewport.viewportToImageZoom(currentZoom);
+        if (Math.abs(imageZoom - 1.0) < 0.05) {
+          viewer.viewport.goHome();
+        } else {
+          viewer.viewport.zoomTo(viewer.viewport.imageToViewportZoom(1.0));
+        }
+        viewer.viewport.applyConstraints();
+      });
+    }
+
+    if (toolZoomIn) {
+      toolZoomIn.addEventListener('click', () => {
+        if (!viewer || !viewer.viewport) return;
+        viewer.viewport.zoomBy(1.4);
+        viewer.viewport.applyConstraints();
+      });
+    }
+
+    if (toolZoomOut) {
+      toolZoomOut.addEventListener('click', () => {
+        if (!viewer || !viewer.viewport) return;
+        viewer.viewport.zoomBy(1 / 1.4);
+        viewer.viewport.applyConstraints();
+      });
+    }
+
+    if (toolHome) {
+      toolHome.addEventListener('click', () => {
+        if (!viewer || !viewer.viewport) return;
+        viewer.viewport.goHome();
+        viewer.viewport.applyConstraints();
+      });
+    }
+
+    if (toolRotate) {
+      toolRotate.addEventListener('click', () => {
+        if (!viewer || !viewer.viewport) return;
+        const deg = (viewer.viewport.getRotation() + 90) % 360;
+        viewer.viewport.setRotation(deg);
+      });
+    }
+
+    if (toolFullscreen) {
+      toolFullscreen.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+    }
+
+    // 同步底部工具栏 Zoom Badge
+    viewer.addHandler('animation', () => {
+      if (!viewer.viewport) return;
+      const zoom = viewer.viewport.getZoom(true);
+      const imgZoom = viewer.viewport.viewportToImageZoom(zoom);
+      const pct = Math.round(imgZoom * 100);
+      if (toolZoomBadge) toolZoomBadge.textContent = `${pct}%`;
+    });
+
+    // ============================================================
+    // 6. 鹰眼图与底栏防重叠动态检测守卫 (Dynamic Collision Guard)
+    // 即使在没有预定义断点的任意窄屏/折叠屏下，也确保间距不足时自动上浮错层避让
+    // ============================================================
+    function checkToolbarCollision() {
+      const tb = document.getElementById('mainFloatingToolbar');
+      const navW = document.getElementById('navWrapper');
+      const navL = document.getElementById('navLauncher');
+      if (!tb || !navW || !navL) return;
+
+      const tbRect = tb.getBoundingClientRect();
+      const activeNav = !navW.classList.contains('is-collapsed') ? navW : navL;
+      const navRect = activeNav.getBoundingClientRect();
+
+      // 水平方向重叠或者安全间隙小于 20px
+      const isOverlapX = (navRect.right + 20 > tbRect.left);
+      if (isOverlapX) {
+        navW.classList.add('dodge-toolbar');
+        navL.classList.add('dodge-toolbar');
+      } else if (window.innerWidth > 1080) {
+        navW.classList.remove('dodge-toolbar');
+        navL.classList.remove('dodge-toolbar');
+      }
+    }
+
+    window.addEventListener('resize', checkToolbarCollision);
+    const originalToggleNav = toggleNavState;
+    toggleNavState = function(collapsed) {
+      originalToggleNav(collapsed);
+      setTimeout(checkToolbarCollision, 50);
+    };
+    checkToolbarCollision();
+  </script>
+</body>
+</html>

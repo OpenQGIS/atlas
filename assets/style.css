@@ -5806,11 +5806,30 @@ body:has(.about-modal.open) {
     left: calc(14px + env(safe-area-inset-left, 0px));
   }
 
-  /* 触控友好胶囊按钮 (符合 Apple 44pt / Material 48dp 规范) */
+  /* 移动端方案 A：微晶正圆浮标（极简纯图标 · 38x38 水滴高透 · 零遮挡） */
   .nav-launcher-btn {
-    min-height: 44px;
-    padding: 8px 18px;
-    font-size: 13px;
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    min-width: 38px;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .nav-launcher-btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  /* 移动端隐藏文字标签与键盘键标识，杜绝遮挡地图底图信息 */
+  .nav-launcher-btn span,
+  .nav-launcher-btn .kbd-badge {
+    display: none !important;
   }
 
   /* 移动端无 Hover 状态：常驻显示轻量关闭按钮，尺寸扩大便于触控 */
@@ -8210,11 +8229,14 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 }
 
 .footer-nav-link .mini-ext {
-  width: 12px;
-  height: 12px;
-  stroke-width: 2.2;
-  opacity: 0.65;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  width: 13.5px;
+  height: 13.5px;
+  stroke-width: 2;
+  opacity: 0.7;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast), transform var(--transition-fast), color var(--transition-fast);
 }
 
 .footer-nav-link:hover .mini-ext {

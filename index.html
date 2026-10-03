@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20261003_v75">
+  <link rel="stylesheet" href="assets/style.css?v=20261003_v76">
   <script src="assets/config.js?v=20260930_v57"></script>
   <script src="assets/i18n.js?v=20261003_v63"></script>
   <script src="data/themes.js?v=20260930_v57"></script>
@@ -67,6 +67,11 @@
 
         <!-- 模式切换按键 -->
         <button class="capsule-btn icon-btn theme-toggle-btn hero-theme-btn" id="btnHeroToggleTheme" data-i18n-title="navThemeToggle" title="切换主题模式" aria-label="切换主题模式">
+          <span class="tb-icon-layer">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path id="pathHeroThemeMorph" d="M16 12C16 14.2091 14.2091 16 12 16C9.7909 16 8 14.2091 8 12C8 9.7909 9.7909 8 12 8C14.2091 8 16 9.7909 16 12ZM12 2C12 2.6667 12 3.3333 12 4M12 20C12 20.6667 12 21.3333 12 22M4.93 4.93C5.4 5.4 5.87 5.87 6.34 6.34M17.66 17.66C18.13 18.13 18.6 18.6 19.07 19.07M2 12C2.6667 12 3.3333 12 4 12M20 12C20.6667 12 21.3333 12 22 12M6.34 17.66C5.87 18.13 5.4 18.6 4.93 19.07M19.07 4.93C18.6 5.4 18.13 5.87 17.66 6.34" />
+            </svg>
+          </span>
         </button>
       </div>
     </div>
@@ -161,6 +166,11 @@
 
           <!-- Theme Toggle Button -->
           <button class="capsule-btn icon-btn theme-toggle-btn" id="btnToggleTheme" data-i18n-title="navThemeToggle" title="切换主题模式" aria-label="切换主题模式">
+            <span class="tb-icon-layer">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path id="pathHeaderThemeMorph" d="M16 12C16 14.2091 14.2091 16 12 16C9.7909 16 8 14.2091 8 12C8 9.7909 9.7909 8 12 8C14.2091 8 16 9.7909 16 12ZM12 2C12 2.6667 12 3.3333 12 4M12 20C12 20.6667 12 21.3333 12 22M4.93 4.93C5.4 5.4 5.87 5.87 6.34 6.34M17.66 17.66C18.13 18.13 18.6 18.6 19.07 19.07M2 12C2.6667 12 3.3333 12 4 12M20 12C20.6667 12 21.3333 12 22 12M6.34 17.66C5.87 18.13 5.4 18.6 4.93 19.07M19.07 4.93C18.6 5.4 18.13 5.87 17.66 6.34" />
+              </svg>
+            </span>
           </button>
 
           <!-- Subtle Divider -->
@@ -240,7 +250,11 @@
             </div>
           </div>
           <button class="tool-btn theme-toggle-btn" id="toolToggleTheme" data-custom-tip="切换主题模式 (T)" data-i18n-title="navThemeToggle" aria-label="切换主题模式">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span class="tb-icon-layer">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path id="pathViewerThemeMorph" d="M16 12C16 14.2091 14.2091 16 12 16C9.7909 16 8 14.2091 8 12C8 9.7909 9.7909 8 12 8C14.2091 8 16 9.7909 16 12ZM12 2C12 2.6667 12 3.3333 12 4M12 20C12 20.6667 12 21.3333 12 22M4.93 4.93C5.4 5.4 5.87 5.87 6.34 6.34M17.66 17.66C18.13 18.13 18.6 18.6 19.07 19.07M2 12C2.6667 12 3.3333 12 4 12M20 12C20.6667 12 21.3333 12 22 12M6.34 17.66C5.87 18.13 5.4 18.6 4.93 19.07M19.07 4.93C18.6 5.4 18.13 5.87 17.66 6.34" />
+              </svg>
+            </span>
           </button>
           <div class="tool-divider"></div>
         </div>
@@ -643,14 +657,14 @@
                 <li>
                   <a href="https://github.com/OpenQGIS/Cabinet" target="_blank" rel="noopener" class="footer-nav-link">
                     <span class="footer-link-name" data-i18n="footerLinkCabinet">珍奇柜 · Cabinet</span>
-                    <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="path-ext-morph" id="pathCabinetExtMorph" d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"/></svg>
                   </a>
                   <p class="footer-link-hint" data-i18n="footerLinkCabinetHint">空间碎片藏录与开源资源精选库</p>
                 </li>
                 <li>
                   <a href="https://github.com/OpenQGIS/Gallery" target="_blank" rel="noopener" class="footer-nav-link">
                     <span class="footer-link-name" data-i18n="footerLinkGallery">典藏总馆 · Gallery</span>
-                    <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="path-ext-morph" id="pathGalleryExtMorph" d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"/></svg>
                   </a>
                   <p class="footer-link-hint" data-i18n="footerLinkGalleryHint">空间地理成果与制图聚合大厅</p>
                 </li>
@@ -669,7 +683,7 @@
                 <li>
                   <a href="https://github.com/OpenQGIS" target="_blank" rel="noopener" class="footer-nav-link">
                     <span class="footer-link-name">GitHub · OpenQGIS</span>
-                    <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    <svg class="icon mini-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="path-ext-morph" id="pathGithubExtMorph" d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"/></svg>
                   </a>
                   <p class="footer-link-hint" data-i18n="footerLinkOrgHint">探索更多开源制图与空间算法项目</p>
                 </li>

@@ -147,24 +147,19 @@
       }
     });
   }
-
   function updateZoomUI() {
     if (window.AtlasMorphicons && window.AtlasMorphicons.reset && osdViewer && osdViewer.viewport) {
       const curZ = osdViewer.viewport.getZoom();
       const homeZ = osdViewer.viewport.getHomeZoom();
-      if (Math.abs(curZ - homeZ) / homeZ < 0.04) {
+      if (Math.abs(curZ - homeZ) / (homeZ || 1) < 0.04) {
         window.AtlasMorphicons.reset.toFit();
       } else {
         window.AtlasMorphicons.reset.toZoomed();
       }
-
-      // 全图显示时自动隐藏鹰眼图选区框，聚焦细节时平滑显现
-      const isFull = Math.abs(curZ - homeZ) / (homeZ || 1) < 0.04;
-      const displayRegion = document.querySelector('#viewerNavigator .displayregion') || document.querySelector('.displayregion');
-      if (displayRegion) {
-        displayRegion.classList.toggle('is-full-view', isFull);
-      }
     }
+
+    // 全图完整呈现时自动隐藏鹰眼图选区框，聚焦细节或平移时平滑显现
+    updateDisplayRegionVisibility();
     if (!osdViewer || !osdViewer.viewport) return;
     const currentZoom = osdViewer.viewport.getZoom();
     const currentPercent = getPhysicalPercentFromZoom(osdViewer, currentZoom);
@@ -3379,6 +3374,48 @@
     setTimeout(checkToolbarCollision, 50);
   }
 
+  // 动态控制鹰眼图「显示范围框」的显隐：
+  // 若当前为全图完整显示，隐藏绿框，保持纯净；只有缩放聚焦到局部时才显现框线
+  function updateDisplayRegionVisibility() {
+    const displayRegion = document.querySelector('#viewerNavigator .displayregion') || document.querySelector('.displayregion');
+    if (!displayRegion || !osdViewer || !osdViewer.viewport) return;
+
+    const currentZoom = osdViewer.viewport.getZoom();
+    const homeZoom = osdViewer.viewport.getHomeZoom();
+
+    // 判断 1: 缩放倍率接近或小于全图自适应倍率 (允许 3% 浮点误差)
+    const isZoomAtHome = currentZoom <= (homeZoom * 1.03);
+
+    // 判断 2: 视口 bounds 完整包容全图 bounds
+    let isBoundsCoveringHome = false;
+    try {
+      const bounds = osdViewer.viewport.getBounds();
+      const homeBounds = osdViewer.viewport.getHomeBounds();
+      isBoundsCoveringHome = (
+        bounds.x <= homeBounds.x + 0.02 &&
+        bounds.y <= homeBounds.y + 0.02 &&
+        (bounds.x + bounds.width) >= (homeBounds.x + homeBounds.width - 0.02) &&
+        (bounds.y + bounds.height) >= (homeBounds.y + homeBounds.height - 0.02)
+      );
+    } catch (e) {}
+
+    // 判断 3: 鹰眼框自身的像素宽高占满整个鹰眼容器 (>= 94%)
+    let isBoxFullNavigator = false;
+    const navEl = document.getElementById('viewerNavigator') || document.getElementById('navStageContainer');
+    if (navEl) {
+      const navW = parseFloat(navEl.style.width) || navEl.clientWidth || 0;
+      const navH = parseFloat(navEl.style.height) || navEl.clientHeight || 0;
+      const bw = parseFloat(displayRegion.style.width) || 0;
+      const bh = parseFloat(displayRegion.style.height) || 0;
+      if (navW > 0 && navH > 0 && bw >= navW * 0.94 && bh >= navH * 0.94) {
+        isBoxFullNavigator = true;
+      }
+    }
+
+    const isFullView = (isZoomAtHome && isBoundsCoveringHome) || isBoxFullNavigator;
+    displayRegion.classList.toggle('is-full-view', isFullView);
+  }
+
   function updateNavigatorDimensions(item) {
     const navEl = document.getElementById('viewerNavigator');
     const navStage = document.getElementById('navStageContainer');
@@ -4600,11 +4637,21 @@
         setTimeout(fixNavigatorBackground, 250);
         setTimeout(() => {
           renderDynamicZoomPresets(item);
+          updateDisplayRegionVisibility();
         }, 80);
+        setTimeout(updateDisplayRegionVisibility, 300);
       });
 
       osdViewer.addHandler('zoom', function () {
         updateZoomUI();
+      });
+
+      osdViewer.addHandler('pan', function () {
+        updateDisplayRegionVisibility();
+      });
+
+      osdViewer.addHandler('animation', function () {
+        updateDisplayRegionVisibility();
       });
 
       // 移动端在移动、捏合或轻触画布时，自动收起信息抽屉，平滑复原底栏

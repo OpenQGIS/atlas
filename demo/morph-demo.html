@@ -392,6 +392,22 @@
     .nav-pulse-active {
       animation: navPulseGlow 0.45s ease-out forwards !important;
     }
+    @keyframes themeGlowSun {
+      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.85); }
+      70% { box-shadow: 0 0 0 16px rgba(245, 158, 11, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+    @keyframes themeGlowMoon {
+      0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.85); }
+      70% { box-shadow: 0 0 0 16px rgba(99, 102, 241, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+    }
+    .theme-pulse-sun {
+      animation: themeGlowSun 0.52s ease-out forwards !important;
+    }
+    .theme-pulse-moon {
+      animation: themeGlowMoon 0.52s ease-out forwards !important;
+    }
     .variant-box.active-scheme {
       border-color: rgba(var(--accent-rgb), 0.5) !important;
       background: rgba(var(--accent-rgb), 0.08) !important;
@@ -671,6 +687,79 @@
   <!-- 阶段一：你已认可的黄金四件套 -->
   <div class="section-divider">已认可的黄金四件套 (1、2、3、8 完美对应现有高频功能)</div>
   <div class="grid">
+
+    <!-- 场景 0: 昼夜模式切换 · 太阳与月牙天象形变 (Sun ⇄ Moon · 3 种方案并排实测) -->
+    <div class="card" id="cardThemeShowcase" style="grid-column: 1 / -1;">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-name">场景 0: 昼夜模式切换 · 太阳与月牙天象形变 (3 种方案并排实测)</span>
+          <span class="card-scene">Sun ⇄ Moon · 晨曦日光与沉静月牙双向天象形态转换</span>
+        </div>
+        <span class="badge badge-refined">核心功能 1 · 点击体验昼夜变身</span>
+      </div>
+
+      <p class="card-desc" style="margin-bottom: 14px;">
+        <strong>天象演变哲学：</strong>太阳为<strong>8 芒辐射状日照射线与天体核心</strong>（9 段连续矢量），月牙为<strong>精妙优美的双弧封闭弯月</strong>。切换时 8 道光线伴随圆环张弛，向内聚拢吸入弯月身躯，或由弯月展开绽放出 8 道晨曦日光，生动诠释昼夜交替的自然法则。
+      </p>
+
+      <!-- 3 大方案对比网格 -->
+      <div class="variant-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0;">
+        
+        <!-- 方案 1: 纯净吸聚 · 原生矢量形变 -->
+        <div class="variant-box active-scheme" id="boxThemeV1" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #f59e0b; margin-bottom: 4px;">方案 1: 纯净吸聚 · 原生形变</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 12px;">8芒日照 ⇄ 弯月弧光 · 0.45s (0% 旋转)</div>
+          <button class="morph-btn" id="btnThemeV1" aria-label="方案1: 纯净吸聚" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathThemeV1" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblThemeV1" style="font-size: 10px;">太阳 (Sun · 暗色模式)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0 0 10px;">
+            <strong>极简克制：</strong>无任何额外位移或旋转，8 道日光射线向内平滑收敛为月牙，或由月牙温和舒展绽放为太阳。纯净利落，专注矢量形态变身。
+          </p>
+          <button class="seg-btn" id="btnApplyThemeV1" style="font-size: 11px; padding: 4px 12px; margin-top: auto;">设为底栏生效方案 ↘</button>
+        </div>
+
+        <!-- 方案 2: 天球公转 · 180° 昼夜轮转 -->
+        <div class="variant-box" id="boxThemeV2" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #3b82f6; margin-bottom: 4px;">方案 2: 天球公转 · 180° 轮转 (推荐)</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 12px;">形变 + 180° 天体公转 · 0.58s (580ms 同频)</div>
+          <button class="morph-btn" id="btnThemeV2" aria-label="方案2: 天球公转" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg id="svgThemeV2" viewBox="0 0 24 24"><path id="pathThemeV2" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblThemeV2" style="font-size: 10px;">太阳 (Sun · 0°)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0 0 10px;">
+            <strong>580ms 动力学同频：</strong>后撤 -15° 蓄力 ➔ 顺时针旋转 180° 过冲 +10° ➔ 阻尼归位落锁。形变在公转中段自然融合，生动演绎“日升月落、斗转星移”。
+          </p>
+          <button class="seg-btn" id="btnApplyThemeV2" style="font-size: 11px; padding: 4px 12px; margin-top: auto;">设为底栏生效方案 ↘</button>
+        </div>
+
+        <!-- 方案 3: 晨昏光冕 · 极光微晶脉冲 -->
+        <div class="variant-box" id="boxThemeV3" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #a855f7; margin-bottom: 4px;">方案 3: 晨昏光冕 · 极光微晶脉冲</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 12px;">形变 + 晨曦暖金/冷月蓝微晶脉冲 · 0.52s</div>
+          <button class="morph-btn" id="btnThemeV3" aria-label="方案3: 极光微晶脉冲" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathThemeV3" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblThemeV3" style="font-size: 10px;">太阳 (Sun · 暗色模式)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0 0 10px;">
+            <strong>光冕呼吸：</strong>变身瞬间按键底盘激发一层微晶脉冲光圈（晨曦暖阳光晕 / 静谧月夜冷光），如同破晓或入夜刹那的天象光晕。
+          </p>
+          <button class="seg-btn" id="btnApplyThemeV3" style="font-size: 11px; padding: 4px 12px; margin-top: auto;">设为底栏生效方案 ↘</button>
+        </div>
+
+      </div>
+
+      <div class="card-footer" style="margin-top: 10px;">
+        <span>实测提示: 点击上方任意方案，均可直观体验太阳与月牙形态变形，并联动全局昼夜主题切换</span>
+        <span class="card-footer-tip" id="themeActiveSchemeTip">当前底栏生效方案: 方案 1 (纯净吸聚 · 原生形变) ↗</span>
+      </div>
+    </div>
 
     <!-- 场景 A: 整图展卷全貌 -->
     <div class="card" id="cardReset">
@@ -1326,7 +1415,7 @@
       globe: { active: false, a: Languages, b: Globe, morphs: [], label: document.getElementById('lblGlobe'), textA: '多语言字符 (Languages)', textB: '全球经纬网 (Globe)' },
       home: { active: false, a: Home, b: Send, morphs: [], label: document.getElementById('lblHome'), textA: '温馨小屋 (Home)', textB: '传送飞机 (Send)' },
       link: { active: false, a: Paperclip, b: ExternalLink, morphs: [], label: document.getElementById('lblLink'), textA: '内联附件 (Paperclip)', textB: '斜向外跳 (ExternalLink)' },
-      theme: { active: false, a: Sun, b: Moon, morphs: [], label: null, textA: '太阳', textB: '月牙' },
+      theme: { active: false, a: Sun, b: Moon, morphs: [], label: document.getElementById('lblThemeV1'), textA: '太阳 (Sun · 暗色模式)', textB: '月牙 (Moon · 浅色模式)' },
       fullscreen: { active: false, a: Maximize, b: Minimize, morphs: [], label: null, textA: '全屏', textB: '还原' },
       copy: { active: false, a: Link, b: Check, morphs: [], label: null, textA: '直链', textB: '已复制' },
       drawer: { 
@@ -1423,7 +1512,12 @@
     initMorphPair('globe', document.getElementById('pathGlobeMorph'), null);
     initMorphPair('home', document.getElementById('pathHomeMorph'), document.getElementById('tbPathHome'));
     initMorphPair('link', document.getElementById('pathLinkMorph'), null);
-    initMorphPair('theme', null, document.getElementById('tbPathTheme'));
+    // 场景 0 昼夜模式 (Sun ⇄ Moon · 3 种方案实例)
+    const morphThemeV1 = createMorph(document.getElementById('pathThemeV1'), Sun);
+    const morphThemeV2 = createMorph(document.getElementById('pathThemeV2'), Sun);
+    const morphThemeV3 = createMorph(document.getElementById('pathThemeV3'), Sun);
+    const morphTbTheme = createMorph(document.getElementById('tbPathTheme'), Sun);
+    states.theme.morphs.push(morphThemeV1, morphThemeV2, morphThemeV3, morphTbTheme);
     initMorphPair('fullscreen', null, document.getElementById('tbPathFullscreen'));
     initMorphPair('copy', null, null);
     initMorphPair('drawer', document.getElementById('pathDrawerMorph'), document.getElementById('tbPathDrawer'));
@@ -1509,6 +1603,149 @@
         }, 1200);
       }
     }
+
+    // ==========================================
+    // 场景 0: 3 种昼夜模式方案实现与控制 (Sun ⇄ Moon)
+    // ==========================================
+    let activeThemeScheme = 1; // 1, 2, 3
+    let themeAngleV2 = 0;
+    let isThemeBusy = false;
+
+    function runThemeScheme(schemeNum = null) {
+      if (isThemeBusy) return;
+      isThemeBusy = true;
+
+      const nextActive = !states.theme.active;
+      states.theme.active = nextActive;
+      const targetIcon = nextActive ? Moon : Sun;
+      const nextTheme = nextActive ? 'light' : 'dark';
+
+      // 1. 全局主题及控制条单选同步
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      document.querySelectorAll('#themeGroup .seg-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === nextTheme);
+      });
+
+      // 2. 状态标签文字同步
+      const lblV1 = document.getElementById('lblThemeV1');
+      const lblV2 = document.getElementById('lblThemeV2');
+      const lblV3 = document.getElementById('lblThemeV3');
+
+      if (lblV1) lblV1.textContent = nextActive ? '月牙 (Moon · 浅色模式)' : '太阳 (Sun · 暗色模式)';
+      if (lblV3) lblV3.textContent = nextActive ? '月牙 (Moon · 浅色模式)' : '太阳 (Sun · 暗色模式)';
+
+      // 3. 方案 1: 纯净吸聚变身
+      morphThemeV1.morphTo(targetIcon, currentPreset);
+
+      // 4. 方案 2: 天球公转 180° + 形变 (580ms 同频)
+      const targetAngle = themeAngleV2 + 180;
+      const svgV2 = document.getElementById('svgThemeV2');
+      const tbBtn = document.getElementById('tbTheme');
+      const tbSvg = tbBtn ? tbBtn.querySelector('svg') : null;
+
+      // Stage 1 (0ms): 蓄力后撤 -15° (140ms)
+      if (svgV2) {
+        svgV2.style.transition = 'transform 0.14s cubic-bezier(0.4, 0, 0.2, 1)';
+        svgV2.style.transform = `rotate(${themeAngleV2 - 15}deg)`;
+      }
+      if (activeThemeScheme === 2 && tbSvg) {
+        tbSvg.style.transition = 'transform 0.14s cubic-bezier(0.4, 0, 0.2, 1)';
+        tbSvg.style.transform = `rotate(${themeAngleV2 - 15}deg)`;
+      }
+
+      // 形变中段启动 (70ms)
+      setTimeout(() => {
+        morphThemeV2.morphTo(targetIcon, 'smooth');
+        if (activeThemeScheme === 2) morphTbTheme.morphTo(targetIcon, 'smooth');
+      }, 70);
+
+      // Stage 2 (140ms): 顺时针过冲 +10° (280ms)
+      setTimeout(() => {
+        if (svgV2) {
+          svgV2.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)';
+          svgV2.style.transform = `rotate(${targetAngle + 10}deg)`;
+        }
+        if (activeThemeScheme === 2 && tbSvg) {
+          tbSvg.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)';
+          tbSvg.style.transform = `rotate(${targetAngle + 10}deg)`;
+        }
+      }, 140);
+
+      // Stage 3 (420ms): 阻尼归位 (160ms)
+      setTimeout(() => {
+        if (svgV2) {
+          svgV2.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          svgV2.style.transform = `rotate(${targetAngle}deg)`;
+        }
+        if (activeThemeScheme === 2 && tbSvg) {
+          tbSvg.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          tbSvg.style.transform = `rotate(${targetAngle}deg)`;
+        }
+      }, 420);
+
+      // 580ms 结项
+      setTimeout(() => {
+        themeAngleV2 = targetAngle;
+        if (lblV2) lblV2.textContent = nextActive ? `月牙 (Moon · ${themeAngleV2 % 360}°)` : `太阳 (Sun · ${themeAngleV2 % 360}°)`;
+      }, 580);
+
+      // 5. 方案 3: 晨昏光冕脉冲
+      morphThemeV3.morphTo(targetIcon, currentPreset);
+      const btnV3 = document.getElementById('btnThemeV3');
+      const pulseClass = nextActive ? 'theme-pulse-sun' : 'theme-pulse-moon';
+      if (btnV3) {
+        btnV3.classList.remove('theme-pulse-sun', 'theme-pulse-moon');
+        void btnV3.offsetWidth;
+        btnV3.classList.add(pulseClass);
+      }
+      if (activeThemeScheme === 3 && tbBtn) {
+        tbBtn.classList.remove('theme-pulse-sun', 'theme-pulse-moon');
+        void tbBtn.offsetWidth;
+        tbBtn.classList.add(pulseClass);
+      }
+
+      // 6. 底栏如果为方案 1 则直接形变
+      if (activeThemeScheme === 1) {
+        morphTbTheme.morphTo(targetIcon, currentPreset);
+      }
+
+      showToast(nextActive ? '天象更迭：已切换至浅色模式 ☽ (Moon 月牙显影)' : '天象更迭：已切换至深色模式 ☼ (Sun 太阳绽放)');
+
+      setTimeout(() => {
+        isThemeBusy = false;
+      }, 580);
+    }
+
+    // 绑定方案切换与底栏生效
+    const themeSchemeTitles = {
+      1: '方案 1 (纯净吸聚 · 原生形变)',
+      2: '方案 2 (天球公转 · 180° 轮转)',
+      3: '方案 3 (晨昏光冕 · 极光微晶脉冲)'
+    };
+
+    function setThemeScheme(schemeNum) {
+      activeThemeScheme = schemeNum;
+      [1, 2, 3].forEach(n => {
+        const box = document.getElementById(`boxThemeV${n}`);
+        if (box) box.classList.toggle('active-scheme', n === schemeNum);
+      });
+      const tip = document.getElementById('themeActiveSchemeTip');
+      if (tip) tip.textContent = `当前底栏生效方案: ${themeSchemeTitles[schemeNum]} ↗`;
+      showToast(`底栏「昼夜模式」已切换为: ${themeSchemeTitles[schemeNum]}`);
+    }
+
+    const btnTh1 = document.getElementById('btnThemeV1');
+    const btnTh2 = document.getElementById('btnThemeV2');
+    const btnTh3 = document.getElementById('btnThemeV3');
+
+    if (btnTh1) btnTh1.onclick = () => runThemeScheme(1);
+    if (btnTh2) btnTh2.onclick = () => runThemeScheme(2);
+    if (btnTh3) btnTh3.onclick = () => runThemeScheme(3);
+
+    [1, 2, 3].forEach(n => {
+      const btn = document.getElementById(`btnApplyThemeV${n}`);
+      if (btn) btn.onclick = () => setThemeScheme(n);
+    });
 
     // ==========================================
     // 场景 B: 3 种不同节奏与编排方案实现
@@ -1686,7 +1923,7 @@
     bindHoverMorph(document.getElementById('cardLink'), 'link');
 
     // 底栏其他控制
-    document.getElementById('tbTheme').onclick = () => toggleState('theme');
+    document.getElementById('tbTheme').onclick = () => runThemeScheme(activeThemeScheme);
     document.getElementById('tbFullscreen').onclick = () => toggleState('fullscreen');
     document.getElementById('tbCopy').onclick = () => toggleState('shareExt3');
 
@@ -1704,7 +1941,10 @@
     document.querySelectorAll('#themeGroup .seg-btn').forEach(btn => {
       btn.onclick = () => {
         const mode = btn.dataset.mode;
-        toggleState('theme', mode === 'light');
+        const wantActive = (mode === 'light');
+        if (states.theme.active !== wantActive) {
+          runThemeScheme(activeThemeScheme);
+        }
       };
     });
 
@@ -1715,6 +1955,13 @@
       const progress = e.target.value / 100;
       scrubberVal.textContent = `${e.target.value}%`;
       
+      // 场景 0 昼夜模式随滑块联动
+      const svgThemeV2 = document.getElementById('svgThemeV2');
+      if (svgThemeV2) {
+        svgThemeV2.style.transition = 'none';
+        svgThemeV2.style.transform = `rotate(${progress * 180}deg)`;
+      }
+
       // 场景 B 随滑块联动
       const currentDeg = progress * 90;
       [document.getElementById('btnRotateV1'), document.getElementById('btnRotateV2'), document.getElementById('tbRotate')].forEach(el => {

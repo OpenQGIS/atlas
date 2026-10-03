@@ -7,9 +7,9 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20261003_v77">
+  <link rel="stylesheet" href="assets/style.css?v=20261003_v78">
   <script src="assets/config.js?v=20260930_v57"></script>
-  <script src="assets/i18n.js?v=20261003_v63"></script>
+  <script src="assets/i18n.js?v=20261003_v64"></script>
   <script src="data/themes.js?v=20260930_v57"></script>
   <script src="data/manifest.js?v=20260930_v57"></script>
   <script src="assets/theme.js?v=20261002_v69"></script>
@@ -397,7 +397,7 @@
           <button class="tool-btn info-btn" id="btnToggleInfo" aria-label="作品详情" data-i18n-title="actionToggleInfo">
             <span class="tb-icon-layer">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path id="pathInfoMorph" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 16v-4M12 8h.01"/>
+                <path id="pathInfoMorph" d="M22 12C22 17.5228 17.5228 22 12 22C6.4772 22 2 17.5228 2 12C2 6.4772 6.4772 2 12 2C17.5228 2 22 6.4772 22 12ZM9.09 9C9.5754 7.62 10.9854 6.7914 12.4272 7.0387C13.869 7.286 14.9222 8.5372 14.92 10C14.92 12 11.92 13 11.92 13M12 17C12.0033 17 12.0067 17 12.01 17"/>
               </svg>
             </span>
           </button>
@@ -472,8 +472,10 @@
         <div class="drawer-header" id="drawerDragHandle">
           <div class="drawer-drag-grip" aria-hidden="true"><span></span><span></span><span></span></div>
           <h3 class="drawer-title" data-i18n="metaDrawerTitle">作品档案</h3>
-          <button class="drawer-close-btn nav-btn" id="btnCloseDrawer" data-i18n-title="actionClose" data-custom-tip="收起面板 (Tab / I)" aria-label="收起面板">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <button class="drawer-close-btn nav-btn" id="btnCloseDrawer" data-i18n-title="actionCollapseDrawer" data-custom-tip="收起面板 (Tab / I)" aria-label="收起面板">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
           </button>
         </div>
         <div class="drawer-content" id="drawerContent">
@@ -753,6 +755,6 @@
         </div>
       </div>
     </div>
-  <script src="assets/app.js?v=20261003_v76"></script>
+  <script src="assets/app.js?v=20261003_v77"></script>
 </body>
 </html>

@@ -119,6 +119,11 @@
   }
 
   function updateUI() {
+    const isDark = (currentTheme === 'dark');
+    if (window.AtlasMorphicons && window.AtlasMorphicons.theme) {
+      window.AtlasMorphicons.theme.set(isDark);
+    }
+
     const buttons = [
       document.getElementById('btnToggleTheme'),
       document.getElementById('toolToggleTheme'),
@@ -126,13 +131,15 @@
     ].filter(Boolean);
 
     buttons.forEach(btn => {
-      if (currentTheme === 'dark') {
-        btn.innerHTML = SVG_SUN;
+      const hasMorphPath = btn.querySelector('#pathHeroThemeMorph, #pathHeaderThemeMorph, #pathViewerThemeMorph');
+      if (!hasMorphPath) {
+        btn.innerHTML = isDark ? SVG_SUN : SVG_MOON;
+      }
+      if (isDark) {
         btn.dataset.customTip = '切换至浅色模式 (Light Mode)';
         btn.removeAttribute('title');
         btn.setAttribute('aria-label', '切换至浅色模式');
       } else {
-        btn.innerHTML = SVG_MOON;
         btn.dataset.customTip = '切换至深色模式 (Dark Mode)';
         btn.removeAttribute('title');
         btn.setAttribute('aria-label', '切换至深色模式');

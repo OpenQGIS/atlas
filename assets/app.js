@@ -1642,6 +1642,40 @@
     }
   }
 
+  function bindMoreCardMorph(card, folderIcon, imageIcon) {
+    if (!card || card.dataset.folderMorphBound) return;
+    const fIcon = folderIcon || (window.LucideIcons && window.LucideIcons.Folder);
+    const iIcon = imageIcon || (window.LucideIcons && window.LucideIcons.Image);
+    const pathEl = card.querySelector('.path-folder-morph');
+    if (!pathEl || !window.Morphicons || !fIcon || !iIcon) return;
+
+    try {
+      card.dataset.folderMorphBound = 'true';
+      const m = window.Morphicons.createMorph(pathEl, fIcon);
+      let isHovered = false;
+
+      function onEnter() {
+        if (isHovered) return;
+        isHovered = true;
+        m.morphTo(iIcon, 'snappy');
+      }
+
+      function onLeave() {
+        if (!isHovered) return;
+        isHovered = false;
+        m.morphTo(fIcon, 'snappy');
+      }
+
+      card.addEventListener('mouseenter', onEnter);
+      card.addEventListener('mouseleave', onLeave);
+      card.addEventListener('focus', onEnter);
+      card.addEventListener('blur', onLeave);
+    } catch (err) {
+      console.warn('bindMoreCardMorph error:', err);
+    }
+  }
+  window.bindMoreCardMorph = bindMoreCardMorph;
+
   function createMoreCard(group, totalInCat, remainingCount, curLang, unshownItems, allInCat) {
     const isEn = curLang === 'en';
     const meta = SUBCATEGORY_META[group.name] || {};
@@ -1724,10 +1758,8 @@
           '</div>' +
           '<div class="more-card-center-lead">' +
             '<div class="more-card-compass-icon" aria-hidden="true">' +
-              '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
-                '<circle cx="12" cy="12" r="9.5"></circle>' +
-                '<polygon points="12 6 14.5 12 12 10.5 9.5 12 12 6" fill="currentColor" fill-opacity="0.3"></polygon>' +
-                '<polygon points="12 18 14.5 12 12 13.5 9.5 12 12 18" fill="currentColor"></polygon>' +
+              '<svg class="icon more-folder-svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                '<path class="path-folder-morph" d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />' +
               '</svg>' +
             '</div>' +
             '<h3 class="more-card-heading">' + escapeHtml(titleText) + '</h3>' +
@@ -1754,6 +1786,8 @@
         enterSubcategoryView(group.name);
       }
     });
+
+    bindMoreCardMorph(card);
 
     return card;
   }
@@ -2522,9 +2556,22 @@
     if (copyShareUrlBtn) {
       copyShareUrlBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (currentViewerIndex >= 0 && currentFilteredItems[currentViewerIndex]) {
-          shareDirectLink(currentFilteredItems[currentViewerIndex]);
+        const item = getCurrentViewerItem();
+        if (!item) return;
+        const url = getShareUrlForItem(item);
+        copyToClipboard(url);
+
+        const t = window.AtlasI18n ? window.AtlasI18n.t : (k => k);
+        copyShareUrlBtn.textContent = t('actionShareCopied');
+        copyShareUrlBtn.classList.add('copied');
+        if (copyShareUrlBtn._copiedTimer) {
+          clearTimeout(copyShareUrlBtn._copiedTimer);
         }
+        copyShareUrlBtn._copiedTimer = setTimeout(() => {
+          copyShareUrlBtn.textContent = t('actionCopy');
+          copyShareUrlBtn.classList.remove('copied');
+          copyShareUrlBtn._copiedTimer = null;
+        }, 1800);
       });
     }
 
@@ -2873,6 +2920,11 @@
         case 'f':
         case 'F':
           if (toolFullscreen) toolFullscreen.click();
+          break;
+        case 't':
+        case 'T':
+          const toolTheme = document.getElementById('toolToggleTheme') || document.getElementById('btnToggleTheme');
+          if (toolTheme) toolTheme.click();
           break;
         case 'i':
         case 'I':
@@ -6788,6 +6840,8 @@
   let morphHeaderLang = null;
   let morphViewerLang = null;
   let morphShareLink = null;
+  let morphTheme = null;
+  let morphHome = null;
 
   let rotateAngle = 0;
   let isRotateBusy = false;
@@ -6800,162 +6854,305 @@
 
     const { createMorph } = window.Morphicons;
     const {
+      Sun, Moon,
       ResetFit, ResetZoomed,
       RotateCw,
       Maximize, Minimize,
-      CircleHelp, X,
+      CircleHelp, CircleAlert, X,
       Languages, Globe,
-      Link, Check
+      Link, Check,
+      Paperclip, ExternalLink,
+      Home, Send,
+      Folder, Image
     } = window.LucideIcons;
 
     // A: toolReset
     const pReset = document.getElementById('pathResetMorph');
-    if (pReset) {
-      const m = createMorph(pReset, ResetFit);
-      let isZoomed = false;
-      morphReset = {
-        toFit() {
-          if (!isZoomed) return;
-          isZoomed = false;
-          m.morphTo(ResetFit, 'snappy');
-        },
-        toZoomed() {
-          if (isZoomed) return;
-          isZoomed = true;
-          m.morphTo(ResetZoomed, 'snappy');
-        },
-        toggle() {
-          isZoomed = !isZoomed;
-          m.morphTo(isZoomed ? ResetZoomed : ResetFit, 'snappy');
-        }
-      };
+    if (pReset && ResetFit && ResetZoomed) {
+      try {
+        const m = createMorph(pReset, ResetFit);
+        let isZoomed = false;
+        morphReset = {
+          toFit() {
+            if (!isZoomed) return;
+            isZoomed = false;
+            m.morphTo(ResetFit, 'snappy');
+          },
+          toZoomed() {
+            if (isZoomed) return;
+            isZoomed = true;
+            m.morphTo(ResetZoomed, 'snappy');
+          },
+          toggle() {
+            isZoomed = !isZoomed;
+            m.morphTo(isZoomed ? ResetZoomed : ResetFit, 'snappy');
+          }
+        };
+      } catch (err) {
+        console.warn('Morphicons Reset failed to init:', err);
+      }
     }
 
     // B: toolRotate (Scheme 3: Pure-torque spring dynamics, scale strictly 1.0)
     const pRotate = document.getElementById('pathRotateMorph');
     const svgRotate = document.getElementById('toolRotateSvg');
-    if (pRotate && svgRotate) {
-      const m = createMorph(pRotate, RotateCw);
-      morphRotate = {
-        rotateNext(onComplete) {
-          if (isRotateBusy) return;
-          isRotateBusy = true;
-          const targetAngle = rotateAngle + 90;
+    if (pRotate && svgRotate && RotateCw) {
+      try {
+        const m = createMorph(pRotate, RotateCw);
+        morphRotate = {
+          rotateNext(onComplete) {
+            if (isRotateBusy) return;
+            isRotateBusy = true;
+            const targetAngle = rotateAngle + 90;
 
-          // Stage 1 (0ms): Reverse recoil -22 deg (scale strictly 1.0)
-          svgRotate.style.transition = 'transform 0.14s cubic-bezier(0.4, 0, 0.2, 1)';
-          svgRotate.style.transform = `rotate(${rotateAngle - 22}deg)`;
+            // Stage 1 (0ms): Reverse recoil -22 deg (scale strictly 1.0)
+            svgRotate.style.transition = 'transform 0.14s cubic-bezier(0.4, 0, 0.2, 1)';
+            svgRotate.style.transform = `rotate(${rotateAngle - 22}deg)`;
 
-          // Stage 2 (140ms): Forward torque sprint, overshoot +14 deg
-          setTimeout(() => {
-            svgRotate.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)';
-            svgRotate.style.transform = `rotate(${targetAngle + 14}deg)`;
-          }, 140);
+            // Stage 2 (140ms): Forward torque sprint, overshoot +14 deg
+            setTimeout(() => {
+              svgRotate.style.transition = 'transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)';
+              svgRotate.style.transform = `rotate(${targetAngle + 14}deg)`;
+            }, 140);
 
-          // Stage 3 (420ms): Spring damping settling at targetAngle
-          setTimeout(() => {
-            svgRotate.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            svgRotate.style.transform = `rotate(${targetAngle}deg)`;
-          }, 420);
+            // Stage 3 (420ms): Spring damping settling at targetAngle
+            setTimeout(() => {
+              svgRotate.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
+              svgRotate.style.transform = `rotate(${targetAngle}deg)`;
+            }, 420);
 
-          // Lock final angle (580ms)
-          setTimeout(() => {
-            rotateAngle = targetAngle;
+            // Lock final angle (580ms)
+            setTimeout(() => {
+              rotateAngle = targetAngle;
+              isRotateBusy = false;
+              if (typeof onComplete === 'function') onComplete(rotateAngle % 360);
+            }, 580);
+          },
+          reset() {
+            rotateAngle = 0;
             isRotateBusy = false;
-            if (typeof onComplete === 'function') onComplete(rotateAngle % 360);
-          }, 580);
-        },
-        reset() {
-          rotateAngle = 0;
-          isRotateBusy = false;
-          if (svgRotate) {
-            svgRotate.style.transition = 'none';
-            svgRotate.style.transform = 'rotate(0deg)';
+            if (svgRotate) {
+              svgRotate.style.transition = 'none';
+              svgRotate.style.transform = 'rotate(0deg)';
+            }
+          },
+          ambientWakeup() {
+            if (!svgRotate || isRotateBusy) return;
+            svgRotate.style.transition = 'transform 0.16s cubic-bezier(0.2, 0.8, 0.4, 1)';
+            svgRotate.style.transform = `rotate(${rotateAngle + 12}deg)`;
+            setTimeout(() => {
+              svgRotate.style.transition = 'transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1)';
+              svgRotate.style.transform = `rotate(${rotateAngle}deg)`;
+            }, 160);
           }
-        },
-        ambientWakeup() {
-          if (!svgRotate || isRotateBusy) return;
-          svgRotate.style.transition = 'transform 0.16s cubic-bezier(0.2, 0.8, 0.4, 1)';
-          svgRotate.style.transform = `rotate(${rotateAngle + 12}deg)`;
-          setTimeout(() => {
-            svgRotate.style.transition = 'transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            svgRotate.style.transform = `rotate(${rotateAngle}deg)`;
-          }, 160);
-        }
-      };
+        };
+      } catch (err) {
+        console.warn('Morphicons Rotate failed to init:', err);
+      }
     }
 
     // C: toolFullscreen
     const pFullscreen = document.getElementById('pathFullscreenMorph');
-    if (pFullscreen) {
-      const m = createMorph(pFullscreen, Maximize);
-      let isFs = false;
-      morphFullscreen = {
-        set(fsState) {
-          if (isFs === fsState) return;
-          isFs = fsState;
-          m.morphTo(isFs ? Minimize : Maximize, 'snappy');
-        }
-      };
+    if (pFullscreen && Maximize && Minimize) {
+      try {
+        const m = createMorph(pFullscreen, Maximize);
+        let isFs = false;
+        morphFullscreen = {
+          set(fsState) {
+            if (isFs === fsState) return;
+            isFs = fsState;
+            m.morphTo(isFs ? Minimize : Maximize, 'snappy');
+          }
+        };
+      } catch (err) {
+        console.warn('Morphicons Fullscreen failed to init:', err);
+      }
     }
 
-    // D: btnToggleInfo
-    // Info icon path: circle with line/dot -> morphs to X
+    // D: btnToggleInfo (Scene D: CircleHelp <-> CircleAlert)
     const pInfo = document.getElementById('pathInfoMorph');
-    if (pInfo) {
-      const InfoIcon = {
-        d: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 16v-4M12 8h.01'
-      };
-      const m = createMorph(pInfo, InfoIcon);
-      let isOpen = false;
-      morphInfo = {
-        set(openState) {
-          if (isOpen === openState) return;
-          isOpen = openState;
-          m.morphTo(isOpen ? X : InfoIcon, 'snappy');
-        }
-      };
+    if (pInfo && CircleHelp && CircleAlert) {
+      try {
+        const m = createMorph(pInfo, CircleHelp);
+        let isOpen = false;
+        morphInfo = {
+          set(openState) {
+            if (isOpen === openState) return;
+            isOpen = openState;
+            m.morphTo(isOpen ? CircleAlert : CircleHelp, 'snappy');
+          }
+        };
+      } catch (err) {
+        console.warn('Morphicons Info failed to init:', err);
+      }
     }
 
     // E: Language Dropdowns (Languages <-> Globe)
     const pHeaderLang = document.getElementById('pathHeaderLangMorph');
-    if (pHeaderLang) {
-      const m = createMorph(pHeaderLang, Languages);
-      let isOpen = false;
-      morphHeaderLang = {
-        set(openState) {
-          if (isOpen === openState) return;
-          isOpen = openState;
-          m.morphTo(isOpen ? Globe : Languages, 'snappy');
-        }
-      };
+    if (pHeaderLang && Languages && Globe) {
+      try {
+        const m = createMorph(pHeaderLang, Languages);
+        let isOpen = false;
+        morphHeaderLang = {
+          set(openState) {
+            if (isOpen === openState) return;
+            isOpen = openState;
+            m.morphTo(isOpen ? Globe : Languages, 'snappy');
+          }
+        };
+      } catch (err) {
+        console.warn('Morphicons HeaderLang failed to init:', err);
+      }
     }
 
     const pViewerLang = document.getElementById('pathViewerLangMorph');
-    if (pViewerLang) {
-      const m = createMorph(pViewerLang, Languages);
-      let isOpen = false;
-      morphViewerLang = {
-        set(openState) {
-          if (isOpen === openState) return;
-          isOpen = openState;
-          m.morphTo(isOpen ? Globe : Languages, 'snappy');
-        }
-      };
+    if (pViewerLang && Languages && Globe) {
+      try {
+        const m = createMorph(pViewerLang, Languages);
+        let isOpen = false;
+        morphViewerLang = {
+          set(openState) {
+            if (isOpen === openState) return;
+            isOpen = openState;
+            m.morphTo(isOpen ? Globe : Languages, 'snappy');
+          }
+        };
+      } catch (err) {
+        console.warn('Morphicons ViewerLang failed to init:', err);
+      }
     }
 
     // F: btnShareOptLink (Link <-> Check)
     const pShareLink = document.getElementById('pathShareLinkMorph');
-    if (pShareLink) {
-      const m = createMorph(pShareLink, Link);
-      morphShareLink = {
-        triggerSuccess(duration = 1800) {
-          m.morphTo(Check, 'snappy');
-          setTimeout(() => {
-            m.morphTo(Link, 'snappy');
-          }, duration);
+    if (pShareLink && Link && Check) {
+      try {
+        const m = createMorph(pShareLink, Link);
+        morphShareLink = {
+          triggerSuccess(duration = 1800) {
+            m.morphTo(Check, 'snappy');
+            setTimeout(() => {
+              m.morphTo(Link, 'snappy');
+            }, duration);
+          }
+        };
+      } catch (err) {
+        console.warn('Morphicons ShareLink failed to init:', err);
+      }
+    }
+
+    // G: Theme Toggle (Sun <-> Moon)
+    const themePaths = [
+      document.getElementById('pathHeroThemeMorph'),
+      document.getElementById('pathHeaderThemeMorph'),
+      document.getElementById('pathViewerThemeMorph')
+    ].filter(Boolean);
+
+    if (themePaths.length > 0 && Sun && Moon) {
+      try {
+        const isInitialDark = (document.documentElement.getAttribute('data-theme') !== 'light');
+        const initialIcon = isInitialDark ? Sun : Moon;
+        const morphInstances = themePaths.map(p => createMorph(p, initialIcon));
+        let isDark = isInitialDark;
+
+        morphTheme = {
+          set(darkState) {
+            if (isDark === darkState) return;
+            isDark = darkState;
+            const targetIcon = isDark ? Sun : Moon;
+            morphInstances.forEach(m => m.morphTo(targetIcon, 'snappy'));
+          },
+          toggle() {
+            this.set(!isDark);
+          }
+        };
+      } catch (err) {
+        console.warn('Morphicons Theme failed to init:', err);
+      }
+    }
+
+    // H: Footer External Links (Scene G: Paperclip <-> ExternalLink)
+    if (Paperclip && ExternalLink) {
+      try {
+        const extLinks = document.querySelectorAll('.footer-nav-link[target="_blank"]');
+        extLinks.forEach(link => {
+          if (link.dataset.extMorphBound) return;
+          link.dataset.extMorphBound = 'true';
+          const pathEl = link.querySelector('.path-ext-morph');
+          if (!pathEl) return;
+          const m = createMorph(pathEl, Paperclip);
+          let isHovered = false;
+
+          function onEnter() {
+            if (isHovered) return;
+            isHovered = true;
+            m.morphTo(ExternalLink, 'snappy');
+          }
+
+          function onLeave() {
+            if (!isHovered) return;
+            isHovered = false;
+            m.morphTo(Paperclip, 'snappy');
+          }
+
+          link.addEventListener('mouseenter', onEnter);
+          link.addEventListener('mouseleave', onLeave);
+          link.addEventListener('focus', onEnter);
+          link.addEventListener('blur', onLeave);
+        });
+      } catch (err) {
+        console.warn('Morphicons ExtLinks failed to init:', err);
+      }
+    }
+
+    // I: Return Home (Scene F: Home <-> Send on Hover)
+    const pReturnHero = document.getElementById('pathReturnHeroMorph');
+    const btnReturnHero = document.getElementById('btnReturnHero');
+    if (pReturnHero && btnReturnHero && Home && Send) {
+      try {
+        if (!btnReturnHero.dataset.morphBound) {
+          btnReturnHero.dataset.morphBound = 'true';
+          const m = createMorph(pReturnHero, Home);
+          let isHovered = false;
+
+          function onEnter() {
+            if (isHovered) return;
+            isHovered = true;
+            m.morphTo(Send, 'snappy');
+          }
+
+          function onLeave() {
+            if (!isHovered) return;
+            isHovered = false;
+            m.morphTo(Home, 'snappy');
+          }
+
+          btnReturnHero.addEventListener('mouseenter', onEnter);
+          btnReturnHero.addEventListener('mouseleave', onLeave);
+          btnReturnHero.addEventListener('focus', onEnter);
+          btnReturnHero.addEventListener('blur', onLeave);
+
+          morphHome = {
+            toSend() {
+              m.morphTo(Send, 'snappy');
+            },
+            toHome() {
+              m.morphTo(Home, 'snappy');
+            }
+          };
         }
-      };
+      } catch (err) {
+        console.warn('Morphicons Home failed to init:', err);
+      }
+    }
+
+    // J: Category More Cards (Scene C: Folder <-> Image on Hover)
+    if (Folder && Image) {
+      try {
+        const moreCards = document.querySelectorAll('.gallery-more-card');
+        moreCards.forEach(c => bindMoreCardMorph(c, Folder, Image));
+      } catch (err) {
+        console.warn('Morphicons MoreCards failed to init:', err);
+      }
     }
 
     window.AtlasMorphicons = {
@@ -6965,7 +7162,9 @@
       info: morphInfo,
       headerLang: morphHeaderLang,
       viewerLang: morphViewerLang,
-      shareLink: morphShareLink
+      shareLink: morphShareLink,
+      theme: morphTheme,
+      home: morphHome
     };
   }
 

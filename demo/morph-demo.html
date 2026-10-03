@@ -880,6 +880,87 @@
       </div>
     </div>
 
+    <!-- 场景 H: 作品档案收折与右上角退出 · 3 大方案并排实测 (参考场景 B 布局) -->
+    <div class="card" id="cardDrawer" style="grid-column: 1 / -1;">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="card-name">场景 H: 作品档案收折与右上角退出 · 方案并排实测</span>
+          <span class="card-scene">消除双 X 撞车 · 优化右上角双圈嵌套</span>
+        </div>
+        <span class="badge badge-refined">点击下方各按钮对比</span>
+      </div>
+
+      <!-- 3 大候选方案 + 右上角对照并排网格 -->
+      <div class="variant-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 16px 0;">
+        
+        <!-- 方案 1: 抽屉折叠 (ChevronDown ⇄ ChevronUp) -->
+        <div class="variant-box" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #10b981; margin-bottom: 4px;">方案 1: 抽屉折叠 (推荐)</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 14px;">ChevronDown ⇄ ChevronUp · 0.4s</div>
+          <button class="morph-btn" id="btnDrawerMorph" aria-label="方案1: 抽屉折叠" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathDrawerMorph" d="M6 9C8 11 10 13 12 15C14 13 16 11 18 9" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblDrawer" style="font-size: 10px;">展开中 (ChevronDown)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0;">
+            <strong>极佳直觉：</strong>展开态为向下折角（暗示收纳），点击后弹簧 Morph 翻转为向上箭头。彻底摆脱 ✕ 的关闭误解，与全局退出完全解耦。
+          </p>
+        </div>
+
+        <!-- 方案 2: 面板收敛 (Minimize2 ⇄ Maximize) -->
+        <div class="variant-box" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #3b82f6; margin-bottom: 4px;">方案 2: 面板四角收敛</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 14px;">Minimize2 ⇄ Maximize · 0.4s</div>
+          <button class="morph-btn" id="btnDrawerMinMorph" aria-label="方案2: 窗口最小化" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathDrawerMinMorph" d="M14 10C16.3333 7.6667 18.6667 5.3333 21 3M20 10C18 10 16 10 14 10C14 8 14 6 14 4M3 21C5.3333 18.6667 7.6667 16.3333 10 14M4 14C6 14 8 14 10 14C10 16 10 18 10 20" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblDrawerMin" style="font-size: 10px;">展开态 (Minimize2)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0;">
+            <strong>专业工具质感：</strong>四角朝向中心聚拢收缩，符合 GIS、CAD 等图形浮动卡片最小化直觉，视觉科技感强。
+          </p>
+        </div>
+
+        <!-- 方案 3: 汉堡收归 (Menu ⇄ X) -->
+        <div class="variant-box" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #a855f7; margin-bottom: 4px;">方案 3: 汉堡收折形态</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 14px;">Menu ⇄ X · 0.45s</div>
+          <button class="morph-btn" id="btnDrawerMenuMorph" aria-label="方案3: 汉堡收归" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathDrawerMenuMorph" d="M4 5C9.3333 5 14.6667 5 20 5M4 12C9.3333 12 14.6667 12 20 12M4 19C9.3333 19 14.6667 19 20 19" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblDrawerMenu" style="font-size: 10px;">收起态 (Menu)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0;">
+            <strong>抽屉目录隐喻：</strong>收起时是三道横线（Menu 目录），展开后 Morph 为 ✕。通过动画过程传递“这是抽屉展开”，降低歧义。
+          </p>
+        </div>
+
+        <!-- 对照组: 右上角单层微晶 Exit 按钮 (消除双圈嵌套) -->
+        <div class="variant-box" style="display: flex; flex-direction: column; align-items: center; padding: 18px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; text-align: center;">
+          <div style="font-size: 13px; font-weight: 700; color: #ef4444; margin-bottom: 4px;">右上角: 单层微晶退出</div>
+          <div style="font-size: 11px; opacity: 0.7; margin-bottom: 14px;">消除双圈嵌套 · 纯净单圆 X</div>
+          <button class="morph-btn" id="btnSingleRingExit" aria-label="右上角单层微晶退出" style="width: 58px; height: 58px; margin-bottom: 12px;">
+            <svg viewBox="0 0 24 24"><path id="pathExitMorph" d="M18 6C14 10 10 14 6 18M6 6C10 10 14 14 18 18" /></svg>
+          </button>
+          <div class="btn-state-label" style="font-size: 11px; margin-bottom: 8px;">
+            当前状态: <span class="state-pill" id="lblSingleRingExit" style="font-size: 10px;">单层微晶 (Exit)</span>
+          </div>
+          <p style="font-size: 11px; line-height: 1.5; opacity: 0.8; margin: 0;">
+            <strong>消灭双圈嵌套：</strong>剥除内层 button 独立边框，仅保留统一胶囊单层微光圆壳，点击微弹缩放，干脆通透。
+          </p>
+        </div>
+
+      </div>
+
+      <div class="card-footer" style="margin-top: 10px;">
+        <span>实测提示: 分别点击上方 4 个按钮体验不同方案的物理形变效果</span>
+        <span class="card-footer-tip">推荐 方案1 (ChevronDown) + 右上角单圆 ✕ 组合 ↗</span>
+      </div>
+    </div>
+
   </div>
 
   <!-- 拟真 AtlasLog 悬浮底栏 (集成 3D 磁吸视差跟随 + Tooltip 坐标跟随) -->
@@ -919,9 +1000,16 @@
     <div class="tb-divider"></div>
 
     <!-- 场景 D: 帮助信息 -->
-    <button class="tb-btn" id="tbHelp" data-custom-tip="作品档案与帮助 (I)">
+    <button class="tb-btn" id="tbHelp" data-custom-tip="帮助指南 (CircleHelp)">
       <span class="tb-icon-layer">
         <svg viewBox="0 0 24 24"><path id="tbPathHelp" /></svg>
+      </span>
+    </button>
+
+    <!-- 场景 H: 作品档案抽屉开关 -->
+    <button class="tb-btn" id="tbDrawer" data-custom-tip="作品档案收折 (Tab / I)">
+      <span class="tb-icon-layer">
+        <svg viewBox="0 0 24 24"><path id="tbPathDrawer" /></svg>
       </span>
     </button>
 
@@ -962,12 +1050,13 @@
       CircleHelp, CircleAlert,
       Globe, Languages,
       Home, Send,
-      Paperclip, ExternalLink
+      Paperclip, ExternalLink,
+      Minimize2
     } = window.LucideIcons;
 
     let currentPreset = 'snappy';
 
-    // 基础交互状态字典 (场景 A, C, D, E, F, G 及底栏独有)
+    // 基础交互状态字典 (场景 A, C, D, E, F, G, H 及底栏独有)
     const states = {
       reset: { active: false, a: ResetFit, b: ResetZoomed, morphs: [], label: document.getElementById('lblReset'), textA: '全貌展卷 (Fit)', textB: '聚焦缩放 (Zoomed)' },
       folder: { active: false, a: Folder, b: Image, morphs: [], label: document.getElementById('lblFolder'), textA: '日常图册 (Folder)', textB: '晶透画卷 (Image)' },
@@ -977,7 +1066,43 @@
       link: { active: false, a: Paperclip, b: ExternalLink, morphs: [], label: document.getElementById('lblLink'), textA: '内联附件 (Paperclip)', textB: '斜向外跳 (ExternalLink)' },
       theme: { active: false, a: Sun, b: Moon, morphs: [], label: null, textA: '太阳', textB: '月牙' },
       fullscreen: { active: false, a: Maximize, b: Minimize, morphs: [], label: null, textA: '全屏', textB: '还原' },
-      copy: { active: false, a: Link, b: Check, morphs: [], label: null, textA: '直链', textB: '已复制' }
+      copy: { active: false, a: Link, b: Check, morphs: [], label: null, textA: '直链', textB: '已复制' },
+      drawer: { 
+        active: false, 
+        a: ChevronDown, 
+        b: ChevronUp, 
+        morphs: [], 
+        label: document.getElementById('lblDrawer'), 
+        textA: '展开中 (ChevronDown)', 
+        textB: '已收起 (ChevronUp)' 
+      },
+      drawerMin: { 
+        active: false, 
+        a: Minimize2, 
+        b: Maximize, 
+        morphs: [], 
+        label: document.getElementById('lblDrawerMin'), 
+        textA: '展开态 (Minimize2)', 
+        textB: '已最小化 (Maximize)' 
+      },
+      drawerMenu: {
+        active: false,
+        a: Menu,
+        b: X,
+        morphs: [],
+        label: document.getElementById('lblDrawerMenu'),
+        textA: '收起态 (Menu)',
+        textB: '展开态 (X)'
+      },
+      exit: {
+        active: false,
+        a: X,
+        b: Check,
+        morphs: [],
+        label: document.getElementById('lblSingleRingExit'),
+        textA: '单层微晶 (Exit)',
+        textB: '已退出 (Check)'
+      }
     };
 
     function initMorphPair(key, pathElCard, pathElToolbar) {
@@ -1003,6 +1128,10 @@
     initMorphPair('theme', null, document.getElementById('tbPathTheme'));
     initMorphPair('fullscreen', null, document.getElementById('tbPathFullscreen'));
     initMorphPair('copy', null, document.getElementById('tbPathCopy'));
+    initMorphPair('drawer', document.getElementById('pathDrawerMorph'), document.getElementById('tbPathDrawer'));
+    initMorphPair('drawerMin', document.getElementById('pathDrawerMinMorph'), null);
+    initMorphPair('drawerMenu', document.getElementById('pathDrawerMenuMorph'), null);
+    initMorphPair('exit', document.getElementById('pathExitMorph'), null);
 
     function toggleState(key, forceActive = null) {
       const item = states[key];
@@ -1037,6 +1166,29 @@
 
       if (key === 'reset') {
         showToast(item.active ? '视口已聚焦缩放！' : '视口已恢复 1:1 整图展卷全貌！');
+      }
+
+      if (key === 'drawer') {
+        showToast(item.active ? '方案 1: 箭头已翻转为 ChevronUp (已收起)' : '方案 1: 箭头已翻转为 ChevronDown (展开中)');
+      }
+
+      if (key === 'drawerMin') {
+        showToast(item.active ? '方案 2: 卡片已收拢最小化 (Maximize)' : '方案 2: 卡片已还原四角展开 (Minimize2)');
+      }
+
+      if (key === 'drawerMenu') {
+        showToast(item.active ? '方案 3: 菜单平滑变身为 ✕ (展开态)' : '方案 3: ✕ 平滑收折为三道横线 (Menu)');
+      }
+
+      if (key === 'exit' && item.active) {
+        showToast('右上角: 触发单层微晶退出 (Esc) · 纯净单圆无嵌套双圈');
+        setTimeout(() => {
+          if (item.active) {
+            item.active = false;
+            item.morphs.forEach(m => m.morphTo(item.a, currentPreset));
+            if (item.label) item.label.textContent = item.textA;
+          }
+        }, 1200);
       }
     }
 
@@ -1180,6 +1332,18 @@
     document.getElementById('btnFolderMorph').onclick = () => toggleState('folder');
     document.getElementById('btnHomeMorph').onclick = () => toggleState('home');
     document.getElementById('btnLinkMorph').onclick = () => toggleState('link');
+
+    // 场景 H: 作品档案抽屉与退出并排实测绑定
+    const btnDrawer = document.getElementById('btnDrawerMorph');
+    if (btnDrawer) btnDrawer.onclick = () => toggleState('drawer');
+    const tbDr = document.getElementById('tbDrawer');
+    if (tbDr) tbDr.onclick = () => toggleState('drawer');
+    const btnDrMin = document.getElementById('btnDrawerMinMorph');
+    if (btnDrMin) btnDrMin.onclick = () => toggleState('drawerMin');
+    const btnDrMenu = document.getElementById('btnDrawerMenuMorph');
+    if (btnDrMenu) btnDrMenu.onclick = () => toggleState('drawerMenu');
+    const btnExit = document.getElementById('btnSingleRingExit');
+    if (btnExit) btnExit.onclick = () => toggleState('exit');
 
     // Hover 悬停敏感卡片驱动 (场景 C, F, G 及底栏主页)
     function bindHoverMorph(triggerEl, stateKey) {

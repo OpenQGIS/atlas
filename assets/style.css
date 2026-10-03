@@ -6537,11 +6537,10 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
     -webkit-backdrop-filter: blur(12px) saturate(210%) brightness(1.04) !important;
   }
 
-  /* 移动触屏按下反馈：水滴表面张力微挤压弹性恢复，绝不粘滞常亮 */
+  /* 移动端底栏保持基座沉稳静止（避免子按键触发冒泡导致整个工具栏收缩晃动），触控反馈收敛于单个按键 */
   .viewer-float-toolbar:active,
   .viewer-floating-toolbar:active {
-    transform: translateX(-50%) scale(0.96) !important;
-    transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    transform: translateX(-50%) !important;
   }
 
   :root[data-theme="light"] .viewer-float-toolbar,

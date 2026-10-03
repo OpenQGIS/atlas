@@ -6775,7 +6775,7 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   filter: brightness(0.68) contrast(1.08) saturate(1.1);
   opacity: 0;
   transform: scale(1.02);
-  transition: opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1), transform 12s ease;
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 12s ease;
   z-index: 1;
   pointer-events: none;
 }
@@ -6785,6 +6785,10 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   transform: scale(1.04);
 }
 
+.hero-bg.is-fading-out {
+  opacity: 0 !important;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 1, 1) !important;
+}
 
 .hero-scrim {
   position: absolute;
@@ -6798,7 +6802,6 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
 
 /* 首屏平滑主题过渡 */
 .hero-screen,
-.hero-bg,
 .hero-scrim,
 .hero-slogan-svg,
 .hero-slogan-sep-svg,
@@ -6811,14 +6814,9 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
               text-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 浅色模式首屏（方案二：柔光微霜轻覆 Soft Frost Wash） */
+/* 浅色模式首屏保持沉浸夜境质感（昼夜双生 Day/Night Contrast · 严禁修改底图透明度） */
 :root[data-theme="light"] .hero-screen {
-  background-color: #18202c;
-}
-
-:root[data-theme="light"] .hero-bg {
-  filter: brightness(0.85) contrast(1.05) saturate(1.15);
-  opacity: 0.9;
+  background-color: #0b0d10;
 }
 
 :root[data-theme="light"] .hero-scrim {
@@ -7358,6 +7356,40 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media,
   text-overflow: ellipsis;
   white-space: nowrap;
   transition: color 0.3s ease;
+}
+
+.hero-artwork-refresh {
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  margin-left: 3px;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 999px 999px 0;
+  transition: color 0.2s ease, transform 0.35s ease;
+  line-height: 1;
+}
+
+.hero-artwork-refresh:hover {
+  color: #f7e0aa;
+  transform: rotate(60deg);
+}
+
+.hero-artwork-refresh:active {
+  transform: rotate(180deg) scale(0.88);
+}
+
+.hero-artwork-refresh.is-spinning {
+  animation: heroRefreshSpin 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes heroRefreshSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .hero-artwork-tag:hover {

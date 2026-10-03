@@ -502,10 +502,9 @@
   }
 
   /* -------------------------------------------------------------
-     Hero Screen (多级智能匹配 + 双层平滑轮播 + 边界对齐)
+     Hero Screen (多级智能匹配 + 单图层过黑呼吸转场 + 边界对齐)
      ------------------------------------------------------------- */
   let heroTimer = null;
-  let activeHeroLayerIndex = 0; // 0 for A, 1 for B
   let lastHeroItemId = null;
 
   function isHeroExcluded(item) {
@@ -555,8 +554,10 @@
 
   function initHero() {
     const heroScreen = document.getElementById('heroScreen');
+    const heroBg = document.getElementById('heroBg');
     const heroScrollBtn = document.getElementById('heroScrollBtn');
-    if (!heroScreen || !galleryItems || galleryItems.length === 0) return;
+    const btnHeroRefreshBg = document.getElementById('btnHeroRefreshBg');
+    if (!heroScreen || !heroBg || !galleryItems || galleryItems.length === 0) return;
 
     // 跨端精准视口高度测量 (确保动态锁高不低于窗口内部高度)
     function syncHeroViewportHeight() {
@@ -572,9 +573,10 @@
       window.visualViewport.addEventListener('resize', syncHeroViewportHeight);
     }
 
-    const HERO_DWELL_MS = 8000; // 画面完全就绪后的专属驻留欣赏时间：8 秒
+    const HERO_DWELL_MS = 12000; // 画面完全就绪后的专属驻留欣赏时间：12 秒
     let preloadedNextItem = null;
     let preloadImageObj = null;
+    let isHeroTransitioning = false;
 
     function updateArtworkTag(item) {
       const heroArtworkTag = document.getElementById('heroArtworkTag');
@@ -586,7 +588,7 @@
       }
     }
 
-    // 后台静默预加载下一卷 2K 画卷，确保到期切换时 0ms 瞬间无缝呈现
+    // 后台静默预加载下一卷画卷，确保切换时 0ms 瞬间无缝呈现
     function prepareAndPreloadNext() {
       const pool = getEligibleHeroPool();
       if (pool.length === 0) return null;
@@ -602,12 +604,12 @@
       return preloadedNextItem;
     }
 
-    // 安排下一次换图（必须在大图完全加载并展示完成后才开始倒计时 8 秒）
+    // 安排下一次自动换图（静观驻留 12 秒）
     function scheduleNextTransition() {
       stopHeroTimer();
       heroTimer = setTimeout(() => {
-        if (window.scrollY < 80 && !document.hidden) {
-          displayHeroArtwork(preloadedNextItem);
+        if (window.scrollY < 80 && !document.hidden && !document.body.classList.contains('in-gallery')) {
+          transitionToNextHeroArtwork(false);
         }
       }, HERO_DWELL_MS);
     }
@@ -619,25 +621,66 @@
       }
     }
 
-    function displayHeroArtwork(itemToDisplay) {
+    // 过黑转场（Fade-through-black · 0.4s 淡入暗底 -> 换图 -> 0.8s 淡出显影，彻底杜绝双图叠加）
+    function transitionToNextHeroArtwork(isManual = false) {
+      if (isHeroTransitioning) return;
       stopHeroTimer();
+
       const pool = getEligibleHeroPool();
       if (pool.length === 0) return;
 
-      const targetItem = itemToDisplay || pool[Math.floor(Math.random() * pool.length)];
+      let candidates = pool.filter(it => it.id !== (currentHeroItem ? currentHeroItem.id : null));
+      if (candidates.length === 0) candidates = pool;
+      const targetItem = (isManual || !preloadedNextItem)
+        ? candidates[Math.floor(Math.random() * candidates.length)]
+        : preloadedNextItem;
+
+      isHeroTransitioning = true;
+      if (btnHeroRefreshBg) {
+        btnHeroRefreshBg.classList.add('is-spinning');
+      }
+
+      // 阶段 1：0.4s 平滑淡出至暗底
+      heroBg.classList.add('is-fading-out');
+
+      setTimeout(() => {
+        currentHeroItem = targetItem;
+        lastHeroItemId = targetItem.id;
+
+        const highResUrl = `thumbs/hero/${targetItem.id}.webp`;
+        // 赋予新画卷大图（若未缓存则先以缩略图兜底）
+        heroBg.style.backgroundImage = `url("${highResUrl}")`;
+        updateArtworkTag(targetItem);
+
+        // 触发重绘后移除 is-fading-out，启动 0.8s 呼吸淡入亮起
+        void heroBg.offsetHeight;
+        heroBg.classList.remove('is-fading-out');
+        heroBg.classList.add('active');
+
+        // 阶段 2：转场完毕，预载下一张并安排定时
+        setTimeout(() => {
+          isHeroTransitioning = false;
+          if (btnHeroRefreshBg) {
+            btnHeroRefreshBg.classList.remove('is-spinning');
+          }
+          prepareAndPreloadNext();
+          scheduleNextTransition();
+        }, 850);
+      }, 420);
+    }
+
+    // 首屏开屏首帧加载（自适应随机挑选一幅最契合的高清画卷，瞬间秒开）
+    function displayInitialHero() {
+      const pool = getEligibleHeroPool();
+      if (pool.length === 0) return;
+
+      const targetItem = pool[Math.floor(Math.random() * pool.length)];
       currentHeroItem = targetItem;
       lastHeroItemId = targetItem.id;
 
-      const layerA = document.getElementById('heroBgA') || document.getElementById('heroBg');
-      const layerB = document.getElementById('heroBgB');
-
-      const incoming = (activeHeroLayerIndex === 0 && layerB) ? layerB : layerA;
-      const outgoing = (incoming === layerB) ? layerA : layerB;
-
-      if (!incoming) return;
-
       // 0ms 瞬间挂上低清缩略图作底图，绝无黑屏等待
-      incoming.style.backgroundImage = `url("${targetItem.thumb}")`;
+      heroBg.style.backgroundImage = `url("${targetItem.thumb}")`;
+      updateArtworkTag(targetItem);
 
       const highResUrl = `thumbs/hero/${targetItem.id}.webp`;
       const highResImg = new Image();
@@ -646,37 +689,30 @@
       const onImageReady = () => {
         if (hasCompleted) return;
         hasCompleted = true;
-
-        // 大图加载就绪：上屏锐化并触发 1.4s 电影级淡入淡出
-        incoming.style.backgroundImage = `url("${highResUrl}")`;
-        incoming.classList.add('active');
-        if (outgoing) {
-          outgoing.classList.remove('active');
-        }
-
-        activeHeroLayerIndex = (incoming === layerB) ? 1 : 0;
-        updateArtworkTag(targetItem);
-
-        // 【关键逻辑】：大图完全加载呈现后，立即后台预加载下一张，并启动满额 8 秒停留倒计时
+        heroBg.style.backgroundImage = `url("${highResUrl}")`;
+        heroBg.classList.add('active');
         prepareAndPreloadNext();
         scheduleNextTransition();
       };
 
       highResImg.onload = onImageReady;
-      highResImg.onerror = () => {
-        // 容错降级：大图网络异常时，以缩略图继续展示并正常计时
-        onImageReady();
-      };
+      highResImg.onerror = onImageReady;
       highResImg.src = highResUrl;
-
-      // 命中浏览器内存/磁盘缓存时秒开
       if (highResImg.complete) {
         onImageReady();
       }
     }
 
-    // 首帧加载展示
-    displayHeroArtwork();
+    displayInitialHero();
+
+    // 绑定左下角胶囊内嵌【换一卷】按钮
+    if (btnHeroRefreshBg) {
+      btnHeroRefreshBg.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        transitionToNextHeroArtwork(true);
+      });
+    }
 
     // 页面不可见或向下滚动离开首屏时暂停倒计时以节省设备能耗
     document.addEventListener('visibilitychange', () => {

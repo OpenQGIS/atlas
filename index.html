@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>地图录 OpenQGIS制图作品集</title>
-  <link rel="stylesheet" href="assets/style.css?v=20261003_v73">
+  <link rel="stylesheet" href="assets/style.css?v=20261003_v74">
   <script src="assets/config.js?v=20260930_v57"></script>
   <script src="assets/i18n.js?v=20261003_v63"></script>
   <script src="data/themes.js?v=20260930_v57"></script>
@@ -23,8 +23,7 @@
 <body data-page="atlas">
   <!-- Fullscreen Opening Screen (开屏全景与Slogan) -->
   <section class="hero-screen" id="heroScreen">
-    <div class="hero-bg hero-bg-a active" id="heroBgA"></div>
-    <div class="hero-bg hero-bg-b" id="heroBgB"></div>
+    <div class="hero-bg active" id="heroBg"></div>
     <div class="hero-scrim"></div>
     
 
@@ -99,6 +98,11 @@
         </svg>
       </span>
       <span class="hero-artwork-name" id="heroArtworkName"></span>
+      <button class="hero-artwork-refresh" id="btnHeroRefreshBg" title="换一卷背景画卷" aria-label="换一卷背景画卷">
+        <svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:11px;height:11px;">
+          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Scroll Down Prompt Button (点击或鼠标滚动直达第二屏瀑布流) -->
@@ -734,6 +738,6 @@
         </div>
       </div>
     </div>
-  <script src="assets/app.js?v=20261003_v73"></script>
+  <script src="assets/app.js?v=20261003_v74"></script>
 </body>
 </html>

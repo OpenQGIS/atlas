@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark" data-effect="blur-focus">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Hero 画卷图片切换动效实验场 · AtlasLog Demo</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* =====================================================================
+       Hero 图片切换转场特效实验专属样式
+       ==================================================================== */
+    :root {
+      --hero-trans-dur: 1.4s;
+      --hero-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* 修复浅色模式下 opacity 被强制锁死 0.9 导致动画失效的 Bug */
+    :root[data-theme="light"] .hero-bg {
+      filter: brightness(0.85) contrast(1.05) saturate(1.15) !important;
+      opacity: 0 !important;
+    }
+    :root[data-theme="light"] .hero-bg.active {
+      opacity: 0.95 !important;
+    }
+
+    /* -------------------------------------------------------------
+       效果 1：基线对照 (Baseline - 纯淡入 + 极微缩放 · 0黑场)
+       ------------------------------------------------------------- */
+    html[data-effect="baseline"] .hero-bg {
+      opacity: 0;
+      transform: scale(1.02);
+      transition: opacity var(--hero-trans-dur) cubic-bezier(0.25, 1, 0.5, 1),
+                  transform 12s ease;
+      filter: brightness(0.68) contrast(1.08) saturate(1.1);
+      z-index: 1;
+    }
+    html[data-effect="baseline"] .hero-bg.active {
+      opacity: 1;
+      transform: scale(1.04);
+      z-index: 2;
+    }
+    /* 出场图平稳垫底，直至新图完全覆盖，彻底消灭黑场空窗 */
+    html[data-effect="baseline"] .hero-bg.leaving {
+      opacity: 1 !important;
+      z-index: 1 !important;
+    }
+
+    /* -------------------------------------------------------------
+       效果 2：镜头景深雾化对焦 (Cinematic Defocus-to-Focus · 0黑场)
+       ------------------------------------------------------------- */
+    html[data-effect="blur-focus"] .hero-bg {
+      opacity: 0;
+      transform: scale(1.06);
+      filter: blur(18px) brightness(0.72) contrast(1.1) saturate(1.15);
+      transition: opacity var(--hero-trans-dur) var(--hero-ease),
+                  filter var(--hero-trans-dur) var(--hero-ease),
+                  transform 12s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1;
+      will-change: opacity, filter, transform;
+    }
+    html[data-effect="blur-focus"] .hero-bg.active {
+      opacity: 1;
+      transform: scale(1.02);
+      filter: blur(0px) brightness(0.68) contrast(1.08) saturate(1.1);
+      z-index: 2;
+    }
+    /* 旧图垫底稳定，绝不下坠至黑底，新图对焦直接浮现于旧图之上 */
+    html[data-effect="blur-focus"] .hero-bg.leaving {
+      opacity: 1 !important;
+      transform: scale(1.01);
+      filter: blur(0px) brightness(0.68) contrast(1.08) saturate(1.1) !important;
+      z-index: 1 !important;
+      transition: none !important;
+    }
+
+    /* -------------------------------------------------------------
+       效果 3：画卷徐展·羽化揭幕 (Scroll Unfurl / Soft Edge Wipe · 0黑场)
+       ------------------------------------------------------------- */
+    :root {
+      --scroll-wipe-dur: 1.15s;
+      --scroll-wipe-ease: cubic-bezier(0.32, 0.72, 0.3, 1.0);
+    }
+    html[data-wipe-rhythm="golden"] {
+      --scroll-wipe-dur: 1.15s;
+      --scroll-wipe-ease: cubic-bezier(0.32, 0.72, 0.3, 1.0);
+    }
+    html[data-wipe-rhythm="brisk"] {
+      --scroll-wipe-dur: 0.9s;
+      --scroll-wipe-ease: cubic-bezier(0.25, 0.1, 0.25, 1.0);
+    }
+    html[data-wipe-rhythm="grand"] {
+      --scroll-wipe-dur: 1.45s;
+      --scroll-wipe-ease: cubic-bezier(0.35, 0.15, 0.25, 1.0);
+    }
+
+    html[data-effect="scroll-wipe"] .hero-bg {
+      opacity: 1;
+      z-index: 1;
+      transform: translateX(-1%) scale(1.025);
+      clip-path: inset(0 100% 0 0 round 0);
+      filter: brightness(0.68) contrast(1.08) saturate(1.1);
+      transition: clip-path var(--scroll-wipe-dur) var(--scroll-wipe-ease),
+                  transform var(--scroll-wipe-dur) var(--scroll-wipe-ease);
+      will-change: clip-path, transform;
+    }
+    html[data-effect="scroll-wipe"] .hero-bg.active {
+      opacity: 1;
+      z-index: 3;
+      transform: translateX(0) scale(1.02);
+      clip-path: inset(0 0 0 0 round 0);
+    }
+    html[data-effect="scroll-wipe"] .hero-bg.leaving {
+      opacity: 1 !important;
+      z-index: 1 !important;
+      transform: scale(1.01);
+      clip-path: inset(0 0 0 0) !important;
+      transition: none !important;
+    }
+
+    /* 卷轴边缘装裱微光线 */
+    .scroll-seam-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, 
+        transparent 0%, 
+        rgba(230, 195, 125, 0.85) 25%, 
+        rgba(255, 255, 255, 0.95) 50%, 
+        rgba(230, 195, 125, 0.85) 75%, 
+        transparent 100%
+      );
+      box-shadow: 0 0 18px 3px rgba(230, 195, 125, 0.55), 0 0 4px rgba(255, 255, 255, 0.9);
+      pointer-events: none;
+      z-index: 4;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    html[data-effect="scroll-wipe"] .scroll-seam-line.animating {
+      opacity: 1;
+      animation: seamSweep var(--scroll-wipe-dur) var(--scroll-wipe-ease) forwards;
+    }
+    @keyframes seamSweep {
+      0% { left: 0%; opacity: 0; }
+      4% { opacity: 1; }
+      85% { opacity: 1; }
+      96% { opacity: 0.35; }
+      100% { left: 100%; opacity: 0; }
+    }
+
+    /* -------------------------------------------------------------
+       效果 4：动态大地巡礼航行 (Directional Ken Burns · 遥感飞阅)
+       ------------------------------------------------------------- */
+    html[data-effect="ken-burns"] .hero-bg {
+      opacity: 0;
+      filter: brightness(0.68) contrast(1.08) saturate(1.1);
+      transition: opacity var(--hero-trans-dur) var(--hero-ease);
+      z-index: 1;
+    }
+    html[data-effect="ken-burns"] .hero-bg.active {
+      opacity: 1;
+      z-index: 2;
+    }
+    /* 四种随机航行位移姿态 */
+    html[data-effect="ken-burns"] .hero-bg.flight-nw {
+      animation: flightNW 14s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    html[data-effect="ken-burns"] .hero-bg.flight-se {
+      animation: flightSE 14s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    html[data-effect="ken-burns"] .hero-bg.flight-zoom-in {
+      animation: flightZoomIn 14s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    html[data-effect="ken-burns"] .hero-bg.flight-pan-x {
+      animation: flightPanX 14s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes flightNW {
+      0% { transform: scale(1.10) translate(2%, 2%); }
+      100% { transform: scale(1.02) translate(-1%, -1%); }
+    }
+    @keyframes flightSE {
+      0% { transform: scale(1.03) translate(-1%, -1%); }
+      100% { transform: scale(1.11) translate(2%, 2%); }
+    }
+    @keyframes flightZoomIn {
+      0% { transform: scale(1.14) translateY(1.5%); }
+      100% { transform: scale(1.03) translateY(0); }
+    }
+    @keyframes flightPanX {
+      0% { transform: scale(1.06) translateX(-2.5%); }
+      100% { transform: scale(1.04) translateX(2%); }
+    }
+
+    /* -------------------------------------------------------------
+       效果 5：晨曦微光扫掠 (Dawn Specular Shimmer · 微晶拂晓)
+       ------------------------------------------------------------- */
+    html[data-effect="shimmer"] .hero-bg {
+      opacity: 0;
+      transform: scale(1.04);
+      filter: brightness(0.68) contrast(1.08) saturate(1.1);
+      transition: opacity var(--hero-trans-dur) var(--hero-ease),
+                  transform 10s ease;
+      z-index: 1;
+    }
+    html[data-effect="shimmer"] .hero-bg.active {
+      opacity: 1;
+      transform: scale(1.02);
+      z-index: 2;
+    }
+    .hero-shimmer-sweep {
+      position: absolute;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        125deg,
+        transparent 35%,
+        rgba(230, 195, 125, 0.08) 42%,
+        rgba(255, 255, 255, 0.22) 50%,
+        rgba(230, 195, 125, 0.12) 56%,
+        transparent 65%
+      );
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0;
+      mix-blend-mode: screen;
+    }
+    .hero-shimmer-sweep.animating {
+      animation: sweepPass var(--hero-trans-dur) cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+    @keyframes sweepPass {
+      0% { transform: translate(-35%, -35%) rotate(0deg); opacity: 0; }
+      20% { opacity: 0.9; }
+      80% { opacity: 0.9; }
+      100% { transform: translate(35%, 35%) rotate(0deg); opacity: 0; }
+    }
+
+    /* -------------------------------------------------------------
+       效果 6：现代杂志视差横滑 (Editorial Parallax Slide)
+       ------------------------------------------------------------- */
+    html[data-effect="editorial-slide"] .hero-bg {
+      opacity: 0;
+      transform: translateX(45px) scale(1.04);
+      filter: brightness(0.68) contrast(1.08) saturate(1.1);
+      transition: opacity var(--hero-trans-dur) var(--hero-ease),
+                  transform var(--hero-trans-dur) var(--hero-ease);
+      z-index: 1;
+    }
+    html[data-effect="editorial-slide"] .hero-bg.active {
+      opacity: 1;
+      transform: translateX(0) scale(1.02);
+      z-index: 2;
+    }
+    html[data-effect="editorial-slide"] .hero-bg.leaving {
+      opacity: 0;
+      transform: translateX(-35px) scale(0.98);
+      z-index: 1;
+    }
+
+    /* =====================================================================
+       Demo 专属：顶级微晶玻璃悬浮控制器 (Demo Floating Dock)
+       ==================================================================== */
+    .effects-dock-wrapper {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      width: calc(100% - 32px);
+      max-width: 980px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      user-select: none;
+      pointer-events: none;
+    }
+    .effects-dock {
+      pointer-events: auto;
+      background: rgba(15, 20, 28, 0.78);
+      backdrop-filter: blur(24px) saturate(220%) contrast(105%);
+      -webkit-backdrop-filter: blur(24px) saturate(220%) contrast(105%);
+      border: 1.5px solid rgba(255, 255, 255, 0.16);
+      border-top: 1.8px solid rgba(255, 255, 255, 0.45);
+      border-radius: 20px;
+      padding: 10px 16px;
+      box-shadow: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.25),
+        0 20px 48px rgba(0, 0, 0, 0.65),
+        0 0 1px rgba(255, 255, 255, 0.3);
+      color: #fff;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+    :root[data-theme="light"] .effects-dock {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.8);
+      border-top: 1.8px solid #ffffff;
+      color: #0f172a;
+      box-shadow: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.95),
+        0 20px 48px rgba(15, 23, 42, 0.18),
+        0 0 1px rgba(0, 0, 0, 0.15);
+    }
+
+    .dock-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .dock-label {
+      font-size: 0.74rem;
+      font-family: var(--font-mono, monospace);
+      letter-spacing: 0.05em;
+      opacity: 0.65;
+      margin-right: 4px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .dock-pill-group {
+      display: flex;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 99px;
+      padding: 3px;
+      gap: 3px;
+    }
+    :root[data-theme="light"] .dock-pill-group {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .dock-btn {
+      background: transparent;
+      border: none;
+      color: inherit;
+      padding: 5px 12px;
+      border-radius: 99px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+    .dock-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    :root[data-theme="light"] .dock-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .dock-btn.active {
+      background: #e6c37d;
+      color: #1c1409;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(230, 195, 125, 0.4);
+    }
+    .dock-btn.badge-rec::after {
+      content: '荐';
+      display: inline-block;
+      font-size: 0.62rem;
+      padding: 1px 4px;
+      background: rgba(230, 195, 125, 0.25);
+      color: #e6c37d;
+      border-radius: 4px;
+      margin-left: 2px;
+      font-weight: bold;
+    }
+    .dock-btn.active.badge-rec::after {
+      background: rgba(28, 20, 9, 0.2);
+      color: #1c1409;
+    }
+
+    .dock-btn-action {
+      background: rgba(230, 195, 125, 0.18);
+      border: 1px solid rgba(230, 195, 125, 0.45);
+      color: #f7e0aa;
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dock-btn-action:hover {
+      background: #e6c37d;
+      color: #1a1308;
+      box-shadow: 0 4px 14px rgba(230, 195, 125, 0.45);
+      transform: translateY(-1px);
+    }
+    .dock-btn-action:active {
+      transform: translateY(0);
+    }
+    :root[data-theme="light"] .dock-btn-action {
+      background: rgba(184, 134, 45, 0.12);
+      border-color: rgba(184, 134, 45, 0.4);
+      color: #8c6018;
+    }
+    :root[data-theme="light"] .dock-btn-action:hover {
+      background: #c89d47;
+      color: #ffffff;
+    }
+
+    .dock-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      margin: 0 2px;
+    }
+    :root[data-theme="light"] .dock-divider {
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    /* 动效说明浮动条 */
+    .effect-explain-bar {
+      pointer-events: auto;
+      background: rgba(12, 16, 23, 0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 6px 14px;
+      font-size: 0.76rem;
+      color: rgba(255, 255, 255, 0.78);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 100%;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    :root[data-theme="light"] .effect-explain-bar {
+      background: rgba(255, 255, 255, 0.78);
+      border-color: rgba(0, 0, 0, 0.08);
+      color: #334155;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+    .explain-tag {
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(230, 195, 125, 0.18);
+      color: #f7e0aa;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    :root[data-theme="light"] .explain-tag {
+      background: rgba(184, 134, 45, 0.15);
+      color: #8c6018;
+    }
+
+    /* 画签微动进场效果联动 */
+    .hero-artwork-tag.tag-entering {
+      animation: tagSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes tagSlideIn {
+      0% { transform: translateY(12px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    /* 右上角切图倒计时圆环 */
+    .timer-ring-wrap {
+      width: 18px;
+      height: 18px;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .timer-ring-svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+    .timer-ring-circle {
+      stroke: #e6c37d;
+      stroke-dasharray: 44;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.1s linear;
+    }
+  </style>
+</head>
+<body data-page="atlas-demo">
+  <!-- Fullscreen Opening Screen (开屏全景与Slogan) -->
+  <section class="hero-screen" id="heroScreen">
+    <div class="hero-bg hero-bg-a active" id="heroBgA"></div>
+    <div class="hero-bg hero-bg-b" id="heroBgB"></div>
+    <div class="scroll-seam-line" id="scrollSeamLine"></div>
+    <div class="hero-shimmer-sweep" id="heroShimmerSweep"></div>
+    <div class="hero-scrim"></div>
+
+    <!-- 首屏顶部胶囊 -->
+    <div class="hero-top-actions" id="heroTopActions">
+      <div class="header-actions-capsule hero-actions-capsule" style="background: rgba(16,22,32,0.65); border: 1px solid rgba(255,255,255,0.18);">
+        <!-- 倒计时指示器 -->
+        <div class="timer-ring-wrap" title="下一幅画卷倒计时">
+          <svg class="timer-ring-svg" viewBox="0 0 18 18">
+            <circle cx="9" cy="9" r="7" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.8"></circle>
+            <circle class="timer-ring-circle" id="timerRingCircle" cx="9" cy="9" r="7" fill="none" stroke-width="1.8" stroke-linecap="round"></circle>
+          </svg>
+        </div>
+        <div class="capsule-divider"></div>
+        <span style="font-size:0.75rem; color:#f7e0aa; font-family:var(--font-mono); font-weight:600;" id="heroCounter">01 / 28</span>
+        <div class="capsule-divider"></div>
+        <!-- 模式切换按键 -->
+        <button class="capsule-btn icon-btn theme-toggle-btn hero-theme-btn" id="btnHeroToggleTheme" title="切换深浅主题" aria-label="切换深浅主题">
+          <svg class="icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 首屏中央标题区域 -->
+    <div class="hero-content">
+      <div class="hero-brand-capsule" id="heroBrandCapsule">
+        <span style="font-size:0.72rem; letter-spacing:0.18em; text-transform:uppercase; font-weight:600; color:#f7e0aa;">OPENQGIS ATLASLOG · TRANSITION LAB</span>
+      </div>
+      <h1 class="hero-title hero-title-svg-wrap" id="heroTitle">
+        <span class="hero-title-chunk" style="font-size: 2.2rem; font-weight: 700; letter-spacing: 0.1em; color: #fff; text-shadow: 0 4px 20px rgba(0,0,0,0.85);">一图一境 · 静观其详</span>
+      </h1>
+      <p class="hero-subtitle" id="heroSubtitle"><span class="hero-sub-chunk">地图录</span><span class="hero-sub-sep"> · </span><span class="hero-sub-chunk">首屏转场动效深度测试</span></p>
+      <div class="hero-desc">在此实验室中对比 6 种不同维度的画卷切换特效与参数</div>
+    </div>
+
+    <!-- Active Artwork Label (左下角画签) -->
+    <div class="hero-artwork-tag" id="heroArtworkTag" style="display: inline-flex; left: 32px; bottom: 120px;">
+      <span class="hero-artwork-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:100%;height:100%;">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+      </span>
+      <span class="hero-artwork-prefix" style="font-size:0.68rem; opacity:0.65; margin-right:4px;">正在展出:</span>
+      <span class="hero-artwork-name" id="heroArtworkName" style="color:#f7e0aa; font-weight:600;">SHANGHAI-暗夜肌理</span>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       控制悬浮面板 (Bottom Floating Controller)
+       ==================================================================== -->
+  <div class="effects-dock-wrapper">
+    <!-- 动效特性原理解析小条 -->
+    <div class="effect-explain-bar" id="effectExplainBar">
+      <span class="explain-tag" id="explainTag">镜头景深雾化对焦</span>
+      <span id="explainText">新图伴随 24px 大光圈失焦与 107% 初始放大，随 1.4s 电影级曲线迅速锐化收拢至清晰画面，如航拍摄像机晨雾开镜。</span>
+    </div>
+
+    <!-- 主控面板 -->
+    <div class="effects-dock">
+      <!-- 转场动效选择 -->
+      <div class="dock-row">
+        <span class="dock-label">✨ 转场模式:</span>
+        <div class="dock-pill-group">
+          <button class="dock-btn" data-effect="baseline" title="基准对照（原版透明度淡入+2%微推镜）">01 基准淡入</button>
+          <button class="dock-btn active badge-rec" data-effect="blur-focus" title="镜头景深雾化对焦（单反大光圈由虚变实开镜，电影感极佳）">02 景深对焦</button>
+          <button class="dock-btn badge-rec" data-effect="scroll-wipe" title="画卷徐展横向羽化擦除（东方长卷缓缓揭幕，伴随金色微光）">03 画卷徐展</button>
+          <button class="dock-btn" data-effect="ken-burns" title="大地遥感多向航行（随机西北/东南/俯冲四向大动态飞阅巡礼）">04 遥感飞阅</button>
+          <button class="dock-btn" data-effect="shimmer" title="晨曦微晶拂晓掠影（斜向晨光掠过画幅，琉璃质感）">05 晨曦掠影</button>
+          <button class="dock-btn" data-effect="editorial-slide" title="极简杂志视差横滑（新图自右侧轻微层叠滑入）">06 视差横滑</button>
+        </div>
+      </div>
+
+      <!-- 快速触发与辅助调节 -->
+      <div class="dock-row">
+        <!-- 换一卷触发按钮 -->
+        <button class="dock-btn-action" id="btnNextMap" title="立即触发下一张画卷转场">
+          <svg style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          立即换一卷 (Next)
+        </button>
+
+        <div class="dock-divider"></div>
+
+        <!-- 动画时长调节 -->
+        <span class="dock-label">⏱ 速度:</span>
+        <div class="dock-pill-group">
+          <button class="dock-btn" data-speed="0.8s">快速 0.8s</button>
+          <button class="dock-btn active" data-speed="1.4s">标准 1.4s</button>
+          <button class="dock-btn" data-speed="2.2s">沉浸 2.2s</button>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- 自动轮播开关 -->
+        <span class="dock-label">🔄 轮播:</span>
+        <div class="dock-pill-group">
+          <button class="dock-btn active" id="btnToggleAuto">开启 (5s)</button>
+          <button class="dock-btn" id="btnTogglePause">暂停</button>
+        </div>
+
+        <div class="dock-divider"></div>
+
+        <!-- 主题切换 -->
+        <button class="dock-btn" id="btnDockTheme" title="切换深色/浅色测试兼容性">🌓 主题</button>
+        <a href="../index.html" class="dock-btn" style="text-decoration:none;" title="返回正式作品集">🏛 返回首页</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/config.js"></script>
+  <script src="../assets/i18n.js"></script>
+  <script src="../data/manifest.js"></script>
+
+  <script>
+    // 效果说明字典
+    const EFFECT_EXPLAINS = {
+      'baseline': {
+        tag: '01 基线淡入 (Baseline)',
+        desc: '当前正式线上效果：纯透明度 1.4s 交叉淡入 + 居中极微弱缩放 (1.02 -> 1.04)，平实克制。（已修复浅色模式失效问题）'
+      },
+      'blur-focus': {
+        tag: '02 镜头景深对焦 (Defocus-to-Focus · 强烈推荐)',
+        desc: '新图伴随 24px 大光圈景深失焦与 107% 初始微放大，随 1.4s 电影级曲线迅速锐化收拢至清晰画面，如航拍摄像机晨雾开镜。'
+      },
+      'scroll-wipe': {
+        tag: '03 画卷徐展·水墨揭幕 (Scroll Unfurl · 推荐)',
+        desc: '利用现代 CSS 柔和裁切，模拟东方地图羊皮纸长卷自左向右徐徐展卷揭幕，右缘附带一抹微晶暖金光缕，极具开卷仪式感。'
+      },
+      'ken-burns': {
+        tag: '04 大地遥感多向航行 (Directional Flight)',
+        desc: '告别呆板的居中微缩放，每次切图自动轮换四种航向（西北航行、东南俯冲、大纵深拉近），带来遥感测绘巡航大地的动态视野。'
+      },
+      'shimmer': {
+        tag: '05 晨曦微晶拂晓掠影 (Dawn Shimmer)',
+        desc: '新画卷淡入的同时，一道 125° 晨曦日光以微晶斜角掠过整幅地图，模拟晨光破晓照亮地貌的清晨光影。'
+      },
+      'editorial-slide': {
+        tag: '06 极简杂志视差横滑 (Parallax Slide)',
+        desc: '新画卷自右侧轻微位移 45px 错峰滑入，旧画卷反向微移，呈现高档建筑画册或艺术展刊的翻页视差。'
+      }
+    };
+
+    // 筛选所有参与 Hero 轮播的作品
+    const heroPool = (window.ATLAS_MANIFEST || []).filter(item => item.hero);
+    let currentIndex = 0;
+    let activeLayerIndex = 0;
+    let autoPlayTimer = null;
+    let autoIntervalMs = 5000;
+    let isAutoPlaying = true;
+    let timerTickInterval = null;
+    let remainingTimeMs = autoIntervalMs;
+    const TICK_STEP = 100;
+
+    const layerA = document.getElementById('heroBgA');
+    const layerB = document.getElementById('heroBgB');
+    const seamLine = document.getElementById('scrollSeamLine');
+    const shimmerSweep = document.getElementById('heroShimmerSweep');
+    const artworkName = document.getElementById('heroArtworkName');
+    const artworkTag = document.getElementById('heroArtworkTag');
+    const heroCounter = document.getElementById('heroCounter');
+    const timerRingCircle = document.getElementById('timerRingCircle');
+    const explainTag = document.getElementById('explainTag');
+    const explainText = document.getElementById('explainText');
+
+    const FLIGHT_CLASSES = ['flight-nw', 'flight-se', 'flight-zoom-in', 'flight-pan-x'];
+    let flightIndex = 0;
+
+    // 初始化第一张图
+    function initFirstMap() {
+      if (heroPool.length === 0) return;
+      const first = heroPool[0];
+      layerA.style.backgroundImage = `url("../thumbs/hero/${first.id}.webp")`;
+      layerA.classList.add('active');
+      artworkName.textContent = first.title;
+      heroCounter.textContent = `01 / ${heroPool.length < 10 ? '0' + heroPool.length : heroPool.length}`;
+      startTimerProgress();
+    }
+
+    // 执行切图转场动画核心逻辑
+    function transitionToNextMap() {
+      if (heroPool.length === 0) return;
+
+      currentIndex = (currentIndex + 1) % heroPool.length;
+      const nextItem = heroPool[currentIndex];
+
+      const incoming = (activeLayerIndex === 0) ? layerB : layerA;
+      const outgoing = (incoming === layerB) ? layerA : layerB;
+      const currentEffect = document.documentElement.getAttribute('data-effect') || 'blur-focus';
+
+      // 准备进入层
+      incoming.className = 'hero-bg';
+      outgoing.className = 'hero-bg active leaving';
+
+      // 预先解码大图，确保图片就绪瞬间再触发动画，杜绝因图片解码延迟造成的空白/黑屏
+      const imgUrl = `../thumbs/hero/${nextItem.id}.webp`;
+      const preImg = new Image();
+      let hasTriggered = false;
+
+      const triggerTransition = () => {
+        if (hasTriggered) return;
+        hasTriggered = true;
+
+        incoming.style.backgroundImage = `url("${imgUrl}")`;
+
+        // 针对遥感航行模式分配航向动画
+        if (currentEffect === 'ken-burns') {
+          const flightClass = FLIGHT_CLASSES[flightIndex % FLIGHT_CLASSES.length];
+          flightIndex++;
+          incoming.classList.add(flightClass);
+        }
+
+        // 针对画卷徐展触发边缘光线
+        if (currentEffect === 'scroll-wipe' && seamLine) {
+          seamLine.classList.remove('animating');
+          void seamLine.offsetWidth; // 触发 reflow 重置动画
+          seamLine.classList.add('animating');
+        }
+
+        // 针对晨曦掠影触发流光
+        if (currentEffect === 'shimmer' && shimmerSweep) {
+          shimmerSweep.classList.remove('animating');
+          void shimmerSweep.offsetWidth;
+          shimmerSweep.classList.add('animating');
+        }
+
+        // 触发入场
+        requestAnimationFrame(() => {
+          incoming.classList.add('active');
+        });
+
+        // 切换当前激活图层指针
+        activeLayerIndex = (incoming === layerB) ? 1 : 0;
+
+        // 更新画签文字与弹性微动
+        artworkName.textContent = nextItem.title;
+        artworkTag.classList.remove('tag-entering');
+        void artworkTag.offsetWidth;
+        artworkTag.classList.add('tag-entering');
+
+        // 更新计数器
+        const numStr = (currentIndex + 1) < 10 ? `0${currentIndex + 1}` : `${currentIndex + 1}`;
+        heroCounter.textContent = `${numStr} / ${heroPool.length < 10 ? '0' + heroPool.length : heroPool.length}`;
+
+        // 动画结束后清理旧图层的 leaving 类
+        const durSeconds = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-trans-dur')) || 1.4;
+        setTimeout(() => {
+          outgoing.classList.remove('active', 'leaving', 'flight-nw', 'flight-se', 'flight-zoom-in', 'flight-pan-x');
+        }, durSeconds * 1000 + 100);
+
+        // 重置轮播进度条
+        resetTimerProgress();
+      };
+
+      preImg.onload = triggerTransition;
+      preImg.onerror = triggerTransition;
+      preImg.src = imgUrl;
+      if (preImg.complete) {
+        triggerTransition();
+      }
+      heroCounter.textContent = `${numStr} / ${heroPool.length < 10 ? '0' + heroPool.length : heroPool.length}`;
+
+      // 动画结束后清理旧图层的 leaving 类
+      const durSeconds = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-trans-dur')) || 1.4;
+      setTimeout(() => {
+        outgoing.classList.remove('active', 'leaving', 'flight-nw', 'flight-se', 'flight-zoom-in', 'flight-pan-x');
+      }, durSeconds * 1000 + 100);
+
+      // 重置轮播进度条
+      resetTimerProgress();
+    }
+
+    // 倒计时圆环与进度控制
+    function startTimerProgress() {
+      if (!isAutoPlaying) return;
+      remainingTimeMs = autoIntervalMs;
+      clearInterval(timerTickInterval);
+
+      timerTickInterval = setInterval(() => {
+        if (!isAutoPlaying) return;
+        remainingTimeMs -= TICK_STEP;
+        const progress = Math.max(0, remainingTimeMs / autoIntervalMs);
+        const dashoffset = 44 * (1 - progress);
+        if (timerRingCircle) {
+          timerRingCircle.style.strokeDashoffset = dashoffset;
+        }
+
+        if (remainingTimeMs <= 0) {
+          transitionToNextMap();
+        }
+      }, TICK_STEP);
+    }
+
+    function resetTimerProgress() {
+      remainingTimeMs = autoIntervalMs;
+      if (timerRingCircle) {
+        timerRingCircle.style.strokeDashoffset = 0;
+      }
+    }
+
+    function stopTimerProgress() {
+      clearInterval(timerTickInterval);
+      if (timerRingCircle) {
+        timerRingCircle.style.strokeDashoffset = 44;
+      }
+    }
+
+    // 事件绑定：切换转场模式
+    document.querySelectorAll('[data-effect]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-effect]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const effect = btn.getAttribute('data-effect');
+        document.documentElement.setAttribute('data-effect', effect);
+
+        // 更新说明文本
+        if (EFFECT_EXPLAINS[effect]) {
+          explainTag.textContent = EFFECT_EXPLAINS[effect].tag;
+          explainText.textContent = EFFECT_EXPLAINS[effect].desc;
+        }
+
+        // 立即触发一次切图让用户直观感受该模式
+        transitionToNextMap();
+      });
+    });
+
+    // 事件绑定：调节转场过渡时长
+    document.querySelectorAll('[data-speed]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-speed]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const speed = btn.getAttribute('data-speed');
+        document.documentElement.style.setProperty('--hero-trans-dur', speed);
+      });
+    });
+
+    // 事件绑定：立即换图按钮
+    document.getElementById('btnNextMap').addEventListener('click', () => {
+      transitionToNextMap();
+    });
+
+    // 事件绑定：自动轮播控制
+    const btnToggleAuto = document.getElementById('btnToggleAuto');
+    const btnTogglePause = document.getElementById('btnTogglePause');
+
+    btnToggleAuto.addEventListener('click', () => {
+      isAutoPlaying = true;
+      btnToggleAuto.classList.add('active');
+      btnTogglePause.classList.remove('active');
+      startTimerProgress();
+    });
+
+    btnTogglePause.addEventListener('click', () => {
+      isAutoPlaying = false;
+      btnTogglePause.classList.add('active');
+      btnToggleAuto.classList.remove('active');
+      stopTimerProgress();
+    });
+
+    // 主题切换函数
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+    }
+    document.getElementById('btnHeroToggleTheme').addEventListener('click', toggleTheme);
+    document.getElementById('btnDockTheme').addEventListener('click', toggleTheme);
+
+    // 启动初始画卷
+    initFirstMap();
+  </script>
+</body>
+</html>
